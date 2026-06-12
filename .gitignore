@@ -1,0 +1,6 @@
+# SSH 部署密钥 —— 绝不提交
+github-dungeon-raid_ed25519
+github-dungeon-raid_ed25519.pub
+
+# 本地工具/配置
+.claude/
