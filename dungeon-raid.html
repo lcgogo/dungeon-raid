@@ -133,7 +133,7 @@
 (()=>{
 //==================== 配置 ====================
 // 版本号 v主.次.修：小改动改"修"，新Boss/职业改"次"，大版本变更需先确认。页面底部显示。
-const VERSION='v1.5.0';
+const VERSION='v1.6.0';
 const COLS=6, ROWS=6, PAD=8;
 let TILE=70;                       // 实际按画布宽度自适应
 // 显式 emoji 字体栈：让 canvas 测量宽度与彩色 emoji 实际渲染一致（移动端居中更稳）
@@ -263,7 +263,7 @@ const BOSSES=[
       if(dmg>0) log(tr(`🕷️ 中毒：流失 ${dmg} 生命（${Math.round(pct*100)}%）`,`🕷️ Venom: −${dmg} HP (${Math.round(pct*100)}%)`)); } },
 ];
 function bossDef(t){ return BOSSES.find(b=>b.id===(t&&t.bossId)) || BOSSES[0]; }
-function isSwordTarget(t){ return !!t && (t.type==='enemy' || (t.type==='boss' && bossDef(t).swordable)); }
+function isSwordTarget(t){ return !!t && (t.type==='enemy' || (t.type==='boss' && (bossDef(t).swordable || !!(player&&player.pierceTurn)))); }  // 斗士嗜血：本回合可攻击剑免疫 Boss
 // 击败小偷：夺回它偷走的金币
 function thiefRecover(t){ if(t&&t.bossId==='thief'&&t.stolen>0){ player.gold+=t.stolen; log(tr(`🦹 抓住小偷！夺回 ${t.stolen} 金币。`,`🦹 Caught the Thief! Recovered ${t.stolen} gold.`)); t.stolen=0; } }
 // 死亡报告：累计各来源对玩家造成的伤害
@@ -326,7 +326,7 @@ const RACES=[
   {id:'human', e:'🧑', n:['人类','Human'], d:['全能基准：无特性、无削弱，适合新手。','Baseline: no trait, no weakness. Beginner-friendly.'], f:p=>{}},
   {id:'elf',   e:'🧝', n:['精灵','Elf'],   d:['特性：连击加成翻倍（每多连1个 +30%）。削弱：「强健体魄」升级只 +3 上限。','Trait: combo bonus doubled (+30%/tile). Weakness: Tough Body upgrade gives only +3 max HP.'], f:p=>{p.comboMult=2; p.maxHpUpMult=0.5;}},
   {id:'dwarf', e:'🧔', n:['矮人','Dwarf'], d:['特性：护甲减伤翻倍（每点护甲抵 2 点）。削弱：剑威力 −0.3。','Trait: armor counts double (each point blocks 2). Weakness: sword power −0.3.'], f:p=>{p.armorMult=2; p.weaponPower-=0.3;}},
-  {id:'orc',   e:'🧌', n:['兽人','Orc'],   d:['特性：蛮力，剑链伤害 ×1.25。削弱：无甲——永远无法获得护甲。','Trait: Brute Force, sword damage ×1.25. Weakness: No Armor — can never gain armor.'], f:p=>{p.swordMult=1.25; p.noArmor=true;}},
+  {id:'orc',   e:'🧌', n:['兽人','Orc'],   d:['特性：「强健体魄」升级时生命上限翻倍（每次 +12）。削弱：无甲——永远无法获得护甲。','Trait: Tough Body upgrade gives double max HP (+12 each). Weakness: No Armor — can never gain armor.'], f:p=>{p.maxHpUpMult=2; p.noArmor=true;}},
 ];
 // 一阶职业：主动技能（f 返回 false 表示无效不发动；返回值表示自带日志）
 const TIER1={
@@ -336,8 +336,8 @@ const TIER1={
   rogue:{n:['盗贼','Rogue'], skill:{name:['点金','Gold Touch'], short:['剑变金币','Swords→Coins'], cd:5, f:p=>{ let n=0; for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){const t=grid[r][c]; if(t&&t.type==='sword'){t.type='coin';n++;}} if(!n)return false; log(tr(`💰 点金：${n} 把剑化为金币`,`💰 Gold Touch: ${n} swords → coins`)); return n; }}},
   blacksmith:{n:['锻造师','Blacksmith'], skill:{name:['锻甲','Forge Armor'], short:['收全场盾→护甲','Absorb all shields'], cd:5, f:p=>{ if(p.noArmor) return false; let n=0; for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){const t=grid[r][c]; if(t&&t.type==='shield'){grid[r][c]=null;n++;}} if(!n)return false; p.shieldXp+=n*p.armorPerShield; while(p.shieldXp>=armorNeeded(p.armor)){p.shieldXp-=armorNeeded(p.armor);p.armor++;} applyGravity(); syncPositions(false); log(tr(`🔰 锻甲：吞下 ${n} 盾（减伤 ${p.armor}）`,`🔰 Forge: ${n} shields (armor ${p.armor})`)); return n; }}},
   miser:{n:['守财奴','Miser'], skill:{name:['囤金','Hoard'], short:['锁金生利','Lock gold for interest'], cd:5, f:p=>{ if(p.goldLock>0) return false; const n=Math.max(3,Math.min(10,Math.floor(p.gold/10))); p.goldLock=n; p.goldFrozen=0; log(tr(`🔒 囤金：锁定 ${n} 回合（期间不产/不花金币，到期返还双倍）`,`🔒 Hoard: locked ${n} turns (no gold in/out; doubled payout at end)`)); return true; }}},
-  berserker:{n:['狂战士','Berserker'], skill:{name:['狂怒','Frenzy'], short:['生命减半，越少越猛','Halve HP, low HP = high dmg'], cd:5, f:p=>{ p.hp=Math.max(1,Math.floor(p.hp/2)); p.lowHpDmg=true; log(tr('🔪 狂怒！生命减半，开始嗜血（越缺血剑伤越高）','🔪 Frenzy! HP halved — lower HP, higher sword damage')); return true; }}},
-  fighter:{n:['斗士','Fighter'], skill:{name:['嗜血','Bloodthirst'], short:['本回合击中怪回血','Heal per enemy hit this turn'], cd:5, f:p=>{ p.bloodthirst=1; log(tr('🩸 嗜血：本回合剑链每击中一只怪回 3 血','🩸 Bloodthirst: heal 3 per enemy hit this turn')); return true; }}},
+  berserker:{n:['狂战士','Berserker'], skill:{name:['狂怒','Frenzy'], short:['本回合不死+残血增伤','Undying this turn + low-HP dmg'], cd:5, f:p=>{ p.hp=Math.max(1,Math.floor(p.hp/2)); p.lowHpDmg=true; p.undyingTurn=true; log(tr('🔪 狂怒！生命减半并进入不屈（本回合无论受多少伤都保留 1 血），血越少剑伤越高','🔪 Frenzy! HP halved and Undying this turn (keep ≥1 HP no matter the damage); lower HP, higher sword damage')); return true; }}},
+  fighter:{n:['斗士','Fighter'], skill:{name:['嗜血','Bloodthirst'], short:['回血+本回合可攻击剑免疫怪','Heal + pierce sword-immunity'], cd:5, f:p=>{ p.bloodthirst=1; p.pierceTurn=true; log(tr('🩸 嗜血：本回合剑链每击中一只怪回 3 血，且可用剑攻击剑免疫的 Boss（幽灵/小丑）','🩸 Bloodthirst: heal 3 per enemy hit this turn, and your sword can hit sword-immune bosses (Ghost/Clown)')); return true; }}},
 };
 // 二阶职业：被动
 const TIER2={
@@ -538,7 +538,7 @@ function draw(){
     if(t.type==='enemy'||t.type==='boss'){
       const isBoss=t.type==='boss';
       const bdef = isBoss?bossDef(t):null;
-      const doomed = killSet && killSet.has(t.r+','+t.c) && (!isBoss || bdef.swordable); // 会被这条线杀死 → 骷髅
+      const doomed = killSet && killSet.has(t.r+','+t.c) && (!isBoss || bdef.swordable || player.pierceTurn); // 会被这条线杀死 → 骷髅
       ctx.font=Math.floor(TILE*0.30)+'px '+EMOJI_FONT;
       ctx.textAlign='center'; ctx.textBaseline='middle';
       ctx.fillText(doomed?'💀':(isBoss?bdef.emoji:'👹'), cx, y+TILE*0.30);
@@ -733,6 +733,7 @@ function resolve(){
         msg=`${d.emoji}×${count}${comboTxt} → `+tr(`获得 ${g} 金币`,`+${g} gold`)+(player.goldXp?tr(`（+${Math.floor(g/2)}经验）`,` (+${Math.floor(g/2)} XP)`):''); } }
   }
   log(msg);
+  if(player.pierceTurn) player.pierceTurn=false;   // 斗士嗜血穿透仅本回合
 
   // 回合推进：怪物倒计时 / 攻击
   player.turns++;
@@ -809,12 +810,14 @@ function advanceEnemies(){
     }
   }
   if(player.shieldTurn) player.shieldTurn=false;   // 圣盾仅护本回合
+  if(player.undyingTurn) player.undyingTurn=false; // 狂怒不屈仅本回合
 }
-// 玩家受伤的统一入口：圣盾免伤 / 矮人护甲翻倍 / 荆棘反弹 / 伤害统计
+// 玩家受伤的统一入口：圣盾免伤 / 狂怒不屈保命 / 矮人护甲翻倍 / 荆棘反弹 / 伤害统计
 function hurtPlayer(atk, sourceKey, ignoreArmor){
   if(player.shieldTurn) return 0;
   const dmg = ignoreArmor ? atk : Math.max(1, atk - player.armor*(player.armorMult||1) - (player.toughness||0));
   player.hp -= dmg;
+  if(player.undyingTurn && player.hp<1) player.hp=1; // 狂怒不屈：本回合最低保留 1 血
   addDmg(sourceKey, dmg);
   if(player.thorns && dmg>0) reflectThorns(Math.ceil(dmg*player.thorns));
   return dmg;

@@ -153,17 +153,20 @@ function boardEnemies(){ const g=grid(),e=[]; for(let r=0;r<ROWS;r++)for(let c=0
 function boardSwords(){ const g=grid(); let n=0; for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){const t=g[r][c]; if(t&&t.type==='sword')n++;} return n; }
 function boardBoss(){ const g=grid(); for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){const t=g[r][c]; if(t&&t.type==='boss')return t;} return null; }
 
-// 一阶主动技能使用策略（仅在有利时用；狂怒/囤金/点金属高风险/情境，机器人不用）
+// 一阶主动技能使用策略（仅在有利时用；囤金/点金属高风险/情境，机器人不用）
 function boardHearts(){ const g=grid(); let n=0; for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){const t=g[r][c]; if(t&&t.type==='heart')n++;} return n; }
 function maybeSkill(){
   const p=P(); if(!p.tier1 || p.skillCd>0) return;
-  const ens=boardEnemies().length, threat=boardEnemies().some(e=>e.cd<=1), boss=!!boardBoss();
+  const bossT=boardBoss();
+  const ens=boardEnemies().length, threat=boardEnemies().some(e=>e.cd<=1), boss=!!bossT;
+  const immuneBoss=bossT && !G.isSwordTarget(bossT);  // 剑免疫 Boss（幽灵/小丑）当前在场
   const id=p.tier1;
   if(id==='knight' && (boss||threat)) G.activateSkill();        // 圣盾：将受击时
   else if(id==='priest' && boardHearts()>=3) G.activateSkill(); // 祝福：心多时转经验
   else if(id==='ranger' && ens>=2) G.activateSkill();           // 箭雨：怪多时
   else if(id==='blacksmith' && bestSimple('shield')) G.activateSkill(); // 锻甲：有盾时
-  else if(id==='fighter' && ens>=2) G.activateSkill();          // 嗜血：怪多时
+  else if(id==='fighter' && (immuneBoss || ens>=2)) G.activateSkill();  // 嗜血：有剑免疫Boss(开穿透)或怪多时
+  else if(id==='berserker' && threat && p.hp<=0.5*p.maxHp) G.activateSkill(); // 狂怒：将被打死时用不屈保命
   resolveLevels();
 }
 // 机器人处理转职选择（resolve/buyItem 触发 showTierSelect 后，apply 第一个选项）

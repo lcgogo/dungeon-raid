@@ -25,9 +25,9 @@
 
   | 图块 | 作用 |
   |---|---|
-  | ⚔️ 剑 | 攻击怪物 |
-  | 🛡️ 盾 | 增加护甲（先于生命承受伤害）|
-  | ❤️ 心 | 回复生命 |
+  | 🔪 剑 | 攻击怪物 |
+  | 🔰 盾 | 增加护甲（先于生命承受伤害）|
+  | 💗 心 | 回复生命 |
   | 💰 金币 | 赚取金币，用于商店 |
   | 👹 怪 | 敌人 |
 
@@ -39,29 +39,86 @@
 每只怪格子上有三个数字：
 
 - **中间大数字** = 血量
-- **左上红色角标** = 攻击力
-- **右上角标** = 倒计时（每行动一次 −1，归零就按攻击力攻击你；先扣护甲再扣生命）
+- **左上红色角标** = 攻击力（真实伤害的 Boss 显示为紫色）
+- **右上角标** = 倒计时（每行动一次 −1，归零就按攻击力攻击你；先扣护甲再扣生命，但每次至少掉 1 滴）
 
 ### 📈 成长系统
 
 - **经验**只来自**击杀怪物**（每杀一只 +3），升级时**技能三选一**。
 - **连击加成**：一次连得越多收益越高，整体收益 `× (1 + (个数−2) × 15%)`（连 5 ≈ ×1.45，连 7 ≈ ×1.75）。
-- **金币商店**：💊 治疗 / 🛡️ 修甲 / 💥 灭怪（全场怪 −6 血）。
+- **护甲累积**：盾不直接给护甲，而是累积「护甲进度」，攒满 +1 护甲（越往后越贵）。受击时护甲先减伤，剩下的才掉血。
+- **金币商店**：💊 治疗（回复 10 生命）/ 💥 炸弹（全场怪 −6 血）。每件商品有独立冷却。
 
-### 🧙 职业（开局四选一）
+### 🧬 种族（开局选择）
 
-| 职业 | 技能 |
-|---|---|
-| 🛡️ 骑士 | 每回合自动 +2 护甲，护甲上限 +4 |
-| ⚔️ 狂战士 | 生命低于 50% 时剑伤 +50%，但最大生命 −4 |
-| 💰 盗贼 | 用剑每串到一只怪，额外 +1 金币 |
-| ❤️ 牧师 | 治疗超出生命上限的部分转化为护甲 |
+开局先选一个种族。每个种族都有独特**特性**和对应的**削弱**：
+
+| 种族 | 特性 | 削弱 |
+|---|---|---|
+| 🧑 人类 Human | 无（全能基准，适合新手） | 无 |
+| 🧝 精灵 Elf | 连击加成翻倍（每多连 1 个 +30%） | 「强健体魄」升级只 +3 生命上限 |
+| 🧔 矮人 Dwarf | 护甲减伤翻倍（每点护甲抵 2 点） | 剑威力 −0.3 |
+| 🧌 兽人 Orc | 「强健体魄」升级时生命上限翻倍（每次 +12） | **无甲**——永远无法获得护甲（盾牌从棋盘移除） |
+
+### 🌟 成长路线
+
+1. **开局**：选一个种族。
+2. **第 50 回合 Boss**：击败它可转入**一阶职业**（主动技能），从本种族专属的 2 个里二选一。
+3. **第 100 回合 Boss**：击败它可转入**二阶职业**（被动），同样从本种族的 2 个里二选一。
+
+> 用剑或炸弹击败 Boss 都能触发转职。
+
+### ⚔️ 一阶职业 · 主动技能
+
+每个种族对应 2 个一阶职业，技能冷却均为 **5 回合**：
+
+| 种族 | 职业 | 技能 | 效果 |
+|---|---|---|---|
+| 🧑 人类 | 🛡️ 骑士 Knight | 圣盾 Aegis | 本回合免疫所有伤害 |
+| 🧑 人类 | 💗 牧师 Priest | 祝福 Blessing | 清掉全场的心，每颗转 3 点经验 |
+| 🧝 精灵 | 🏹 游侠 Ranger | 箭雨 Arrow Rain | 对全场怪造成「剑威力 ×2」的伤害 |
+| 🧝 精灵 | 💰 盗贼 Rogue | 点金 Gold Touch | 把场上所有的剑变成金币 |
+| 🧔 矮人 | 🔰 锻造师 Blacksmith | 锻甲 Forge Armor | 吞下全场的盾，全部转为护甲进度 |
+| 🧔 矮人 | 🔒 守财奴 Miser | 囤金 Hoard | 锁金 3~10 回合（期间不产/不花金币，到期返还**双倍**）|
+| 🧌 兽人 | 🔪 狂战士 Berserker | 狂怒 Frenzy | 生命减半并进入**不屈**：本回合无论受多少伤都保留 1 血；之后血越少剑伤越高（最高 +60%）|
+| 🧌 兽人 | 🩸 斗士 Fighter | 嗜血 Bloodthirst | 本回合剑链每击中一只怪回 3 血，**且可用剑攻击剑免疫的 Boss（幽灵/小丑）** |
+
+### 🎖️ 二阶职业 · 被动
+
+每个种族对应 2 个二阶职业，转职后永久生效：
+
+| 种族 | 职业 | 效果 |
+|---|---|---|
+| 🧑 人类 | 不朽 Immortal | 治疗溢出的部分转为永久生命上限 |
+| 🧑 人类 | 将军 General | 升级时改为**四选一** |
+| 🧝 精灵 | 神射手 Sharpshooter | 剑链每击杀一只怪额外 +2 经验 |
+| 🧝 精灵 | 影袭 Shadow | 炸弹冷却永久缩为 2 回合 |
+| 🧔 矮人 | 爆破手 Demolitionist | 炸弹伤害更高，但花费金币更多 |
+| 🧔 矮人 | 财阀 Tycoon | 获得金币时额外按一半转为经验 |
+| 🧌 兽人 | 嗜杀 Warlord | 剩余血量越高剑伤越高（最高 +50%）|
+| 🧌 兽人 | 荆棘 Thorns | 受到伤害的一半反弹给攻击者 |
+
+### 👹 Boss 图鉴
+
+每约 **10 回合**会随机出现一个 Boss，击败奖励 💰+20、经验 +15。Boss 强度每 **50 回合**提升一档（Lv2、Lv3…）。其中 **幽灵、小丑只能用 💥 炸弹** 打，其余都可以用剑链攻击（也能炸）。
+
+| Boss | 攻击方式 | 招数 |
+|---|---|---|
+| 👻 幽灵 Ghost | 仅炸弹 | 剑链对它无效；倒计时归零会对你重击 |
+| 🤡 小丑 Clown | 仅炸弹 | 每回合随机打乱棋盘上若干棋子，制造持续混乱 |
+| 🧛 吸血鬼 Vampire | 剑 / 炸弹 | 每回合吸取场上所有的心来回血——别把心留在场上 |
+| 🥷 刺客 Assassin | 剑 / 炸弹 | 属性同普通怪，但攻击是**真实伤害**，无视护甲直接掉血 |
+| 🦖 饕餮 Devourer | 剑 / 炸弹 | 每回合吸取场上每只怪一半生命壮大；倒计时归零放出等于自身 50% 血量的强击 |
+| 🧙 召唤师 Summoner | 剑 / 炸弹 | 每回合把一个非怪棋子变成一只怪，拖得越久怪越多 |
+| 🦹 小偷 Thief | 剑 / 炸弹 | 现身即偷走一定比例金币（一阶 20%、二阶 40%…）；倒计时内击败夺回，让它逃走则永久失去 |
+| 🕷️ 蜘蛛 Spider | 剑 / 炸弹 | 现身即让你中毒（血条变绿），每回合按生命百分比掉血（一阶 10%、二阶 20%…，无视护甲）；击败即解毒 |
 
 ### ✨ 其他特性
 
 - 💾 **本地存档**：自动保存进度与最佳纪录，可「继续上局」。
-- 💡 **轻点任意方块**：查看说明与当前实时数值（如剑的当前威力与固定剑伤）。
-- 🩸 **低血预警**：生命越低，屏幕边缘越红；危急时呼吸闪烁。
+- 💡 **轻点任意方块**：查看说明与当前实时数值（如剑的当前威力与固定剑伤）；轻点 HUD 查看角色全部属性与职业详情。
+- 🩸 **低血预警**：生命越低，屏幕边缘越红；危急时呼吸闪烁，生命条同步闪烁。
+- ☠️ **死亡报告**：倒下时列出致命回合各伤害来源的占比。
 
 ### 🛠️ 开发 / 平衡测试
 
@@ -97,9 +154,9 @@ Just open `dungeon-raid.html` in a browser. The game auto-fits the screen width 
 
   | Tile | Effect |
   |---|---|
-  | ⚔️ Sword | Attack enemies |
-  | 🛡️ Shield | Gain armor (absorbs damage before health) |
-  | ❤️ Heart | Restore health |
+  | 🔪 Sword | Attack enemies |
+  | 🔰 Shield | Gain armor (absorbs damage before health) |
+  | 💗 Heart | Restore health |
   | 💰 Coin | Earn gold for the shop |
   | 👹 Enemy | A monster |
 
@@ -111,37 +168,105 @@ Just open `dungeon-raid.html` in a browser. The game auto-fits the screen width 
 Each enemy tile shows three numbers:
 
 - **Big center number** = health
-- **Red badge, top-left** = attack power
-- **Badge, top-right** = countdown (−1 per action; at zero it attacks you for its attack power — armor first, then health)
+- **Red badge, top-left** = attack power (shown purple for true-damage bosses)
+- **Badge, top-right** = countdown (−1 per action; at zero it attacks you for its attack power — armor first, then health, but you always lose at least 1 HP)
 
 ### 📈 Progression
 
 - **XP comes only from kills** (+3 per enemy). On level-up, **pick 1 of 3** upgrades.
 - **Combo bonus**: longer chains pay more — total reward `× (1 + (N − 2) × 15%)` (5-chain ≈ ×1.45, 7-chain ≈ ×1.75).
-- **Gold shop**: 💊 Heal / 🛡️ Repair Armor / 💥 Bomb (−6 HP to all enemies).
+- **Armor accumulates**: shields do not grant armor directly; they fill "armor progress," and filling it gives +1 armor (costs more each time). Armor soaks each hit, then the rest comes off your HP.
+- **Gold shop**: 💊 Heal (restore 10 HP) / 💥 Bomb (all foes −6 HP). Each item has its own cooldown.
 
-### 🧙 Classes (choose 1 at start)
+### 🧬 Races (chosen at start)
 
-| Class | Skill |
-|---|---|
-| 🛡️ Knight | +2 armor each turn, +4 armor cap |
-| ⚔️ Berserker | +50% sword damage when below 50% HP, but −4 max HP |
-| 💰 Rogue | +1 gold for each enemy your sword chain hits |
-| ❤️ Priest | Overhealing beyond max HP converts into armor |
+Pick a race at the start. Each has a unique **trait** and a matching **weakness**:
+
+| Race | Trait | Weakness |
+|---|---|---|
+| 🧑 Human | None (all-round baseline, beginner-friendly) | None |
+| 🧝 Elf | Combo bonus doubled (+30% per extra tile) | Tough Body upgrade gives only +3 max HP |
+| 🧔 Dwarf | Armor counts double (each point blocks 2) | Sword power −0.3 |
+| 🧌 Orc | Tough Body upgrade gives double max HP (+12 each) | **No Armor** — can never gain armor (shields removed from the board) |
+
+### 🌟 Progression Path
+
+1. **Start**: choose a race.
+2. **Turn-50 boss**: beat it to advance to a **Tier-1 class** (active skill), picking 1 of your race's 2 options.
+3. **Turn-100 boss**: beat it to advance to a **Tier-2 class** (passive), again 1 of your race's 2 options.
+
+> Beating a boss with either a sword chain or a bomb triggers the advance.
+
+### ⚔️ Tier-1 Classes · Active Skills
+
+Each race has 2 Tier-1 classes; every skill has a **5-turn cooldown**:
+
+| Race | Class | Skill | Effect |
+|---|---|---|---|
+| 🧑 Human | 🛡️ Knight | Aegis | Immune to all damage this turn |
+| 🧑 Human | 💗 Priest | Blessing | Clear all hearts on the board; each becomes 3 XP |
+| 🧝 Elf | 🏹 Ranger | Arrow Rain | Deal "sword power ×2" damage to all enemies |
+| 🧝 Elf | 💰 Rogue | Gold Touch | Turn every sword on the board into a coin |
+| 🧔 Dwarf | 🔰 Blacksmith | Forge Armor | Absorb all shields on the board into armor progress |
+| 🧔 Dwarf | 🔒 Miser | Hoard | Lock gold for 3–10 turns (no gold in/out; **double** payout at the end) |
+| 🧌 Orc | 🔪 Berserker | Frenzy | Halve HP and become **Undying**: keep ≥1 HP no matter the damage this turn; afterward lower HP means higher sword damage (up to +60%) |
+| 🧌 Orc | 🩸 Fighter | Bloodthirst | Heal 3 HP per enemy your sword chain hits this turn, **and your sword can hit sword-immune bosses (Ghost/Clown)** |
+
+### 🎖️ Tier-2 Classes · Passives
+
+Each race has 2 Tier-2 classes; once chosen they apply permanently:
+
+| Race | Class | Effect |
+|---|---|---|
+| 🧑 Human | Immortal | Overheal raises your max HP permanently |
+| 🧑 Human | General | Level-up offers 4 choices instead of 3 |
+| 🧝 Elf | Sharpshooter | +2 extra XP per enemy killed by a sword chain |
+| 🧝 Elf | Shadow | Bomb cooldown becomes 2 turns permanently |
+| 🧔 Dwarf | Demolitionist | Bomb hits harder but costs more gold |
+| 🧔 Dwarf | Tycoon | Gold gained also grants half as much XP |
+| 🧌 Orc | Warlord | Higher current HP means higher sword damage (up to +50%) |
+| 🧌 Orc | Thorns | Reflect half of damage taken back to the attacker |
+
+### 👹 Bestiary
+
+About every **10 turns** a random boss appears; beating one rewards 💰+20 and +15 XP. Boss strength steps up one tier every **50 turns** (Lv2, Lv3…). **Ghost and Clown can only be hit with the 💥 Bomb**; all others can be attacked with sword chains too (bombs also work).
+
+| Boss | How to hit | Gimmick |
+|---|---|---|
+| 👻 Ghost | Bomb only | Immune to sword chains; strikes you hard when its timer hits 0 |
+| 🤡 Clown | Bomb only | Scrambles several random tiles every turn, causing constant chaos |
+| 🧛 Vampire | Sword / Bomb | Drains every heart on the board each turn to heal — do not leave hearts out |
+| 🥷 Assassin | Sword / Bomb | Stats like a normal enemy, but its hits are **true damage** — ignore armor, straight to HP |
+| 🦖 Devourer | Sword / Bomb | Drains half the HP from every enemy each turn to grow; at 0 unleashes a hit worth 50% of its HP |
+| 🧙 Summoner | Sword / Bomb | Turns a non-enemy tile into an enemy each turn — the longer it lives, the more enemies |
+| 🦹 Thief | Sword / Bomb | Steals a share of gold on arrival (20% at Lv1, 40% at Lv2…); kill it before its timer to recover, let it flee and the gold is gone forever |
+| 🕷️ Spider | Sword / Bomb | Poisons you on arrival (HP bar turns green); each turn you lose a % of HP (10% at Lv1, 20% at Lv2…, ignoring armor); kill it to cure |
 
 ### ✨ Other Features
 
 - 💾 **Local save**: progress and best record are saved automatically; resume your last run anytime.
-- 💡 **Tap any tile**: see its description and current live stats (e.g. your current sword power and flat bonus).
-- 🩸 **Low-HP warning**: the screen edges redden as health drops, pulsing when critical.
+- 💡 **Tap any tile**: see its description and current live stats (e.g. your current sword power and flat bonus); tap the HUD to view all your stats and class details.
+- 🩸 **Low-HP warning**: the screen edges redden as health drops, pulsing when critical, with the HP bar blinking too.
+- ☠️ **Death report**: when you fall, it lists each damage source's share of the killing turn.
 
 ### 🛠️ Development / Balance Testing
 
-`playtest.js` is a **headless bot** that loads the real game logic from `dungeon-raid.html` (with DOM/Canvas stubbed out), plays automatically with a greedy strategy, and reports survival turns and levels reached per class — handy for balance regression testing.
+`playtest.js` is a **headless bot** that loads the real game logic from `dungeon-raid.html` (with DOM/Canvas stubbed out), plays automatically with a greedy strategy, and reports survival turns and levels reached per race/class line — handy for balance regression testing.
 
 ```bash
-node playtest.js
+node playtest.js                  # scan mode: 4 races × several enemy-stat sets, find the closest to the target turn
+
+# Targeted mode: pin a class line or a single boss, run detailed stats for comparison
+node playtest.js --race=orc                          # test Orc only
+node playtest.js --race=human --t1=knight --t2=immortal   # pin tier-1 / tier-2
+node playtest.js --boss=spider                       # only spawn the Spider (isolate one boss)
+node playtest.js --race=elf --boss=assassin --games=40    # combine + custom game count
+node playtest.js --race=dwarf --enemy=C2             # pick an enemy-stat candidate (defaults to live file values)
 ```
+
+Flags: `--race=` (human/elf/dwarf/orc), `--t1=`/`--t2=` (class-line id), `--boss=` (the only boss that spawns), `--enemy=` (enemy-stat candidate, defaults to live file values), `--games=` (games per config), `--report` (full per-race table). Targeted mode also prints: mean/max turns, tier-1/tier-2 reach rate, and the killing turn's main cause-of-death share.
+
+See [`TEST_REPORT.md`](TEST_REPORT.md) for baseline data (versioned, for regression comparison) and [`CHANGELOG.md`](CHANGELOG.md) for the change history.
 
 ---
 
