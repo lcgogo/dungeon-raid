@@ -103,14 +103,14 @@
 
   <div id="shop">
     <button class="shopBtn" data-buy="heal"><span>💊 治疗</span><small>回复10生命</small><em></em></button>
-    <button class="shopBtn" data-buy="armor"><span>🛡️ 修甲</span><small>护甲回满</small><em></em></button>
+    <button class="shopBtn" data-buy="armor"><span>🔰 修甲</span><small>护甲回满</small><em></em></button>
     <button class="shopBtn" data-buy="bomb"><span>💥 灭怪</span><small>全场怪-6血</small><em></em></button>
   </div>
 
   <div id="log"></div>
   <div class="footer">
     拖动连接 <b>2个及以上</b>相邻同类图块来消除（横竖斜都行）。<br>
-    🛡️加护甲 · ❤️回血 · 💰赚金币 · ⚔️攻击：<b>剑链可以直接拖过 👹</b>，串到的怪会被点杀！<br>
+    🔰加护甲 · 💗回血 · 💰赚金币 · ⚔️攻击：<b>剑链可以直接拖过 👹</b>，串到的怪会被点杀！<br>
     👹中间大数字是<b>血量</b>，左上🔴是<b>攻击力</b>，右上是<b>倒计时</b>——每行动一次减1，归零就按攻击力打你！<br>
     连得越多收益越高：<b>连击加成 = 1 + (个数−2)×15%</b>（连5≈×1.45，连7≈×1.75）。<br>
     💡 <b>轻点任意方块</b>可查看说明与当前数值。
@@ -125,12 +125,13 @@
 //==================== 配置 ====================
 const COLS=6, ROWS=6, PAD=8;
 let TILE=70;                       // 实际按画布宽度自适应
-// 显式 emoji 字体栈：让 canvas 测量宽度与彩色 emoji 实际渲染一致，避免 ❤️🛡️ 等带变体符的 emoji 居中偏移
+// 显式 emoji 字体栈：让 canvas 测量宽度与彩色 emoji 实际渲染一致（移动端居中更稳）
+// 注：心/盾已改用原生彩色 emoji 💗/🔰（不带 FE0F 变体符），避免老符号在 canvas 里居中偏移
 const EMOJI_FONT="'Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji',sans-serif";
 const DEF = {
   sword:  {emoji:'⚔️', color:'#e74c3c', glow:'#ff7a6b', name:'剑'},
-  shield: {emoji:'🛡️', color:'#3498db', glow:'#6fb6ff', name:'盾'},
-  heart:  {emoji:'❤️', color:'#e84393', glow:'#ff85c0', name:'心'},
+  shield: {emoji:'🔰', color:'#3498db', glow:'#6fb6ff', name:'盾'},
+  heart:  {emoji:'💗', color:'#e84393', glow:'#ff85c0', name:'心'},
   coin:   {emoji:'💰', color:'#f1c40f', glow:'#ffe07a', name:'金'},
   enemy:  {emoji:'👹', color:'#7d3cad', glow:'#c08bff', name:'怪'},
 };
@@ -168,10 +169,10 @@ function makeTile(type){
 
 //==================== 职业 ====================
 const CLASSES=[
-  {n:'骑士',   e:'🛡️', d:'【护甲恢复】每回合自动+2护甲，护甲上限+4', f:p=>{p.armorCap+=4; p.armor=p.armorCap; p.armorRegen=2;}},
+  {n:'骑士',   e:'🔰', d:'【护甲恢复】每回合自动+2护甲，护甲上限+4', f:p=>{p.armorCap+=4; p.armor=p.armorCap; p.armorRegen=2;}},
   {n:'狂战士', e:'⚔️', d:'【血怒】生命低于50%时剑伤+50%，但最大生命-4', f:p=>{p.maxHp-=4; p.berserk=true;}},
   {n:'盗贼',   e:'💰', d:'【掠夺】用剑每串到一只怪，获得 1 金币（不论是否击杀）', f:p=>{p.steal=true;}},
-  {n:'牧师',   e:'❤️', d:'【圣光护盾】治疗超出生命上限的部分转化为护甲', f:p=>{p.overheal=true;}},
+  {n:'牧师',   e:'💗', d:'【圣光护盾】治疗超出生命上限的部分转化为护甲', f:p=>{p.overheal=true;}},
 ];
 function showClassSelect(){
   busy=true;
@@ -427,7 +428,7 @@ cv.addEventListener('pointercancel',endDrag);
 //==================== 金币商店 ====================
 const SHOP={
   heal: {cost:15, f(){ const h=gainHeal(10); log(`💊 喝下药水，回复 ${h} 生命`); }},
-  armor:{cost:12, f(){ player.armor=player.armorCap; log('🛡️ 护甲修复至满'); }},
+  armor:{cost:12, f(){ player.armor=player.armorCap; log('🔰 护甲修复至满'); }},
   bomb: {cost:25, f(){ let kills=0;
     for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const t=grid[r][c];
       if(t&&t.type==='enemy'){ t.hp-=6; if(t.hp<=0){ grid[r][c]=null; kills++; player.xp+=3; } } }
@@ -609,13 +610,13 @@ function tileInfo(t){
       ['多连奖励', '每超出 2 把 +15%'],
       ['一条 N 把剑的伤害', `⌊(N×${p.weaponPower}+${p.swordFlat})×连击⌋`],
       ['血怒（狂战士）', p.berserk?'生命<50% 时总伤 ×1.5':'—'] ]};
-  if(t.type==='shield') return {icon:'🛡️', title:'盾 · 护甲',
+  if(t.type==='shield') return {icon:'🔰', title:'盾 · 护甲',
     desc:'连接 2 个及以上的盾增加护甲。怪物攻击时先扣护甲，再扣生命。',
     rows:[ ['每个盾 +护甲', `+${p.armorPerShield}`],
       ['当前护甲', `${Math.round(p.armor)} / ${p.armorCap}`],
       ['每回合自动回甲（骑士）', p.armorRegen?`+${p.armorRegen}`:'—'],
       ['治疗溢出转护甲（牧师）', p.overheal?'是':'—'] ]};
-  if(t.type==='heart') return {icon:'❤️', title:'心 · 治疗',
+  if(t.type==='heart') return {icon:'💗', title:'心 · 治疗',
     desc:'连接 2 颗及以上的心回复生命。',
     rows:[ ['每颗心回复', `+${p.healPerHeart}`],
       ['当前生命', `${Math.round(p.hp)} / ${p.maxHp}`],
@@ -668,8 +669,8 @@ function updateHUD(){
   if(player.cls) b.push(`${player.cls.e}${player.cls.n}`);
   // 四项核心收益，统一格式紧挨在一起
   b.push(`⚔️×${player.weaponPower}${player.swordFlat?`+${player.swordFlat}`:''}`);
-  b.push(`🛡️${player.armorPerShield}`);
-  b.push(`❤️${player.healPerHeart}`);
+  b.push(`🔰${player.armorPerShield}`);
+  b.push(`💗${player.healPerHeart}`);
   b.push(`💰${player.goldPerCoin}`);
   if(player.steal)b.push(`掠夺`);
   if(player.lifesteal)b.push(`吸血 ${player.lifesteal}`);
