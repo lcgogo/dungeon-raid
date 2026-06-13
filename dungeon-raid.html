@@ -190,7 +190,7 @@ function applyStaticLang(){
 let grid, player, selection, dragging, anim, busy=false, pendingLevels=0;
 
 function newPlayer(){
-  return {hp:20,maxHp:20, armor:0, shieldXp:0, toughness:0, shopCd:{}, skillCd:0, gold:0, xp:0, level:1,
+  return {hp:20,maxHp:20, armor:0, shieldXp:0, toughness:0, shopCd:{}, skillCd:0, dmgBy:{}, gold:0, xp:0, level:1,
     weaponPower:1, swordFlat:0, armorPerShield:1, healPerHeart:1, goldPerCoin:1,
     lifesteal:0, regen:0, coinXp:0, turns:0};
 }
@@ -226,6 +226,13 @@ const BOSSES=[
 ];
 function bossDef(t){ return BOSSES.find(b=>b.id===(t&&t.bossId)) || BOSSES[0]; }
 function isSwordTarget(t){ return !!t && (t.type==='enemy' || (t.type==='boss' && bossDef(t).swordable)); }
+// 死亡报告：累计各来源对玩家造成的伤害
+function addDmg(key,amt){ if(player){ player.dmgBy=player.dmgBy||{}; player.dmgBy[key]=(player.dmgBy[key]||0)+amt; } }
+function dmgSourceLabel(key){
+  if(key==='enemy') return {emoji:'👹', name:['普通怪','Enemy']};
+  const b=BOSSES.find(x=>x.id===key);
+  return b?{emoji:b.emoji, name:b.name}:{emoji:'❓', name:['未知','Unknown']};
+}
 function bossStats(){
   const lv=player.level;
   return { hp: 8 + Math.floor(lv*1.0), atk: 5 + Math.floor(lv*1.2), cd: 6 + Math.floor(Math.random()*3) }; // cd 6~8
@@ -680,11 +687,13 @@ function advanceEnemies(){
         def.act(t);   // 特殊 Boss（如小丑）：执行特效，不直接掉血（act 内部自带日志）
       } else if(def && def.trueDmg){
         player.hp-=t.atk;   // 真实伤害：无视护甲与额外减伤
+        addDmg(def.id, t.atk);
         log(tr(`${def.emoji} ${L(def.name)} 真实伤害 ${t.atk}（无视护甲）！`,`${def.emoji} ${L(def.name)} hits for ${t.atk} TRUE damage (ignores armor)!`));
       } else {
         // 护甲 = 常驻减伤值，不消耗；无论减多少，最低仍掉 1 血
         const dmg=Math.max(1, t.atk - player.armor - (player.toughness||0));
         player.hp-=dmg;
+        addDmg(def?def.id:'enemy', dmg);
         log((def?tr(`${def.emoji} Boss 重击`,`${def.emoji} Boss strike`):tr('👹 攻击','👹 attack'))+tr(` ${t.atk}，被护甲挡下，实际掉 ${dmg} 血！`,` ${t.atk}, armor blocks → ${dmg} HP lost!`));
       }
       t.cd=t.baseCd;
@@ -739,14 +748,28 @@ function showLevelUp(){
 function gameOver(){
   busy=true;
   saveBest(); clearSave();
+  // 死亡报告：各来源伤害占比
+  const dmg=player.dmgBy||{};
+  const ents=Object.entries(dmg).filter(([k,v])=>v>0).sort((a,b)=>b[1]-a[1]);
+  const tot=ents.reduce((s,[,v])=>s+v,0);
+  let report='';
+  if(ents.length){
+    const rows=ents.map(([k,v])=>{ const s=dmgSourceLabel(k);
+      const pct=Math.round(v/tot*100);
+      return `<div style="display:flex;justify-content:space-between;gap:8px;padding:3px 6px;font-size:13px">
+        <span>${s.emoji} ${L(s.name)}</span><b style="color:var(--gold)">${Math.round(v)} · ${pct}%</b></div>`; }).join('');
+    report=`<div style="text-align:left;margin:4px 0 12px;background:var(--panel2);border-radius:10px;padding:6px 4px">
+      <div style="text-align:center;color:var(--dim);font-size:12px;margin-bottom:2px">${tr('☠️ 伤害来源','☠️ Damage taken from')}</div>${rows}</div>`;
+  }
   const card=document.getElementById('card');
   card.innerHTML=`<h2 style="color:var(--hp)">${tr('💀 你倒下了','💀 You fell')}</h2>
     <p>${tr('地牢吞噬了又一位冒险者…','The dungeon claims another adventurer…')}</p>
-    <div style="font-size:15px;line-height:2;margin-bottom:10px">
+    <div style="font-size:15px;line-height:2;margin-bottom:6px">
       ${tr('到达等级','Level reached')} <b style="color:var(--gold)">${player.level}</b><br>
       ${tr('累计金币','Total gold')} <b style="color:var(--gold)">💰 ${player.gold}</b><br>
       ${tr('坚持回合','Turns survived')} <b style="color:var(--gold)">${player.turns}</b>
     </div>
+    ${report}
     <button class="btn" id="again">${tr('换个职业再来','Play again')}</button>`;
   document.getElementById('again').onclick=showClassSelect;
   showOverlay();
