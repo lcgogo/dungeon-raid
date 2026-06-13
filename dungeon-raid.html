@@ -452,7 +452,7 @@ function buyItem(key){
   checkLevel(); updateHUD();
   if(pendingLevels) showLevelUp();
 }
-document.querySelectorAll('.shopBtn').forEach(b=>{
+document.querySelectorAll('.shopBtn[data-buy]').forEach(b=>{
   b.onclick=()=>buyItem(b.dataset.buy);
 });
 
@@ -703,7 +703,7 @@ function updateHUD(){
   if(player.lifesteal)b.push(`吸血 ${player.lifesteal}`);
   if(player.regen)b.push(`恢复 ${player.regen}`);
   document.getElementById('bonusTxt').textContent=b.join('　');
-  document.querySelectorAll('.shopBtn').forEach(btn=>{
+  document.querySelectorAll('.shopBtn[data-buy]').forEach(btn=>{
     const c=shopCost(btn.dataset.buy);
     btn.querySelector('em').textContent = player.shopCd>0 ? `⏳${player.shopCd}回合` : c+'💰';
     btn.disabled = busy || pendingLevels || player.shopCd>0 || player.gold < c; });
