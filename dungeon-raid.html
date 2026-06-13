@@ -85,14 +85,12 @@
     <div class="row"><span class="lbl">生命</span>
       <div class="bar" style="flex:1"><i id="hpBar" style="background:var(--hp)"></i><span id="hpTxt"></span></div>
     </div>
-    <div class="row"><span class="lbl">护甲</span>
-      <div class="bar" style="flex:1"><i id="arBar" style="background:var(--armor)"></i><span id="arTxt"></span></div>
-    </div>
     <div class="row"><span class="lbl">经验</span>
       <div class="bar" style="flex:1"><i id="xpBar" style="background:var(--xp)"></i><span id="xpTxt"></span></div>
     </div>
     <div class="stats">
       <span>等级 <b id="lvTxt">1</b></span>
+      <span>🔰减伤 <b id="armorTxt">0</b></span>
       <span>💰 <b id="goldTxt">0</b></span>
       <span>回合 <b id="turnTxt">0</b></span>
     </div>
@@ -110,8 +108,8 @@
   <div id="log"></div>
   <div class="footer">
     拖动连接 <b>2个及以上</b>相邻同类图块来消除（横竖斜都行）。<br>
-    🔰加护甲 · 💗回血 · 💰赚金币 · 🔪攻击：<b>剑链可以直接拖过 👹</b>，串到的怪会被点杀！<br>
-    👹中间大数字是<b>血量</b>，左上🔴是<b>攻击力</b>，右上是<b>倒计时</b>——每行动一次减1，归零就按攻击力打你！<br>
+    🔰减伤 · 💗回血 · 💰赚金币 · 🔪攻击：<b>剑链可以直接拖过 👹</b>，串到的怪会被点杀！<br>
+    👹中间大数字是<b>血量</b>，左上🔴是<b>攻击力</b>，右上是<b>倒计时</b>——归零就攻击你，<b>实际掉血=攻击−护甲，最低1</b>！<br>
     连得越多收益越高：<b>连击加成 = 1 + (个数−2)×15%</b>（连5≈×1.45，连7≈×1.75）。<br>
     💡 <b>轻点任意方块</b>可查看说明与当前数值。
   </div>
@@ -141,7 +139,7 @@ const CONNECTABLE=['sword','shield','heart','coin'];
 let grid, player, selection, dragging, anim, busy=false, pendingLevels=0;
 
 function newPlayer(){
-  return {hp:20,maxHp:20, armor:0,armorCap:8, gold:0, xp:0, level:1,
+  return {hp:20,maxHp:20, armor:0,armorCap:5, toughness:0, gold:0, xp:0, level:1,
     weaponPower:1, swordFlat:0, armorPerShield:1, healPerHeart:1, goldPerCoin:1,
     lifesteal:0, regen:0, coinXp:0, turns:0};
 }
@@ -169,10 +167,10 @@ function makeTile(type){
 
 //==================== 职业 ====================
 const CLASSES=[
-  {n:'骑士',   e:'🔰', d:'【护甲恢复】每回合自动+2护甲，护甲上限+4', f:p=>{p.armorCap+=4; p.armor=p.armorCap; p.armorRegen=2;}},
+  {n:'骑士',   e:'🔰', d:'【铁壁】怪物伤害额外 −1（最低仍为1），护甲上限 +4，开局 +3 护甲', f:p=>{p.armorCap+=4; p.armor+=3; p.toughness+=1;}},
   {n:'狂战士', e:'🔪', d:'【血怒】生命低于50%时剑伤+50%，但最大生命-4', f:p=>{p.maxHp-=4; p.berserk=true;}},
   {n:'盗贼',   e:'💰', d:'【掠夺】用剑每串到一只怪，获得 1 金币（不论是否击杀）', f:p=>{p.steal=true;}},
-  {n:'牧师',   e:'💗', d:'【圣光护盾】治疗超出生命上限的部分转化为护甲', f:p=>{p.overheal=true;}},
+  {n:'牧师',   e:'💗', d:'【回春】每颗心多回 +1 生命，且生命越低回血越多', f:p=>{p.healPerHeart+=1; p.revive=true;}},
 ];
 function showClassSelect(){
   busy=true;
@@ -479,8 +477,14 @@ function resolve(){
     const comboTxt=combo>1?` 连击×${combo.toFixed(2)}`:'';
     const d=DEF[type];
     if(type==='shield'){ const add=Math.round(count*player.armorPerShield*combo);
-      player.armor=Math.min(player.armorCap, player.armor+add); msg=`${d.emoji}×${count}${comboTxt} → 护甲 +${add}`; }
-    else if(type==='heart'){ const h=gainHeal(Math.round(count*player.healPerHeart*combo));
+      const gain=Math.min(add, player.armorCap-player.armor), over=add-gain;
+      player.armor+=gain;
+      let extra=''; if(over>0){ const h=gainHeal(over); if(h>0) extra=`，护甲已满溢出回复 ${h} 生命`; }
+      msg=`${d.emoji}×${count}${comboTxt} → 减伤 +${gain}`+extra; }
+    else if(type==='heart'){
+      let amt=count*player.healPerHeart*combo;
+      if(player.revive) amt*=1+(player.maxHp-player.hp)/player.maxHp; // 牧师：越缺血回越多
+      const h=gainHeal(Math.round(amt));
       msg=`${d.emoji}×${count}${comboTxt} → 回复 ${h} 生命`; }
     else if(type==='coin'){ const g=Math.round(count*player.goldPerCoin*combo); player.gold+=g;
       msg=`${d.emoji}×${count}${comboTxt} → 获得 ${g} 金币`; }
@@ -491,7 +495,6 @@ function resolve(){
   player.turns++;
   advanceEnemies();
   if(player.regen) gainHeal(player.regen);
-  if(player.armorRegen) player.armor=Math.min(player.armorCap, player.armor+player.armorRegen); // 骑士
 
   applyGravity();
   syncPositions(false);
@@ -501,12 +504,10 @@ function resolve(){
   if(pendingLevels) showLevelUp();
 }
 
-// 治疗：溢出部分（牧师）转为护甲，返回实际回复的生命
+// 治疗：返回实际回复的生命（超出上限的部分丢弃）
 function gainHeal(amount){
   const space=player.maxHp-player.hp, used=Math.min(space,amount);
   player.hp+=used;
-  const over=amount-used;
-  if(over>0 && player.overheal) player.armor=Math.min(player.armorCap, player.armor+over);
   return used;
 }
 
@@ -531,10 +532,10 @@ function advanceEnemies(){
     if(!t||t.type!=='enemy') continue;
     t.cd--;
     if(t.cd<=0){
-      let dmg=t.atk;
-      if(player.armor>=dmg){ player.armor-=dmg; }
-      else { dmg-=player.armor; player.armor=0; player.hp-=dmg; }
-      log(`👹 发动攻击，造成 ${t.atk} 伤害！`);
+      // 护甲 = 常驻减伤值，不消耗；无论减多少，最低仍掉 1 血
+      const dmg=Math.max(1, t.atk - player.armor - (player.toughness||0));
+      player.hp-=dmg;
+      log(`👹 攻击 ${t.atk}，被护甲挡下，实际掉 ${dmg} 血！`);
       t.cd=t.baseCd;
     }
   }
@@ -561,8 +562,9 @@ const UPGRADES=[
   {n:'强健体魄', d:'最大生命 +6，并立即回满', f:p=>{p.maxHp+=6; p.hp=p.maxHp;}},
   {n:'磨利刀刃', d:'剑伤 +50%（连越长收益越大）', f:p=>{p.weaponPower+=0.5;}},
   {n:'狂战之力', d:'每次剑链额外 +3 固定伤害', f:p=>{p.swordFlat+=3;}},
-  {n:'重型护甲', d:'护甲上限 +6，立即 +4 护甲', f:p=>{p.armorCap+=6; p.armor=Math.min(p.armorCap,p.armor+4);}},
+  {n:'重型护甲', d:'护甲上限 +3，立即 +2 护甲', f:p=>{p.armorCap+=3; p.armor=Math.min(p.armorCap,p.armor+2);}},
   {n:'坚盾强化', d:'每个盾提供的护甲 +1', f:p=>{p.armorPerShield+=1;}},
+  {n:'铁甲', d:'受到的伤害额外 −1（最低仍为1）', f:p=>{p.toughness+=1;}},
   {n:'神圣治疗', d:'每颗心回复生命 +1', f:p=>{p.healPerHeart+=1;}},
   {n:'贪婪之心', d:'每枚金币收益 +1', f:p=>{p.goldPerCoin+=1;}},
   {n:'吸血鬼',   d:'每击杀一只怪物回复 1 生命', f:p=>{p.lifesteal+=1;}},
@@ -610,25 +612,24 @@ function tileInfo(t){
       ['多连奖励', '每超出 2 把 +15%'],
       ['一条 N 把剑的伤害', `⌊(N×${p.weaponPower}+${p.swordFlat})×连击⌋`],
       ['血怒（狂战士）', p.berserk?'生命<50% 时总伤 ×1.5':'—'] ]};
-  if(t.type==='shield') return {icon:'🔰', title:'盾 · 护甲',
-    desc:'连接 2 个及以上的盾增加护甲。怪物攻击时先扣护甲，再扣生命。',
+  if(t.type==='shield') return {icon:'🔰', title:'盾 · 减伤',
+    desc:'连接 2 个及以上的盾提升护甲。护甲是常驻减伤值：每次受击实际掉血 = max(1, 怪攻击 − 护甲 − 额外减伤)，无论多高至少掉 1 血。护甲满时多连的盾溢出回血。',
     rows:[ ['每个盾 +护甲', `+${p.armorPerShield}`],
-      ['当前护甲', `${Math.round(p.armor)} / ${p.armorCap}`],
-      ['每回合自动回甲（骑士）', p.armorRegen?`+${p.armorRegen}`:'—'],
-      ['治疗溢出转护甲（牧师）', p.overheal?'是':'—'] ]};
+      ['当前护甲(减伤)', `${p.armor} / ${p.armorCap}`],
+      ['额外减伤(铁壁/铁甲)', p.toughness?`−${p.toughness}`:'—'] ]};
   if(t.type==='heart') return {icon:'💗', title:'心 · 治疗',
     desc:'连接 2 颗及以上的心回复生命。',
     rows:[ ['每颗心回复', `+${p.healPerHeart}`],
       ['当前生命', `${Math.round(p.hp)} / ${p.maxHp}`],
       ['每回合自动回复', p.regen?`+${p.regen}`:'—'],
-      ['超量治疗转护甲（牧师）', p.overheal?'是':'—'] ]};
+      ['越缺血回越多(牧师)', p.revive?'是':'—'] ]};
   if(t.type==='coin') return {icon:'💰', title:'金币',
     desc:'连接 2 枚及以上的金币赚钱，用于商店购买。',
     rows:[ ['每枚金币', `+${p.goldPerCoin}`],
       ['当前金币', `${p.gold}`],
       ['掠夺（盗贼）', p.steal?'剑每串到一只怪 +1 金币':'—'] ]};
   return {icon:'👹', title:'怪物',
-    desc:'倒计时每行动一次 -1，归零就按攻击力打你（先扣护甲再扣生命）。用剑链串过它即可攻击，伤害够高就能点杀。',
+    desc:'倒计时每行动一次 -1，归零就攻击你：实际掉血 = max(1, 攻击力 − 护甲)。用剑链串过它即可攻击，伤害够高就能点杀。',
     rows:[ ['血量', `${t.hp} / ${t.maxHp}`],
       ['攻击力', `${t.atk}`],
       ['倒计时', `${t.cd} / ${t.baseCd} 回合`] ]};
@@ -658,7 +659,8 @@ function bar(idBar,idTxt,cur,max,suffix){
 function updateHUD(){
   bar('hpBar','hpTxt',player.hp,player.maxHp);
   updateDanger();
-  bar('arBar','arTxt',player.armor,player.armorCap);
+  document.getElementById('armorTxt').textContent =
+    `${player.armor}/${player.armorCap}` + (player.toughness?`+${player.toughness}`:'');
   const need=xpNeeded(player.level);
   document.getElementById('xpBar').style.width=(player.xp/need*100)+'%';
   document.getElementById('xpTxt').textContent=`${player.xp} / ${need}`;
