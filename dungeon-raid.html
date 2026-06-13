@@ -89,7 +89,7 @@
 <body>
 <div id="wrap">
   <button id="langBtn">EN</button>
-  <h1 id="title">🔪 地牢突袭 <span class="sub">Dungeon Raid</span></h1>
+  <h1 id="title">🏰 地牢突袭 <span class="sub">Dungeon Raid</span></h1>
 
   <div id="hud">
     <div class="row"><span class="lbl" id="lblHp">生命</span>
@@ -123,6 +123,7 @@
     拖动连接 <b>2+</b> 相邻同类消除（横竖斜）；🔪剑链可穿过 👹 点杀，连得越多收益越高。<br>
     💡 <b>轻点任意方块</b>查看玩法说明与当前数值。
   </div>
+  <div id="ver" style="text-align:center; font-size:9px; color:var(--dim); margin-top:4px;"></div>
 </div>
 
 <div id="vignette"></div>
@@ -131,6 +132,7 @@
 <script>
 (()=>{
 //==================== 配置 ====================
+const VERSION='v1.0';              // 每次提交 +0.1，页面底部显示，便于确认部署版本
 const COLS=6, ROWS=6, PAD=8;
 let TILE=70;                       // 实际按画布宽度自适应
 // 显式 emoji 字体栈：让 canvas 测量宽度与彩色 emoji 实际渲染一致（移动端居中更稳）
@@ -169,7 +171,7 @@ function applyStaticLang(){
   const set=(id,txt)=>{ const el=document.getElementById(id); if(el) el.textContent=txt; };
   if(document.documentElement) document.documentElement.lang = lang==='en'?'en':'zh-CN';
   const tt=document.getElementById('title');
-  if(tt) tt.innerHTML = tr('🔪 地牢突袭 <span class="sub">Dungeon Raid</span>','🔪 Dungeon Raid');
+  if(tt) tt.innerHTML = tr('🏰 地牢突袭 <span class="sub">Dungeon Raid</span>','🏰 Dungeon Raid');
   set('lblHp', tr('生命','HP'));
   set('lblAr', tr('护甲','Armor'));
   set('lblXp', tr('等级经验','Level XP'));
@@ -955,6 +957,7 @@ function logClear(){ logs=[]; logEl.innerHTML=''; }
 document.getElementById('langBtn').onclick=()=>setLang(lang==='en'?'zh':'en');
 document.getElementById('langBtn').textContent = lang==='en'?'中文':'EN';
 applyStaticLang();
+document.getElementById('ver').textContent=VERSION;
 resize(); showClassSelect(); loop();
 })();
 </script>
