@@ -84,6 +84,18 @@
   /* 低血时生命条闪烁 */
   #hpBar.low{animation:hpBlink 1.1s ease-in-out infinite;}
   @keyframes hpBlink{0%,100%{filter:brightness(1);opacity:1;}50%{filter:brightness(1.7);opacity:.55;}}
+  /* 回放控制条 */
+  #replayBar{display:none; position:fixed; left:0; right:0; bottom:0; z-index:30;
+    background:#241b30; border-top:1px solid #6a4fa3; padding:7px 10px;
+    align-items:center; gap:7px; font-size:12px; color:#d9ccff;}
+  #replayBar.show{display:flex;}
+  #replayBar .rbProg{flex:1; min-width:0;}
+  #replayBar .rbBar{height:6px; border-radius:4px; background:#15101e; overflow:hidden; margin-top:3px;}
+  #replayBar .rbBar > i{display:block; height:100%; background:#7d3cad; width:0;}
+  #replayBar button{background:#2f2440; color:#d9ccff; border:1px solid #6a4fa3; border-radius:8px;
+    padding:4px 9px; font-size:12px; cursor:pointer;}
+  #replayBar button.on{background:#7d3cad; color:#fff; border-color:#c08bff;}
+  #replayBar button:hover{border-color:#c08bff;}
 </style>
 </head>
 <body>
@@ -129,12 +141,25 @@
 <div id="vignette"></div>
 <div id="overlay"><div class="card" id="card"></div></div>
 
+<div id="replayBar">
+  <div class="rbProg"><span id="rbTxt">🎬 回放</span><div class="rbBar"><i id="rbFill"></i></div></div>
+  <button id="rbPause">⏸</button>
+  <button class="rbSpd" data-spd="1">1×</button>
+  <button class="rbSpd" data-spd="2">2×</button>
+  <button class="rbSpd" data-spd="4">4×</button>
+  <button id="rbExit">⏹</button>
+</div>
+
 <script>
 (()=>{
 //==================== 配置 ====================
 // 版本号 v主.次.修：小改动改"修"，新Boss/职业改"次"，大版本变更需先确认。页面底部显示。
-const VERSION='v1.7.1';
+const VERSION='v1.8.0';
 const DEV=true;    // 开发版：指向最新开发版本；独立存档 + DEV 标识。正式版在 dungeon-raid.html（DEV=false）
+// 带种子随机数（mulberry32）：游戏全程用 rnd() 取代原生随机，配合录制种子可确定性重放
+let __rng=null;
+function srand(s){ let a=s>>>0; __rng=()=>{ a|=0; a=a+0x6D2B79F5|0; let t=Math.imul(a^a>>>15,1|a); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; }
+function rnd(){ if(!__rng) srand((Date.now()>>>0)^0x9e3779b9); return __rng(); }
 const COLS=6, ROWS=6, PAD=8;
 let TILE=70;                       // 实际按画布宽度自适应
 // 显式 emoji 字体栈：让 canvas 测量宽度与彩色 emoji 实际渲染一致（移动端居中更稳）
@@ -194,6 +219,7 @@ function applyStaticLang(){
 
 //==================== 状态 ====================
 let grid, player, selection, dragging, anim, busy=false, pendingLevels=0;
+let rec=null, replaying=false;   // rec=本局录像{v,seed,race,acts}；replaying=回放中（回放时不录、抑制弹窗）
 
 function newPlayer(){
   return {hp:20,maxHp:20, armor:0, shieldXp:0, toughness:0, shopCd:{}, skillCd:0, dmgBy:{}, bossDue:false, gold:0, xp:0, level:1,
@@ -209,9 +235,9 @@ function armorNeeded(a){ return 3 + a*3; }   // 护甲像经验一样累积：�
 function enemyStats(){
   const lv=player.level;
   return {
-    hp: 3 + Math.floor(Math.random()*3) + Math.floor(lv*0.7),   // lv1≈3~5, lv10≈10~12, lv20≈17~19
+    hp: 3 + Math.floor(rnd()*3) + Math.floor(lv*0.7),   // lv1≈3~5, lv10≈10~12, lv20≈17~19
     atk: 2 + Math.floor(lv*0.7),                                // lv1=2, lv5=5, lv10=9, lv20=16
-    baseCd: 3 + Math.floor(Math.random()*2),                    // 3~4（裸种族开局期更宽容）
+    baseCd: 3 + Math.floor(rnd()*2),                    // 3~4（裸种族开局期更宽容）
   };
 }
 function enemyChance(){ return Math.min(0.30, 0.10 + player.level*0.014); }
@@ -247,7 +273,7 @@ const BOSSES=[
     desc:['属性和普通怪一样，可被剑砍。它【每回合】把场上一个非怪/非Boss的棋子变成一只怪——拖得越久怪越多，速战速决！','Stats like a normal enemy and sword-attackable. Every turn it turns one non-enemy tile into an enemy — the longer it lives, the more enemies. End it fast!'],
     act(t){ const n=t.tier||1; let made=0;
       for(let i=0;i<n;i++){ const cells=[]; for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const x=grid[r][c]; if(x&&x.type!=='enemy'&&x.type!=='boss') cells.push([r,c]); }
-        if(!cells.length) break; const [r,c]=cells[Math.floor(Math.random()*cells.length)];
+        if(!cells.length) break; const [r,c]=cells[Math.floor(rnd()*cells.length)];
         const e=makeTile('enemy'); e.curY=cellY(r); grid[r][c]=e; made++; }
       if(made){ syncPositions(false); log(tr(`🧙 召唤师召唤出 ${made} 只怪！`,`🧙 The Summoner conjures ${made} enemies!`)); } } },
   { id:'thief', emoji:'🦹', name:['小偷','Thief'], monster:true, swordable:true, flee:true,
@@ -276,7 +302,7 @@ function dmgSourceLabel(key){
 }
 function bossStats(){
   const lv=player.level;
-  return { hp: 8 + Math.floor(lv*1.0), atk: 5 + Math.floor(lv*1.2), cd: 6 + Math.floor(Math.random()*3) }; // cd 6~8
+  return { hp: 8 + Math.floor(lv*1.0), atk: 5 + Math.floor(lv*1.2), cd: 6 + Math.floor(rnd()*3) }; // cd 6~8
 }
 function bossTier(){ return 1 + Math.floor(player.turns/50); }  // 每 50 回合 Boss 强度档位 +1
 function hasBoss(){ for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++) if(grid[r][c]&&grid[r][c].type==='boss') return true; return false; }
@@ -286,7 +312,7 @@ function isPoisoned(){ for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const t=g
 function scrambleTiles(n){
   const cells=[];
   for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const t=grid[r][c]; if(t && t.type!=='boss') cells.push([r,c]); }
-  for(let i=cells.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [cells[i],cells[j]]=[cells[j],cells[i]]; }
+  for(let i=cells.length-1;i>0;i--){ const j=Math.floor(rnd()*(i+1)); [cells[i],cells[j]]=[cells[j],cells[i]]; }
   const k=Math.min(n,cells.length);
   for(let i=0;i<k;i++){ const [r,c]=cells[i]; const nt=makeTile(); nt.curY=cellY(r); grid[r][c]=nt; }
   syncPositions(false);
@@ -297,8 +323,8 @@ function spawnBoss(){
   const cells=[];
   for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++) if(grid[r][c]) cells.push([r,c]);
   if(!cells.length) return;
-  const [r,c]=cells[Math.floor(Math.random()*cells.length)];
-  const def=BOSSES[Math.floor(Math.random()*BOSSES.length)];
+  const [r,c]=cells[Math.floor(rnd()*cells.length)];
+  const def=BOSSES[Math.floor(rnd()*BOSSES.length)];
   const tier=bossTier();
   const s = def.monster ? enemyStats() : bossStats();   // 怪属性型 Boss 用怪物数值
   const cdv = (s.cd!=null ? s.cd : s.baseCd);
@@ -313,8 +339,8 @@ function spawnBoss(){
 function makeTile(type){
   if(type===undefined){
     const pool=connectablePool();
-    type = Math.random()<enemyChance() ? 'enemy'
-         : pool[Math.floor(Math.random()*pool.length)];
+    type = rnd()<enemyChance() ? 'enemy'
+         : pool[Math.floor(rnd()*pool.length)];
   }
   const t={type};
   if(type==='enemy'){ const s=enemyStats(); t.hp=s.hp; t.maxHp=s.hp; t.atk=s.atk; t.cd=s.baseCd; t.baseCd=s.baseCd; }
@@ -380,11 +406,32 @@ function showClassSelect(){   // 现在是「选种族」
     b.onclick=()=>startGame(rc);
     card.appendChild(b);
   });
+  // 录像：回放上一局 / 导入回放
+  const lastRec=getLastRec();
+  if(lastRec){
+    const rb=document.createElement('button'); rb.className='choice';
+    rb.style.borderColor='#6a4fa3';
+    rb.innerHTML=`<b>🎬 ${tr('回放上一局','Replay last run')}</b><small>${tr('自动重演你上一局的完整操作','Auto-replays your last full run')}</small>`;
+    rb.onclick=()=>startReplay(lastRec);
+    card.appendChild(rb);
+  }
+  const ib=document.createElement('button'); ib.className='choice';
+  ib.style.borderColor='#6a4fa3';
+  ib.innerHTML=`<b>📥 ${tr('导入回放','Import replay')}</b><small>${tr('粘贴录像 JSON 回放','Paste a recording JSON to replay')}</small>`;
+  ib.onclick=()=>importReplay();
+  card.appendChild(ib);
   showOverlay();
+}
+function importReplay(){
+  const s=prompt(tr('粘贴录像 JSON：','Paste recording JSON:')); if(!s) return;
+  let r; try{ r=JSON.parse(s); }catch(e){ alert(tr('解析失败：JSON 格式错误','Parse failed: invalid JSON')); return; }
+  if(!r||!Array.isArray(r.acts)||typeof r.seed!=='number'){ alert(tr('录像无效','Invalid recording')); return; }
+  startReplay(r);
 }
 
 // 转职选择：tier=1 选一阶（主动），tier=2 选二阶（被动）
 function showTierSelect(tier){
+  if(replaying) return;   // 回放：转职由动作序列驱动，不弹窗
   busy=true; player.awaitingTier=tier;
   const path=RACE_PATHS[player.race]; const ids=tier===1?path.t1:path.t2; const pool=tier===1?TIER1:TIER2;
   const card=document.getElementById('card');
@@ -396,6 +443,7 @@ function showTierSelect(tier){
     const detail = tier===1 ? `${tr('主动','Active')}【${L(def.skill.name)}】${L(def.skill.short)}` : L(def.d);
     b.innerHTML=`<b>${L(def.n)}</b><small>${detail}</small>`;
     b.onclick=()=>{
+      recAct(['t', tier, id]);   // 录制转职选择
       if(tier===1){ player.tier1=id; }
       else { player.tier2=id; def.f(player); player.hp=Math.min(player.hp,player.maxHp); }
       player.awaitingTier=0; busy=false; hideOverlay(); updateHUD();
@@ -412,14 +460,17 @@ function onBossKilled(){
 }
 
 //==================== 初始化 ====================
+let __seedCtr=0;
 function startGame(rc){
+  if(replaying){ srand(replayRec.seed); }                       // 回放：用录像里的种子，不新建录像
+  else { const seed=((Date.now()>>>0)^(__seedCtr++*0x9E3779B9))>>>0; srand(seed); rec={v:1,seed,race:rc.id,acts:[]}; saveRec(); }
   player=newPlayer(); player.race=rc.id; rc.f(player); player.hp=player.maxHp;
   selection=[]; dragging=false; busy=false; pendingLevels=0;
   grid=[];
   for(let r=0;r<ROWS;r++){ grid[r]=[]; for(let c=0;c<COLS;c++){
     const pool=connectablePool();
-    let type = Math.random()<0.08 ? 'enemy'
-             : pool[Math.floor(Math.random()*pool.length)];
+    let type = rnd()<0.08 ? 'enemy'
+             : pool[Math.floor(rnd()*pool.length)];
     grid[r][c]=makeTile(type);
   }}
   syncPositions(true);
@@ -430,6 +481,12 @@ function startGame(rc){
 
 //==================== 本地存档 ====================
 const SAVE_KEY=DEV?'dr_save_dev':'dr_save', BEST_KEY=DEV?'dr_best_dev':'dr_best';   // dev 版独立存档，与正式版互不覆盖
+const REC_KEY=DEV?'dr_rec_dev':'dr_rec', REC_LAST_KEY=DEV?'dr_rec_last_dev':'dr_rec_last';  // 进行中录像 / 上一局完整录像
+// 录制一个玩家动作（回放中不录）。动作：['m',cells,baseType] 连线 / ['b',key] 购买 / ['k'] 技能 / ['u',idx] 升级选择 / ['t',tier,id] 转职选择
+function recAct(a){ if(rec && !replaying){ rec.acts.push(a); saveRec(); } }
+function saveRec(){ try{ if(rec) localStorage.setItem(REC_KEY, JSON.stringify(rec)); }catch(e){} }
+function loadRec(){ try{ return JSON.parse(localStorage.getItem(REC_KEY)||'null'); }catch(e){ return null; } }
+function getLastRec(){ try{ return JSON.parse(localStorage.getItem(REC_LAST_KEY)||'null'); }catch(e){ return null; } }
 function saveGame(){
   if(!grid||!player) return;
   try{
@@ -448,6 +505,7 @@ function loadGame(){
     player=data.player;
     pendingLevels=data.pendingLevels||0;
     grid=data.grid.map(row=>row.map(t=> t?{...t}:null));
+    rec=loadRec();   // 恢复进行中的录像，继续游戏时录制不断
     selection=[]; dragging=false; busy=false;
     syncPositions(true); hideOverlay(); logClear();
     log(tr('继续上次的探险…','Continuing your last run…'));
@@ -669,6 +727,7 @@ function buyItem(key){
   const it=SHOP[key]; if(!it) return;
   const cost=shopCost(key); if(player.gold<cost) return;
   player.gold-=cost; it.f();
+  recAct(['b',key]);   // 录制购买
   player.shopCd[key]= (key==='bomb' && player.bombCd) ? player.bombCd : 3;  // 影袭：炸弹冷却2回合
   checkLevel(); updateHUD();
   if(player.t1Pending){ player.t1Pending=false; showTierSelect(1); return; }  // 炸弹击败Boss也可触发转职
@@ -687,6 +746,7 @@ function activateSkill(){
   const r=sk.f(player);
   if(r===false) return;        // 技能判定无效（如锻甲场上没护甲）：不进冷却、不刷日志
   player.skillCd=sk.cd;
+  recAct(['k']);   // 录制技能发动
   if(r===undefined) log(tr(`✨ 【${L(sk.name)}】发动！`,`✨ ${L(sk.name)} activated!`)); // 技能没自带日志才用通用日志
   checkLevel(); updateHUD();
   if(pendingLevels) showLevelUp();
@@ -696,6 +756,7 @@ document.getElementById('skillBtn').onclick=activateSkill;
 //==================== 核心结算 ====================
 function resolve(){
   const type=selection[0].type;
+  recAct(['m', selection.map(s=>[s.r,s.c]), type]);   // 录制连线（改动棋盘前）
   let msg=''; // 经验只来自击杀（在 dealDamage 里 +3），消除图块本身不给经验
 
   if(type==='sword'){
@@ -829,7 +890,7 @@ function hurtPlayer(atk, sourceKey, ignoreArmor){
 function reflectThorns(amt){
   const es=[]; for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const t=grid[r][c]; if(t&&(t.type==='enemy'||t.type==='boss')) es.push([r,c,t]); }
   if(!es.length) return;
-  const [r,c,t]=es[Math.floor(Math.random()*es.length)];
+  const [r,c,t]=es[Math.floor(rnd()*es.length)];
   t.hp-=amt;
   if(t.hp<=0){ const isB=t.type==='boss'; grid[r][c]=null; if(isB){thiefRecover(t);player.xp+=15;player.gold+=20;onBossKilled();} else {player.xp+=3+(player.killXp||0);player.gold+=1;} }
   log(tr(`🌵 荆棘反弹 ${amt} 伤害`,`🌵 Thorns reflect ${amt}`));
@@ -863,18 +924,23 @@ const UPGRADES=[
   {n:['吸血鬼','Vampire'],         d:['每击杀一只怪物回复 1 生命','Heal 1 HP per enemy killed'], f:p=>{p.lifesteal+=1;}},
   {n:['生命恢复','Regeneration'],  d:['每回合自动回复 1 生命','Heal 1 HP every turn'], f:p=>{p.regen+=1;}},
 ];
-function showLevelUp(){
-  busy=true;
+// 升级三选一的洗牌（消耗 RNG）——供 UI 与回放共用，确保 RNG 消耗一致
+function rollUpgradePool(){
   // 兽人无甲：剔除护甲相关升级（死选项）
   const avail=player.noArmor ? UPGRADES.filter(u=>u.n[0]!=='重型护甲'&&u.n[0]!=='坚盾强化') : UPGRADES;
-  const pool=[...avail].sort(()=>Math.random()-0.5).slice(0,(player.upgradeChoices||3));  // 将军：四选一
+  return [...avail].sort(()=>rnd()-0.5).slice(0,(player.upgradeChoices||3));  // 将军：四选一
+}
+function applyUpgrade(u){ u.f(player); player.hp=Math.min(player.hp,player.maxHp); pendingLevels--; }
+function showLevelUp(){
+  if(replaying) return;   // 回放：升级由动作序列驱动，不弹窗（洗牌在回放的 'u' 步里消耗）
+  busy=true;
+  const pool=rollUpgradePool();
   const card=document.getElementById('card');
   card.innerHTML=`<h2>${tr(`⬆️ 升到 ${player.level} 级！`,`⬆️ Level ${player.level}!`)}</h2><p>${tr('选择一项强化','Pick one upgrade')}</p>`;
   pool.forEach(u=>{
     const b=document.createElement('button'); b.className='choice';
     b.innerHTML=`<b>${L(u.n)}</b><small>${L(typeof u.d==='function'?u.d(player):u.d)}</small>`;
-    b.onclick=()=>{ u.f(player); player.hp=Math.min(player.hp,player.maxHp);
-      pendingLevels--;
+    b.onclick=()=>{ recAct(['u', UPGRADES.indexOf(u)]); applyUpgrade(u);   // 录制升级选择（按 UPGRADES 索引）
       if(pendingLevels>0){ showLevelUp(); } else { busy=false; hideOverlay(); }
       updateHUD(); };   // 必须在 busy 置回 false 之后刷新，否则技能/商店按钮一直禁用到下一回合
     card.appendChild(b);
@@ -884,7 +950,10 @@ function showLevelUp(){
 
 function gameOver(){
   busy=true;
-  saveBest(); clearSave();
+  if(replaying){ stopReplay(); }                 // 回放播到死亡：停止回放，照常显示死亡报告
+  else { saveBest(); clearSave();
+    try{ if(rec) localStorage.setItem(REC_LAST_KEY, JSON.stringify(rec)); }catch(e){}  // 保存本局完整录像供回放
+  }
   // 死亡报告：各来源伤害占比
   const dmg=player.dmgBy||{};
   const ents=Object.entries(dmg).filter(([k,v])=>v>0).sort((a,b)=>b[1]-a[1]);
@@ -907,10 +976,74 @@ function gameOver(){
       ${tr('坚持回合','Turns survived')} <b style="color:var(--gold)">${player.turns}</b>
     </div>
     ${report}
+    <div style="display:flex;gap:6px;justify-content:center;margin-bottom:8px;flex-wrap:wrap">
+      <button class="choice" id="goReplay" style="width:auto;margin:0;padding:7px 12px">🎬 ${tr('回放本局','Replay')}</button>
+      <button class="choice" id="goCopy" style="width:auto;margin:0;padding:7px 12px">📋 ${tr('复制录像','Copy')}</button>
+      <button class="choice" id="goExport" style="width:auto;margin:0;padding:7px 12px">⏬ ${tr('导出','Export')}</button>
+    </div>
     <button class="btn" id="again">${tr('换个职业再来','Play again')}</button>`;
   document.getElementById('again').onclick=showClassSelect;
+  const finished=getLastRec();
+  const rep=document.getElementById('goReplay'), cp=document.getElementById('goCopy'), ex=document.getElementById('goExport');
+  if(finished){
+    rep.onclick=()=>startReplay(finished);
+    cp.onclick=()=>{ const s=JSON.stringify(finished); try{ navigator.clipboard.writeText(s); log(tr('📋 录像已复制到剪贴板','📋 Recording copied')); }catch(e){ prompt(tr('复制以下录像：','Copy this recording:'), s); } };
+    ex.onclick=()=>exportRec(finished);
+  } else { rep.style.display=cp.style.display=ex.style.display='none'; }
   showOverlay();
 }
+function exportRec(r){
+  try{ const blob=new Blob([JSON.stringify(r)],{type:'application/json'});
+    const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
+    a.download=`dungeon-raid-${r.race}-${(r.acts?r.acts.length:0)}acts.json`;
+    a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+  }catch(e){ log('导出失败: '+e.message); }
+}
+
+//==================== 录像回放 ====================
+let replayRec=null, replayIdx=0, replayTimer=null, replaySpeed=1, replayPaused=false;
+const REPLAY_BASE=620;   // 每步基础间隔 ms（按倍速缩短）
+function startReplay(recObj){
+  if(!recObj||!Array.isArray(recObj.acts)){ alert(tr('录像无效','Invalid recording')); return; }
+  replaying=true; replayRec=recObj; replayIdx=0; replaySpeed=1; replayPaused=false; rec=null;
+  hideOverlay(); busy=false;
+  startGame(raceById(recObj.race));    // replaying=true → 用 recObj.seed 播种、不新建录像
+  document.getElementById('replayBar').classList.add('show');
+  updateReplayBar(); scheduleReplay();
+}
+function scheduleReplay(){ clearTimeout(replayTimer); if(replayPaused||!replaying) return; replayTimer=setTimeout(replayStep, REPLAY_BASE/replaySpeed); }
+function replayStep(){
+  if(!replaying) return;
+  if(replayIdx>=replayRec.acts.length){ replayDone(); return; }
+  const a=replayRec.acts[replayIdx++];
+  try{ dispatchReplayAct(a); }catch(e){ log('回放出错: '+e.message); replayDone(); return; }
+  if(replaying){ updateReplayBar(); scheduleReplay(); }   // resolve 可能已触发 gameOver→stopReplay
+}
+function dispatchReplayAct(a){
+  const k=a[0];
+  if(k==='m'){ const cells=a[1], base=a[2];
+    selection=cells.map(([r,c],i)=>({r,c,type:i===0?base:(grid[r][c]?grid[r][c].type:base)}));
+    resolve();
+  } else if(k==='b'){ buyItem(a[1]); }
+  else if(k==='k'){ activateSkill(); }
+  else if(k==='u'){ rollUpgradePool(); applyUpgrade(UPGRADES[a[1]]); updateHUD(); }   // 洗牌消耗等量 RNG（丢弃结果），按录像索引应用
+  else if(k==='t'){ const tier=a[1], id=a[2];
+    if(tier===1){ player.tier1=id; } else { player.tier2=id; TIER2[id].f(player); player.hp=Math.min(player.hp,player.maxHp); }
+    player.awaitingTier=0; updateHUD();
+  }
+}
+function updateReplayBar(){
+  const n=replayRec?replayRec.acts.length:0;
+  document.getElementById('rbTxt').textContent=`🎬 ${tr('回放','Replay')} · ${tr('回合','turn')} ${player?player.turns:0} · ${replayIdx}/${n}`;
+  document.getElementById('rbFill').style.width=(n?Math.min(100,replayIdx/n*100):0)+'%';
+  document.getElementById('rbPause').textContent=replayPaused?'▶':'⏸';
+  document.querySelectorAll('#replayBar .rbSpd').forEach(b=>b.classList.toggle('on', +b.dataset.spd===replaySpeed));
+}
+function replayDone(){ clearTimeout(replayTimer); replayTimer=null; replayPaused=true; updateReplayBar(); log(tr('🎬 回放结束（点 ⏹ 退出）','🎬 Replay finished (⏹ to exit)')); }
+function stopReplay(){ clearTimeout(replayTimer); replayTimer=null; replaying=false; replayRec=null; document.getElementById('replayBar').classList.remove('show'); }
+document.getElementById('rbPause').onclick=()=>{ if(replayIdx>=(replayRec?replayRec.acts.length:0)) return; replayPaused=!replayPaused; updateReplayBar(); scheduleReplay(); };
+document.getElementById('rbExit').onclick=()=>{ stopReplay(); showClassSelect(); };
+document.querySelectorAll('#replayBar .rbSpd').forEach(b=>{ b.onclick=()=>{ replaySpeed=+b.dataset.spd; updateReplayBar(); scheduleReplay(); }; });
 
 //==================== 方块说明（点击查看）====================
 function tileInfo(t){
