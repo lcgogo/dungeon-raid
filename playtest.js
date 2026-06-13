@@ -6,7 +6,7 @@ const fs = require('fs');
 const html = fs.readFileSync(__dirname + '/dungeon-raid.html', 'utf8');
 let script = html.match(/<script>([\s\S]*?)<\/script>/)[1];
 
-const EXPORT = `globalThis.__G={CLASSES,UPGRADES,startGame,resolve,buyItem,shopCost,SHOP,activateSkill,isSwordTarget,
+const EXPORT = `globalThis.__G={RACES,RACE_PATHS,TIER1,TIER2,UPGRADES,startGame,resolve,buyItem,shopCost,SHOP,activateSkill,isSwordTarget,
   get grid(){return grid}, set grid(v){grid=v},
   get player(){return player},
   set selection(v){selection=v},
@@ -140,32 +140,43 @@ function boardEnemies(){ const g=grid(),e=[]; for(let r=0;r<ROWS;r++)for(let c=0
 function boardSwords(){ const g=grid(); let n=0; for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){const t=g[r][c]; if(t&&t.type==='sword')n++;} return n; }
 function boardBoss(){ const g=grid(); for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){const t=g[r][c]; if(t&&t.type==='boss')return t;} return null; }
 
-// 职业主动技能使用策略
+// 一阶主动技能使用策略（仅在有利时用；狂怒/囤金/点金属高风险/情境，机器人不用）
+function boardHearts(){ const g=grid(); let n=0; for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){const t=g[r][c]; if(t&&t.type==='heart')n++;} return n; }
 function maybeSkill(){
-  const p=P(); if(p.skillCd>0) return;
-  const cn=Array.isArray(p.cls.n)?p.cls.n[0]:p.cls.n;  // 职业名已双语化为 [中,英]
-  // 只用"明确有利"的技能；狂怒(减半血)/点金(剑变金)属高风险/情境技能，机器人不滥用
-  if(cn==='骑士'){ G.activateSkill(); }     // 锻甲：永久+1护甲
-  else if(cn==='牧师'){ G.activateSkill(); } // 祈福：+6上限并回满
+  const p=P(); if(!p.tier1 || p.skillCd>0) return;
+  const ens=boardEnemies().length, threat=boardEnemies().some(e=>e.cd<=1), boss=!!boardBoss();
+  const id=p.tier1;
+  if(id==='knight' && (boss||threat)) G.activateSkill();        // 圣盾：将受击时
+  else if(id==='priest' && boardHearts()>=3) G.activateSkill(); // 祝福：心多时转经验
+  else if(id==='ranger' && ens>=2) G.activateSkill();           // 箭雨：怪多时
+  else if(id==='blacksmith' && bestSimple('shield')) G.activateSkill(); // 锻甲：有盾时
+  else if(id==='fighter' && ens>=2) G.activateSkill();          // 嗜血：怪多时
   resolveLevels();
+}
+// 机器人处理转职选择（resolve/buyItem 触发 showTierSelect 后，apply 第一个选项）
+function botTransform(){
+  const p=P(); if(!p.awaitingTier) return;
+  const t=p.awaitingTier, ids=G.RACE_PATHS[p.race][t===1?'t1':'t2'], id=ids[0];
+  if(t===1){ p.tier1=id; } else { p.tier2=id; G.TIER2[id].f(p); p.hp=Math.min(p.hp,p.maxHp); }
+  p.awaitingTier=0; G.busy=false;
 }
 
 // ---------- 4) 单局 ----------
-function playGame(cls){
-  G.startGame(cls);
+function playGame(rc){
+  G.startGame(rc);
   let turn=0;
   for(; turn<4000; turn++){
     const p=P();
     if(p.hp<=0) break;
+    botTransform();   // 处理上一步触发的转职
     // 商店（先于行动；买东西不推进回合）
     G.busy=false;
     const ens=boardEnemies(), threatened=ens.some(e=>e.cd<=1);
     const boss=boardBoss();
-    // 商店（受3回合冷却限制，每窗口只成功一次）：危急回血 > 炸Boss > 炸怪群
-    if(p.hp<=0.3*p.maxHp && p.gold>=G.shopCost('heal')){ G.buyItem('heal'); resolveLevels(); }
-    else if(boss && p.gold>=G.shopCost('bomb')){ G.buyItem('bomb'); resolveLevels(); }       // Boss 只能炸，优先
-    else if(boardEnemies().length>=4 && p.gold>=G.shopCost('bomb')){ G.buyItem('bomb'); resolveLevels(); }
-    maybeSkill();   // 职业主动技能
+    if(p.hp<=0.3*p.maxHp && p.gold>=G.shopCost('heal')){ G.buyItem('heal'); botTransform(); resolveLevels(); }
+    else if(boss && p.gold>=G.shopCost('bomb')){ G.buyItem('bomb'); botTransform(); resolveLevels(); }
+    else if(boardEnemies().length>=4 && p.gold>=G.shopCost('bomb')){ G.buyItem('bomb'); botTransform(); resolveLevels(); }
+    maybeSkill();   // 一阶主动
 
     // 选招
     const sword=bestSword();
@@ -187,10 +198,11 @@ function playGame(cls){
     G.selection=sel;
     G.resolve();
     if(P().hp<=0){ turn++; break; }
+    botTransform();   // resolve 可能触发转职
     resolveLevels();
   }
   const p=P();
-  return { level:p.level, turns:p.turns, gold:p.gold, maxHp:p.maxHp, died:p.hp<=0, loopTurns:turn };
+  return { level:p.level, turns:p.turns, gold:p.gold, maxHp:p.maxHp, died:p.hp<=0, loopTurns:turn, t1:p.tier1, t2:p.tier2 };
 }
 
 // ---------- 5) 批量跑 ----------
@@ -199,28 +211,27 @@ const med=arr=>{ const a=arr.slice().sort((x,y)=>x-y); return a[Math.floor(a.len
 const avg=arr=>arr.reduce((s,x)=>s+x,0)/arr.length;
 function runBatch(){
   const out=[];
-  for(const cls of G.CLASSES){
+  for(const rc of G.RACES){
     const res=[];
-    for(let i=0;i<GAMES;i++){ try{ res.push(playGame(cls)); }catch(e){ res.push({error:e.message}); } }
+    for(let i=0;i<GAMES;i++){ try{ res.push(playGame(rc)); }catch(e){ res.push({error:e.message}); } }
     const ok=res.filter(r=>!r.error);
     const levels=ok.map(r=>r.level), turns=ok.map(r=>r.turns);
-    out.push({ cls:Array.isArray(cls.n)?cls.n[0]:cls.n, games:ok.length,
-      lvl_med:med(levels), lvl_avg:+avg(levels).toFixed(1), lvl_max:Math.max(...levels),
-      turn_med:med(turns), turn_avg:Math.round(avg(turns)), turn_max:Math.max(...turns),
+    out.push({ cls:rc.n[0], games:ok.length,
+      lvl_med:med(levels), turn_med:med(turns||[0]), turn_max:Math.max(0,...turns),
       capped:ok.filter(r=>!r.died).length, errors:res.length-ok.length, err0:(res.find(r=>r.error)||{}).error });
   }
   return out;
 }
 // 目标：总回合中位 ≈ 60。扫一批更硬的候选，自动挑最接近的。
-const TARGET=60;
+const TARGET=150;
 const CANDIDATES=[
-  { name:'F 当前',        v:{ hp:'3 + Math.floor(Math.random()*3) + Math.floor(lv*0.7)', atk:'2 + Math.floor(lv*0.8)', cd:'3 + Math.floor(Math.random()*2)', chance:'Math.min(0.32, 0.11 + player.level*0.015)' } },
-  { name:'J atk1.0/cd2-3', v:{ hp:'3 + Math.floor(Math.random()*3) + Math.floor(lv*0.85)', atk:'3 + Math.floor(lv*1.0)', cd:'2 + Math.floor(Math.random()*2)', chance:'Math.min(0.34, 0.12 + player.level*0.016)' } },
-  { name:'K atk1.2/cd2-3', v:{ hp:'3 + Math.floor(Math.random()*3) + Math.floor(lv*0.9)', atk:'3 + Math.floor(lv*1.2)', cd:'2 + Math.floor(Math.random()*2)', chance:'Math.min(0.35, 0.13 + player.level*0.017)' } },
-  { name:'L atk1.2/cd1-2', v:{ hp:'4 + Math.floor(Math.random()*3) + Math.floor(lv*1.0)', atk:'3 + Math.floor(lv*1.2)', cd:'1 + Math.floor(Math.random()*2)', chance:'Math.min(0.36, 0.13 + player.level*0.018)' } },
+  { name:'C atk0.7/cd3-4', v:{ hp:'3 + Math.floor(Math.random()*3) + Math.floor(lv*0.7)', atk:'2 + Math.floor(lv*0.7)', cd:'3 + Math.floor(Math.random()*2)', chance:'Math.min(0.30, 0.10 + player.level*0.014)' } },
+  { name:'C2 atk0.75/cd3-4',v:{ hp:'3 + Math.floor(Math.random()*3) + Math.floor(lv*0.75)', atk:'2 + Math.floor(lv*0.75)', cd:'3 + Math.floor(Math.random()*2)', chance:'Math.min(0.31, 0.105 + player.level*0.0145)' } },
+  { name:'D atk0.8/cd3-4', v:{ hp:'3 + Math.floor(Math.random()*3) + Math.floor(lv*0.8)', atk:'2 + Math.floor(lv*0.8)', cd:'3 + Math.floor(Math.random()*2)', chance:'Math.min(0.32, 0.11 + player.level*0.015)' } },
+  { name:'D2 atk0.85/cd3-4',v:{ hp:'3 + Math.floor(Math.random()*3) + Math.floor(lv*0.82)', atk:'2 + Math.floor(lv*0.85)', cd:'3 + Math.floor(Math.random()*2)', chance:'Math.min(0.33, 0.115 + player.level*0.015)' } },
 ];
-console.log('护甲减伤+商店冷却下扫描（每职业 '+GAMES+' 局），目标总回合中位 ≈ '+TARGET+'\n');
-console.log('候选             | 骑士  狂战  盗贼  牧师 |总回合中位');
+console.log('种族系统平衡扫描（每种族 '+GAMES+' 局，回合中位数），目标 ≈ '+TARGET+'\n');
+console.log('候选             | 人类  精灵  矮人  兽人 |总回合中位');
 console.log('-----------------|------------------------|--------');
 let bestCand=null;
 for(const cand of CANDIDATES){
@@ -230,13 +241,13 @@ for(const cand of CANDIDATES){
   const byCls = {}; out.forEach(r=>byCls[r.cls]=r.turn_med);
   console.log(
     cand.name.padEnd(16)+' | '+
-    String(byCls['骑士']).padStart(5)+String(byCls['狂战士']).padStart(6)+
-    String(byCls['盗贼']).padStart(6)+String(byCls['牧师']).padStart(6)+' | '+
+    String(byCls['人类']).padStart(5)+String(byCls['精灵']).padStart(6)+
+    String(byCls['矮人']).padStart(6)+String(byCls['兽人']).padStart(6)+' | '+
     String(turnMed).padStart(6));
   cand.turnMed=turnMed; cand.byCls=byCls;
   if(!bestCand || Math.abs(turnMed-TARGET)<Math.abs(bestCand.turnMed-TARGET)) bestCand=cand;
 }
-console.log('\n（数字=该职业回合中位数；看盗贼是否仍明显高于其它职业）');
+console.log('\n（数字=该种族回合中位数）');
 console.log('最接近目标('+TARGET+'回合)的是：'+bestCand.name+'（总回合中位 '+bestCand.turnMed+'）');
 console.log('  hp: '+bestCand.v.hp);
 console.log('  atk: '+bestCand.v.atk);
