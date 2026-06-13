@@ -111,7 +111,7 @@
   <div id="shop">
     <button id="skillBtn" class="shopBtn skillBtn" style="display:none"><span></span><small></small><em></em></button>
     <button class="shopBtn" data-buy="heal"><span>💊 治疗</span><small>回复10生命</small><em></em></button>
-    <button class="shopBtn" data-buy="bomb"><span>💥 灭怪</span><small>全场怪-6血</small><em></em></button>
+    <button class="shopBtn" data-buy="bomb"><span>💥 炸弹</span><small>全场怪-6血</small><em></em></button>
   </div>
 
   <div id="log"></div>
@@ -177,7 +177,7 @@ function spawnBoss(){
   const [r,c]=cells[Math.floor(Math.random()*cells.length)];
   const s=bossStats();
   grid[r][c]={type:'boss', hp:s.hp, maxHp:s.hp, atk:s.atk, cd:s.cd, baseCd:s.cd};
-  log('👻 Boss 现身！剑链对它无效，只能用 💥灭怪 炸它，击败有厚赏！');
+  log('👻 Boss 现身！剑链对它无效，只能用 💥炸弹 炸它，击败有厚赏！');
 }
 
 function makeTile(type){
@@ -678,7 +678,7 @@ function tileInfo(t){
       ['当前金币', `${p.gold}`],
       ['掠夺（盗贼）', p.steal?'剑每击杀一只怪 +1 金币':'—'] ]};
   if(t.type==='boss') return {icon:'👻', title:'Boss · 幽灵',
-    desc:'每 10 回合现身。剑链对它无效，只能用商店的 💥灭怪（每次 −6 血）炸它！倒计时归零会对你重击。击败有丰厚奖励。',
+    desc:'每 10 回合现身。剑链对它无效，只能用商店的 💥炸弹（每次 −6 血）炸它！倒计时归零会对你重击。击败有丰厚奖励。',
     rows:[ ['血量', `${t.hp} / ${t.maxHp}`],
       ['攻击力', `${t.atk}`],
       ['倒计时', `${t.cd} / ${t.baseCd} 回合`],
