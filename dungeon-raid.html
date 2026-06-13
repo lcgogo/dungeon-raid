@@ -79,7 +79,7 @@
 </head>
 <body>
 <div id="wrap">
-  <h1>⚔️ 地牢突袭 <span class="sub">Dungeon Raid</span></h1>
+  <h1>🔪 地牢突袭 <span class="sub">Dungeon Raid</span></h1>
 
   <div id="hud">
     <div class="row"><span class="lbl">生命</span>
@@ -110,7 +110,7 @@
   <div id="log"></div>
   <div class="footer">
     拖动连接 <b>2个及以上</b>相邻同类图块来消除（横竖斜都行）。<br>
-    🔰加护甲 · 💗回血 · 💰赚金币 · ⚔️攻击：<b>剑链可以直接拖过 👹</b>，串到的怪会被点杀！<br>
+    🔰加护甲 · 💗回血 · 💰赚金币 · 🔪攻击：<b>剑链可以直接拖过 👹</b>，串到的怪会被点杀！<br>
     👹中间大数字是<b>血量</b>，左上🔴是<b>攻击力</b>，右上是<b>倒计时</b>——每行动一次减1，归零就按攻击力打你！<br>
     连得越多收益越高：<b>连击加成 = 1 + (个数−2)×15%</b>（连5≈×1.45，连7≈×1.75）。<br>
     💡 <b>轻点任意方块</b>可查看说明与当前数值。
@@ -129,7 +129,7 @@ let TILE=70;                       // 实际按画布宽度自适应
 // 注：心/盾已改用原生彩色 emoji 💗/🔰（不带 FE0F 变体符），避免老符号在 canvas 里居中偏移
 const EMOJI_FONT="'Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji',sans-serif";
 const DEF = {
-  sword:  {emoji:'⚔️', color:'#e74c3c', glow:'#ff7a6b', name:'剑'},
+  sword:  {emoji:'🔪', color:'#e74c3c', glow:'#ff7a6b', name:'剑'},
   shield: {emoji:'🔰', color:'#3498db', glow:'#6fb6ff', name:'盾'},
   heart:  {emoji:'💗', color:'#e84393', glow:'#ff85c0', name:'心'},
   coin:   {emoji:'💰', color:'#f1c40f', glow:'#ffe07a', name:'金'},
@@ -170,7 +170,7 @@ function makeTile(type){
 //==================== 职业 ====================
 const CLASSES=[
   {n:'骑士',   e:'🔰', d:'【护甲恢复】每回合自动+2护甲，护甲上限+4', f:p=>{p.armorCap+=4; p.armor=p.armorCap; p.armorRegen=2;}},
-  {n:'狂战士', e:'⚔️', d:'【血怒】生命低于50%时剑伤+50%，但最大生命-4', f:p=>{p.maxHp-=4; p.berserk=true;}},
+  {n:'狂战士', e:'🔪', d:'【血怒】生命低于50%时剑伤+50%，但最大生命-4', f:p=>{p.maxHp-=4; p.berserk=true;}},
   {n:'盗贼',   e:'💰', d:'【掠夺】用剑每串到一只怪，获得 1 金币（不论是否击杀）', f:p=>{p.steal=true;}},
   {n:'牧师',   e:'💗', d:'【圣光护盾】治疗超出生命上限的部分转化为护甲', f:p=>{p.overheal=true;}},
 ];
@@ -469,7 +469,7 @@ function resolve(){
     let steal=0;
     if(player.steal && targets.length){ steal=targets.length; player.gold+=steal; } // 盗贼【掠夺】：每串到一只怪 +1 金币
     const comboTxt=combo>1?` 连击×${combo.toFixed(2)}`:'';
-    msg=`⚔️×${nS}${comboTxt}` + (targets.length
+    msg=`🔪×${nS}${comboTxt}` + (targets.length
       ? ` 直击 ${targets.length} 只怪 → ${dmg} 伤害` + (kills?`，击杀 ${kills} 只👹`:'') + (steal?`，💰+${steal}`:'')
       : `（未串到怪）`);
   } else {
@@ -603,7 +603,7 @@ function gameOver(){
 //==================== 方块说明（点击查看）====================
 function tileInfo(t){
   const p=player;
-  if(t.type==='sword') return {icon:'⚔️', title:'剑 · 攻击',
+  if(t.type==='sword') return {icon:'🔪', title:'剑 · 攻击',
     desc:'连接 2 把及以上的剑攻击怪物。剑链可直接拖过 👹，串到的怪各自独立吃满伤害。',
     rows:[ ['每把剑威力', `×${p.weaponPower}`],
       ['固定剑伤', `+${p.swordFlat}`],
@@ -668,7 +668,7 @@ function updateHUD(){
   const b=[];
   if(player.cls) b.push(`${player.cls.e}${player.cls.n}`);
   // 四项核心收益，统一格式紧挨在一起
-  b.push(`⚔️×${player.weaponPower}${player.swordFlat?`+${player.swordFlat}`:''}`);
+  b.push(`🔪×${player.weaponPower}${player.swordFlat?`+${player.swordFlat}`:''}`);
   b.push(`🔰${player.armorPerShield}`);
   b.push(`💗${player.healPerHeart}`);
   b.push(`💰${player.goldPerCoin}`);
