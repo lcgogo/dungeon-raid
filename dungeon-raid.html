@@ -212,10 +212,18 @@ const BOSSES=[
   { id:'ghost', emoji:'👻', name:['幽灵','Ghost'],
     desc:['剑链对它无效，只能用 💥炸弹 炸（每次 −6 血）。倒计时归零会对你重击！','Immune to sword chains — only the 💥 Bomb hurts it (−6 each). It strikes you hard at 0!'] },
   { id:'clown', emoji:'🤡', name:['小丑','Clown'], perTurn:true,
+    special:['每回合打乱 3 个棋子','Scrambles 3 tiles each turn'],
     desc:['剑链对它无效，只能用 💥炸弹 炸。它【每回合】都会随机打乱棋盘上 3 个棋子，制造持续混乱！','Immune to sword chains — only the 💥 Bomb works. Every turn it scrambles 3 random tiles, causing constant chaos!'],
     act(){ const k=scrambleTiles(3); log(tr(`🤡 小丑捣乱，打乱了 ${k} 个棋子！`,`🤡 The Clown scrambles ${k} tiles!`)); } },
+  { id:'vampire', emoji:'🧛', name:['吸血鬼','Vampire'], perTurn:true, swordable:true,
+    special:['每回合吸取场上的 ❤️ 回血','Drains ❤️ each turn to heal'],
+    desc:['可以用剑攻击它（也能用炸弹）。但它【每回合】会吸取棋盘上所有的心来回血——别把心留在场上！','You CAN hit it with sword chains (and bombs). But every turn it drains all hearts on the board to heal — do not leave hearts on the board!'],
+    act(t){ let n=0; for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const x=grid[r][c]; if(x&&x.type==='heart'){ grid[r][c]=null; n++; } }
+      if(n){ t.hp=Math.min(t.maxHp, t.hp+n*3); applyGravity(); syncPositions(false);
+        log(tr(`🧛 吸血鬼吸取 ${n} 颗心回血（→${t.hp}）`,`🧛 Vampire drains ${n} hearts (→${t.hp})`)); } } },
 ];
 function bossDef(t){ return BOSSES.find(b=>b.id===(t&&t.bossId)) || BOSSES[0]; }
+function isSwordTarget(t){ return !!t && (t.type==='enemy' || (t.type==='boss' && bossDef(t).swordable)); }
 function bossStats(){
   const lv=player.level;
   return { hp: 8 + Math.floor(lv*1.0), atk: 5 + Math.floor(lv*1.2), cd: 6 + Math.floor(Math.random()*3) }; // cd 6~8
@@ -381,7 +389,7 @@ function roundRect(x,y,w,h,r){ ctx.beginPath(); ctx.moveTo(x+r,y);
 function previewKills(){
   // 剑链且已构成可消除的连线（长度≥2，怪起手时怪自身也占一格）
   if(!dragging || selection.length<2 || selection[0].type!=='sword') return null;
-  const targets=selection.filter(s=>{const t=grid[s.r][s.c]; return t&&t.type==='enemy';});
+  const targets=selection.filter(s=>isSwordTarget(grid[s.r][s.c]));
   if(!targets.length) return null; // 没串到怪 → 不造成伤害，无击杀预览
   const nS=selection.filter(s=>{const t=grid[s.r][s.c]; return t&&t.type==='sword';}).length;
   const combo=1+Math.max(0,nS-2)*0.15;
@@ -390,7 +398,7 @@ function previewKills(){
   pool=Math.floor(pool);
   // 与结算一致：每只怪独立吃满 pool，pool≥血量即死
   const dead=new Set();
-  targets.forEach(s=>{const t=grid[s.r][s.c]; if(t&&t.type==='enemy' && pool>=t.hp) dead.add(s.r+','+s.c);});
+  targets.forEach(s=>{const t=grid[s.r][s.c]; if(isSwordTarget(t) && pool>=t.hp) dead.add(s.r+','+s.c);});
   return dead;
 }
 
@@ -405,17 +413,19 @@ function draw(){
     const x=cellX(c), y=(t.curY!==undefined?t.curY:cellY(r));
     const d=DEF[t.type], g=TILE-8;
     const picked=sel.has(t.r+','+t.c);
-    // 被剑链穿过的怪 → 红色高亮（表示正被攻击）
-    const gl = (picked && t.type==='enemy' && chainType==='sword') ? DEF.sword.glow : d.glow;
+    // 能被剑攻击的（怪 / 可剑连的Boss，以及剑本身）统一红底，一眼看出可攻击
+    const baseCol = (isSwordTarget(t) || t.type==='sword') ? DEF.sword.color : d.color;
+    // 被剑链穿过的怪/可攻击Boss → 红色高亮（表示正被攻击）
+    const gl = (picked && chainType==='sword' && isSwordTarget(t)) ? DEF.sword.glow : d.glow;
     // 背景
     ctx.save();
     roundRect(x+4,y+4,g,g,12);
-    if(!picked){ ctx.fillStyle=hexA(d.color,.16); }
+    if(!picked){ ctx.fillStyle=hexA(baseCol,.16); }
     else { ctx.fillStyle=hexA(gl,.30); ctx.shadowColor=gl; ctx.shadowBlur=14; }
     ctx.fill();
     ctx.shadowBlur=0;
     ctx.lineWidth=picked?3:1.5;
-    ctx.strokeStyle=picked?gl:hexA(d.color,.5);
+    ctx.strokeStyle=picked?gl:hexA(baseCol,.5);
     ctx.stroke();
     ctx.restore();
 
@@ -423,10 +433,10 @@ function draw(){
     if(t.type==='enemy'||t.type==='boss'){
       const isBoss=t.type==='boss';
       const bdef = isBoss?bossDef(t):null;
-      const doomed = !isBoss && killSet && killSet.has(t.r+','+t.c); // 会被这条线杀死 → 骷髅
+      const doomed = killSet && killSet.has(t.r+','+t.c) && (!isBoss || bdef.swordable); // 会被这条线杀死 → 骷髅
       ctx.font=Math.floor(TILE*0.30)+'px '+EMOJI_FONT;
       ctx.textAlign='center'; ctx.textBaseline='middle';
-      ctx.fillText(isBoss?bdef.emoji:(doomed?'💀':'👹'), cx, y+TILE*0.30);
+      ctx.fillText(doomed?'💀':(isBoss?bdef.emoji:'👹'), cx, y+TILE*0.30);
       // 血量
       ctx.fillStyle='#fff'; ctx.font='700 '+Math.floor(TILE*0.34)+'px system-ui';
       ctx.fillText(t.hp, cx, cy+TILE*0.10);
@@ -493,8 +503,8 @@ function startDrag(e){
   const cell=cellFromEvent(e); if(!cell) return;
   const t=grid[cell.r][cell.c]; if(!t) return;
   // 从怪物起手 → 视为剑攻击链
-  const base = t.type==='enemy' ? 'sword' : t.type;
-  // Boss 无法被剑连，但允许轻触查看信息（连线不会扩展，松手即弹说明）
+  const base = isSwordTarget(t) ? 'sword' : t.type;   // 怪 / 可攻击Boss 起手 → 剑链
+  // 不可连的 Boss 仍允许轻触查看信息（连线不会扩展，松手即弹说明）
   if(t.type!=='boss' && !CONNECTABLE.includes(base)) return;
   dragging=true; selection=[{r:cell.r,c:cell.c,type:base}];
   e.preventDefault();
@@ -511,7 +521,7 @@ function moveDrag(e){
   }
   if(selection.some(s=>s.r===cell.r&&s.c===cell.c)) return; // 已选
   const base=selection[0].type;
-  const ok = t.type===base || (base==='sword' && t.type==='enemy'); // 剑链可穿怪
+  const ok = t.type===base || (base==='sword' && isSwordTarget(t)); // 剑链可穿怪/可攻击Boss
   if(!ok) return;
   if(Math.abs(cell.r-last.r)<=1 && Math.abs(cell.c-last.c)<=1) // 相邻8向
     selection.push({r:cell.r,c:cell.c,type:t.type});
@@ -578,7 +588,7 @@ function resolve(){
 
   if(type==='sword'){
     const swords=selection.filter(s=>{const t=grid[s.r][s.c]; return t&&t.type==='sword';});
-    const targets=selection.filter(s=>{const t=grid[s.r][s.c]; return t&&t.type==='enemy';});
+    const targets=selection.filter(s=>isSwordTarget(grid[s.r][s.c]));
     const nS=swords.length;
     swords.forEach(s=>grid[s.r][s.c]=null);
     const combo=1+Math.max(0,nS-2)*0.15;               // 多连奖励：每超出2把剑 +15%
@@ -641,14 +651,17 @@ function dealDamage(pool, targets){
   let dmg=0, kills=0;
   const list=[];
   if(targets){ targets.forEach(s=>{ const t=grid[s.r][s.c];
-    if(t&&t.type==='enemy') list.push({r:s.r,c:s.c,t}); }); }
+    if(isSwordTarget(t)) list.push({r:s.r,c:s.c,t}); }); }
   else { for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const t=grid[r][c];
     if(t&&t.type==='enemy') list.push({r,c,t}); } }
   // 原版算法：剑链伤害对每只目标【独立、全额】生效，不共享、不分配
   for(const e of list){
     const hit=Math.min(pool, e.t.hp);
     e.t.hp-=hit; dmg+=hit;
-    if(e.t.hp<=0){ grid[e.r][e.c]=null; kills++; player.xp+=3; player.gold += 1 + (player.bargain?2:0); }
+    if(e.t.hp<=0){ grid[e.r][e.c]=null; kills++;
+      if(e.t.type==='boss'){ player.xp+=15; player.gold+=20; }       // 剑杀 Boss：厚赏
+      else { player.xp+=3; player.gold += 1 + (player.bargain?2:0); }
+    }
   }
   return {dmg,kills};
 }
@@ -762,9 +775,10 @@ function tileInfo(t){
       [tr('掠夺（盗贼）','Plunder (Rogue)'), p.steal?tr('剑每击杀一只怪 +1 金币','+1 gold per sword kill'):'—'] ]};
   if(t.type==='boss'){ const def=bossDef(t);
     const rows=[ [tr('血量','HP'), `${t.hp} / ${t.maxHp}`] ];
-    if(def.perTurn){ rows.push([tr('特殊','Special'), tr('每回合打乱 3 个棋子','Scrambles 3 tiles each turn')]); }
-    else if(def.act){ rows.push([tr('特殊','Special'), tr('归零打乱棋子','Scrambles tiles at 0')]); rows.push([tr('倒计时','Timer'), `${t.cd} / ${t.baseCd}`]); }
-    else { rows.push([tr('攻击力','Attack'), `${t.atk}`]); rows.push([tr('倒计时','Timer'), `${t.cd} / ${t.baseCd}`]); }
+    if(def.special) rows.push([tr('特殊','Special'), L(def.special)]);
+    else rows.push([tr('攻击力','Attack'), `${t.atk}`]);
+    if(!def.perTurn) rows.push([tr('倒计时','Timer'), `${t.cd} / ${t.baseCd}`]);
+    rows.push([tr('攻击方式','How to hit'), def.swordable?tr('剑 / 炸弹','Sword / Bomb'):tr('只能炸弹','Bomb only')]);
     rows.push([tr('击败奖励','Kill reward'), '💰+20 · XP+15']);
     return {icon:def.emoji, title:'Boss · '+L(def.name), desc:L(def.desc), rows};
   }
