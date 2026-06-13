@@ -16,44 +16,42 @@
     background:radial-gradient(circle at 50% 0%, #2a1f3a, var(--bg));
     color:var(--txt); font-family:-apple-system,system-ui,"PingFang SC","Microsoft YaHei",sans-serif;
     display:flex; flex-direction:column; align-items:center; min-height:100%;
-    user-select:none; -webkit-user-select:none; padding:10px 8px 30px;
+    user-select:none; -webkit-user-select:none; padding:4px 6px 8px;
   }
-  h1{font-size:22px; margin:6px 0 2px; letter-spacing:2px;}
-  h1 .sub{font-size:12px; color:var(--dim); letter-spacing:1px;}
-  #wrap{width:100%; max-width:460px;}
+  h1{font-size:17px; margin:2px 0 1px; letter-spacing:1px;}
+  h1 .sub{font-size:11px; color:var(--dim); letter-spacing:1px;}
+  #wrap{width:100%; max-width:440px;}
 
   /* HUD */
-  #hud{background:var(--panel); border:1px solid #3a2d4d; border-radius:14px; padding:10px 12px; margin-bottom:10px;}
-  .bar{height:16px; border-radius:8px; background:#15101e; overflow:hidden; position:relative;}
+  #hud{background:var(--panel); border:1px solid #3a2d4d; border-radius:12px; padding:6px 10px; margin-bottom:6px;}
+  .bar{height:13px; border-radius:7px; background:#15101e; overflow:hidden; position:relative;}
   .bar > i{display:block; height:100%; transition:width .25s; }
-  .bar > span{position:absolute; inset:0; font-size:11px; text-align:center; line-height:16px; color:#fff; text-shadow:0 1px 2px #000;}
-  .row{display:flex; align-items:center; gap:8px; margin:5px 0;}
-  .row .lbl{width:54px; font-size:12px; color:var(--dim);}
-  .stats{display:flex; justify-content:space-between; margin-top:8px; font-size:13px;}
+  .bar > span{position:absolute; inset:0; font-size:10px; text-align:center; line-height:13px; color:#fff; text-shadow:0 1px 2px #000;}
+  .row{display:flex; align-items:center; gap:6px; margin:3px 0;}
+  .row .lbl{width:54px; font-size:11px; color:var(--dim);}
+  .stats{display:flex; justify-content:space-between; margin-top:5px; font-size:12px;}
   .stats b{color:var(--gold);}
-  .mini{font-size:11px; color:var(--dim); margin-top:6px; line-height:1.5;}
+  .mini{font-size:10px; color:var(--dim); margin-top:4px; line-height:1.4;}
 
   /* board */
-  #board{display:block; width:100%; touch-action:none; border-radius:14px;
+  #board{display:block; width:100%; touch-action:none; border-radius:12px;
          background:var(--panel2); border:1px solid #3a2d4d;}
-  #log{font-size:12px; color:var(--dim); height:40px; overflow:hidden; margin:8px 4px; line-height:1.55;}
+  #log{font-size:11px; color:var(--dim); height:24px; overflow:hidden; margin:5px 4px; line-height:1.4;}
 
   /* shop */
-  #shop{display:flex; gap:8px; margin:10px 0 2px;}
-  .shopBtn{flex:1; background:var(--panel2); border:1px solid #3a2d4d; border-radius:12px;
-           color:var(--txt); padding:8px 4px; cursor:pointer; display:flex; flex-direction:column;
-           align-items:center; gap:2px; font-size:13px; transition:.15s;}
+  #shop{display:flex; gap:6px; margin:6px 0 0;}
+  .shopBtn{flex:1; background:var(--panel2); border:1px solid #3a2d4d; border-radius:10px;
+           color:var(--txt); padding:6px 3px; cursor:pointer; display:flex; flex-direction:column;
+           align-items:center; gap:1px; font-size:12px; transition:.15s;}
   .shopBtn em{font-style:normal; font-size:11px; color:var(--gold);}
   .shopBtn small{font-size:10px; color:var(--dim); line-height:1.2;}
   .shopBtn:disabled{opacity:.38; cursor:not-allowed;}
   .shopBtn:not(:disabled):hover{border-color:var(--gold); transform:translateY(-1px);}
 
-  /* 职业主动技能按钮 */
-  .skillBtn{width:100%; margin:10px 0 0; padding:11px; border-radius:12px; cursor:pointer;
-            font-size:14px; font-weight:700; color:#fff; transition:.15s;
-            background:linear-gradient(90deg,#7d3cad,#b657d6); border:1px solid #c08bff;}
-  .skillBtn:disabled{opacity:.4; cursor:not-allowed; filter:grayscale(.5);}
-  .skillBtn:not(:disabled):hover{transform:translateY(-1px); box-shadow:0 4px 14px rgba(192,139,255,.4);}
+  /* 职业主动技能按钮：复用 shopBtn 布局，仅换配色 */
+  .shopBtn.skillBtn{background:linear-gradient(160deg,#5a2e85,#7d3cad); border-color:#c08bff; color:#fff; font-weight:700;}
+  .shopBtn.skillBtn em{color:#e7c9ff;}
+  .shopBtn.skillBtn:not(:disabled):hover{border-color:#e6c2ff;}
 
   /* overlay */
   #overlay{position:fixed; inset:0; background:rgba(10,6,18,.82); backdrop-filter:blur(3px);
@@ -71,7 +69,7 @@
   .choice small{color:var(--dim);}
   .btn{background:var(--gold); color:#2a1f10; font-weight:700; border:none; border-radius:12px;
        padding:12px 20px; font-size:15px; cursor:pointer; margin-top:8px;}
-  .footer{font-size:11px; color:var(--dim); text-align:center; margin-top:14px; line-height:1.7;}
+  .footer{font-size:10px; color:var(--dim); text-align:center; margin-top:7px; line-height:1.4;}
 
   /* 低血危险渐晕 */
   #vignette{position:fixed; inset:0; pointer-events:none; z-index:5; opacity:0;
@@ -108,20 +106,16 @@
 
   <canvas id="board"></canvas>
 
-  <button id="skillBtn" class="skillBtn" style="display:none"></button>
-
   <div id="shop">
+    <button id="skillBtn" class="shopBtn skillBtn" style="display:none"><span></span><small></small><em></em></button>
     <button class="shopBtn" data-buy="heal"><span>💊 治疗</span><small>回复10生命</small><em></em></button>
     <button class="shopBtn" data-buy="bomb"><span>💥 灭怪</span><small>全场怪-6血</small><em></em></button>
   </div>
 
   <div id="log"></div>
   <div class="footer">
-    拖动连接 <b>2个及以上</b>相邻同类图块来消除（横竖斜都行）。<br>
-    🔰减伤 · 💗回血 · 💰赚金币 · 🔪攻击：<b>剑链可以直接拖过 👹</b>，串到的怪会被点杀！<br>
-    👹中间大数字是<b>血量</b>，左上🔴是<b>攻击力</b>，右上是<b>倒计时</b>——归零就攻击你，<b>实际掉血=攻击−护甲，最低1</b>！<br>
-    连得越多收益越高：<b>连击加成 = 1 + (个数−2)×15%</b>（连5≈×1.45，连7≈×1.75）。<br>
-    💡 <b>轻点任意方块</b>可查看说明与当前数值。
+    拖动连接 <b>2+</b> 相邻同类消除（横竖斜）；🔪剑链可穿过 👹 点杀，连得越多收益越高。<br>
+    💡 <b>轻点任意方块</b>查看玩法说明与当前数值。
   </div>
 </div>
 
@@ -179,13 +173,13 @@ function makeTile(type){
 //==================== 职业 ====================
 const CLASSES=[
   {n:'骑士',   e:'🔰', d:'【铁壁】怪物伤害额外 −1（最低仍为1），开局 +3 护甲', f:p=>{p.armor+=3; p.toughness+=1;},
-    skill:{name:'锻甲', short:'+1 护甲', cd:5, f:p=>{p.armor+=1;}}},
+    skill:{name:'锻甲', short:'+1护甲', cd:5, f:p=>{p.armor+=1;}}},
   {n:'狂战士', e:'🔪', d:'【血怒】生命低于50%时剑伤+50%，但最大生命-4', f:p=>{p.maxHp-=4; p.berserk=true;},
-    skill:{name:'狂怒', short:'当前生命减半（触发血怒）', cd:5, f:p=>{p.hp=Math.max(1,Math.floor(p.hp/2));}}},
+    skill:{name:'狂怒', short:'生命减半', cd:5, f:p=>{p.hp=Math.max(1,Math.floor(p.hp/2));}}},
   {n:'盗贼',   e:'💰', d:'【掠夺】用剑每击杀一只怪，额外获得 1 金币', f:p=>{p.steal=true;},
-    skill:{name:'点金', short:'把棋盘上所有剑变成金币', cd:5, f:p=>{ for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){const t=grid[r][c]; if(t&&t.type==='sword') t.type='coin';} }}},
+    skill:{name:'点金', short:'剑变金币', cd:5, f:p=>{ for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){const t=grid[r][c]; if(t&&t.type==='sword') t.type='coin';} }}},
   {n:'牧师',   e:'💗', d:'【回春】每颗心多回 +1 生命，且生命越低回血越多', f:p=>{p.healPerHeart+=1; p.revive=true;},
-    skill:{name:'祈福', short:'生命上限 +6 并回满该量', cd:5, f:p=>{p.maxHp+=6; p.hp+=6;}}},
+    skill:{name:'祈福', short:'上限+6回满', cd:5, f:p=>{p.maxHp+=6; p.hp+=6;}}},
 ];
 function showClassSelect(){
   busy=true;
@@ -714,8 +708,10 @@ function updateHUD(){
     btn.querySelector('em').textContent = player.shopCd>0 ? `⏳${player.shopCd}回合` : c+'💰';
     btn.disabled = busy || pendingLevels || player.shopCd>0 || player.gold < c; });
   const sb=document.getElementById('skillBtn'), sk=player.cls&&player.cls.skill;
-  if(sk){ sb.style.display='block';
-    sb.textContent = player.skillCd>0 ? `✨${sk.name}　⏳${player.skillCd}回合` : `✨${sk.name}　${sk.short}`;
+  if(sk){ sb.style.display='flex';
+    sb.querySelector('span').textContent=`✨${sk.name}`;
+    sb.querySelector('small').textContent=sk.short;
+    sb.querySelector('em').textContent = player.skillCd>0 ? `⏳${player.skillCd}回合` : '可发动';
     sb.disabled = busy || pendingLevels || player.skillCd>0;
   } else { sb.style.display='none'; }
   saveGame();
