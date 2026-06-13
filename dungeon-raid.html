@@ -125,6 +125,8 @@
 //==================== 配置 ====================
 const COLS=6, ROWS=6, PAD=8;
 let TILE=70;                       // 实际按画布宽度自适应
+// 显式 emoji 字体栈：让 canvas 测量宽度与彩色 emoji 实际渲染一致，避免 ❤️🛡️ 等带变体符的 emoji 居中偏移
+const EMOJI_FONT="'Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji',sans-serif";
 const DEF = {
   sword:  {emoji:'⚔️', color:'#e74c3c', glow:'#ff7a6b', name:'剑'},
   shield: {emoji:'🛡️', color:'#3498db', glow:'#6fb6ff', name:'盾'},
@@ -321,7 +323,7 @@ function draw(){
     const cx=x+TILE/2, cy=y+TILE/2;
     if(t.type==='enemy'){
       const doomed = killSet && killSet.has(t.r+','+t.c); // 会被这条线杀死 → 骷髅
-      ctx.font=Math.floor(TILE*0.30)+'px serif';
+      ctx.font=Math.floor(TILE*0.30)+'px '+EMOJI_FONT;
       ctx.textAlign='center'; ctx.textBaseline='middle';
       ctx.fillText(doomed?'💀':'👹', cx, y+TILE*0.30);
       // 血量
@@ -341,7 +343,7 @@ function draw(){
       ctx.fillStyle='#fff'; ctx.font='700 '+Math.floor(TILE*0.20)+'px system-ui';
       ctx.fillText(t.cd, bx, by+1);
     } else {
-      ctx.font=Math.floor(TILE*0.46)+'px serif';
+      ctx.font=Math.floor(TILE*0.46)+'px '+EMOJI_FONT;
       ctx.textAlign='center'; ctx.textBaseline='middle';
       ctx.fillText(d.emoji, cx, cy);
     }
