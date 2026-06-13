@@ -48,6 +48,13 @@
   .shopBtn:disabled{opacity:.38; cursor:not-allowed;}
   .shopBtn:not(:disabled):hover{border-color:var(--gold); transform:translateY(-1px);}
 
+  /* 职业主动技能按钮 */
+  .skillBtn{width:100%; margin:10px 0 0; padding:11px; border-radius:12px; cursor:pointer;
+            font-size:14px; font-weight:700; color:#fff; transition:.15s;
+            background:linear-gradient(90deg,#7d3cad,#b657d6); border:1px solid #c08bff;}
+  .skillBtn:disabled{opacity:.4; cursor:not-allowed; filter:grayscale(.5);}
+  .skillBtn:not(:disabled):hover{transform:translateY(-1px); box-shadow:0 4px 14px rgba(192,139,255,.4);}
+
   /* overlay */
   #overlay{position:fixed; inset:0; background:rgba(10,6,18,.82); backdrop-filter:blur(3px);
            display:none; align-items:center; justify-content:center; z-index:10;}
@@ -101,6 +108,8 @@
 
   <canvas id="board"></canvas>
 
+  <button id="skillBtn" class="skillBtn" style="display:none"></button>
+
   <div id="shop">
     <button class="shopBtn" data-buy="heal"><span>💊 治疗</span><small>回复10生命</small><em></em></button>
     <button class="shopBtn" data-buy="bomb"><span>💥 灭怪</span><small>全场怪-6血</small><em></em></button>
@@ -140,7 +149,7 @@ const CONNECTABLE=['sword','shield','heart','coin'];
 let grid, player, selection, dragging, anim, busy=false, pendingLevels=0;
 
 function newPlayer(){
-  return {hp:20,maxHp:20, armor:0, shieldXp:0, toughness:0, shopCd:0, gold:0, xp:0, level:1,
+  return {hp:20,maxHp:20, armor:0, shieldXp:0, toughness:0, shopCd:0, skillCd:0, gold:0, xp:0, level:1,
     weaponPower:1, swordFlat:0, armorPerShield:1, healPerHeart:1, goldPerCoin:1,
     lifesteal:0, regen:0, coinXp:0, turns:0};
 }
@@ -169,10 +178,14 @@ function makeTile(type){
 
 //==================== 职业 ====================
 const CLASSES=[
-  {n:'骑士',   e:'🔰', d:'【铁壁】怪物伤害额外 −1（最低仍为1），开局 +3 护甲', f:p=>{p.armor+=3; p.toughness+=1;}},
-  {n:'狂战士', e:'🔪', d:'【血怒】生命低于50%时剑伤+50%，但最大生命-4', f:p=>{p.maxHp-=4; p.berserk=true;}},
-  {n:'盗贼',   e:'💰', d:'【掠夺】用剑每击杀一只怪，额外获得 1 金币', f:p=>{p.steal=true;}},
-  {n:'牧师',   e:'💗', d:'【回春】每颗心多回 +1 生命，且生命越低回血越多', f:p=>{p.healPerHeart+=1; p.revive=true;}},
+  {n:'骑士',   e:'🔰', d:'【铁壁】怪物伤害额外 −1（最低仍为1），开局 +3 护甲', f:p=>{p.armor+=3; p.toughness+=1;},
+    skill:{name:'锻甲', short:'+1 护甲', cd:5, f:p=>{p.armor+=1;}}},
+  {n:'狂战士', e:'🔪', d:'【血怒】生命低于50%时剑伤+50%，但最大生命-4', f:p=>{p.maxHp-=4; p.berserk=true;},
+    skill:{name:'狂怒', short:'当前生命减半（触发血怒）', cd:5, f:p=>{p.hp=Math.max(1,Math.floor(p.hp/2));}}},
+  {n:'盗贼',   e:'💰', d:'【掠夺】用剑每击杀一只怪，额外获得 1 金币', f:p=>{p.steal=true;},
+    skill:{name:'点金', short:'把棋盘上所有剑变成金币', cd:5, f:p=>{ for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){const t=grid[r][c]; if(t&&t.type==='sword') t.type='coin';} }}},
+  {n:'牧师',   e:'💗', d:'【回春】每颗心多回 +1 生命，且生命越低回血越多', f:p=>{p.healPerHeart+=1; p.revive=true;},
+    skill:{name:'祈福', short:'生命上限 +6 并回满该量', cd:5, f:p=>{p.maxHp+=6; p.hp+=6;}}},
 ];
 function showClassSelect(){
   busy=true;
@@ -189,7 +202,7 @@ function showClassSelect(){
   }
   CLASSES.forEach(cls=>{
     const b=document.createElement('button'); b.className='choice';
-    b.innerHTML=`<b>${cls.e} ${cls.n}</b><small>${cls.d}</small>`;
+    b.innerHTML=`<b>${cls.e} ${cls.n}</b><small>${cls.d}<br>✨主动技能【${cls.skill.name}】：${cls.skill.short}（每 ${cls.skill.cd} 回合）</small>`;
     b.onclick=()=>startGame(cls);
     card.appendChild(b);
   });
@@ -449,6 +462,19 @@ document.querySelectorAll('.shopBtn').forEach(b=>{
   b.onclick=()=>buyItem(b.dataset.buy);
 });
 
+//==================== 职业主动技能 ====================
+function activateSkill(){
+  if(busy||pendingLevels) return;
+  const sk=player&&player.cls&&player.cls.skill; if(!sk) return;
+  if(player.skillCd>0) return;
+  sk.f(player);
+  player.skillCd=sk.cd;
+  log(`✨ 【${sk.name}】发动！`);
+  checkLevel(); updateHUD();
+  if(pendingLevels) showLevelUp();
+}
+document.getElementById('skillBtn').onclick=activateSkill;
+
 //==================== 核心结算 ====================
 function resolve(){
   const type=selection[0].type;
@@ -495,6 +521,7 @@ function resolve(){
   // 回合推进：怪物倒计时 / 攻击
   player.turns++;
   if(player.shopCd>0) player.shopCd--;   // 商店冷却递减
+  if(player.skillCd>0) player.skillCd--; // 技能冷却递减
   advanceEnemies();
   if(player.regen) gainHeal(player.regen);
 
@@ -686,6 +713,11 @@ function updateHUD(){
     const c=shopCost(btn.dataset.buy);
     btn.querySelector('em').textContent = player.shopCd>0 ? `⏳${player.shopCd}回合` : c+'💰';
     btn.disabled = busy || pendingLevels || player.shopCd>0 || player.gold < c; });
+  const sb=document.getElementById('skillBtn'), sk=player.cls&&player.cls.skill;
+  if(sk){ sb.style.display='block';
+    sb.textContent = player.skillCd>0 ? `✨${sk.name}　⏳${player.skillCd}回合` : `✨${sk.name}　${sk.short}`;
+    sb.disabled = busy || pendingLevels || player.skillCd>0;
+  } else { sb.style.display='none'; }
   saveGame();
 }
 // 低血时屏幕边缘变红：血越少越红，危急时呼吸闪烁
