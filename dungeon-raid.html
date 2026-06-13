@@ -136,6 +136,7 @@ const DEF = {
   heart:  {emoji:'💗', color:'#e84393', glow:'#ff85c0', name:'心'},
   coin:   {emoji:'💰', color:'#f1c40f', glow:'#ffe07a', name:'金'},
   enemy:  {emoji:'👹', color:'#7d3cad', glow:'#c08bff', name:'怪'},
+  boss:   {emoji:'👻', color:'#1f6f5c', glow:'#7fffd4', name:'Boss'},
 };
 const CONNECTABLE=['sword','shield','heart','coin'];
 
@@ -159,6 +160,23 @@ function enemyStats(){
   };
 }
 function enemyChance(){ return Math.min(0.34, 0.12 + player.level*0.016); }
+
+// Boss：每 10 回合现身，剑链免疫、只能用炸弹炸，奖励丰厚
+function bossStats(){
+  const lv=player.level;
+  return { hp: 8 + Math.floor(lv*1.0), atk: 5 + Math.floor(lv*1.2), cd: 6 + Math.floor(Math.random()*3) }; // cd 6~8
+}
+function hasBoss(){ for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++) if(grid[r][c]&&grid[r][c].type==='boss') return true; return false; }
+function spawnBoss(){
+  if(hasBoss()) return;                       // 同时只存在一个 Boss
+  const cells=[];
+  for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++) if(grid[r][c]) cells.push([r,c]);
+  if(!cells.length) return;
+  const [r,c]=cells[Math.floor(Math.random()*cells.length)];
+  const s=bossStats();
+  grid[r][c]={type:'boss', hp:s.hp, maxHp:s.hp, atk:s.atk, cd:s.cd, baseCd:s.cd};
+  log('👻 Boss 现身！剑链对它无效，只能用 💥灭怪 炸它，击败有厚赏！');
+}
 
 function makeTile(type){
   if(type===undefined){
@@ -329,11 +347,12 @@ function draw(){
     ctx.restore();
 
     const cx=x+TILE/2, cy=y+TILE/2;
-    if(t.type==='enemy'){
-      const doomed = killSet && killSet.has(t.r+','+t.c); // 会被这条线杀死 → 骷髅
+    if(t.type==='enemy'||t.type==='boss'){
+      const isBoss=t.type==='boss';
+      const doomed = !isBoss && killSet && killSet.has(t.r+','+t.c); // 会被这条线杀死 → 骷髅
       ctx.font=Math.floor(TILE*0.30)+'px '+EMOJI_FONT;
       ctx.textAlign='center'; ctx.textBaseline='middle';
-      ctx.fillText(doomed?'💀':'👹', cx, y+TILE*0.30);
+      ctx.fillText(isBoss?'👻':(doomed?'💀':'👹'), cx, y+TILE*0.30);
       // 血量
       ctx.fillStyle='#fff'; ctx.font='700 '+Math.floor(TILE*0.34)+'px system-ui';
       ctx.fillText(t.hp, cx, cy+TILE*0.10);
@@ -397,7 +416,8 @@ function startDrag(e){
   const t=grid[cell.r][cell.c]; if(!t) return;
   // 从怪物起手 → 视为剑攻击链
   const base = t.type==='enemy' ? 'sword' : t.type;
-  if(!CONNECTABLE.includes(base)) return;
+  // Boss 无法被剑连，但允许轻触查看信息（连线不会扩展，松手即弹说明）
+  if(t.type!=='boss' && !CONNECTABLE.includes(base)) return;
   dragging=true; selection=[{r:cell.r,c:cell.c,type:base}];
   e.preventDefault();
 }
@@ -435,10 +455,12 @@ cv.addEventListener('pointercancel',endDrag);
 //==================== 金币商店 ====================
 const SHOP={
   heal: {cost:15, f(){ const h=gainHeal(10); log(`💊 喝下药水，回复 ${h} 生命`); }},
-  bomb: {cost:25, f(){ let kills=0;
+  bomb: {cost:25, f(){ let kills=0, boss=0;
     for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const t=grid[r][c];
-      if(t&&t.type==='enemy'){ t.hp-=6; if(t.hp<=0){ grid[r][c]=null; kills++; player.xp+=3; } } }
-    log(`💥 投掷炸弹，对全场怪物造成 6 伤害` + (kills?`，击杀 ${kills} 只👹`:''));
+      if(t&&(t.type==='enemy'||t.type==='boss')){ t.hp-=6;
+        if(t.hp<=0){ const isBoss=t.type==='boss'; grid[r][c]=null;
+          if(isBoss){ boss++; player.xp+=15; player.gold+=20; } else { kills++; player.xp+=3; } } } }
+    log(`💥 投掷炸弹，全场 −6` + (kills?`，击杀 ${kills} 只👹`:'') + (boss?`，击败 👻Boss！厚赏 💰+20、经验+15`:''));
     applyGravity(); syncPositions(false); }},
 };
 function shopCost(key){ return Math.ceil(SHOP[key].cost*(player.bargain?0.5:1)); } // 盗贼半价
@@ -518,6 +540,7 @@ function resolve(){
   if(player.skillCd>0) player.skillCd--; // 技能冷却递减
   advanceEnemies();
   if(player.regen) gainHeal(player.regen);
+  if(player.turns % 10 === 0) spawnBoss();   // 每 10 回合 Boss 现身
 
   applyGravity();
   syncPositions(false);
@@ -552,13 +575,13 @@ function dealDamage(pool, targets){
 
 function advanceEnemies(){
   for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const t=grid[r][c];
-    if(!t||t.type!=='enemy') continue;
+    if(!t || (t.type!=='enemy' && t.type!=='boss')) continue;
     t.cd--;
     if(t.cd<=0){
       // 护甲 = 常驻减伤值，不消耗；无论减多少，最低仍掉 1 血
       const dmg=Math.max(1, t.atk - player.armor - (player.toughness||0));
       player.hp-=dmg;
-      log(`👹 攻击 ${t.atk}，被护甲挡下，实际掉 ${dmg} 血！`);
+      log((t.type==='boss'?'👻 Boss 重击':'👹 攻击')+` ${t.atk}，被护甲挡下，实际掉 ${dmg} 血！`);
       t.cd=t.baseCd;
     }
   }
@@ -651,6 +674,12 @@ function tileInfo(t){
     rows:[ ['每枚金币', `+${p.goldPerCoin}`],
       ['当前金币', `${p.gold}`],
       ['掠夺（盗贼）', p.steal?'剑每击杀一只怪 +1 金币':'—'] ]};
+  if(t.type==='boss') return {icon:'👻', title:'Boss · 幽灵',
+    desc:'每 10 回合现身。剑链对它无效，只能用商店的 💥灭怪（每次 −6 血）炸它！倒计时归零会对你重击。击败有丰厚奖励。',
+    rows:[ ['血量', `${t.hp} / ${t.maxHp}`],
+      ['攻击力', `${t.atk}`],
+      ['倒计时', `${t.cd} / ${t.baseCd} 回合`],
+      ['击败奖励', '💰+20 · 经验+15'] ]};
   return {icon:'👹', title:'怪物',
     desc:'倒计时每行动一次 -1，归零就攻击你：实际掉血 = max(1, 攻击力 − 护甲)。用剑链串过它即可攻击，伤害够高就能点杀。',
     rows:[ ['血量', `${t.hp} / ${t.maxHp}`],
