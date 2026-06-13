@@ -89,7 +89,7 @@
 <body>
 <div id="wrap">
   <button id="langBtn">EN</button>
-  <h1 id="title">🏰 地牢突袭 <span class="sub">Dungeon Raid</span></h1>
+  <h1 id="title">　　🏰 地牢突袭 <span class="sub">Dungeon Raid</span></h1>
 
   <div id="hud">
     <div class="row"><span class="lbl" id="lblHp">生命</span>
@@ -132,7 +132,7 @@
 <script>
 (()=>{
 //==================== 配置 ====================
-const VERSION='v1.1';              // 每次提交 +0.1，页面底部显示，便于确认部署版本
+const VERSION='v1.2';              // 每次提交 +0.1，页面底部显示，便于确认部署版本
 const COLS=6, ROWS=6, PAD=8;
 let TILE=70;                       // 实际按画布宽度自适应
 // 显式 emoji 字体栈：让 canvas 测量宽度与彩色 emoji 实际渲染一致（移动端居中更稳）
@@ -171,7 +171,7 @@ function applyStaticLang(){
   const set=(id,txt)=>{ const el=document.getElementById(id); if(el) el.textContent=txt; };
   if(document.documentElement) document.documentElement.lang = lang==='en'?'en':'zh-CN';
   const tt=document.getElementById('title');
-  if(tt) tt.innerHTML = tr('🏰 地牢突袭 <span class="sub">Dungeon Raid</span>','🏰 Dungeon Raid');
+  if(tt) tt.innerHTML = tr('　　🏰 地牢突袭 <span class="sub">Dungeon Raid</span>','　　🏰 Dungeon Raid');
   set('lblHp', tr('生命','HP'));
   set('lblAr', tr('护甲','Armor'));
   set('lblXp', tr('等级经验','Level XP'));
@@ -223,7 +223,7 @@ const BOSSES=[
     act(t){ let n=0; for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const x=grid[r][c]; if(x&&x.type==='heart'){ grid[r][c]=null; n++; } }
       if(n){ t.hp=Math.min(t.maxHp, t.hp+n*(2+(t.tier||1))); applyGravity(); syncPositions(false);
         log(tr(`🧛 吸血鬼吸取 ${n} 颗心回血（→${t.hp}）`,`🧛 Vampire drains ${n} hearts (→${t.hp})`)); } } },
-  { id:'assassin', emoji:'🥷', name:['刺客','Assassin'], monster:true, swordable:true, trueDmg:true,
+  { id:'assassin', emoji:'🥷', name:['刺客','Assassin'], monster:true, swordable:true, trueDmg:true, noTierScale:true,
     desc:['属性和普通怪差不多，但它的攻击是【真实伤害】——无视护甲和额外减伤，直接掉血！可以用剑砍它，趁早解决。','Stats like a normal enemy, but its hits are TRUE damage — they ignore armor and any reduction, straight to your HP! You can sword it down, so kill it fast.'] },
   { id:'devourer', emoji:'🦖', name:['饕餮','Devourer'], monster:true, swordable:true,
     special:['吞噬怪物壮大，倒计时放大招','Devours to grow; nukes at 0'],
@@ -279,7 +279,8 @@ function spawnBoss(){
   const tier=bossTier();
   const s = def.monster ? enemyStats() : bossStats();   // 怪属性型 Boss 用怪物数值
   const cdv = (s.cd!=null ? s.cd : s.baseCd);
-  const hp=s.hp*tier, atk=s.atk*tier;                   // 每 50 回合档位提升：血量/攻击翻倍累加
+  const mult = def.noTierScale ? 1 : tier;              // 刺客等：血量/攻击始终同级怪物，不吃档位倍率
+  const hp=s.hp*mult, atk=s.atk*mult;
   grid[r][c]={type:'boss', bossId:def.id, tier, hp, maxHp:hp, atk, cd:cdv, baseCd:cdv};
   const tlabel = tier>1?` Lv${tier}`:'';
   log(tr(`${def.emoji} Boss【${L(def.name)}】${tlabel} 现身！轻点它查看打法。`,`${def.emoji} Boss [${L(def.name)}]${tlabel} appears! Tap it to see how to fight.`));
