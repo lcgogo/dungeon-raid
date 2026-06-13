@@ -23,7 +23,8 @@
   #wrap{width:100%; max-width:440px;}
 
   /* HUD */
-  #hud{background:var(--panel); border:1px solid #3a2d4d; border-radius:12px; padding:6px 10px; margin-bottom:6px;}
+  #hud{background:var(--panel); border:1px solid #3a2d4d; border-radius:12px; padding:6px 10px; margin-bottom:6px; cursor:pointer;}
+  #hud:hover{border-color:#5a4a73;}
   .bar{height:13px; border-radius:7px; background:#15101e; overflow:hidden; position:relative;}
   .bar > i{display:block; height:100%; transition:width .25s; }
   .bar > span{position:absolute; inset:0; font-size:10px; text-align:center; line-height:13px; color:#fff; text-shadow:0 1px 2px #000;}
@@ -102,6 +103,7 @@
       <span>回合 <b id="turnTxt">0</b></span>
     </div>
     <div class="mini" id="bonusTxt"></div>
+    <div style="text-align:right; font-size:10px; color:var(--gold); margin-top:2px;">ⓘ 点击查看属性 / 职业详情</div>
   </div>
 
   <canvas id="board"></canvas>
@@ -700,6 +702,43 @@ function showTileInfo(t){
   document.getElementById('infoClose').onclick=()=>{ busy=false; hideOverlay(); updateHUD(); };
   showOverlay();
 }
+
+// 点击 HUD：查看角色全部属性 + 职业
+function showPlayerInfo(){
+  if(busy||pendingLevels||!player) return;
+  busy=true;
+  const p=player, cls=p.cls, an=armorNeeded(p.armor);
+  const rowItem=(k,v)=>`<div style="display:flex;justify-content:space-between;gap:10px;padding:6px 2px;border-bottom:1px solid #3a2d4d">
+       <span style="color:var(--dim)">${k}</span><b style="text-align:right">${v}</b></div>`;
+  const rows=[
+    ['❤️ 生命', `${Math.round(p.hp)} / ${p.maxHp}`],
+    ['🔰 护甲(减伤)', `${p.armor}${p.toughness?` +${p.toughness}`:''}　进度 ${p.shieldXp}/${an}`],
+    ['📈 等级 · 经验', `Lv.${p.level} · ${p.xp}/${xpNeeded(p.level)}`],
+    ['💰 金币 · 回合', `${p.gold} · ${p.turns}`],
+    ['🔪 剑威力', `×${p.weaponPower}${p.swordFlat?` +${p.swordFlat} 固定`:''}`],
+    ['🔰 每盾进度', `+${p.armorPerShield}`],
+    ['💗 每心回复', `+${p.healPerHeart}`],
+    ['💰 每金币', `+${p.goldPerCoin}`],
+  ].map(([k,v])=>rowItem(k,v)).join('');
+  const perks=[];
+  if(p.toughness) perks.push(`额外减伤 −${p.toughness}`);
+  if(p.lifesteal) perks.push(`吸血 +${p.lifesteal}/杀`);
+  if(p.regen) perks.push(`每回合回复 +${p.regen}`);
+  if(p.steal) perks.push(`掠夺（剑杀怪 +1💰）`);
+  if(p.berserk) perks.push(`血怒（生命<50% 剑伤×1.5）`);
+  if(p.revive) perks.push(`回春（越缺血回越多）`);
+  const perkLine = perks.length ? `<div style="text-align:left;font-size:12px;color:var(--gold);margin:8px 0 0">✦ 特性：${perks.join('　')}</div>` : '';
+  const skillLine = cls ? `<div style="text-align:left;font-size:12px;margin:8px 0 0;padding:8px;background:var(--panel2);border-radius:10px">✨ 主动技能【${cls.skill.name}】：${cls.skill.short}（每 ${cls.skill.cd} 回合）</div>` : '';
+  const card=document.getElementById('card');
+  card.innerHTML=`<h2>${cls?`${cls.e} ${cls.n}`:'冒险者'}</h2>
+    ${cls?`<p>${cls.d}</p>`:''}
+    <div style="text-align:left;font-size:13px;margin:0 0 4px">${rows}</div>
+    ${skillLine}${perkLine}
+    <button class="btn" id="infoClose" style="width:100%;margin-top:12px">关闭</button>`;
+  document.getElementById('infoClose').onclick=()=>{ busy=false; hideOverlay(); updateHUD(); };
+  showOverlay();
+}
+document.getElementById('hud').onclick=showPlayerInfo;
 
 function showOverlay(){ document.getElementById('overlay').classList.add('show'); }
 function hideOverlay(){ document.getElementById('overlay').classList.remove('show'); }
