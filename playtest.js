@@ -127,7 +127,8 @@ function toSelection(path, baseType){
 const UP_PRIORITY=['强健体魄','重型护甲','磨利刀刃','坚盾强化','神圣治疗','狂战之力','吸血鬼','生命恢复'];
 function resolveLevels(){
   while(G.pendingLevels>0){
-    const pool=shuffle(G.UPGRADES).slice(0,3);
+    const avail=P().noArmor ? G.UPGRADES.filter(u=>u.n[0]!=='重型护甲'&&u.n[0]!=='坚盾强化') : G.UPGRADES;
+    const pool=shuffle(avail).slice(0,3);
     const rank=n=>{const i=UP_PRIORITY.indexOf(n);return i<0?99:i;};
     pool.sort((a,b)=>rank(a.n)-rank(b.n));
     pool[0].f(P()); P().hp=Math.min(P().hp,P().maxHp);
