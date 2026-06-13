@@ -28,7 +28,7 @@
   .bar > i{display:block; height:100%; transition:width .25s; }
   .bar > span{position:absolute; inset:0; font-size:11px; text-align:center; line-height:16px; color:#fff; text-shadow:0 1px 2px #000;}
   .row{display:flex; align-items:center; gap:8px; margin:5px 0;}
-  .row .lbl{width:42px; font-size:12px; color:var(--dim);}
+  .row .lbl{width:54px; font-size:12px; color:var(--dim);}
   .stats{display:flex; justify-content:space-between; margin-top:8px; font-size:13px;}
   .stats b{color:var(--gold);}
   .mini{font-size:11px; color:var(--dim); margin-top:6px; line-height:1.5;}
@@ -85,12 +85,14 @@
     <div class="row"><span class="lbl">生命</span>
       <div class="bar" style="flex:1"><i id="hpBar" style="background:var(--hp)"></i><span id="hpTxt"></span></div>
     </div>
-    <div class="row"><span class="lbl">经验</span>
+    <div class="row"><span class="lbl">护甲</span>
+      <div class="bar" style="flex:1"><i id="arBar" style="background:var(--armor)"></i><span id="arTxt"></span></div>
+    </div>
+    <div class="row"><span class="lbl">等级经验</span>
       <div class="bar" style="flex:1"><i id="xpBar" style="background:var(--xp)"></i><span id="xpTxt"></span></div>
     </div>
     <div class="stats">
       <span>等级 <b id="lvTxt">1</b></span>
-      <span>🔰减伤 <b id="armorTxt">0</b></span>
       <span>💰 <b id="goldTxt">0</b></span>
       <span>回合 <b id="turnTxt">0</b></span>
     </div>
@@ -143,7 +145,7 @@ function newPlayer(){
     lifesteal:0, regen:0, coinXp:0, turns:0};
 }
 function xpNeeded(lv){ return 10 + lv*6; }
-function armorNeeded(a){ return 2 + a*2; }   // 护甲像经验一样累积：每升 1 点护甲所需的盾进度递增
+function armorNeeded(a){ return 3 + a*3; }   // 护甲像经验一样累积：每升 1 点护甲所需的盾进度递增（越往后越贵）
 
 function enemyStats(){
   const lv=player.level;
@@ -659,8 +661,10 @@ function bar(idBar,idTxt,cur,max,suffix){
 function updateHUD(){
   bar('hpBar','hpTxt',player.hp,player.maxHp);
   updateDanger();
-  document.getElementById('armorTxt').textContent =
-    `${player.armor}` + (player.toughness?`+${player.toughness}`:'') + ` (${player.shieldXp}/${armorNeeded(player.armor)})`;
+  const an=armorNeeded(player.armor);
+  document.getElementById('arBar').style.width=Math.min(100,player.shieldXp/an*100)+'%';
+  document.getElementById('arTxt').textContent=
+    `减伤 ${player.armor}${player.toughness?`+${player.toughness}`:''}　${player.shieldXp}/${an}`;
   const need=xpNeeded(player.level);
   document.getElementById('xpBar').style.width=(player.xp/need*100)+'%';
   document.getElementById('xpTxt').textContent=`${player.xp} / ${need}`;
