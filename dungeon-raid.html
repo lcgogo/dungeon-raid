@@ -256,7 +256,15 @@ function makeTile(type){
 //==================== 职业 ====================
 const CLASSES=[
   {n:['骑士','Knight'],     e:'🔰', d:['【铁壁】怪物伤害额外 −1（最低仍为1），开局 +3 护甲','[Bulwark] Enemy damage −1 extra (min 1); start with +3 armor'], f:p=>{p.armor+=3; p.toughness+=1;},
-    skill:{name:['锻甲','Forge Armor'], short:['+1 护甲','+1 Armor'], cd:5, f:p=>{p.armor+=1;}}},
+    skill:{name:['锻甲','Forge Armor'], short:['收集全盘护甲','Absorb all shields'], cd:5, f:p=>{
+      let n=0; for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const t=grid[r][c]; if(t&&t.type==='shield'){ grid[r][c]=null; n++; } }
+      if(!n) return false;                         // 场上没护甲 → 不发动、不进冷却
+      p.shieldXp += n*p.armorPerShield;
+      while(p.shieldXp>=armorNeeded(p.armor)){ p.shieldXp-=armorNeeded(p.armor); p.armor++; }
+      applyGravity(); syncPositions(false);
+      log(tr(`🔰 锻甲：吞下 ${n} 个护甲（减伤 ${p.armor}）`,`🔰 Forge: absorbed ${n} shields (armor ${p.armor})`));
+      return n;   // 已自带日志
+    }}},
   {n:['狂战士','Berserker'], e:'🔪', d:['【血怒】生命低于50%时剑伤+50%，但最大生命-4','[Bloodlust] +50% sword damage when below 50% HP, but −4 max HP'], f:p=>{p.maxHp-=4; p.berserk=true;},
     skill:{name:['狂怒','Rage'], short:['生命减半','Halve HP'], cd:5, f:p=>{p.hp=Math.max(1,Math.floor(p.hp/2));}}},
   {n:['盗贼','Rogue'],       e:'💰', d:['【掠夺】用剑每击杀一只怪，额外获得 1 金币','[Plunder] +1 extra gold for each enemy your sword kills'], f:p=>{p.steal=true;},
@@ -552,9 +560,10 @@ function activateSkill(){
   if(busy||pendingLevels) return;
   const sk=player&&player.cls&&player.cls.skill; if(!sk) return;
   if(player.skillCd>0) return;
-  sk.f(player);
+  const r=sk.f(player);
+  if(r===false) return;        // 技能判定无效（如锻甲场上没护甲）：不进冷却、不刷日志
   player.skillCd=sk.cd;
-  log(tr(`✨ 【${L(sk.name)}】发动！`,`✨ ${L(sk.name)} activated!`));
+  if(r===undefined) log(tr(`✨ 【${L(sk.name)}】发动！`,`✨ ${L(sk.name)} activated!`)); // 技能没自带日志才用通用日志
   checkLevel(); updateHUD();
   if(pendingLevels) showLevelUp();
 }
