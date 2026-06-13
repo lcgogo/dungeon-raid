@@ -95,9 +95,10 @@ function swordEval(path){
   const g=grid(), p=P();
   let nS=0, enemies=[];
   for(const[r,c]of path){ const t=g[r][c]; if(t.type==='sword')nS++; else if(G.isSwordTarget(t))enemies.push(t); }
-  const combo=1+Math.max(0,nS-2)*0.15;
-  let pool=(nS*p.weaponPower+p.swordFlat)*combo;
-  if(p.berserk && p.hp<p.maxHp*0.5) pool*=1.5;
+  const combo=1+Math.max(0,nS-2)*0.15*(p.comboMult||1);
+  const titanFlat=p.titan?Math.floor(p.maxHp/12):0;
+  let pool=(nS*p.weaponPower+p.swordFlat+titanFlat)*combo*(p.swordMult||1);
+  if(p.lowHpDmg) pool*=1+(1-p.hp/p.maxHp)*0.6;   // 与游戏一致：狂怒残血增伤
   pool=Math.floor(pool);
   let kills=0, threat=0;
   for(const e of enemies){ if(pool>=e.hp){ kills++; threat+=e.atk*(e.cd<=1?3:1); } }

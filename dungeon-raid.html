@@ -133,7 +133,7 @@
 (()=>{
 //==================== 配置 ====================
 // 版本号 v主.次.修：小改动改"修"，新Boss/职业改"次"，大版本变更需先确认。页面底部显示。
-const VERSION='v1.6.0';
+const VERSION='v1.6.1';
 const COLS=6, ROWS=6, PAD=8;
 let TILE=70;                       // 实际按画布宽度自适应
 // 显式 emoji 字体栈：让 canvas 测量宽度与彩色 emoji 实际渲染一致（移动端居中更稳）
@@ -347,7 +347,7 @@ const TIER2={
   shadow:{n:['影袭','Shadow'], d:['炸弹冷却永久缩为 2 回合','Bomb cooldown becomes 2 turns'], f:p=>{ p.bombCd=2; }},
   demolitionist:{n:['爆破手','Demolitionist'], d:['炸弹伤害更高，但花费金币更多','Bomb hits harder but costs more gold'], f:p=>{ p.bombBoost=true; }},
   tycoon:{n:['财阀','Tycoon'], d:['获得金币时额外按一半转为经验','Gold gained also grants half as XP'], f:p=>{ p.goldXp=true; }},
-  warlord:{n:['嗜杀','Warlord'], d:['剩余血量越高，剑伤越高（最高 +50%）','Higher current HP = higher sword damage (up to +50%)'], f:p=>{ p.highHpDmg=true; }},
+  warlord:{n:['巨力','Titan'], d:['最大生命越高，剑链固定伤害越高（每 12 点最大生命 +1）','Higher max HP = higher flat sword damage (+1 per 12 max HP)'], f:p=>{ p.titan=true; }},
   thorns:{n:['荆棘','Thorns'], d:['受到伤害的一半反弹给攻击者','Reflect half of damage taken back to the attacker'], f:p=>{ p.thorns=0.5; }},
 };
 const RACE_PATHS={
@@ -497,9 +497,9 @@ function previewKills(){
   if(!targets.length) return null; // 没串到怪 → 不造成伤害，无击杀预览
   const nS=selection.filter(s=>{const t=grid[s.r][s.c]; return t&&t.type==='sword';}).length;
   const combo=1+Math.max(0,nS-2)*0.15*(player.comboMult||1);
-  let pool=(nS*player.weaponPower+player.swordFlat)*combo*(player.swordMult||1);
-  if(player.lowHpDmg)  pool*=1+(1-player.hp/player.maxHp)*0.6;
-  if(player.highHpDmg) pool*=1+(player.hp/player.maxHp)*0.5;
+  const titanFlat=player.titan?Math.floor(player.maxHp/12):0;   // 巨力：最大生命越高，固定剑伤越高
+  let pool=(nS*player.weaponPower+player.swordFlat+titanFlat)*combo*(player.swordMult||1);
+  if(player.lowHpDmg) pool*=1+(1-player.hp/player.maxHp)*0.6;
   pool=Math.floor(pool);
   // 与结算一致：每只怪独立吃满 pool，pool≥血量即死
   const dead=new Set();
@@ -700,9 +700,9 @@ function resolve(){
     const nS=swords.length;
     swords.forEach(s=>grid[s.r][s.c]=null);
     const combo=1+Math.max(0,nS-2)*0.15*(player.comboMult||1);   // 多连奖励（精灵翻倍）
-    let pool=(nS*player.weaponPower+player.swordFlat)*combo*(player.swordMult||1); // 兽人蛮力×1.25
-    if(player.lowHpDmg)  pool*=1+(1-player.hp/player.maxHp)*0.6; // 狂战：越缺血越猛（最高+60%）
-    if(player.highHpDmg) pool*=1+(player.hp/player.maxHp)*0.5;   // 嗜杀：血越高越猛（最高+50%）
+    const titanFlat=player.titan?Math.floor(player.maxHp/12):0;  // 巨力：最大生命越高，固定剑伤越高
+    let pool=(nS*player.weaponPower+player.swordFlat+titanFlat)*combo*(player.swordMult||1);
+    if(player.lowHpDmg) pool*=1+(1-player.hp/player.maxHp)*0.6;  // 狂战：越缺血越猛（最高+60%）
     pool=Math.floor(pool);
     let dmg=0, kills=0;
     if(targets.length){ ({dmg,kills}=dealDamage(pool, targets)); }
@@ -915,7 +915,7 @@ function tileInfo(t){
     rows:[ [tr('每把剑威力','Power per sword'), `×${p.weaponPower}`],
       [tr('固定剑伤','Flat damage'), `+${p.swordFlat}`],
       [tr('多连奖励','Combo bonus'), tr(`每超出 2 把 +${Math.round(15*(p.comboMult||1))}%`,`+${Math.round(15*(p.comboMult||1))}% per sword over 2`)],
-      [tr('伤害加成','Damage bonus'), (p.swordMult>1?tr(`蛮力 ×${p.swordMult}`,`Brute ×${p.swordMult}`):'')+(p.lowHpDmg?tr(' ·越缺血越猛',' ·low HP↑'):'')+(p.highHpDmg?tr(' ·血越高越猛',' ·high HP↑'):'')||'—'] ]};
+      [tr('伤害加成','Damage bonus'), ((p.lowHpDmg?tr('越缺血越猛','low HP↑'):'')+(p.titan?tr(` ·巨力+${Math.floor(p.maxHp/12)}`,` ·Titan+${Math.floor(p.maxHp/12)}`):'')).trim()||'—'] ]};
   if(t.type==='shield') return {icon:'🔰', title:tr('盾 · 减伤','Shield · Armor'),
     desc:tr('连接盾累积「护甲进度」，攒满就 +1 护甲（永久减伤）。受击时先用护甲抵消，剩下的才掉血，但每次至少掉 1 滴。','Linking shields fills armor progress; fill it for +1 permanent armor. Armor soaks each hit, but you always lose at least 1 HP.'),
     rows:[ [tr('当前护甲(减伤)','Armor (reduction)'), p.noArmor?tr('无甲（兽人）','none (Orc)'):`${p.armor}`],
@@ -982,7 +982,7 @@ function showPlayerInfo(){
   ].map(([k,v])=>rowItem(k,v)).join('');
   const perks=[];
   if(p.lowHpDmg) perks.push(tr('狂怒：越缺血剑伤越高','Frenzy: low HP, high dmg'));
-  if(p.highHpDmg) perks.push(tr('嗜杀：血越高剑伤越高','Warlord: high HP, high dmg'));
+  if(p.titan) perks.push(tr(`巨力：固定剑伤 +${Math.floor(p.maxHp/12)}`,`Titan: +${Math.floor(p.maxHp/12)} flat sword dmg`));
   if(p.thorns) perks.push(tr('荆棘反弹','Thorns'));
   if(p.lifesteal) perks.push(tr(`吸血 +${p.lifesteal}/杀`,`Lifesteal +${p.lifesteal}`));
   if(p.regen) perks.push(tr(`每回合回复 +${p.regen}`,`Regen +${p.regen}`));

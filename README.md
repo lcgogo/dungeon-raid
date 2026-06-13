@@ -95,7 +95,7 @@
 | 🧝 精灵 | 影袭 Shadow | 炸弹冷却永久缩为 2 回合 |
 | 🧔 矮人 | 爆破手 Demolitionist | 炸弹伤害更高，但花费金币更多 |
 | 🧔 矮人 | 财阀 Tycoon | 获得金币时额外按一半转为经验 |
-| 🧌 兽人 | 嗜杀 Warlord | 剩余血量越高剑伤越高（最高 +50%）|
+| 🧌 兽人 | 巨力 Titan | 最大生命越高，剑链固定伤害越高（每 12 点最大生命 +1，与兽人 HP×2 特性联动）|
 | 🧌 兽人 | 荆棘 Thorns | 受到伤害的一半反弹给攻击者 |
 
 ### 👹 Boss 图鉴
@@ -224,7 +224,7 @@ Each race has 2 Tier-2 classes; once chosen they apply permanently:
 | 🧝 Elf | Shadow | Bomb cooldown becomes 2 turns permanently |
 | 🧔 Dwarf | Demolitionist | Bomb hits harder but costs more gold |
 | 🧔 Dwarf | Tycoon | Gold gained also grants half as much XP |
-| 🧌 Orc | Warlord | Higher current HP means higher sword damage (up to +50%) |
+| 🧌 Orc | Titan | Higher max HP means higher flat sword damage (+1 per 12 max HP; synergizes with the Orc's HP×2 trait) |
 | 🧌 Orc | Thorns | Reflect half of damage taken back to the attacker |
 
 ### 👹 Bestiary
