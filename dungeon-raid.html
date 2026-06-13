@@ -139,7 +139,7 @@ const CONNECTABLE=['sword','shield','heart','coin'];
 let grid, player, selection, dragging, anim, busy=false, pendingLevels=0;
 
 function newPlayer(){
-  return {hp:20,maxHp:20, armor:0,armorCap:5, toughness:0, gold:0, xp:0, level:1,
+  return {hp:20,maxHp:20, armor:0,armorCap:5, toughness:0, shopCd:0, gold:0, xp:0, level:1,
     weaponPower:1, swordFlat:0, armorPerShield:1, healPerHeart:1, goldPerCoin:1,
     lifesteal:0, regen:0, coinXp:0, turns:0};
 }
@@ -148,12 +148,12 @@ function xpNeeded(lv){ return 10 + lv*6; }
 function enemyStats(){
   const lv=player.level;
   return {
-    hp: 3 + Math.floor(Math.random()*3) + Math.floor(lv*0.7),  // lv1≈3~5, lv10≈10~12, lv20≈17~19
-    atk: 2 + Math.floor(lv*0.8),                               // lv1=2, lv5=6, lv10=10, lv20=18
-    baseCd: 3 + Math.floor(Math.random()*2),                   // 3~4（出手很勤）
+    hp: 3 + Math.floor(Math.random()*3) + Math.floor(lv*0.85),  // lv1≈3~5, lv10≈11~13, lv20≈20~22
+    atk: 3 + Math.floor(lv*1.0),                                // lv1=4, lv5=8, lv10=13, lv20=23
+    baseCd: 2 + Math.floor(Math.random()*2),                    // 2~3（出手很勤）
   };
 }
-function enemyChance(){ return Math.min(0.32, 0.11 + player.level*0.015); }
+function enemyChance(){ return Math.min(0.34, 0.12 + player.level*0.016); }
 
 function makeTile(type){
   if(type===undefined){
@@ -169,7 +169,7 @@ function makeTile(type){
 const CLASSES=[
   {n:'骑士',   e:'🔰', d:'【铁壁】怪物伤害额外 −1（最低仍为1），护甲上限 +4，开局 +3 护甲', f:p=>{p.armorCap+=4; p.armor+=3; p.toughness+=1;}},
   {n:'狂战士', e:'🔪', d:'【血怒】生命低于50%时剑伤+50%，但最大生命-4', f:p=>{p.maxHp-=4; p.berserk=true;}},
-  {n:'盗贼',   e:'💰', d:'【掠夺】用剑每串到一只怪，获得 1 金币（不论是否击杀）', f:p=>{p.steal=true;}},
+  {n:'盗贼',   e:'💰', d:'【掠夺】用剑每击杀一只怪，额外获得 1 金币', f:p=>{p.steal=true;}},
   {n:'牧师',   e:'💗', d:'【回春】每颗心多回 +1 生命，且生命越低回血越多', f:p=>{p.healPerHeart+=1; p.revive=true;}},
 ];
 function showClassSelect(){
@@ -436,9 +436,11 @@ const SHOP={
 function shopCost(key){ return Math.ceil(SHOP[key].cost*(player.bargain?0.5:1)); } // 盗贼半价
 function buyItem(key){
   if(busy||pendingLevels) return;
+  if(player.shopCd>0) return;                 // 商店冷却中：每 3 回合才能用一次
   const it=SHOP[key]; if(!it) return;
   const cost=shopCost(key); if(player.gold<cost) return;
   player.gold-=cost; it.f();
+  player.shopCd=3;                            // 购买后进入 3 回合冷却
   checkLevel(); updateHUD();
   if(pendingLevels) showLevelUp();
 }
@@ -465,7 +467,7 @@ function resolve(){
     if(targets.length){ ({dmg,kills}=dealDamage(pool, targets)); }
     if(player.lifesteal&&kills) player.hp=Math.min(player.maxHp, player.hp+kills*player.lifesteal);
     let steal=0;
-    if(player.steal && targets.length){ steal=targets.length; player.gold+=steal; } // 盗贼【掠夺】：每串到一只怪 +1 金币
+    if(player.steal && kills){ steal=kills; player.gold+=steal; } // 盗贼【掠夺】：每击杀一只怪额外 +1 金币
     const comboTxt=combo>1?` 连击×${combo.toFixed(2)}`:'';
     msg=`🔪×${nS}${comboTxt}` + (targets.length
       ? ` 直击 ${targets.length} 只怪 → ${dmg} 伤害` + (kills?`，击杀 ${kills} 只👹`:'') + (steal?`，💰+${steal}`:'')
@@ -493,6 +495,7 @@ function resolve(){
 
   // 回合推进：怪物倒计时 / 攻击
   player.turns++;
+  if(player.shopCd>0) player.shopCd--;   // 商店冷却递减
   advanceEnemies();
   if(player.regen) gainHeal(player.regen);
 
@@ -627,7 +630,7 @@ function tileInfo(t){
     desc:'连接 2 枚及以上的金币赚钱，用于商店购买。',
     rows:[ ['每枚金币', `+${p.goldPerCoin}`],
       ['当前金币', `${p.gold}`],
-      ['掠夺（盗贼）', p.steal?'剑每串到一只怪 +1 金币':'—'] ]};
+      ['掠夺（盗贼）', p.steal?'剑每击杀一只怪 +1 金币':'—'] ]};
   return {icon:'👹', title:'怪物',
     desc:'倒计时每行动一次 -1，归零就攻击你：实际掉血 = max(1, 攻击力 − 护甲)。用剑链串过它即可攻击，伤害够高就能点杀。',
     rows:[ ['血量', `${t.hp} / ${t.maxHp}`],
@@ -680,8 +683,8 @@ function updateHUD(){
   document.getElementById('bonusTxt').textContent=b.join('　');
   document.querySelectorAll('.shopBtn').forEach(btn=>{
     const c=shopCost(btn.dataset.buy);
-    btn.querySelector('em').textContent=c+'💰';
-    btn.disabled = busy || pendingLevels || player.gold < c; });
+    btn.querySelector('em').textContent = player.shopCd>0 ? `⏳${player.shopCd}回合` : c+'💰';
+    btn.disabled = busy || pendingLevels || player.shopCd>0 || player.gold < c; });
   saveGame();
 }
 // 低血时屏幕边缘变红：血越少越红，危急时呼吸闪烁

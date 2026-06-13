@@ -124,11 +124,12 @@ function toSelection(path, baseType){
 }
 
 // 升级：模拟"三选一"，按优先级挑
-const UP_PRIORITY=['强健体魄','重型护甲','磨利刀刃','坚盾强化','神圣治疗','狂战之力','吸血鬼','生命恢复','贪婪之心'];
+const UP_PRIORITY=['强健体魄','铁甲','重型护甲','磨利刀刃','坚盾强化','神圣治疗','狂战之力','吸血鬼','生命恢复'];
 function resolveLevels(){
   while(G.pendingLevels>0){
     const pool=shuffle(G.UPGRADES).slice(0,3);
-    pool.sort((a,b)=>UP_PRIORITY.indexOf(a.n)-UP_PRIORITY.indexOf(b.n));
+    const rank=n=>{const i=UP_PRIORITY.indexOf(n);return i<0?99:i;};
+    pool.sort((a,b)=>rank(a.n)-rank(b.n));
     pool[0].f(P()); P().hp=Math.min(P().hp,P().maxHp);
     G.pendingLevels=G.pendingLevels-1;
   }
@@ -197,32 +198,30 @@ function runBatch(){
 // 目标：总回合中位 ≈ 60。扫一批更硬的候选，自动挑最接近的。
 const TARGET=60;
 const CANDIDATES=[
-  { name:'F atk0.8/cd3-4', v:{ hp:'3 + Math.floor(Math.random()*3) + Math.floor(lv*0.7)', atk:'2 + Math.floor(lv*0.8)', cd:'3 + Math.floor(Math.random()*2)', chance:'Math.min(0.32, 0.11 + player.level*0.015)' } },
-  { name:'G atk1.0/cd2-3', v:{ hp:'3 + Math.floor(Math.random()*3) + Math.floor(lv*0.8)', atk:'3 + Math.floor(lv*1.0)', cd:'2 + Math.floor(Math.random()*2)', chance:'Math.min(0.34, 0.12 + player.level*0.016)' } },
-  { name:'H atk1.2/cd2-3', v:{ hp:'4 + Math.floor(Math.random()*3) + Math.floor(lv*0.9)', atk:'3 + Math.floor(lv*1.2)', cd:'2 + Math.floor(Math.random()*2)', chance:'Math.min(0.36, 0.13 + player.level*0.017)' } },
-  { name:'I atk1.0/cd1-2', v:{ hp:'3 + Math.floor(Math.random()*3) + Math.floor(lv*0.8)', atk:'3 + Math.floor(lv*1.0)', cd:'1 + Math.floor(Math.random()*2)', chance:'Math.min(0.34, 0.12 + player.level*0.016)' } },
+  { name:'F 当前',        v:{ hp:'3 + Math.floor(Math.random()*3) + Math.floor(lv*0.7)', atk:'2 + Math.floor(lv*0.8)', cd:'3 + Math.floor(Math.random()*2)', chance:'Math.min(0.32, 0.11 + player.level*0.015)' } },
+  { name:'J atk1.0/cd2-3', v:{ hp:'3 + Math.floor(Math.random()*3) + Math.floor(lv*0.85)', atk:'3 + Math.floor(lv*1.0)', cd:'2 + Math.floor(Math.random()*2)', chance:'Math.min(0.34, 0.12 + player.level*0.016)' } },
+  { name:'K atk1.2/cd2-3', v:{ hp:'3 + Math.floor(Math.random()*3) + Math.floor(lv*0.9)', atk:'3 + Math.floor(lv*1.2)', cd:'2 + Math.floor(Math.random()*2)', chance:'Math.min(0.35, 0.13 + player.level*0.017)' } },
+  { name:'L atk1.2/cd1-2', v:{ hp:'4 + Math.floor(Math.random()*3) + Math.floor(lv*1.0)', atk:'3 + Math.floor(lv*1.2)', cd:'1 + Math.floor(Math.random()*2)', chance:'Math.min(0.36, 0.13 + player.level*0.018)' } },
 ];
-console.log('扫描更硬候选（每职业 '+GAMES+' 局），目标总回合中位 ≈ '+TARGET+'\n');
-console.log('候选             | 骑士 狂战 盗贼 牧师 | 等级中位均 | 回合中位');
-console.log('-----------------|--------------------|-----------|--------');
+console.log('护甲减伤+商店冷却下扫描（每职业 '+GAMES+' 局），目标总回合中位 ≈ '+TARGET+'\n');
+console.log('候选             | 骑士  狂战  盗贼  牧师 |总回合中位');
+console.log('-----------------|------------------------|--------');
 let bestCand=null;
 for(const cand of CANDIDATES){
   G = loadGame(variant(cand.v));
   const out = runBatch();
-  const lvls = out.map(r=>r.lvl_med);
-  const avgLvl = (lvls.reduce((a,b)=>a+b,0)/lvls.length).toFixed(1);
   const turnMed = med(out.map(r=>r.turn_med));
-  const byCls = {}; out.forEach(r=>byCls[r.cls]=r.lvl_med);
+  const byCls = {}; out.forEach(r=>byCls[r.cls]=r.turn_med);
   console.log(
     cand.name.padEnd(16)+' | '+
-    String(byCls['骑士']).padStart(4)+String(byCls['狂战士']).padStart(5)+
-    String(byCls['盗贼']).padStart(5)+String(byCls['牧师']).padStart(5)+' | '+
-    String(avgLvl).padStart(9)+' | '+String(turnMed).padStart(6));
-  cand.turnMed=turnMed; cand.avgLvl=avgLvl;
+    String(byCls['骑士']).padStart(5)+String(byCls['狂战士']).padStart(6)+
+    String(byCls['盗贼']).padStart(6)+String(byCls['牧师']).padStart(6)+' | '+
+    String(turnMed).padStart(6));
+  cand.turnMed=turnMed; cand.byCls=byCls;
   if(!bestCand || Math.abs(turnMed-TARGET)<Math.abs(bestCand.turnMed-TARGET)) bestCand=cand;
 }
-console.log('\n最接近目标('+TARGET+'回合)的是：'+bestCand.name+'（回合中位 '+bestCand.turnMed+'，等级中位均 '+bestCand.avgLvl+'）');
-console.log('对应数值：');
+console.log('\n（数字=该职业回合中位数；看盗贼是否仍明显高于其它职业）');
+console.log('最接近目标('+TARGET+'回合)的是：'+bestCand.name+'（总回合中位 '+bestCand.turnMed+'）');
 console.log('  hp: '+bestCand.v.hp);
 console.log('  atk: '+bestCand.v.atk);
 console.log('  baseCd: '+bestCand.v.cd);
