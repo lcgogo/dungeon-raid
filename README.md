@@ -147,6 +147,10 @@ node playtest.js --race=dwarf --enemy=C2             # 指定敌人数值候选�
 
 参数：`--race=`（human/elf/dwarf/orc）、`--t1=`/`--t2=`（转职线 id）、`--boss=`（固定唯一会刷的 Boss）、`--enemy=`（敌人数值候选名，默认实时文件值）、`--games=`（每配置局数）、`--report`（全种族详细表）。定向模式额外输出：回合均值/最高、达一阶/二阶比例、致命回合主要死因占比。
 
+```bash
+node playtest.js --replay=run.json   # 回放一份游戏导出的录像（确定性重演），输出结局/死因，便于分析真实人类玩法
+```
+
 平衡基准数据见 [`TEST_REPORT.md`](TEST_REPORT.md)（带版本号，可作回归对比）；版本改动历史见 [`CHANGELOG.md`](CHANGELOG.md)。
 
 **正式版 / 开发版的维护**：两个文件仅有一行不同——文件顶部的 `const DEV`（正式版 `false`，开发版 `true`），存档键、版本标识、开始界面徽标都由它派生。改动流程：先改 `dungeon-raid-dev.html` 验证，稳定后 `cp dungeon-raid-dev.html dungeon-raid.html` 再把那行改回 `const DEV=false` 即可同步到正式版。
@@ -287,6 +291,10 @@ node playtest.js --race=dwarf --enemy=C2             # pick an enemy-stat candid
 ```
 
 Flags: `--race=` (human/elf/dwarf/orc), `--t1=`/`--t2=` (class-line id), `--boss=` (the only boss that spawns), `--enemy=` (enemy-stat candidate, defaults to live file values), `--games=` (games per config), `--report` (full per-race table). Targeted mode also prints: mean/max turns, tier-1/tier-2 reach rate, and the killing turn's main cause-of-death share.
+
+```bash
+node playtest.js --replay=run.json   # Replay a recording exported from the game (deterministic re-run); prints the outcome / cause of death — handy for analyzing real human play
+```
 
 See [`TEST_REPORT.md`](TEST_REPORT.md) for baseline data (versioned, for regression comparison) and [`CHANGELOG.md`](CHANGELOG.md) for the change history.
 

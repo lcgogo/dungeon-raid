@@ -7,9 +7,11 @@ const html = fs.readFileSync(__dirname + '/dungeon-raid.html', 'utf8');
 let script = html.match(/<script>([\s\S]*?)<\/script>/)[1];
 
 const EXPORT = `globalThis.__G={RACES,RACE_PATHS,TIER1,TIER2,UPGRADES,BOSSES,startGame,resolve,buyItem,shopCost,SHOP,activateSkill,isSwordTarget,
+  raceById, dispatchReplayAct, dmgSourceLabel,
   get grid(){return grid}, set grid(v){grid=v},
   get player(){return player},
   set selection(v){selection=v},
+  set replaying(v){replaying=v}, set replayRec(v){replayRec=v},
   get pendingLevels(){return pendingLevels}, set pendingLevels(v){pendingLevels=v},
   get busy(){return busy}, set busy(v){busy=v}};`;
 if (!script.includes('resize(); showClassSelect(); loop();'))
@@ -65,6 +67,28 @@ function applyBossFilter(g){
   const keep=g.BOSSES.filter(b=>b.id===ARG.boss);
   if(!keep.length){ console.error('未知 Boss id: '+ARG.boss+'（可选：'+g.BOSSES.map(b=>b.id).join(', ')+'）'); process.exit(1); }
   g.BOSSES.length=0; keep.forEach(b=>g.BOSSES.push(b));
+}
+
+// ---------- 2.6) 回放真实录像：node playtest.js --replay=<录像.json> ----------
+// 用游戏自带的确定性回放逻辑（dispatchReplayAct）跑一份人类录像，输出结局，便于分析真实玩法。
+if(ARG.replay){
+  const rec=JSON.parse(fs.readFileSync(ARG.replay,'utf8'));
+  if(!rec||!Array.isArray(rec.acts)||typeof rec.seed!=='number'){ console.error('录像无效（需含 seed/race/acts）'); process.exit(1); }
+  G.replayRec=rec; G.replaying=true;
+  G.startGame(G.raceById(rec.race));   // replaying=true → 用 rec.seed 播种
+  G.busy=false;
+  let done=0;
+  for(const a of rec.acts){ if(G.player.hp<=0) break; try{ G.dispatchReplayAct(a); }catch(e){ console.error('回放在第'+done+'步出错: '+e.message); break; } done++; }
+  const p=G.player;
+  const db=p.dmgBy||{}; let src=null,mx=0; for(const k in db){ if(db[k]>mx){mx=db[k];src=k;} }
+  const counts={}; rec.acts.forEach(a=>counts[a[0]]=(counts[a[0]]||0)+1);
+  console.log('=== 录像回放 '+ARG.replay+' ===');
+  console.log('种族:', rec.race, '| 种子:', rec.seed, '| 动作数:', rec.acts.length, '(已执行 '+done+')');
+  console.log('动作分布: 连线 '+(counts.m||0)+' / 购买 '+(counts.b||0)+' / 技能 '+(counts.k||0)+' / 升级 '+(counts.u||0)+' / 转职 '+(counts.t||0));
+  console.log('结局: 等级 '+p.level+' · 回合 '+p.turns+' · 金币 '+p.gold+' · 生命 '+Math.max(0,Math.round(p.hp))+'/'+p.maxHp+(p.hp<=0?' ☠️死亡':' (录像结束时仍存活)'));
+  console.log('一阶/二阶:', (p.tier1||'—')+' / '+(p.tier2||'—'));
+  if(src){ const L2=x=>Array.isArray(x)?x[0]:x; const s=G.dmgSourceLabel(src); console.log('致命回合主要伤害来源:', s.emoji+L2(s.name), Math.round(mx)); }
+  process.exit(0);
 }
 
 // ---------- 3) 机器人辅助 ----------
