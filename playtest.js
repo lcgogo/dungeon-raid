@@ -124,7 +124,7 @@ function toSelection(path, baseType){
 }
 
 // 升级：模拟"三选一"，按优先级挑
-const UP_PRIORITY=['强健体魄','铁甲','重型护甲','磨利刀刃','坚盾强化','神圣治疗','狂战之力','吸血鬼','生命恢复'];
+const UP_PRIORITY=['强健体魄','重型护甲','磨利刀刃','坚盾强化','神圣治疗','狂战之力','吸血鬼','生命恢复'];
 function resolveLevels(){
   while(G.pendingLevels>0){
     const pool=shuffle(G.UPGRADES).slice(0,3);
@@ -150,7 +150,6 @@ function playGame(cls){
     const ens=boardEnemies(), threatened=ens.some(e=>e.cd<=1);
     if(p.hp<=0.3*p.maxHp && p.gold>=G.shopCost('heal')){ G.buyItem('heal'); resolveLevels(); }
     if(boardEnemies().length>=4 && p.gold>=G.shopCost('bomb')){ G.buyItem('bomb'); resolveLevels(); }
-    if(p.armor===0 && threatened && p.gold>=G.shopCost('armor')){ G.buyItem('armor'); resolveLevels(); }
 
     // 选招
     const sword=bestSword();
@@ -162,7 +161,7 @@ function playGame(cls){
     if(p.hp<=0.35*p.maxHp && heart){ sel=toSelection(heart.path,'heart'); }
     else if(sword){ sel=toSelection(sword.path,'sword'); }
     else if(p.hp<0.6*p.maxHp && heart){ sel=toSelection(heart.path,'heart'); }
-    else if(p.armor<p.armorCap*0.5 && shield){ sel=toSelection(shield.path,'shield'); }
+    else if(p.armor<6 && shield){ sel=toSelection(shield.path,'shield'); }
     else if(coin){ sel=toSelection(coin.path,'coin'); }
     else if(shield){ sel=toSelection(shield.path,'shield'); }
     else if(heart){ sel=toSelection(heart.path,'heart'); }
