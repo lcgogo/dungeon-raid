@@ -80,7 +80,7 @@
 | 🧝 精灵 | 💰 盗贼 Rogue | 点金 Gold Touch | 把场上所有的剑变成金币 |
 | 🧔 矮人 | 🔰 锻造师 Blacksmith | 锻甲 Forge Armor | 吞下全场的盾，全部转为护甲进度 |
 | 🧔 矮人 | 🔒 守财奴 Miser | 囤金 Hoard | 锁金 3~10 回合（期间不产/不花金币，到期返还**双倍**）|
-| 🧌 兽人 | 🔪 狂战士 Berserker | 狂怒 Frenzy | 生命减半并进入**不屈**：本回合无论受多少伤都保留 1 血；之后血越少剑伤越高（最高 +60%）|
+| 🧌 兽人 | 🔪 狂战士 Berserker | 狂怒 Frenzy | 生命减半并进入**不屈**（仅**本回合**：无论受多少伤都保留 1 血）；并**永久**开启残血增伤——血越少剑伤越高（最高 +60%）|
 | 🧌 兽人 | 🩸 斗士 Fighter | 嗜血 Bloodthirst | 本回合剑链每击中一只怪回 3 血，**且可用剑攻击剑免疫的 Boss（幽灵/小丑）** |
 
 ### 🎖️ 二阶职业 · 被动
@@ -209,7 +209,7 @@ Each race has 2 Tier-1 classes; every skill has a **5-turn cooldown**:
 | 🧝 Elf | 💰 Rogue | Gold Touch | Turn every sword on the board into a coin |
 | 🧔 Dwarf | 🔰 Blacksmith | Forge Armor | Absorb all shields on the board into armor progress |
 | 🧔 Dwarf | 🔒 Miser | Hoard | Lock gold for 3–10 turns (no gold in/out; **double** payout at the end) |
-| 🧌 Orc | 🔪 Berserker | Frenzy | Halve HP and become **Undying**: keep ≥1 HP no matter the damage this turn; afterward lower HP means higher sword damage (up to +60%) |
+| 🧌 Orc | 🔪 Berserker | Frenzy | Halve HP and become **Undying** (**this turn only**: keep ≥1 HP no matter the damage); also **permanently** enables low-HP scaling — lower HP means higher sword damage (up to +60%) |
 | 🧌 Orc | 🩸 Fighter | Bloodthirst | Heal 3 HP per enemy your sword chain hits this turn, **and your sword can hit sword-immune bosses (Ghost/Clown)** |
 
 ### 🎖️ Tier-2 Classes · Passives
