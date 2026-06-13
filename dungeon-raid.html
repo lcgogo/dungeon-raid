@@ -133,7 +133,7 @@
 (()=>{
 //==================== 配置 ====================
 // 版本号 v主.次.修：小改动改"修"，新Boss/职业改"次"，大版本变更需先确认。页面底部显示。
-const VERSION='v1.3.2';
+const VERSION='v1.4.0';
 const COLS=6, ROWS=6, PAD=8;
 let TILE=70;                       // 实际按画布宽度自适应
 // 显式 emoji 字体栈：让 canvas 测量宽度与彩色 emoji 实际渲染一致（移动端居中更稳）
@@ -249,9 +249,17 @@ const BOSSES=[
         if(!cells.length) break; const [r,c]=cells[Math.floor(Math.random()*cells.length)];
         const e=makeTile('enemy'); e.curY=cellY(r); grid[r][c]=e; made++; }
       if(made){ syncPositions(false); log(tr(`🧙 召唤师召唤出 ${made} 只怪！`,`🧙 The Summoner conjures ${made} enemies!`)); } } },
+  { id:'thief', emoji:'🦹', name:['小偷','Thief'], monster:true, swordable:true, flee:true,
+    special:['现身即偷金币，逃走则永久失去','Steals gold on arrival; flees with it'],
+    desc:['一现身就偷走你一定比例的金币（一阶偷 20%、二阶偷 40%，依档位递增）。在它的倒计时内用剑或炸弹击败它，就能夺回被偷的金币；一旦让它逃走，这笔金币就永久消失！','The instant it appears it steals a share of your gold (20% at Lv1, 40% at Lv2, scaling per tier). Beat it with a sword chain or bomb before its timer runs out to recover the stolen gold — let it escape and that gold is gone forever!'],
+    onSpawn(t){ const pct=0.2*(t.tier||1); const steal=Math.floor(player.gold*pct); t.stolen=steal;
+      if(steal>0){ player.gold-=steal; log(tr(`🦹 小偷现身，偷走 ${steal} 金币（${Math.round(pct*100)}%）！倒计时内击败它可夺回。`,`🦹 Thief steals ${steal} gold (${Math.round(pct*100)}%)! Beat it before the timer to recover it.`)); }
+      else log(tr(`🦹 小偷现身，但你身无分文…`,`🦹 The Thief appears, but you have no gold…`)); } },
 ];
 function bossDef(t){ return BOSSES.find(b=>b.id===(t&&t.bossId)) || BOSSES[0]; }
 function isSwordTarget(t){ return !!t && (t.type==='enemy' || (t.type==='boss' && bossDef(t).swordable)); }
+// 击败小偷：夺回它偷走的金币
+function thiefRecover(t){ if(t&&t.bossId==='thief'&&t.stolen>0){ player.gold+=t.stolen; log(tr(`🦹 抓住小偷！夺回 ${t.stolen} 金币。`,`🦹 Caught the Thief! Recovered ${t.stolen} gold.`)); t.stolen=0; } }
 // 死亡报告：累计各来源对玩家造成的伤害
 function addDmg(key,amt){ if(player){ player.dmgBy=player.dmgBy||{}; player.dmgBy[key]=(player.dmgBy[key]||0)+amt; } }
 function dmgSourceLabel(key){
@@ -290,6 +298,7 @@ function spawnBoss(){
   grid[r][c]={type:'boss', bossId:def.id, tier, hp, maxHp:hp, atk, cd:cdv, baseCd:cdv};
   const tlabel = tier>1?` Lv${tier}`:'';
   log(tr(`${def.emoji} Boss【${L(def.name)}】${tlabel} 现身！轻点它查看打法。`,`${def.emoji} Boss [${L(def.name)}]${tlabel} appears! Tap it to see how to fight.`));
+  if(def.onSpawn) def.onSpawn(grid[r][c]);
 }
 
 function makeTile(type){
@@ -415,7 +424,7 @@ function saveGame(){
     localStorage.setItem(SAVE_KEY, JSON.stringify({
       pendingLevels,
       player:{...player},
-      grid: grid.map(row=>row.map(t=> t?{type:t.type,hp:t.hp,maxHp:t.maxHp,atk:t.atk,cd:t.cd,baseCd:t.baseCd,bossId:t.bossId,tier:t.tier}:null)),
+      grid: grid.map(row=>row.map(t=> t?{type:t.type,hp:t.hp,maxHp:t.maxHp,atk:t.atk,cd:t.cd,baseCd:t.baseCd,bossId:t.bossId,tier:t.tier,stolen:t.stolen}:null)),
     }));
   }catch(e){}
 }
@@ -635,7 +644,7 @@ const SHOP={
     for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const t=grid[r][c];
       if(t&&(t.type==='enemy'||t.type==='boss')){ t.hp-=D;
         if(t.hp<=0){ const isBoss=t.type==='boss'; grid[r][c]=null;
-          if(isBoss){ boss++; player.xp+=15; player.gold+=20; onBossKilled(); } else { kills++; player.xp+=3+(player.killXp||0); } } } }
+          if(isBoss){ thiefRecover(t); boss++; player.xp+=15; player.gold+=20; onBossKilled(); } else { kills++; player.xp+=3+(player.killXp||0); } } } }
     log(tr(`💥 投掷炸弹，全场 −${D}`,`💥 Bomb: all foes −${D}`) + (kills?tr(`，击杀 ${kills} 只👹`,`, ${kills} killed`):'') + (boss?tr(`，击败 Boss！厚赏 💰+20、经验+15`,`, Boss down! 💰+20, XP+15`):''));
     applyGravity(); syncPositions(false); }},
 };
@@ -758,7 +767,7 @@ function dealDamage(pool, targets){
     const hit=Math.min(pool, e.t.hp);
     e.t.hp-=hit; dmg+=hit;
     if(e.t.hp<=0){ grid[e.r][e.c]=null; kills++;
-      if(e.t.type==='boss'){ player.xp+=15; player.gold+=20; onBossKilled(); }  // 剑杀 Boss：厚赏 + 可能触发转职
+      if(e.t.type==='boss'){ thiefRecover(e.t); player.xp+=15; player.gold+=20; onBossKilled(); }  // 剑杀 Boss：厚赏 + 可能触发转职
       else { player.xp+=3+(player.killXp||0); player.gold += 1; }                // 神射手：击杀额外经验
     }
   }
@@ -766,6 +775,7 @@ function dealDamage(pool, targets){
 }
 
 function advanceEnemies(){
+  player.dmgBy={};   // 死亡报告只统计死亡那一回合的伤害：每回合敌人行动前清零
   for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const t=grid[r][c];
     if(!t || (t.type!=='enemy' && t.type!=='boss')) continue;
     const def = t.type==='boss' ? bossDef(t) : null;
@@ -773,7 +783,10 @@ function advanceEnemies(){
     if(def && def.perTurn){ def.act(t); continue; }    // 纯每回合型（小丑/吸血鬼）：无倒计时
     t.cd--;
     if(t.cd<=0){
-      if(def && def.cdAttack){
+      if(def && def.flee){
+        log(tr(`🦹 小偷逃走了！${t.stolen?`你永久失去了 ${t.stolen} 金币。`:''}`,`🦹 The Thief escapes!${t.stolen?` ${t.stolen} gold lost forever.`:''}`));
+        grid[r][c]=null; continue;
+      } else if(def && def.cdAttack){
         def.cdAttack(t);   // 自定义倒计时攻击（饕餮：自身血量50%）
       } else if(def && def.act){
         def.act(t);   // 特殊 Boss（如小丑）：执行特效，不直接掉血（act 内部自带日志）
@@ -803,7 +816,7 @@ function reflectThorns(amt){
   if(!es.length) return;
   const [r,c,t]=es[Math.floor(Math.random()*es.length)];
   t.hp-=amt;
-  if(t.hp<=0){ const isB=t.type==='boss'; grid[r][c]=null; if(isB){player.xp+=15;player.gold+=20;onBossKilled();} else {player.xp+=3+(player.killXp||0);player.gold+=1;} }
+  if(t.hp<=0){ const isB=t.type==='boss'; grid[r][c]=null; if(isB){thiefRecover(t);player.xp+=15;player.gold+=20;onBossKilled();} else {player.xp+=3+(player.killXp||0);player.gold+=1;} }
   log(tr(`🌵 荆棘反弹 ${amt} 伤害`,`🌵 Thorns reflect ${amt}`));
 }
 
@@ -867,7 +880,7 @@ function gameOver(){
       return `<div style="display:flex;justify-content:space-between;gap:8px;padding:3px 6px;font-size:13px">
         <span>${s.emoji} ${L(s.name)}</span><b style="color:var(--gold)">${Math.round(v)} · ${pct}%</b></div>`; }).join('');
     report=`<div style="text-align:left;margin:4px 0 12px;background:var(--panel2);border-radius:10px;padding:6px 4px">
-      <div style="text-align:center;color:var(--dim);font-size:12px;margin-bottom:2px">${tr('☠️ 伤害来源','☠️ Damage taken from')}</div>${rows}</div>`;
+      <div style="text-align:center;color:var(--dim);font-size:12px;margin-bottom:2px">${tr('☠️ 致命回合伤害来源','☠️ Killing blow — damage this turn')}</div>${rows}</div>`;
   }
   const card=document.getElementById('card');
   card.innerHTML=`<h2 style="color:var(--hp)">${tr('💀 你倒下了','💀 You fell')}</h2>
@@ -913,7 +926,8 @@ function tileInfo(t){
     const rows=[ [tr('血量','HP'), `${t.hp} / ${t.maxHp}`] ];
     if(def.special) rows.push([tr('特殊','Special'), L(def.special)]);
     else rows.push([def.trueDmg?tr('攻击力（真实·无视护甲）','Attack (TRUE, ignores armor)'):tr('攻击力','Attack'), `${t.atk}`]);
-    if(!def.perTurn) rows.push([tr('倒计时','Timer'), `${t.cd} / ${t.baseCd}`]);
+    if(!def.perTurn) rows.push([tr(def.flee?'逃走倒计时':'倒计时',def.flee?'Escape timer':'Timer'), `${t.cd} / ${t.baseCd}`]);
+    if(def.id==='thief'&&t.stolen) rows.push([tr('已偷金币','Stolen gold'), tr(`${t.stolen}（击败夺回）`,`${t.stolen} (recover on kill)`)]);
     rows.push([tr('攻击方式','How to hit'), def.swordable?tr('剑 / 炸弹','Sword / Bomb'):tr('只能炸弹','Bomb only')]);
     rows.push([tr('击败奖励','Kill reward'), '💰+20 · XP+15']);
     return {icon:def.emoji, title:'Boss · '+L(def.name)+((t.tier>1)?` Lv${t.tier}`:''), desc:L(def.desc), rows};
