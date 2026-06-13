@@ -78,7 +78,9 @@ node playtest.js --race=elf --boss=assassin --games=40    # 组合 + 自定局�
 node playtest.js --race=dwarf --enemy=C2             # 指定敌人数值候选（默认用文件实时值）
 ```
 
-参数：`--race=`（human/elf/dwarf/orc）、`--t1=`/`--t2=`（转职线 id）、`--boss=`（固定唯一会刷的 Boss）、`--enemy=`（敌人数值候选名，默认实时文件值）、`--games=`（每配置局数）。定向模式额外输出：回合均值/最高、达一阶/二阶比例、致命回合主要死因占比。
+参数：`--race=`（human/elf/dwarf/orc）、`--t1=`/`--t2=`（转职线 id）、`--boss=`（固定唯一会刷的 Boss）、`--enemy=`（敌人数值候选名，默认实时文件值）、`--games=`（每配置局数）、`--report`（全种族详细表）。定向模式额外输出：回合均值/最高、达一阶/二阶比例、致命回合主要死因占比。
+
+平衡基准数据见 [`TEST_REPORT.md`](TEST_REPORT.md)（带版本号，可作回归对比）；版本改动历史见 [`CHANGELOG.md`](CHANGELOG.md)。
 
 ---
 

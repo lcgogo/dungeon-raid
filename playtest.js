@@ -58,7 +58,7 @@ let G = loadGame();
 // ---------- 2.5) 命令行参数：可指定职业线 / Boss，便于和历史对比 ----------
 //   node playtest.js --race=orc --t1=berserker --t2=warlord --boss=spider --enemy=C2 --games=40
 const ARG = Object.fromEntries(process.argv.slice(2).map(s=>{ const m=s.match(/^--([^=]+)=?(.*)$/); return m?[m[1], m[2]]:[s,'']; }));
-const FOCUS = !!(ARG.race||ARG.boss||ARG.t1||ARG.t2);
+const FOCUS = !!(ARG.race||ARG.boss||ARG.t1||ARG.t2) || ('report' in ARG);
 // 把指定 Boss 固定为唯一会刷的 Boss（原地裁剪 BOSSES，spawnBoss 闭包引用同一数组）
 function applyBossFilter(g){
   if(!ARG.boss) return;
