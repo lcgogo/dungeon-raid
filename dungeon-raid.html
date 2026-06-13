@@ -757,7 +757,7 @@ function tileInfo(t){
       [tr('N 把剑的伤害','Damage of N swords'), `⌊(N×${p.weaponPower}+${p.swordFlat})×combo⌋`],
       [tr('血怒（狂战士）','Bloodlust (Berserker)'), p.berserk?tr('生命<50% 时总伤 ×1.5','×1.5 when HP<50%'):'—'] ]};
   if(t.type==='shield') return {icon:'🔰', title:tr('盾 · 减伤','Shield · Armor'),
-    desc:tr('连接盾累积「护甲进度」，攒满就 +1 护甲（永久减伤，像攒经验升级）。护甲是常驻减伤：每次受击实际掉血 = max(1, 怪攻击 − 护甲 − 额外减伤)，无论多高至少掉 1 血。','Linking shields fills armor progress; fill it to gain +1 armor (permanent, like leveling). Armor is flat damage reduction: each hit deals max(1, enemy ATK − armor − extra), always at least 1.'),
+    desc:tr('连接盾累积「护甲进度」，攒满就 +1 护甲（永久减伤，像攒经验升级）。护甲是常驻减伤：受击时先用护甲（和额外减伤）抵消，剩下的才掉血，但每次至少掉 1 滴。','Linking shields fills armor progress; fill it to gain +1 armor (permanent, like leveling). Armor is permanent damage reduction: it soaks each hit (plus any extra reduction), but you always lose at least 1 HP per hit.'),
     rows:[ [tr('当前护甲(减伤)','Armor (reduction)'), `${p.armor}`],
       [tr('护甲进度','Armor progress'), `${p.shieldXp} / ${armorNeeded(p.armor)}`],
       [tr('每个盾 +进度','Progress per shield'), `+${p.armorPerShield}`],
@@ -783,7 +783,7 @@ function tileInfo(t){
     return {icon:def.emoji, title:'Boss · '+L(def.name), desc:L(def.desc), rows};
   }
   return {icon:'👹', title:tr('怪物','Enemy'),
-    desc:tr('倒计时每行动一次 -1，归零就攻击你：实际掉血 = max(1, 攻击力 − 护甲)。用剑链串过它即可攻击，伤害够高就能点杀。','Timer −1 each action; at 0 it hits you for max(1, ATK − armor). Drag a sword chain through it to attack — enough damage kills it.'),
+    desc:tr('左上是攻击力，右上是倒计时。每行动一次倒计时 −1，归零就攻击你：先用护甲抵消，剩下的才掉血，但每次至少掉 1 滴。用剑链串过它就能攻击，伤害够高直接点杀。','Top-left is its attack, top-right its timer. The timer drops by 1 each action; at 0 it attacks — your armor soaks most of it, but you always lose at least 1 HP. Drag a sword chain through it to attack; enough damage kills it.'),
     rows:[ [tr('血量','HP'), `${t.hp} / ${t.maxHp}`],
       [tr('攻击力','Attack'), `${t.atk}`],
       [tr('倒计时','Timer'), `${t.cd} / ${t.baseCd}`] ]};
