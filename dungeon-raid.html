@@ -221,6 +221,8 @@ const BOSSES=[
     act(t){ let n=0; for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const x=grid[r][c]; if(x&&x.type==='heart'){ grid[r][c]=null; n++; } }
       if(n){ t.hp=Math.min(t.maxHp, t.hp+n*3); applyGravity(); syncPositions(false);
         log(tr(`🧛 吸血鬼吸取 ${n} 颗心回血（→${t.hp}）`,`🧛 Vampire drains ${n} hearts (→${t.hp})`)); } } },
+  { id:'assassin', emoji:'🥷', name:['刺客','Assassin'], monster:true, swordable:true, trueDmg:true,
+    desc:['属性和普通怪差不多，但它的攻击是【真实伤害】——无视护甲和额外减伤，直接掉血！可以用剑砍它，趁早解决。','Stats like a normal enemy, but its hits are TRUE damage — they ignore armor and any reduction, straight to your HP! You can sword it down, so kill it fast.'] },
 ];
 function bossDef(t){ return BOSSES.find(b=>b.id===(t&&t.bossId)) || BOSSES[0]; }
 function isSwordTarget(t){ return !!t && (t.type==='enemy' || (t.type==='boss' && bossDef(t).swordable)); }
@@ -246,8 +248,9 @@ function spawnBoss(){
   if(!cells.length) return;
   const [r,c]=cells[Math.floor(Math.random()*cells.length)];
   const def=BOSSES[Math.floor(Math.random()*BOSSES.length)];
-  const s=bossStats();
-  grid[r][c]={type:'boss', bossId:def.id, hp:s.hp, maxHp:s.hp, atk:s.atk, cd:s.cd, baseCd:s.cd};
+  const s = def.monster ? enemyStats() : bossStats();   // 怪属性型 Boss 用怪物数值
+  const cdv = (s.cd!=null ? s.cd : s.baseCd);
+  grid[r][c]={type:'boss', bossId:def.id, hp:s.hp, maxHp:s.hp, atk:s.atk, cd:cdv, baseCd:cdv};
   log(tr(`${def.emoji} Boss【${L(def.name)}】现身！剑链无效，用 💥炸弹 炸它，击败有厚赏！`,`${def.emoji} Boss [${L(def.name)}] appears! Sword-proof — use the 💥 Bomb. Big reward for the kill!`));
 }
 
@@ -444,7 +447,7 @@ function draw(){
       if(!isBoss || !bdef.act){
         const ax=x+10, ay=y+10, ar=TILE*0.16;
         ctx.beginPath(); ctx.arc(ax,ay,ar,0,7);
-        ctx.fillStyle='#c0392b'; ctx.fill(); ctx.strokeStyle='#000'; ctx.lineWidth=1; ctx.stroke();
+        ctx.fillStyle=(isBoss&&bdef.trueDmg)?'#8e44ad':'#c0392b'; ctx.fill(); ctx.strokeStyle='#000'; ctx.lineWidth=1; ctx.stroke();
         ctx.fillStyle='#fff'; ctx.font='700 '+Math.floor(TILE*0.20)+'px system-ui';
         ctx.fillText(t.atk, ax, ay+1);
       }
@@ -675,6 +678,9 @@ function advanceEnemies(){
       const def = t.type==='boss' ? bossDef(t) : null;
       if(def && def.act){
         def.act(t);   // 特殊 Boss（如小丑）：执行特效，不直接掉血（act 内部自带日志）
+      } else if(def && def.trueDmg){
+        player.hp-=t.atk;   // 真实伤害：无视护甲与额外减伤
+        log(tr(`${def.emoji} ${L(def.name)} 真实伤害 ${t.atk}（无视护甲）！`,`${def.emoji} ${L(def.name)} hits for ${t.atk} TRUE damage (ignores armor)!`));
       } else {
         // 护甲 = 常驻减伤值，不消耗；无论减多少，最低仍掉 1 血
         const dmg=Math.max(1, t.atk - player.armor - (player.toughness||0));
@@ -776,7 +782,7 @@ function tileInfo(t){
   if(t.type==='boss'){ const def=bossDef(t);
     const rows=[ [tr('血量','HP'), `${t.hp} / ${t.maxHp}`] ];
     if(def.special) rows.push([tr('特殊','Special'), L(def.special)]);
-    else rows.push([tr('攻击力','Attack'), `${t.atk}`]);
+    else rows.push([def.trueDmg?tr('攻击力（真实·无视护甲）','Attack (TRUE, ignores armor)'):tr('攻击力','Attack'), `${t.atk}`]);
     if(!def.perTurn) rows.push([tr('倒计时','Timer'), `${t.cd} / ${t.baseCd}`]);
     rows.push([tr('攻击方式','How to hit'), def.swordable?tr('剑 / 炸弹','Sword / Bomb'):tr('只能炸弹','Bomb only')]);
     rows.push([tr('击败奖励','Kill reward'), '💰+20 · XP+15']);
