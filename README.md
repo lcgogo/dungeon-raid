@@ -18,6 +18,15 @@
 
 直接用浏览器打开 `dungeon-raid.html` 即可。游戏自动适配屏幕宽度，支持触摸和鼠标。
 
+**两个版本**（首页 `index.html` 可选择，按大小区分）：
+
+| 版本 | 文件 | 说明 |
+|---|---|---|
+| ✅ **正式版** | `dungeon-raid.html` | 稳定版本 |
+| 🚧 **开发版 DEV** | `dungeon-raid-dev.html` | 指向最新开发版本，新功能先在这里试 |
+
+两个版本**存档相互独立、互不覆盖**（DEV 用单独的 localStorage 键）。开始界面与底部都会标明当前是「正式版」还是「DEV 开发版」。
+
 ### 🧩 核心玩法
 
 - **拖动连接** 2 个及以上**相邻同类**图块来消除（横、竖、斜 8 个方向都行）。
@@ -139,6 +148,8 @@ node playtest.js --race=dwarf --enemy=C2             # 指定敌人数值候选�
 
 平衡基准数据见 [`TEST_REPORT.md`](TEST_REPORT.md)（带版本号，可作回归对比）；版本改动历史见 [`CHANGELOG.md`](CHANGELOG.md)。
 
+**正式版 / 开发版的维护**：两个文件仅有一行不同——文件顶部的 `const DEV`（正式版 `false`，开发版 `true`），存档键、版本标识、开始界面徽标都由它派生。改动流程：先改 `dungeon-raid-dev.html` 验证，稳定后 `cp dungeon-raid-dev.html dungeon-raid.html` 再把那行改回 `const DEV=false` 即可同步到正式版。
+
 ---
 
 ## English
@@ -146,6 +157,15 @@ node playtest.js --race=dwarf --enemy=C2             # 指定敌人数值候选�
 ### 🎮 Getting Started
 
 Just open `dungeon-raid.html` in a browser. The game auto-fits the screen width and supports both touch and mouse.
+
+**Two builds** (pick on the `index.html` home page, sized to tell them apart):
+
+| Build | File | Notes |
+|---|---|---|
+| ✅ **Release** | `dungeon-raid.html` | The stable version |
+| 🚧 **Dev** | `dungeon-raid-dev.html` | Tracks the latest dev build; new features land here first |
+
+The two builds keep **separate, non-overwriting saves** (Dev uses its own localStorage keys). The start screen and footer both label which build you are in.
 
 ### 🧩 Core Gameplay
 
