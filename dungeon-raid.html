@@ -133,7 +133,7 @@
 (()=>{
 //==================== 配置 ====================
 // 版本号 v主.次.修：小改动改"修"，新Boss/职业改"次"，大版本变更需先确认。页面底部显示。
-const VERSION='v1.6.3';
+const VERSION='v1.6.4';
 const COLS=6, ROWS=6, PAD=8;
 let TILE=70;                       // 实际按画布宽度自适应
 // 显式 emoji 字体栈：让 canvas 测量宽度与彩色 emoji 实际渲染一致（移动端居中更稳）
@@ -870,8 +870,9 @@ function showLevelUp(){
     const b=document.createElement('button'); b.className='choice';
     b.innerHTML=`<b>${L(u.n)}</b><small>${L(u.d)}</small>`;
     b.onclick=()=>{ u.f(player); player.hp=Math.min(player.hp,player.maxHp);
-      pendingLevels--; updateHUD();
-      if(pendingLevels>0) showLevelUp(); else { busy=false; hideOverlay(); } };
+      pendingLevels--;
+      if(pendingLevels>0){ showLevelUp(); } else { busy=false; hideOverlay(); }
+      updateHUD(); };   // 必须在 busy 置回 false 之后刷新，否则技能/商店按钮一直禁用到下一回合
     card.appendChild(b);
   });
   showOverlay();
