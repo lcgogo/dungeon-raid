@@ -4,6 +4,10 @@
 >
 > A single-file HTML match-link Roguelike game. Pure vanilla JavaScript + Canvas — just open it in any mobile/desktop browser, no dependencies.
 
+> 🙏 **致敬经典**：本项目是向 Fireflame Games 于 2011 年推出的 iOS 经典游戏 **《Dungeon Raid》** 致敬的网页复刻版，玩法深受其启发。本作为非官方的粉丝习作，与原作者无任何关联，仅供学习与娱乐。
+>
+> 🙏 **A tribute**: This is a fan-made web remake inspired by the classic iOS game **Dungeon Raid** by Fireflame Games (2011). It is an unofficial homage, not affiliated with the original author — made just for learning and fun.
+
 [中文](#中文) · [English](#english)
 
 ---
