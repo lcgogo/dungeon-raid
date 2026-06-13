@@ -754,7 +754,7 @@ function tileInfo(t){
     rows:[ [tr('每把剑威力','Power per sword'), `×${p.weaponPower}`],
       [tr('固定剑伤','Flat damage'), `+${p.swordFlat}`],
       [tr('多连奖励','Combo bonus'), tr('每超出 2 把 +15%','+15% per sword over 2')],
-      [tr('N 把剑的伤害','Damage of N swords'), `⌊(N×${p.weaponPower}+${p.swordFlat})×combo⌋`],
+      [tr('伤害怎么算','Damage'), tr('剑越多、威力越高、连得越长，越疼','More swords, higher power, longer chains → more damage')],
       [tr('血怒（狂战士）','Bloodlust (Berserker)'), p.berserk?tr('生命<50% 时总伤 ×1.5','×1.5 when HP<50%'):'—'] ]};
   if(t.type==='shield') return {icon:'🔰', title:tr('盾 · 减伤','Shield · Armor'),
     desc:tr('连接盾累积「护甲进度」，攒满就 +1 护甲（永久减伤，像攒经验升级）。护甲是常驻减伤：受击时先用护甲（和额外减伤）抵消，剩下的才掉血，但每次至少掉 1 滴。','Linking shields fills armor progress; fill it to gain +1 armor (permanent, like leveling). Armor is permanent damage reduction: it soaks each hit (plus any extra reduction), but you always lose at least 1 HP per hit.'),
