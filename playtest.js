@@ -6,7 +6,7 @@ const fs = require('fs');
 const html = fs.readFileSync(__dirname + '/dungeon-raid.html', 'utf8');
 let script = html.match(/<script>([\s\S]*?)<\/script>/)[1];
 
-const EXPORT = `globalThis.__G={RACES,RACE_PATHS,TIER1,TIER2,UPGRADES,startGame,resolve,buyItem,shopCost,SHOP,activateSkill,isSwordTarget,
+const EXPORT = `globalThis.__G={RACES,RACE_PATHS,TIER1,TIER2,UPGRADES,BOSSES,startGame,resolve,buyItem,shopCost,SHOP,activateSkill,isSwordTarget,
   get grid(){return grid}, set grid(v){grid=v},
   get player(){return player},
   set selection(v){selection=v},
@@ -54,6 +54,18 @@ function loadGame(transform){
   return globalThis.__G;
 }
 let G = loadGame();
+
+// ---------- 2.5) 命令行参数：可指定职业线 / Boss，便于和历史对比 ----------
+//   node playtest.js --race=orc --t1=berserker --t2=warlord --boss=spider --enemy=C2 --games=40
+const ARG = Object.fromEntries(process.argv.slice(2).map(s=>{ const m=s.match(/^--([^=]+)=?(.*)$/); return m?[m[1], m[2]]:[s,'']; }));
+const FOCUS = !!(ARG.race||ARG.boss||ARG.t1||ARG.t2);
+// 把指定 Boss 固定为唯一会刷的 Boss（原地裁剪 BOSSES，spawnBoss 闭包引用同一数组）
+function applyBossFilter(g){
+  if(!ARG.boss) return;
+  const keep=g.BOSSES.filter(b=>b.id===ARG.boss);
+  if(!keep.length){ console.error('未知 Boss id: '+ARG.boss+'（可选：'+g.BOSSES.map(b=>b.id).join(', ')+'）'); process.exit(1); }
+  g.BOSSES.length=0; keep.forEach(b=>g.BOSSES.push(b));
+}
 
 // ---------- 3) 机器人辅助 ----------
 const ROWS=6, COLS=6;
@@ -157,7 +169,9 @@ function maybeSkill(){
 // 机器人处理转职选择（resolve/buyItem 触发 showTierSelect 后，apply 第一个选项）
 function botTransform(){
   const p=P(); if(!p.awaitingTier) return;
-  const t=p.awaitingTier, ids=G.RACE_PATHS[p.race][t===1?'t1':'t2'], id=ids[0];
+  const t=p.awaitingTier, ids=G.RACE_PATHS[p.race][t===1?'t1':'t2'];
+  const forced=t===1?ARG.t1:ARG.t2;                 // CLI 指定的转职线
+  const id=(forced && ids.includes(forced))?forced:ids[0];
   if(t===1){ p.tier1=id; } else { p.tier2=id; G.TIER2[id].f(p); p.hp=Math.min(p.hp,p.maxHp); }
   p.awaitingTier=0; G.busy=false;
 }
@@ -203,13 +217,15 @@ function playGame(rc){
     resolveLevels();
   }
   const p=P();
-  return { level:p.level, turns:p.turns, gold:p.gold, maxHp:p.maxHp, died:p.hp<=0, loopTurns:turn, t1:p.tier1, t2:p.tier2 };
+  const db=p.dmgBy||{}; let deathSrc=null,mx=0; for(const k in db){ if(db[k]>mx){mx=db[k];deathSrc=k;} }  // 致命回合主要死因
+  return { level:p.level, turns:p.turns, gold:p.gold, maxHp:p.maxHp, died:p.hp<=0, loopTurns:turn, t1:p.tier1, t2:p.tier2, deathSrc };
 }
 
 // ---------- 5) 批量跑 ----------
-const GAMES=25;
-const med=arr=>{ const a=arr.slice().sort((x,y)=>x-y); return a[Math.floor(a.length/2)]; };
-const avg=arr=>arr.reduce((s,x)=>s+x,0)/arr.length;
+const GAMES=ARG.games?+ARG.games:25;
+const med=arr=>{ const a=arr.slice().sort((x,y)=>x-y); return a.length?a[Math.floor(a.length/2)]:0; };
+const avg=arr=>arr.length?arr.reduce((s,x)=>s+x,0)/arr.length:0;
+const srcName=k=>{ if(k==='enemy')return'👹普通怪'; const b=G.BOSSES.find(x=>x.id===k); return b?b.emoji+b.name[0]:(k||'—'); };
 function runBatch(){
   const out=[];
   for(const rc of G.RACES){
@@ -231,26 +247,56 @@ const CANDIDATES=[
   { name:'D atk0.8/cd3-4', v:{ hp:'3 + Math.floor(Math.random()*3) + Math.floor(lv*0.8)', atk:'2 + Math.floor(lv*0.8)', cd:'3 + Math.floor(Math.random()*2)', chance:'Math.min(0.32, 0.11 + player.level*0.015)' } },
   { name:'D2 atk0.85/cd3-4',v:{ hp:'3 + Math.floor(Math.random()*3) + Math.floor(lv*0.82)', atk:'2 + Math.floor(lv*0.85)', cd:'3 + Math.floor(Math.random()*2)', chance:'Math.min(0.33, 0.115 + player.level*0.015)' } },
 ];
-console.log('种族系统平衡扫描（每种族 '+GAMES+' 局，回合中位数），目标 ≈ '+TARGET+'\n');
-console.log('候选             | 人类  精灵  矮人  兽人 |总回合中位');
-console.log('-----------------|------------------------|--------');
-let bestCand=null;
-for(const cand of CANDIDATES){
-  G = loadGame(variant(cand.v));
-  const out = runBatch();
-  const turnMed = med(out.map(r=>r.turn_med));
-  const byCls = {}; out.forEach(r=>byCls[r.cls]=r.turn_med);
-  console.log(
-    cand.name.padEnd(16)+' | '+
-    String(byCls['人类']).padStart(5)+String(byCls['精灵']).padStart(6)+
-    String(byCls['矮人']).padStart(6)+String(byCls['兽人']).padStart(6)+' | '+
-    String(turnMed).padStart(6));
-  cand.turnMed=turnMed; cand.byCls=byCls;
-  if(!bestCand || Math.abs(turnMed-TARGET)<Math.abs(bestCand.turnMed-TARGET)) bestCand=cand;
+if(FOCUS){
+  // ---- 定向模式：指定职业线/Boss，跑详细统计，便于和历史对比 ----
+  const cand = ARG.enemy ? CANDIDATES.find(c=>c.name.split(' ')[0]===ARG.enemy||c.name.startsWith(ARG.enemy)) : null;
+  if(ARG.enemy && !cand){ console.error('未知 enemy 候选: '+ARG.enemy+'（可选：'+CANDIDATES.map(c=>c.name.split(' ')[0]).join(', ')+'）'); process.exit(1); }
+  G = loadGame(cand?variant(cand.v):undefined);   // 默认用文件里的真实敌人数值
+  applyBossFilter(G);
+  const races = ARG.race ? G.RACES.filter(r=>r.id===ARG.race) : G.RACES;
+  if(ARG.race && !races.length){ console.error('未知种族: '+ARG.race+'（可选：'+G.RACES.map(r=>r.id).join(', ')+'）'); process.exit(1); }
+  const cfg=[`敌人=${cand?cand.name.split(' ')[0]:'实时文件值'}`];
+  if(ARG.boss)cfg.push(`Boss=${ARG.boss}(唯一)`); if(ARG.t1)cfg.push(`一阶=${ARG.t1}`); if(ARG.t2)cfg.push(`二阶=${ARG.t2}`);
+  console.log(`定向测试（每配置 ${GAMES} 局）  ${cfg.join('  ')}\n`);
+  console.log('种族   一阶/二阶          | 回合中位 均值 最高 | 等级中位 | 达一阶 达二阶 | 主要死因');
+  console.log('-------|-------------------|--------------------|----------|---------------|---------');
+  for(const rc of races){
+    const res=[]; for(let i=0;i<GAMES;i++){ try{ res.push(playGame(rc)); }catch(e){ res.push({error:e.message}); } }
+    const ok=res.filter(r=>!r.error);
+    const turns=ok.map(r=>r.turns), lv=ok.map(r=>r.level);
+    const r1=ok.filter(r=>r.t1).length, r2=ok.filter(r=>r.t2).length;
+    const deaths={}; ok.forEach(r=>{ if(r.deathSrc)deaths[r.deathSrc]=(deaths[r.deathSrc]||0)+1; });
+    const topD=Object.entries(deaths).sort((a,b)=>b[1]-a[1]).slice(0,2).map(([k,v])=>`${srcName(k)} ${Math.round(v/ok.length*100)}%`).join(' · ')||'—';
+    const path=`${ARG.t1||G.RACE_PATHS[rc.id].t1[0]}/${ARG.t2||G.RACE_PATHS[rc.id].t2[0]}`;
+    const err=res.length-ok.length;
+    console.log(
+      rc.n[0].padEnd(5)+'  '+path.padEnd(18)+' | '+
+      String(med(turns)).padStart(6)+String(Math.round(avg(turns))).padStart(5)+String(Math.max(0,...turns)).padStart(5)+' | '+
+      String(med(lv)).padStart(7)+'  | '+
+      (Math.round(r1/ok.length*100)+'%').padStart(6)+(Math.round(r2/ok.length*100)+'%').padStart(8)+' | '+
+      topD + (err?`  ⚠️${err}错误`:''));
+  }
+  console.log('\n回合=存活回合，达一阶=击败50回合Boss转一阶的比例，达二阶=转二阶的比例，主要死因=致命回合伤害来源占比。');
+} else {
+  // ---- 扫描模式：四族 × 多套敌人数值，找最接近目标回合的一套 ----
+  console.log('种族系统平衡扫描（每种族 '+GAMES+' 局，回合中位数），目标 ≈ '+TARGET+'\n');
+  console.log('候选             | 人类  精灵  矮人  兽人 |总回合中位');
+  console.log('-----------------|------------------------|--------');
+  let bestCand=null;
+  for(const cand of CANDIDATES){
+    G = loadGame(variant(cand.v)); applyBossFilter(G);
+    const out = runBatch();
+    const turnMed = med(out.map(r=>r.turn_med));
+    const byCls = {}; out.forEach(r=>byCls[r.cls]=r.turn_med);
+    console.log(
+      cand.name.padEnd(16)+' | '+
+      String(byCls['人类']).padStart(5)+String(byCls['精灵']).padStart(6)+
+      String(byCls['矮人']).padStart(6)+String(byCls['兽人']).padStart(6)+' | '+
+      String(turnMed).padStart(6));
+    cand.turnMed=turnMed; cand.byCls=byCls;
+    if(!bestCand || Math.abs(turnMed-TARGET)<Math.abs(bestCand.turnMed-TARGET)) bestCand=cand;
+  }
+  console.log('\n（数字=该种族回合中位数）');
+  console.log('最接近目标('+TARGET+'回合)的是：'+bestCand.name+'（总回合中位 '+bestCand.turnMed+'）');
+  console.log('  hp: '+bestCand.v.hp+' / atk: '+bestCand.v.atk+' / baseCd: '+bestCand.v.cd);
 }
-console.log('\n（数字=该种族回合中位数）');
-console.log('最接近目标('+TARGET+'回合)的是：'+bestCand.name+'（总回合中位 '+bestCand.turnMed+'）');
-console.log('  hp: '+bestCand.v.hp);
-console.log('  atk: '+bestCand.v.atk);
-console.log('  baseCd: '+bestCand.v.cd);
-console.log('  enemyChance: '+bestCand.v.chance);

@@ -65,11 +65,20 @@
 
 ### 🛠️ 开发 / 平衡测试
 
-`playtest.js` 是一个**无头玩法机器人**：它加载 `dungeon-raid.html` 里的真实游戏逻辑（用桩件顶替 DOM/Canvas），用贪心策略自动游玩，统计各职业的存活回合与到达等级，用于数值平衡回归测试。
+`playtest.js` 是一个**无头玩法机器人**：它加载 `dungeon-raid.html` 里的真实游戏逻辑（用桩件顶替 DOM/Canvas），用贪心策略自动游玩，统计各种族/职业线的存活回合与到达等级，用于数值平衡回归测试。
 
 ```bash
-node playtest.js
+node playtest.js                  # 扫描模式：四族 × 多套敌人数值，找最接近目标回合的一套
+
+# 定向模式：固定某条职业线或某个 Boss，跑详细统计，便于和历史对比
+node playtest.js --race=orc                          # 只测兽人
+node playtest.js --race=human --t1=knight --t2=immortal   # 指定一阶/二阶
+node playtest.js --boss=spider                       # 只刷蜘蛛（隔离单个 Boss 的影响）
+node playtest.js --race=elf --boss=assassin --games=40    # 组合 + 自定局数
+node playtest.js --race=dwarf --enemy=C2             # 指定敌人数值候选（默认用文件实时值）
 ```
+
+参数：`--race=`（human/elf/dwarf/orc）、`--t1=`/`--t2=`（转职线 id）、`--boss=`（固定唯一会刷的 Boss）、`--enemy=`（敌人数值候选名，默认实时文件值）、`--games=`（每配置局数）。定向模式额外输出：回合均值/最高、达一阶/二阶比例、致命回合主要死因占比。
 
 ---
 
