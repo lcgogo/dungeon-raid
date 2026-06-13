@@ -6,7 +6,7 @@ const fs = require('fs');
 const html = fs.readFileSync(__dirname + '/dungeon-raid.html', 'utf8');
 let script = html.match(/<script>([\s\S]*?)<\/script>/)[1];
 
-const EXPORT = `globalThis.__G={CLASSES,UPGRADES,startGame,resolve,buyItem,shopCost,SHOP,
+const EXPORT = `globalThis.__G={CLASSES,UPGRADES,startGame,resolve,buyItem,shopCost,SHOP,activateSkill,
   get grid(){return grid}, set grid(v){grid=v},
   get player(){return player},
   set selection(v){selection=v},
@@ -137,6 +137,17 @@ function resolveLevels(){
 }
 
 function boardEnemies(){ const g=grid(),e=[]; for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){const t=g[r][c]; if(t&&t.type==='enemy')e.push(t);} return e; }
+function boardSwords(){ const g=grid(); let n=0; for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){const t=g[r][c]; if(t&&t.type==='sword')n++;} return n; }
+
+// 职业主动技能使用策略
+function maybeSkill(){
+  const p=P(); if(p.skillCd>0) return;
+  const cn=p.cls.n;
+  // 只用"明确有利"的技能；狂怒(减半血)/点金(剑变金)属高风险/情境技能，机器人不滥用
+  if(cn==='骑士'){ G.activateSkill(); }     // 锻甲：永久+1护甲
+  else if(cn==='牧师'){ G.activateSkill(); } // 祈福：+6上限并回满
+  resolveLevels();
+}
 
 // ---------- 4) 单局 ----------
 function playGame(cls){
@@ -150,6 +161,7 @@ function playGame(cls){
     const ens=boardEnemies(), threatened=ens.some(e=>e.cd<=1);
     if(p.hp<=0.3*p.maxHp && p.gold>=G.shopCost('heal')){ G.buyItem('heal'); resolveLevels(); }
     if(boardEnemies().length>=4 && p.gold>=G.shopCost('bomb')){ G.buyItem('bomb'); resolveLevels(); }
+    maybeSkill();   // 职业主动技能
 
     // 选招
     const sword=bestSword();
