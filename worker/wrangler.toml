@@ -1,0 +1,13 @@
+name = "dungeon-raid-rec"
+main = "src/index.js"
+compatibility_date = "2026-06-01"
+
+# 自定义域名：API 走 api.dungeonraid.win（绑定时自动建代理DNS+证书）
+[[routes]]
+pattern = "api.dungeonraid.win"
+custom_domain = true
+
+# KV：存录像
+[[kv_namespaces]]
+binding = "REC"
+id = "4120eb6aa18944e7892d9607bc5cfb06"
