@@ -6,7 +6,7 @@ const fs = require('fs');
 const html = fs.readFileSync(__dirname + '/dungeon-raid.html', 'utf8');
 let script = html.match(/<script>([\s\S]*?)<\/script>/)[1];
 
-const EXPORT = `globalThis.__G={CLASSES,UPGRADES,startGame,resolve,buyItem,shopCost,SHOP,activateSkill,
+const EXPORT = `globalThis.__G={CLASSES,UPGRADES,startGame,resolve,buyItem,shopCost,SHOP,activateSkill,isSwordTarget,
   get grid(){return grid}, set grid(v){grid=v},
   get player(){return player},
   set selection(v){selection=v},
@@ -82,7 +82,7 @@ function greedyPath(sr, sc, pred, preferEnemy){
 function swordEval(path){
   const g=grid(), p=P();
   let nS=0, enemies=[];
-  for(const[r,c]of path){ const t=g[r][c]; if(t.type==='sword')nS++; else if(t.type==='enemy')enemies.push(t); }
+  for(const[r,c]of path){ const t=g[r][c]; if(t.type==='sword')nS++; else if(G.isSwordTarget(t))enemies.push(t); }
   const combo=1+Math.max(0,nS-2)*0.15;
   let pool=(nS*p.weaponPower+p.swordFlat)*combo;
   if(p.berserk && p.hp<p.maxHp*0.5) pool*=1.5;
@@ -94,9 +94,9 @@ function swordEval(path){
 
 function bestSword(){
   const g=grid(); let best=null;
-  const pred=t=>t&&(t.type==='sword'||t.type==='enemy');
+  const pred=t=>t&&(t.type==='sword'||G.isSwordTarget(t));
   for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){
-    const t=g[r][c]; if(!t||!(t.type==='sword'||t.type==='enemy'))continue;
+    const t=g[r][c]; if(!t||!(t.type==='sword'||G.isSwordTarget(t)))continue;
     const path=greedyPath(r,c,pred,true);
     if(path.length<2)continue;
     const ev=swordEval(path);
