@@ -273,7 +273,7 @@ function syncPositions(snap){
 const cv=document.getElementById('board'), ctx=cv.getContext('2d');
 function resize(){
   const w=document.getElementById('wrap').clientWidth;
-  const size=Math.min(w, 460);
+  const size=Math.min(w, 440);
   TILE=Math.floor((size-2*PAD)/COLS);
   const px=COLS*TILE+2*PAD;
   cv.width=px; cv.height=ROWS*TILE+2*PAD;
