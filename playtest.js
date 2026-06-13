@@ -138,6 +138,7 @@ function resolveLevels(){
 
 function boardEnemies(){ const g=grid(),e=[]; for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){const t=g[r][c]; if(t&&t.type==='enemy')e.push(t);} return e; }
 function boardSwords(){ const g=grid(); let n=0; for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){const t=g[r][c]; if(t&&t.type==='sword')n++;} return n; }
+function boardBoss(){ const g=grid(); for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){const t=g[r][c]; if(t&&t.type==='boss')return t;} return null; }
 
 // 职业主动技能使用策略
 function maybeSkill(){
@@ -159,8 +160,11 @@ function playGame(cls){
     // 商店（先于行动；买东西不推进回合）
     G.busy=false;
     const ens=boardEnemies(), threatened=ens.some(e=>e.cd<=1);
+    const boss=boardBoss();
+    // 商店（受3回合冷却限制，每窗口只成功一次）：危急回血 > 炸Boss > 炸怪群
     if(p.hp<=0.3*p.maxHp && p.gold>=G.shopCost('heal')){ G.buyItem('heal'); resolveLevels(); }
-    if(boardEnemies().length>=4 && p.gold>=G.shopCost('bomb')){ G.buyItem('bomb'); resolveLevels(); }
+    else if(boss && p.gold>=G.shopCost('bomb')){ G.buyItem('bomb'); resolveLevels(); }       // Boss 只能炸，优先
+    else if(boardEnemies().length>=4 && p.gold>=G.shopCost('bomb')){ G.buyItem('bomb'); resolveLevels(); }
     maybeSkill();   // 职业主动技能
 
     // 选招
@@ -172,6 +176,7 @@ function playGame(cls){
     let sel=null;
     if(p.hp<=0.35*p.maxHp && heart){ sel=toSelection(heart.path,'heart'); }
     else if(sword){ sel=toSelection(sword.path,'sword'); }
+    else if(boss && p.gold<G.shopCost('bomb') && coin){ sel=toSelection(coin.path,'coin'); } // 攒钱炸Boss
     else if(p.hp<0.6*p.maxHp && heart){ sel=toSelection(heart.path,'heart'); }
     else if(p.armor<6 && shield){ sel=toSelection(shield.path,'shield'); }
     else if(coin){ sel=toSelection(coin.path,'coin'); }
