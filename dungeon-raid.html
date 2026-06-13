@@ -144,7 +144,7 @@ const CONNECTABLE=['sword','shield','heart','coin'];
 let grid, player, selection, dragging, anim, busy=false, pendingLevels=0;
 
 function newPlayer(){
-  return {hp:20,maxHp:20, armor:0, shieldXp:0, toughness:0, shopCd:0, skillCd:0, gold:0, xp:0, level:1,
+  return {hp:20,maxHp:20, armor:0, shieldXp:0, toughness:0, shopCd:{}, skillCd:0, gold:0, xp:0, level:1,
     weaponPower:1, swordFlat:0, armorPerShield:1, healPerHeart:1, goldPerCoin:1,
     lifesteal:0, regen:0, coinXp:0, turns:0};
 }
@@ -466,11 +466,12 @@ const SHOP={
 function shopCost(key){ return Math.ceil(SHOP[key].cost*(player.bargain?0.5:1)); } // 盗贼半价
 function buyItem(key){
   if(busy||pendingLevels) return;
-  if(player.shopCd>0) return;                 // 商店冷却中：每 3 回合才能用一次
+  if(typeof player.shopCd!=='object'||!player.shopCd) player.shopCd={}; // 兼容旧存档
+  if(player.shopCd[key]>0) return;            // 该商品冷却中（每件独立，每 3 回合一次）
   const it=SHOP[key]; if(!it) return;
   const cost=shopCost(key); if(player.gold<cost) return;
   player.gold-=cost; it.f();
-  player.shopCd=3;                            // 购买后进入 3 回合冷却
+  player.shopCd[key]=3;                        // 仅该商品进入 3 回合冷却
   checkLevel(); updateHUD();
   if(pendingLevels) showLevelUp();
 }
@@ -536,7 +537,7 @@ function resolve(){
 
   // 回合推进：怪物倒计时 / 攻击
   player.turns++;
-  if(player.shopCd>0) player.shopCd--;   // 商店冷却递减
+  if(typeof player.shopCd==='object') for(const k in player.shopCd){ if(player.shopCd[k]>0) player.shopCd[k]--; } // 各商品冷却递减
   if(player.skillCd>0) player.skillCd--; // 技能冷却递减
   advanceEnemies();
   if(player.regen) gainHeal(player.regen);
@@ -732,10 +733,11 @@ function updateHUD(){
   if(player.lifesteal)b.push(`吸血 ${player.lifesteal}`);
   if(player.regen)b.push(`恢复 ${player.regen}`);
   document.getElementById('bonusTxt').textContent=b.join('　');
+  const scd=(player.shopCd&&typeof player.shopCd==='object')?player.shopCd:{};
   document.querySelectorAll('.shopBtn[data-buy]').forEach(btn=>{
-    const c=shopCost(btn.dataset.buy);
-    btn.querySelector('em').textContent = player.shopCd>0 ? `⏳${player.shopCd}回合` : c+'💰';
-    btn.disabled = busy || pendingLevels || player.shopCd>0 || player.gold < c; });
+    const c=shopCost(btn.dataset.buy), cd=scd[btn.dataset.buy]||0;
+    btn.querySelector('em').textContent = cd>0 ? `⏳${cd}回合` : c+'💰';
+    btn.disabled = busy || pendingLevels || cd>0 || player.gold < c; });
   const sb=document.getElementById('skillBtn'), sk=player.cls&&player.cls.skill;
   if(sk){ sb.style.display='flex';
     sb.querySelector('span').textContent=`✨${sk.name}`;
