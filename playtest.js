@@ -143,7 +143,7 @@ function boardBoss(){ const g=grid(); for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;
 // 职业主动技能使用策略
 function maybeSkill(){
   const p=P(); if(p.skillCd>0) return;
-  const cn=p.cls.n;
+  const cn=Array.isArray(p.cls.n)?p.cls.n[0]:p.cls.n;  // 职业名已双语化为 [中,英]
   // 只用"明确有利"的技能；狂怒(减半血)/点金(剑变金)属高风险/情境技能，机器人不滥用
   if(cn==='骑士'){ G.activateSkill(); }     // 锻甲：永久+1护甲
   else if(cn==='牧师'){ G.activateSkill(); } // 祈福：+6上限并回满
@@ -204,7 +204,7 @@ function runBatch(){
     for(let i=0;i<GAMES;i++){ try{ res.push(playGame(cls)); }catch(e){ res.push({error:e.message}); } }
     const ok=res.filter(r=>!r.error);
     const levels=ok.map(r=>r.level), turns=ok.map(r=>r.turns);
-    out.push({ cls:cls.n, games:ok.length,
+    out.push({ cls:Array.isArray(cls.n)?cls.n[0]:cls.n, games:ok.length,
       lvl_med:med(levels), lvl_avg:+avg(levels).toFixed(1), lvl_max:Math.max(...levels),
       turn_med:med(turns), turn_avg:Math.round(avg(turns)), turn_max:Math.max(...turns),
       capped:ok.filter(r=>!r.died).length, errors:res.length-ok.length, err0:(res.find(r=>r.error)||{}).error });
