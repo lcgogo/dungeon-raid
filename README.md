@@ -65,9 +65,9 @@
 | 种族 | 特性 | 削弱 |
 |---|---|---|
 | 🧑 人族 Human | 无（全能基准，适合新手） | 无 |
-| 🧝 精灵 Elf | 连击加成翻倍（每多连 1 个 +30%） | 「强健体魄」升级只 +3 生命上限 |
+| 🧝 精灵 Elf | 连击加成翻倍（每多连 1 个 +30%） | 「强化体魄」升级只 +3 生命上限 |
 | 🎅 矮人 Dwarf | 护甲减伤翻倍（每点护甲抵 2 点） | 剑威力 −0.3 |
-| 🧌 兽人 Orc | 「强健体魄」升级时生命上限翻倍（每次 +12） | **无甲**——永远无法获得护甲（盾牌从棋盘移除） |
+| 🧌 兽人 Orc | 「强化体魄」升级时生命上限翻倍（每次 +12） | **无甲**——永远无法获得护甲（盾牌从棋盘移除） |
 
 ### 🌟 成长路线
 
@@ -228,9 +228,9 @@ Pick a race at the start. Each has a unique **trait** and a matching **weakness*
 | Race | Trait | Weakness |
 |---|---|---|
 | 🧑 Human | None (all-round baseline, beginner-friendly) | None |
-| 🧝 Elf | Combo bonus doubled (+30% per extra tile) | Tough Body upgrade gives only +3 max HP |
+| 🧝 Elf | Combo bonus doubled (+30% per extra tile) | Fortify Body upgrade gives only +3 max HP |
 | 🎅 Dwarf | Armor counts double (each point blocks 2) | Sword power −0.3 |
-| 🧌 Orc | Tough Body upgrade gives double max HP (+12 each) | **No Armor** — can never gain armor (shields removed from the board) |
+| 🧌 Orc | Fortify Body upgrade gives double max HP (+12 each) | **No Armor** — can never gain armor (shields removed from the board) |
 
 ### 🌟 Progression Path
 

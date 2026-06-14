@@ -158,7 +158,7 @@
 (()=>{
 //==================== 配置 ====================
 // 版本号 v主.次.修：小改动改"修"，新Boss/职业改"次"，大版本变更需先确认。页面底部显示。
-const VERSION='v1.14.2';
+const VERSION='v1.14.3';
 const DEV=true;    // 开发版：指向最新开发版本；独立存档 + DEV 标识。正式版在 dungeon-raid.html（DEV=false）
 const REC_API='https://api.dungeonraid.win';   // 录像分享 API（Cloudflare Worker + KV）
 // 带种子随机数（mulberry32）：游戏全程用 rnd() 取代原生随机，配合录制种子可确定性重放
@@ -402,9 +402,9 @@ function makeTile(type){
 // 开局选种族（特性≠通用升级，且各带削弱）；击败50回合Boss转一阶（主动），击败100回合Boss转二阶（被动）
 const RACES=[
   {id:'human', e:'🧑', n:['人族','Human'], d:['全能基准：无特性、无削弱，适合新手。','Baseline: no trait, no weakness. Beginner-friendly.'], f:p=>{}},
-  {id:'elf',   e:'🧝', n:['精灵','Elf'],   d:['特性：连击加成翻倍（每多连1个 +30%）。削弱：「强健体魄」升级只 +3 上限。','Trait: combo bonus doubled (+30%/tile). Weakness: Tough Body upgrade gives only +3 max HP.'], f:p=>{p.comboMult=2; p.maxHpUpMult=0.5;}},
+  {id:'elf',   e:'🧝', n:['精灵','Elf'],   d:['特性：连击加成翻倍（每多连1个 +30%）。削弱：「强化体魄」升级只 +3 上限。','Trait: combo bonus doubled (+30%/tile). Weakness: Fortify Body upgrade gives only +3 max HP.'], f:p=>{p.comboMult=2; p.maxHpUpMult=0.5;}},
   {id:'dwarf', e:'🎅', n:['矮人','Dwarf'], d:['特性：护甲减伤翻倍（每点护甲抵 2 点）。削弱：剑威力 −0.3。','Trait: armor counts double (each point blocks 2). Weakness: sword power −0.3.'], f:p=>{p.armorMult=2; p.weaponPower-=0.3;}},
-  {id:'orc',   e:'🧌', n:['兽人','Orc'],   d:['特性：「强健体魄」升级时生命上限翻倍（每次 +12）。削弱：无甲——永远无法获得护甲。','Trait: Tough Body upgrade gives double max HP (+12 each). Weakness: No Armor — can never gain armor.'], f:p=>{p.maxHpUpMult=2; p.noArmor=true;}},
+  {id:'orc',   e:'🧌', n:['兽人','Orc'],   d:['特性：「强化体魄」升级时生命上限翻倍（每次 +12）。削弱：无甲——永远无法获得护甲。','Trait: Fortify Body upgrade gives double max HP (+12 each). Weakness: No Armor — can never gain armor.'], f:p=>{p.maxHpUpMult=2; p.noArmor=true;}},
 ];
 // 一阶职业：主动技能（f 返回 false 表示无效不发动；返回值表示自带日志）
 const TIER1={
@@ -1137,15 +1137,15 @@ function checkLevel(){
 
 //==================== 升级（技能三选一）====================
 const UPGRADES=[
-  {n:['强健体魄','Tough Body'],   d:p=>{const v=Math.round(6*(p.maxHpUpMult||1)); return [`最大生命 +${v}，并立即回满`,`+${v} max HP, fully heal now`];}, f:p=>{p.maxHp+=Math.round(6*(p.maxHpUpMult||1)); p.hp=p.maxHp;}}, // 兽人×2=+12，精灵×0.5=+3
+  {n:['强化体魄','Fortify Body'],  d:p=>{const v=Math.round(6*(p.maxHpUpMult||1)); return [`最大生命 +${v}，并立即回满`,`+${v} max HP, fully heal now`];}, f:p=>{p.maxHp+=Math.round(6*(p.maxHpUpMult||1)); p.hp=p.maxHp;}}, // 兽人×2=+12，精灵×0.5=+3
   {n:['磨利刀刃','Sharpen Blade'], d:['剑伤 +50%（连越长收益越大）','+50% sword power (longer chains gain more)'], f:p=>{p.weaponPower+=0.5;}},
-  {n:['狂战之力','Brute Force'],   d:['每次剑链额外 +3 固定伤害','+3 flat damage per sword chain'], f:p=>{p.swordFlat+=3;}},
-  {n:['重型护甲','Heavy Armor'],   d:['立即 +1 护甲（永久减伤）','+1 armor now (permanent damage cut)'], f:p=>{ if(!p.noArmor) p.armor+=1; }}, // 兽人无甲：无效
-  {n:['坚盾强化','Sturdy Shield'], d:['每个盾提供的护甲进度 +1','+1 armor progress per shield'], f:p=>{p.armorPerShield+=1;}},
-  {n:['神圣治疗','Holy Healing'],  d:['每颗心回复生命 +1','+1 HP healed per heart'], f:p=>{p.healPerHeart+=1;}},
-  {n:['贪婪之心','Greed'],         d:['每枚金币收益 +1','+1 gold per coin'], f:p=>{p.goldPerCoin+=1;}},
-  {n:['吸血鬼','Vampire'],         d:['每击杀一只怪物回复 1 生命','Heal 1 HP per enemy killed'], f:p=>{p.lifesteal+=1;}},
-  {n:['生命恢复','Regeneration'],  d:['每回合自动回复 1 生命','Heal 1 HP every turn'], f:p=>{p.regen+=1;}},
+  {n:['淬炼锋芒','Temper Edge'],   d:['每次剑链额外 +3 固定伤害','+3 flat damage per sword chain'], f:p=>{p.swordFlat+=3;}},
+  {n:['加固护甲','Reinforce Armor'], d:['立即 +1 护甲（永久减伤）','+1 armor now (permanent damage cut)'], f:p=>{ if(!p.noArmor) p.armor+=1; }}, // 兽人无甲：无效
+  {n:['强化盾术','Hone Shielding'], d:['每个盾提供的护甲进度 +1','+1 armor progress per shield'], f:p=>{p.armorPerShield+=1;}},
+  {n:['精研医术','Refine Healing'], d:['每颗心回复生命 +1','+1 HP healed per heart'], f:p=>{p.healPerHeart+=1;}},
+  {n:['搜刮财富','Gather Gold'],   d:['每枚金币收益 +1','+1 gold per coin'], f:p=>{p.goldPerCoin+=1;}},
+  {n:['汲取生命','Drain Life'],    d:['每击杀一只怪物回复 1 生命','Heal 1 HP per enemy killed'], f:p=>{p.lifesteal+=1;}},
+  {n:['凝聚生机','Channel Vitality'], d:['每回合自动回复 1 生命','Heal 1 HP every turn'], f:p=>{p.regen+=1;}},
 ];
 // 升级三选一的洗牌（消耗 RNG）——供 UI 与回放共用，确保 RNG 消耗一致
 function rollUpgradePool(){
