@@ -82,18 +82,22 @@
 
 ### ⚔️ 一阶职业 · 主动技能
 
-每个种族对应 2 个一阶职业，技能冷却均为 **5 回合**：
+每个种族对应一阶职业（**人族、兽人各 3 个，精灵、矮人各 2 个**），技能冷却均为 **5 回合**：
 
 | 种族 | 职业 | 技能 | 效果 |
 |---|---|---|---|
 | 🧑 人族 | 🛡️ 骑士 Knight | 圣盾 Aegis | 本回合免疫所有伤害 |
 | 🧑 人族 | 💗 牧师 Priest | 祝福 Blessing | 清掉全场的心，每颗转 3 点经验 |
+| 🧑 人族 | ⚔️ 剑圣 Sword Saint | 化剑 Bladeshift | **主动**：把全场的心和金币都变成剑。**被动**：每回合棋盘摆完后，把 3 个非敌人/非剑的棋子变成剑 |
 | 🧝 精灵 | 🏹 游侠 Ranger | 箭雨 Arrow Rain | 对全场怪造成「剑威力 ×2」的伤害 |
 | 🧝 精灵 | 💰 盗贼 Rogue | 点金 Gold Touch | 把场上所有的剑变成金币 |
 | 🎅 矮人 | 🔰 锻造师 Blacksmith | 锻甲 Forge Armor | 吞下全场的盾，全部转为护甲进度 |
 | 🎅 矮人 | 🔒 守财奴 Miser | 囤金 Hoard | 锁金 3~10 回合（期间不产/不花金币，到期返还**双倍**）|
 | 🧌 兽人 | 🔪 狂战士 Berserker | 狂怒 Frenzy | 生命减半并进入**不屈**（仅**本回合**：无论受多少伤都保留 1 血）；并**永久**开启残血增伤——血越少剑伤越高（最高 +60%）|
 | 🧌 兽人 | 🩸 斗士 Fighter | 嗜血 Bloodthirst | 本回合剑链每击中一只怪回 3 血，**且可用剑攻击剑免疫的 Boss（幽灵/小丑）** |
+| 🧌 兽人 | 🧪 巫医 Witch Doctor | 蛊毒 Hex | **主动**：本回合连「心」不再回血，而是把这些生命当毒灌给全场怪。**被动**：每回合棋盘摆完后，把 3 个非敌人/非心的棋子变成心 |
+
+> **剑圣 / 巫医** 是「主动+被动」双修职业：除主动技能外，每回合棋盘摆完后还会自动把 3 个棋子转成剑/心。
 
 ### 🎖️ 二阶职业 · 被动
 
@@ -124,8 +128,9 @@
 | 🧙 召唤师 Summoner | 剑 / 炸弹 | 每回合把一个非怪棋子变成一只怪，拖得越久怪越多 |
 | 🦹 小偷 Thief | 剑 / 炸弹 | 现身即偷走一定比例金币（一阶 20%、二阶 40%…）；倒计时内击败夺回，让它逃走则永久失去 |
 | 🧟 僵尸 Zombie | 剑 / 炸弹 | 现身即让你感染尸毒（血条变绿），**潜伏一回合后**每回合按生命百分比掉血（随档位递增，单回合最高 30%，无视护甲）；趁潜伏期击败它即解除感染 |
+| 🦅 鸟人 Birdman | 剑 / 炸弹 | **每回合**俯冲啄你一下（半攻击力），并在回合末和棋盘上**任意一个棋子互换位置（瞬移）**——飘忽难缠，想连它的剑链得算准它的落点，速战速决 |
 
-> Boss 入场时会有**扩散冲击环 + 闪光**特效（普通 Boss 红、终焉之主金），一眼可辨。
+> Boss 入场时会有**扩散冲击环 + 闪光**特效（普通 Boss 红、终焉之主金），一眼可辨。每个 Boss 与一阶主动技能在信息弹窗里都附带一句**俏皮话**。
 
 ### 👑 终局：终焉之主 与 破关
 
@@ -247,18 +252,22 @@ Pick a race at the start. Each has a unique **trait** and a matching **weakness*
 
 ### ⚔️ Tier-1 Classes · Active Skills
 
-Each race has 2 Tier-1 classes; every skill has a **5-turn cooldown**:
+Each race has Tier-1 classes (**Human and Orc have 3, Elf and Dwarf have 2**); every skill has a **5-turn cooldown**:
 
 | Race | Class | Skill | Effect |
 |---|---|---|---|
 | 🧑 Human | 🛡️ Knight | Aegis | Immune to all damage this turn |
 | 🧑 Human | 💗 Priest | Blessing | Clear all hearts on the board; each becomes 3 XP |
+| 🧑 Human | ⚔️ Sword Saint | Bladeshift | **Active**: turn every heart and coin into swords. **Passive**: each turn after the board settles, turn 3 non-enemy non-sword tiles into swords |
 | 🧝 Elf | 🏹 Ranger | Arrow Rain | Deal "sword power ×2" damage to all enemies |
 | 🧝 Elf | 💰 Rogue | Gold Touch | Turn every sword on the board into a coin |
 | 🎅 Dwarf | 🔰 Blacksmith | Forge Armor | Absorb all shields on the board into armor progress |
 | 🎅 Dwarf | 🔒 Miser | Hoard | Lock gold for 3–10 turns (no gold in/out; **double** payout at the end) |
 | 🧌 Orc | 🔪 Berserker | Frenzy | Halve HP and become **Undying** (**this turn only**: keep ≥1 HP no matter the damage); also **permanently** enables low-HP scaling — lower HP means higher sword damage (up to +60%) |
 | 🧌 Orc | 🩸 Fighter | Bloodthirst | Heal 3 HP per enemy your sword chain hits this turn, **and your sword can hit sword-immune bosses (Ghost/Clown)** |
+| 🧌 Orc | 🧪 Witch Doctor | Hex | **Active**: this turn, linking hearts deals that healing as poison to all foes instead of healing you. **Passive**: each turn after the board settles, turn 3 non-enemy non-heart tiles into hearts |
+
+> **Sword Saint / Witch Doctor** are hybrid (active + passive) classes: besides the active skill, each turn after the board settles they auto-convert 3 tiles into swords/hearts.
 
 ### 🎖️ Tier-2 Classes · Passives
 
@@ -289,8 +298,9 @@ About every **10 turns** a random boss appears; beating one rewards 💰+20 and 
 | 🧙 Summoner | Sword / Bomb | Turns a non-enemy tile into an enemy each turn — the longer it lives, the more enemies |
 | 🦹 Thief | Sword / Bomb | Steals a share of gold on arrival (20% at Lv1, 40% at Lv2…); kill it before its timer to recover, let it flee and the gold is gone forever |
 | 🧟 Zombie | Sword / Bomb | Infects you on arrival (HP bar turns green); **after a 1-turn incubation** you lose a % of HP each turn (scaling per tier, capped at 30%/turn, ignoring armor); kill it during incubation to cure |
+| 🦅 Birdman | Sword / Bomb | **Every turn** it dives to peck you (half attack) and, at turn end, **swaps places with a random tile (teleport)** — elusive and nagging, so line up your chain where it lands and finish it fast |
 
-> Each boss arrives with a **shockwave ring + flash** effect (crimson for normal bosses, gold for the Overlord), so you never miss one.
+> Each boss arrives with a **shockwave ring + flash** effect (crimson for normal bosses, gold for the Overlord), so you never miss one. Every boss and every Tier-1 active also carries a one-line **quip** in its info popup.
 
 ### 👑 Endgame: the Overlord & Clearing
 
