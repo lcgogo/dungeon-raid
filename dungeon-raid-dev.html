@@ -158,7 +158,7 @@
 (()=>{
 //==================== 配置 ====================
 // 版本号 v主.次.修：小改动改"修"，新Boss/职业改"次"，大版本变更需先确认。页面底部显示。
-const VERSION='v1.19.0';
+const VERSION='v1.20.0';
 const DEV=true;    // 开发版：指向最新开发版本；独立存档 + DEV 标识。正式版在 dungeon-raid.html（DEV=false）
 const REC_API='https://api.dungeonraid.win';   // 录像分享 API（Cloudflare Worker + KV）
 // 带种子随机数（mulberry32）：游戏全程用 rnd() 取代原生随机，配合录制种子可确定性重放
@@ -233,7 +233,7 @@ function newPlayer(){
     comboMult:1, swordMult:1, armorMult:1, maxHpUpMult:1, noArmor:false,    // 种族特性修正
     heartPoison:false,                                                      // 巫医蛊毒：本回合连心改为毒怪
     foeCdBonus:0, skillCdMod:0, splash:false, rebirthTurn:false, rebirthSaves:0, healMult:1,  // 活死人：迷惑/技能冷却修正/溅射/重生/治疗减半
-    upgradeChoices:3, bombCd:3, goldLock:0, goldFrozen:0, healUses:0,        // 转职被动相关；healUses：治疗已用次数（恢复量/耗金随次数递增）
+    upgradeChoices:3, bombCd:3, goldLock:0, goldFrozen:0, healUses:0, frozen:{},  // 转职被动相关；healUses：治疗递增；frozen：雪人冰封的主动剩余回合（skill/heal/bomb）
     finaleStarted:false, finaleWave:0, cleared:false};                      // 终局：终焉之主浪潮 / 破关
 }
 function xpNeeded(lv){ return 10 + lv*6; }
@@ -309,6 +309,15 @@ const BOSSES=[
   { id:'pollution', emoji:'🦠', name:['污染怪','Corruptor'], quip:['你的心，我给染绿了。','I dyed your hearts rotten green.'], monster:true, noTierScale:true,
     special:['在场时全场心变毒心（连之扣血）','While alive, all hearts are poison (linking drains HP)'],
     desc:['剑链对它无效，只能用 💥炸弹 炸。只要它在场，棋盘上所有的心都变成毒心（绿心 💚）——连毒心不再回血，反而按等量【扣血】（无视护甲）！炸掉它，心就恢复正常。倒计时归零它也会重击你。','Immune to sword chains — only the 💥 Bomb works. While it is on the board, ALL hearts become poison (green 💚) — linking them DRAINS that much HP instead of healing (ignoring armor)! Bomb it and hearts return to normal. It also strikes you when its timer hits 0.'] },
+  { id:'snowman', emoji:'⛄', name:['雪人','Snowman'], quip:['冻住，不许走——技能也别想用。','Freeze! No moves, and no skills either.'], monster:true, noTierScale:true,
+    special:['现身冰封你 1~3 个主动（按档位）','Freezes 1–3 of your actives on arrival (by tier)'],
+    desc:['剑链对它无效，只能用 💥炸弹 炸。它一现身就【随机冰封你的主动能力】——一阶冻 1 个、二阶冻 2 个、三阶冻 3 个（在「一阶主动 / 💊治疗 / 💥炸弹」里随机），数回合内不可用。趁早炸掉它（若炸弹被冻，等解冻再炸）。倒计时归零也会重击你。','Immune to sword chains — only the 💥 Bomb works. On arrival it【freezes random active abilities】: 1 at Lv1, 2 at Lv2, 3 at Lv3 (among your class active / 💊Heal / 💥Bomb), unusable for a few turns. Bomb it down (wait out the thaw if your bomb got frozen). It also strikes you at 0.'],
+    onSpawn(t){ const keys=[]; if(player.tier1) keys.push('skill'); keys.push('heal','bomb');
+      for(let i=keys.length-1;i>0;i--){ const j=Math.floor(rnd()*(i+1)); [keys[i],keys[j]]=[keys[j],keys[i]]; }
+      const m=Math.min(t.tier||1, keys.length), K=4; const froz=keys.slice(0,m);
+      player.frozen=player.frozen||{}; froz.forEach(k=>{ player.frozen[k]=K; });
+      const nm={skill:tr('一阶主动','skill'),heal:'💊',bomb:'💥'};
+      log(tr(`⛄ 雪人冰封了你 ${m} 个主动（${froz.map(k=>nm[k]).join('、')}），${K} 回合内不可用！`,`⛄ Snowman freezes ${m} of your actives (${froz.map(k=>nm[k]).join(',')}) for ${K} turns!`)); } },
   { id:'birdman', emoji:'🦅', name:['鸟人','Birdman'], quip:['抓不住我，我会飞（还会瞬移）。','Catch me? I fly — and teleport.'], monster:true, swordable:true, perTurn:true,
     special:['每回合啄你一下并瞬移换位','Pecks you and teleports each turn'],
     desc:['可以用剑攻击它（也能用炸弹）。它【每回合】都会俯冲啄你一下，并在回合末和棋盘上任意一个棋子【互换位置】——飘忽难缠，想连它的剑链得算准它的落点，速战速决！','You CAN sword it (and bomb it). Every turn it dives to peck you, then swaps places with a random tile at turn end — elusive and nagging, so line up your chain where it lands and finish it fast!'],
@@ -997,6 +1006,7 @@ const SHOP={
 function shopCost(key){ let c=SHOP[key].cost; if(key==='heal') c+=(player.healUses||0); if(key==='bomb'&&player.bombBoost) c=Math.ceil(c*2.0); return c; } // 治疗：每用一次 +1 金；爆破手：炸弹更贵（×2）
 function buyItem(key){
   if(busy||pendingLevels) return;
+  if(player.frozen && player.frozen[key]>0) return;   // 雪人冰封该槽（治疗/炸弹），数回合内不可用
   if(player.skill2 && player.skill2.slot===key){ castSkill2(key); return; }   // 该槽被换装主动占用 → 施放，不再购买消耗品
   if(typeof player.shopCd!=='object'||!player.shopCd) player.shopCd={}; // 兼容旧存档
   if(player.goldLock>0) return;               // 守财奴囤金期间不可用商店
@@ -1042,6 +1052,7 @@ function effSkillCd(id){
 function activateSkill(){
   if(busy||pendingLevels) return;
   const sk=player&&player.tier1&&TIER1[player.tier1]&&TIER1[player.tier1].skill; if(!sk) return;  // 一阶职业的主动
+  if(player.frozen && player.frozen.skill>0) return;   // 雪人冰封了一阶主动
   if(player.skillCd>0) return;
   const r=sk.f(player);
   if(r===false) return;        // 技能判定无效（如锻甲场上没护甲）：不进冷却、不刷日志
@@ -1113,6 +1124,7 @@ function resolve(){
   if(typeof player.shopCd==='object') for(const k in player.shopCd){ if(player.shopCd[k]>0) player.shopCd[k]--; } // 各商品冷却递减
   if(player.skillCd>0) player.skillCd--; // 技能冷却递减
   if(player.skill2Cd>0) player.skill2Cd--; // 换装主动冷却递减
+  if(player.frozen) for(const k in player.frozen){ if(player.frozen[k]>0) player.frozen[k]--; }   // 雪人冰封倒数解冻
   if(player.goldLock>0){ player.goldLock--; if(player.goldLock===0){ const pay=Math.round(player.goldFrozen*2.5); player.gold+=pay; player.goldFrozen=0; log(tr(`🔓 囤金到期：返还 ${pay} 金币`,`🔓 Hoard matured: +${pay} gold`)); } } // 守财奴囤金到期（2.5 倍）
   advanceEnemies();
   if(player.cleared) return;   // 终焉第10波撑过 → onClear 已结算，停止后续处理
@@ -1699,22 +1711,25 @@ function updateHUD(){
       const sk=TIER1[player.skill2.id].skill;
       btn.querySelector('span').textContent=`✨${L(sk.name)}`;
       btn.querySelector('small').textContent=L(sk.short);
-      btn.querySelector('em').textContent = player.skill2Cd>0 ? `⏳${player.skill2Cd}${tr('回合','t')}` : tr('可发动','Ready');
-      btn.disabled = busy || pendingLevels || player.skill2Cd>0;
+      const fz2=player.frozen&&player.frozen[key]>0;
+      btn.querySelector('em').textContent = fz2 ? `❄️${player.frozen[key]}${tr('回合','t')}` : player.skill2Cd>0 ? `⏳${player.skill2Cd}${tr('回合','t')}` : tr('可发动','Ready');
+      btn.disabled = busy || pendingLevels || player.skill2Cd>0 || fz2;
       return;
     }
-    const c=shopCost(key), cd=scd[key]||0;
+    const c=shopCost(key), cd=scd[key]||0, fz=player.frozen&&player.frozen[key]>0;   // 雪人冰封该槽
     if(key==='heal'){ const hv=Math.round((10+2*(player.healUses||0))*(player.healMult||1)); btn.querySelector('small').textContent=tr(`回复 ${hv} 生命`,`Restore ${hv} HP`); }   // 治疗恢复量随次数递增（活死人按 healMult 折算）
-    btn.querySelector('em').textContent = cd>0 ? `⏳${cd}${tr('回合','t')}` : c+'💰';
-    btn.disabled = busy || pendingLevels || cd>0 || player.goldLock>0 || player.gold < c; });
+    btn.querySelector('em').textContent = fz ? `❄️${player.frozen[key]}${tr('回合','t')}` : cd>0 ? `⏳${cd}${tr('回合','t')}` : c+'💰';
+    btn.disabled = busy || pendingLevels || cd>0 || player.goldLock>0 || player.gold < c || fz; });
   const sb=document.getElementById('skillBtn'), sk=player.tier1&&TIER1[player.tier1]&&TIER1[player.tier1].skill;
   if(sk){ sb.style.display='flex';
     sb.querySelector('span').textContent=`✨${L(sk.name)}`;
     sb.querySelector('small').textContent=L(sk.short);
     const hoarding = player.tier1==='miser' && player.goldLock>0;   // 囤金期间技能无法再发动，按锁定显示
-    sb.querySelector('em').textContent = hoarding ? `🔒${player.goldLock}${tr('回合','t')}`
+    const fzs=player.frozen&&player.frozen.skill>0;   // 雪人冰封一阶主动
+    sb.querySelector('em').textContent = fzs ? `❄️${player.frozen.skill}${tr('回合','t')}`
+      : hoarding ? `🔒${player.goldLock}${tr('回合','t')}`
       : player.skillCd>0 ? `⏳${player.skillCd}${tr('回合','t')}` : tr('可发动','Ready');
-    sb.disabled = busy || pendingLevels || player.skillCd>0 || hoarding;
+    sb.disabled = busy || pendingLevels || player.skillCd>0 || hoarding || fzs;
   } else { sb.style.display='none'; }
   saveGame();
 }

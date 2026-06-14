@@ -136,6 +136,7 @@
 | 🦅 鸟人 Birdman | 剑 / 炸弹 | **每回合**俯冲啄你一下（半攻击力），并在回合末和棋盘上**任意一个棋子互换位置（瞬移）**——飘忽难缠，想连它的剑链得算准它的落点，速战速决 |
 | 🗿 石像 Statue | 剑 / 炸弹（慎用） | 它【受到多少伤害，就把等量伤害当作**真实伤害（无视护甲）反弹给你**】——攻击它=伤害自己。想杀它先确保血够厚，别一刀连自己也送走（剑/炸弹/溅射/吸魂都会反弹）|
 | 🦠 污染怪 Corruptor | 仅炸弹 | 只要它在场，**全场的心都变成毒心（绿心 💚）**——连毒心不再回血、反而按等量【**扣血**（无视护甲）】！炸掉它，心立刻恢复正常（低血量，一两发炸弹即可）|
+| ⛄ 雪人 Snowman | 仅炸弹 | 现身就**随机冰封你的主动**——一阶冻 1 个、二阶冻 2 个、三阶冻 3 个（在 一阶主动/💊治疗/💥炸弹 里随机），**4 回合内不可用**（❄️ 标记；限时解冻，炸弹被冻也不会卡死）|
 
 > Boss 入场时会有**扩散冲击环 + 闪光**特效（普通 Boss 红、终焉之主金），一眼可辨。每个 Boss 与一阶主动技能在信息弹窗里都附带一句**俏皮话**。
 
@@ -313,6 +314,7 @@ About every **10 turns** a random boss appears; beating one rewards 💰+20 and 
 | 🦅 Birdman | Sword / Bomb | **Every turn** it dives to peck you (half attack) and, at turn end, **swaps places with a random tile (teleport)** — elusive and nagging, so line up your chain where it lands and finish it fast |
 | 🗿 Statue | Sword / Bomb (careful!) | **Whatever damage it takes, it reflects back at you as TRUE damage (ignoring armor)** — attacking it hurts you. Make sure you have the HP to survive the kill; don't one-shot yourself (sword/bomb/splash/drain all reflect) |
 | 🦠 Corruptor | Bomb only | While it's on the board, **all hearts become poison (green 💚)** — linking them DRAINS that much HP (ignoring armor) instead of healing! Bomb it and hearts return to normal (low HP, one or two bombs) |
+| ⛄ Snowman | Bomb only | On arrival it **freezes random actives** — 1 at Lv1, 2 at Lv2, 3 at Lv3 (among your class active / 💊Heal / 💥Bomb), **unusable for 4 turns** (❄️ marker; time-limited thaw, so a frozen bomb never soft-locks) |
 
 > Each boss arrives with a **shockwave ring + flash** effect (crimson for normal bosses, gold for the Overlord), so you never miss one. Every boss and every Tier-1 active also carries a one-line **quip** in its info popup.
 
