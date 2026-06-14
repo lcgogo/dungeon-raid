@@ -188,7 +188,7 @@ const WEAPON={
 };
 function weap(){ return WEAPON[player&&player.race] || WEAPON.human; }
 function wE(){ return weap().e; }                                       // 武器 emoji（攻击格图标）
-function wN(){ return L(weap().n); }                                    // 武器名（本地化）：剑/箭/斧/狼牙棒/骨
+function wN(){ return tr(weap().n[0], weap().n[1]); }                   // 武器名（本地化）：剑/箭/斧/狼牙棒/骨（用 tr 避免与 L 的 token 替换递归）
 function wChain(){ return tr(weap().n[0]+'链', weap().n[1]+' chain'); } // 武器链：剑链/箭链/斧链/狼牙棒链/骨链
 const CONNECTABLE=['sword','shield','heart','coin'];
 // 无甲种族（兽人）盾牌是死格，从生成池里移除
@@ -202,7 +202,8 @@ let lang = (()=>{ try{
     return nav.indexOf('zh')===0 ? 'zh' : 'en';            // 首次访问跟随浏览器语言
   }catch(e){ return 'zh'; } })();
 const tr = (zh,en)=> lang==='en' ? en : zh;            // 行内双语：渲染时取值
-const L  = (x)=> Array.isArray(x) ? tr(x[0],x[1]) : x; // 数据字段：[中文, English]
+const L  = (x)=>{ let s = Array.isArray(x) ? tr(x[0],x[1]) : x;        // 数据字段：[中文, English]
+  return (typeof s==='string' && s.indexOf('{W')>=0) ? s.replace(/\{WC\}/g, wChain()).replace(/\{W\}/g, wN()) : s; };  // 武器 token：{W}=武器名、{WC}=武器链（按种族）
 function setLang(l){
   lang = l==='en'?'en':'zh';
   try{ localStorage.setItem('dr_lang',lang); }catch(e){}
@@ -264,15 +265,15 @@ function extraFoeCd(){ return (player&&player.foeCdBonus)||0; }   // 活死人�
 
 // ===== Boss 池：每 10 回合从中随机挑一个现身。剑链免疫，只能用炸弹炸，奖励丰厚 =====
 const BOSSES=[
-  { id:'ghost', emoji:'👻', name:['幽灵','Ghost'], quip:['剑？穿过去了，挠痒痒都算不上。','Swords? They pass right through me.'],
-    desc:['剑链对它无效，只能用 💥炸弹 炸。倒计时归零会对你重击！','Immune to sword chains — only the 💥 Bomb hurts it. It strikes you hard at 0!'] },
+  { id:'ghost', emoji:'👻', name:['幽灵','Ghost'], quip:['{W}？穿过去了，挠痒痒都算不上。','{W}s? They pass right through me.'],
+    desc:['{WC}对它无效，只能用 💥炸弹 炸。倒计时归零会对你重击！','Immune to {WC} — only the 💥 Bomb hurts it. It strikes you hard at 0!'] },
   { id:'clown', emoji:'🤡', name:['小丑','Clown'], quip:['笑一个嘛，反正棋盘已经乱了。','Smile! Your board is a mess anyway.'], perTurn:true,
     special:['每回合打乱 3 个棋子','Scrambles 3 tiles each turn'],
-    desc:['剑链对它无效，只能用 💥炸弹 炸。它【每回合】都会随机打乱棋盘上 3 个棋子，制造持续混乱！','Immune to sword chains — only the 💥 Bomb works. Every turn it scrambles 3 random tiles, causing constant chaos!'],
+    desc:['{WC}对它无效，只能用 💥炸弹 炸。它【每回合】都会随机打乱棋盘上 3 个棋子，制造持续混乱！','Immune to {WC} — only the 💥 Bomb works. Every turn it scrambles 3 random tiles, causing constant chaos!'],
     act(t){ const k=scrambleTiles(2+(t.tier||1)); log(tr(`🤡 小丑捣乱，打乱了 ${k} 个棋子！`,`🤡 The Clown scrambles ${k} tiles!`)); } },
   { id:'vampire', emoji:'🧛', name:['吸血鬼','Vampire'], quip:['你的心留着也浪费，我喝了。','Those hearts are wasted on you. Mine now.'], perTurn:true, swordable:true,
     special:['每回合吸取场上的 ❤️ 回血','Drains ❤️ each turn to heal'],
-    desc:['可以用剑攻击它。但它【每回合】会吸取棋盘上所有的心来回血——别把心留在场上！','You CAN hit it with sword chains. But every turn it drains all hearts on the board to heal — do not leave hearts on the board!'],
+    desc:['可以用{W}攻击它。但它【每回合】会吸取棋盘上所有的心来回血——别把心留在场上！','You CAN hit it with a {WC}. But every turn it drains all hearts on the board to heal — do not leave hearts on the board!'],
     act(t){ let n=0; for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const x=grid[r][c]; if(x&&x.type==='heart'){ grid[r][c]=null; n++; } }
       if(n){ const amt=n*(2+(t.tier||1));
         if(pollutionActive()){ t.hp-=amt;   // 同时有污染怪：吸到的是毒心，反被毒、掉血而非回血
@@ -281,10 +282,10 @@ const BOSSES=[
         else { t.hp=Math.min(t.maxHp, t.hp+amt); applyGravity(); syncPositions(false);
           log(tr(`🧛 吸血鬼吸取 ${n} 颗心回血（→${t.hp}）`,`🧛 Vampire drains ${n} hearts (→${t.hp})`)); } } } },
   { id:'assassin', emoji:'🥷', name:['刺客','Assassin'], quip:['护甲？那只是好看的装饰。','Armor? Cute. Purely decorative.'], monster:true, swordable:true, trueDmg:true, noTierScale:true,
-    desc:['属性和普通怪差不多，但它的攻击是【真实伤害】——无视护甲和额外减伤，直接掉血！可以用剑砍它，趁早解决。','Stats like a normal enemy, but its hits are TRUE damage — they ignore armor and any reduction, straight to your HP! You can sword it down, so kill it fast.'] },
+    desc:['属性和普通怪差不多，但它的攻击是【真实伤害】——无视护甲和额外减伤，直接掉血！可以用{W}攻击它，趁早解决。','Stats like a normal enemy, but its hits are TRUE damage — they ignore armor and any reduction, straight to your HP! You can take it down with a {WC}, so kill it fast.'] },
   { id:'devourer', emoji:'🦖', name:['饕餮','Devourer'], quip:['先吃你的怪，再吃你。','I eat your monsters first, then you.'], monster:true, swordable:true,
     special:['吞噬怪物壮大，倒计时放大招','Devours to grow; nukes at 0'],
-    desc:['每回合吸取场上每个怪一半的生命来壮大自己；倒计时归零时，释放等于它当前血量 50% 的强力一击！趁它还小赶紧用剑砍掉。','Each turn it drains half the HP from every enemy to grow; at 0 it unleashes a hit worth 50% of its current HP! Sword it down while it is still small.'],
+    desc:['每回合吸取场上每个怪一半的生命来壮大自己；倒计时归零时，释放等于它当前血量 50% 的强力一击！趁它还小赶紧用{W}解决掉。','Each turn it drains half the HP from every enemy to grow; at 0 it unleashes a hit worth 50% of its current HP! Take it down with a {WC} while it is still small.'],
     everyTurn(t){ const cap=(12+player.level*3)*(t.tier||1); if(t.hp>=cap) return;   // 自身血量封顶（随档位提升），防止无限爆涨
       let g=0; for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const x=grid[r][c]; if(x&&x.type==='enemy'&&x.hp>1){ const take=Math.floor(x.hp/2); x.hp-=take; g+=take; } }
       if(g){ t.hp=Math.min(cap, t.hp+g); t.maxHp=Math.max(t.maxHp,t.hp); log(tr(`🦖 饕餮吞噬怪物生命 +${g}（→${t.hp}）`,`🦖 Devourer absorbs +${g} HP (→${t.hp})`)); } },
@@ -294,7 +295,7 @@ const BOSSES=[
       log(tr(`🦖 饕餮释放积蓄之力，造成 ${dmg} 伤害（自损至 ${t.hp}）！`,`🦖 Devourer unleashes ${dmg} damage (drops to ${t.hp})!`)); } },
   { id:'summoner', emoji:'🧙', name:['召唤师','Summoner'], quip:['一个不够热闹，再加几个。','One is lonely — let me add a few.'], monster:true, swordable:true, perTurn:true,
     special:['每回合召唤一只怪','Summons an enemy each turn'],
-    desc:['属性和普通怪一样，可被剑砍。它【每回合】把场上一个非怪/非Boss的棋子变成一只怪——拖得越久怪越多，速战速决！','Stats like a normal enemy and sword-attackable. Every turn it turns one non-enemy tile into an enemy — the longer it lives, the more enemies. End it fast!'],
+    desc:['属性和普通怪一样，可被{W}攻击。它【每回合】把场上一个非怪/非Boss的棋子变成一只怪——拖得越久怪越多，速战速决！','Stats like a normal enemy and {W}-attackable. Every turn it turns one non-enemy tile into an enemy — the longer it lives, the more enemies. End it fast!'],
     act(t){ const n=t.tier||1; let made=0;
       for(let i=0;i<n;i++){ const cells=[]; for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const x=grid[r][c]; if(x&&x.type!=='enemy'&&x.type!=='boss') cells.push([r,c]); }
         if(!cells.length) break; const [r,c]=cells[Math.floor(rnd()*cells.length)];
@@ -317,13 +318,13 @@ const BOSSES=[
       if(dmg>0) log(tr(`🧟 尸毒发作：流失 ${dmg} 生命（${Math.round(pct*100)}%）`,`🧟 Plague: −${dmg} HP (${Math.round(pct*100)}%)`)); } },
   { id:'statue', emoji:'🗿', name:['石像','Statue'], quip:['打我？你打的是你自己。','Hit me? You are hitting yourself.'], monster:true, swordable:true, noTierScale:true,
     special:['受到的伤害真实反弹给你','Reflects damage taken as TRUE damage'],
-    desc:['可以用剑攻击它，但它【受到多少伤害，就把等量伤害当作真实伤害（无视护甲）反弹给你】！想杀它得先确保自己血够厚——别一刀连自己也送走。倒计时归零也会重击你。','You CAN sword it, but【whatever damage it takes is reflected back at you as TRUE damage (ignoring armor)】! Make sure you have the HP to survive the kill — do not one-shot yourself. It also strikes you when its timer hits 0.'] },
+    desc:['可以用{W}攻击它，但它【受到多少伤害，就把等量伤害当作真实伤害（无视护甲）反弹给你】！想杀它得先确保自己血够厚——别一刀连自己也送走。倒计时归零也会重击你。','You CAN hit it with a {WC}, but【whatever damage it takes is reflected back at you as TRUE damage (ignoring armor)】! Make sure you have the HP to survive the kill — do not one-shot yourself. It also strikes you when its timer hits 0.'] },
   { id:'pollution', emoji:'🦠', name:['污染怪','Corruptor'], quip:['你的心，我给染绿了。','I dyed your hearts rotten green.'], monster:true, noTierScale:true,
     special:['在场时全场心变毒心（连之扣血）','While alive, all hearts are poison (linking drains HP)'],
-    desc:['剑链对它无效，只能用 💥炸弹 炸。只要它在场，棋盘上所有的心都变成毒心（绿心 💚）——连毒心不再回血，反而按等量【扣血】（无视护甲）！炸掉它，心就恢复正常。倒计时归零它也会重击你。','Immune to sword chains — only the 💥 Bomb works. While it is on the board, ALL hearts become poison (green 💚) — linking them DRAINS that much HP instead of healing (ignoring armor)! Bomb it and hearts return to normal. It also strikes you when its timer hits 0.'] },
+    desc:['{WC}对它无效，只能用 💥炸弹 炸。只要它在场，棋盘上所有的心都变成毒心（绿心 💚）——连毒心不再回血，反而按等量【扣血】（无视护甲）！炸掉它，心就恢复正常。倒计时归零它也会重击你。','Immune to {WC} — only the 💥 Bomb works. While it is on the board, ALL hearts become poison (green 💚) — linking them DRAINS that much HP instead of healing (ignoring armor)! Bomb it and hearts return to normal. It also strikes you when its timer hits 0.'] },
   { id:'snowman', emoji:'⛄', name:['雪人','Snowman'], quip:['冻住，不许走——技能也别想用。','Freeze! No moves, and no skills either.'], monster:true, noTierScale:true,
     special:['现身冰封你 1~3 个主动（按档位）','Freezes 1–3 of your actives on arrival (by tier)'],
-    desc:['剑链对它无效，只能用 💥炸弹 炸。它一现身就【随机冰封你的主动能力】——一阶冻 1 个、二阶冻 2 个、三阶冻 3 个（在「一阶主动 / 💊治疗 / 💥炸弹」里随机），数回合内不可用。趁早炸掉它（若炸弹被冻，等解冻再炸）。倒计时归零也会重击你。','Immune to sword chains — only the 💥 Bomb works. On arrival it【freezes random active abilities】: 1 at Lv1, 2 at Lv2, 3 at Lv3 (among your class active / 💊Heal / 💥Bomb), unusable for a few turns. Bomb it down (wait out the thaw if your bomb got frozen). It also strikes you at 0.'],
+    desc:['{WC}对它无效，只能用 💥炸弹 炸。它一现身就【随机冰封你的主动能力】——一阶冻 1 个、二阶冻 2 个、三阶冻 3 个（在「一阶主动 / 💊治疗 / 💥炸弹」里随机），数回合内不可用。趁早炸掉它（若炸弹被冻，等解冻再炸）。倒计时归零也会重击你。','Immune to {WC} — only the 💥 Bomb works. On arrival it【freezes random active abilities】: 1 at Lv1, 2 at Lv2, 3 at Lv3 (among your class active / 💊Heal / 💥Bomb), unusable for a few turns. Bomb it down (wait out the thaw if your bomb got frozen). It also strikes you at 0.'],
     onSpawn(t){ const keys=[]; if(player.tier1) keys.push('skill'); keys.push('heal','bomb');
       for(let i=keys.length-1;i>0;i--){ const j=Math.floor(rnd()*(i+1)); [keys[i],keys[j]]=[keys[j],keys[i]]; }
       const m=Math.min(t.tier||1, keys.length), K=4; const froz=keys.slice(0,m);
@@ -332,7 +333,7 @@ const BOSSES=[
       log(tr(`⛄ 雪人冰封了你 ${m} 个主动（${froz.map(k=>nm[k]).join('、')}），${K} 回合内不可用！`,`⛄ Snowman freezes ${m} of your actives (${froz.map(k=>nm[k]).join(',')}) for ${K} turns!`)); } },
   { id:'birdman', emoji:'🦅', name:['鸟人','Birdman'], quip:['抓不住我，我会飞（还会瞬移）。','Catch me? I fly — and teleport.'], monster:true, swordable:true, perTurn:true,
     special:['每回合啄你一下并瞬移换位','Pecks you and teleports each turn'],
-    desc:['可以用剑攻击它。它【每回合】都会俯冲啄你一下，并在回合末和棋盘上任意一个棋子【互换位置】——飘忽难缠，想连它的剑链得算准它的落点，速战速决！','You CAN sword it. Every turn it dives to peck you, then swaps places with a random tile at turn end — elusive and nagging, so line up your chain where it lands and finish it fast!'],
+    desc:['可以用{W}攻击它。它【每回合】都会俯冲啄你一下，并在回合末和棋盘上任意一个棋子【互换位置】——飘忽难缠，想连它的{WC}得算准它的落点，速战速决！','You CAN hit it with a {WC}. Every turn it dives to peck you, then swaps places with a random tile at turn end — elusive and nagging, so line up your chain where it lands and finish it fast!'],
     act(t){
       const dmg=hurtPlayer(Math.max(1,Math.ceil(t.atk*0.5)), 'birdman', false);
       if(dmg>0) log(tr(`🦅 鸟人俯冲啄击，掉 ${dmg} 血！`,`🦅 The Birdman dives and pecks for ${dmg}!`));
@@ -465,7 +466,7 @@ function makeTile(type){
 const RACES=[
   {id:'human', e:'🧑', n:['人族','Human'], d:['全能基准：无特性、无削弱，适合新手。','Baseline: no trait, no weakness. Beginner-friendly.'], f:p=>{}},
   {id:'elf',   e:'🧝', n:['精灵','Elf'],   d:['特性：连击加成翻倍（每多连1个 +30%）。削弱：「强化体魄」升级只 +3 上限。','Trait: combo bonus doubled (+30%/tile). Weakness: Fortify Body upgrade gives only +3 max HP.'], f:p=>{p.comboMult=2; p.maxHpUpMult=0.5;}},
-  {id:'dwarf', e:'🎅', n:['矮人','Dwarf'], d:['特性：护甲减伤翻倍（每点护甲抵 2 点）。削弱：剑链总伤 ×0.85（含固定伤害一起算）。','Trait: armor counts double (each point blocks 2). Weakness: ×0.85 total sword damage (flat included).'], f:p=>{p.armorMult=2; p.swordMult=0.85;}},
+  {id:'dwarf', e:'🎅', n:['矮人','Dwarf'], d:['特性：护甲减伤翻倍（每点护甲抵 2 点）。削弱：{WC}总伤 ×0.85（含固定伤害一起算）。','Trait: armor counts double (each point blocks 2). Weakness: ×0.85 total {W} damage (flat included).'], f:p=>{p.armorMult=2; p.swordMult=0.85;}},
   {id:'orc',   e:'🧌', n:['兽人','Orc'],   d:['特性：「强化体魄」升级时生命上限翻倍（每次 +12）。削弱：无甲——永远无法获得护甲。','Trait: Fortify Body upgrade gives double max HP (+12 each). Weakness: No Armor — can never gain armor.'], f:p=>{p.maxHpUpMult=2; p.noArmor=true;}},
   {id:'undead',e:'🪦', n:['活死人','Undead'], d:['特性：迷惑——所有怪物（含 Boss）攻击倒计时 +1（更慢出手）。削弱：一切治疗效果减半（心/药水/吸魂；重生满血不受影响）+ 主动技能冷却 +1。','Trait: Confusion — all monsters (incl. bosses) attack 1 turn slower. Weakness: all healing halved (hearts/potion/drain; Rebirth full-heal unaffected) + active-skill cooldowns +1.'], f:p=>{p.foeCdBonus=1; p.skillCdMod=(p.skillCdMod||0)+1; p.healMult=0.5;}},
 ];
@@ -473,13 +474,13 @@ const RACES=[
 const TIER1={
   knight:{n:['骑士','Knight'], quip:['盾举起来，伤害？不存在的。','Shield up. Damage? Never heard of it.'], skill:{name:['圣盾','Aegis'], short:['本回合免伤','No damage this turn'], cd:5, f:p=>{ p.shieldTurn=true; log(tr('🛡️ 圣盾：本回合免疫伤害','🛡️ Aegis: immune to damage this turn')); return true; }}},
   priest:{n:['牧师','Priest'], quip:['心给我，经验你拿，公平交易。','Hearts to me, XP to you. Fair deal.'], skill:{name:['祝福','Blessing'], short:['全场❤️转经验','Hearts→XP'], cd:5, f:p=>{ let n=0; for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){const t=grid[r][c]; if(t&&t.type==='heart'){grid[r][c]=null;n++;}} if(!n)return false; player.xp+=n*3; applyGravity(); syncPositions(false); checkLevel(); log(tr(`💗 祝福：${n} 颗心 → ${n*3} 经验`,`💗 Blessing: ${n} hearts → ${n*3} XP`)); return n; }}},
-  ranger:{n:['游侠','Ranger'], quip:['抬头——那不是雨，是箭。','Heads up — those are not raindrops.'], skill:{name:['箭雨','Arrow Rain'], short:['全场怪受剑威力×2','×2 sword power to all'], cd:5, f:p=>{ const titanFlat=p.titan?Math.floor(p.maxHp/12):0; const pool=Math.floor((p.weaponPower*2 + p.swordFlat + titanFlat)*(p.swordMult||1)); const r=dealDamage(pool,null); applyGravity(); syncPositions(false); log(tr(`🏹 箭雨：全场 ${r.dmg} 伤害`+(r.kills?`，击杀 ${r.kills}`:''),`🏹 Arrow Rain: ${r.dmg} dmg`+(r.kills?`, ${r.kills} killed`:''))); return true; }}},
-  rogue:{n:['盗贼','Rogue'], quip:['剑能砍人，但金币能买命。','Swords kill. Coins buy your life back.'], skill:{name:['点金','Gold Touch'], short:['剑变金币','Swords→Coins'], cd:5, f:p=>{ let n=0; for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){const t=grid[r][c]; if(t&&t.type==='sword'){t.type='coin';n++;}} if(!n)return false; log(tr(`💰 点金：${n} 把剑化为金币`,`💰 Gold Touch: ${n} swords → coins`)); return n; }}},
+  ranger:{n:['游侠','Ranger'], quip:['抬头——那不是雨，是箭。','Heads up — those are not raindrops.'], skill:{name:['箭雨','Arrow Rain'], short:['全场怪受{W}威力×2','×2 {W} power to all'], cd:5, f:p=>{ const titanFlat=p.titan?Math.floor(p.maxHp/12):0; const pool=Math.floor((p.weaponPower*2 + p.swordFlat + titanFlat)*(p.swordMult||1)); const r=dealDamage(pool,null); applyGravity(); syncPositions(false); log(tr(`🏹 箭雨：全场 ${r.dmg} 伤害`+(r.kills?`，击杀 ${r.kills}`:''),`🏹 Arrow Rain: ${r.dmg} dmg`+(r.kills?`, ${r.kills} killed`:''))); return true; }}},
+  rogue:{n:['盗贼','Rogue'], quip:['剑能砍人，但金币能买命。','Swords kill. Coins buy your life back.'], skill:{name:['点金','Gold Touch'], short:['{W}变金币','{W}→Coins'], cd:5, f:p=>{ let n=0; for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){const t=grid[r][c]; if(t&&t.type==='sword'){t.type='coin';n++;}} if(!n)return false; log(tr(`💰 点金：${n} 个${wN()}化为金币`,`💰 Gold Touch: ${n} ${wN()} → coins`)); return n; }}},
   blacksmith:{n:['锻造师','Blacksmith'], quip:['盾别拿手里，焊身上才香。','Do not hold shields — wear them.'], skill:{name:['锻甲','Forge Armor'], short:['收全场盾→护甲','Absorb all shields'], cd:5, f:p=>{ if(p.noArmor) return false; let n=0; for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){const t=grid[r][c]; if(t&&t.type==='shield'){grid[r][c]=null;n++;}} if(!n)return false; p.shieldXp+=n*p.armorPerShield; while(p.shieldXp>=armorNeeded(p.armor)){p.shieldXp-=armorNeeded(p.armor);p.armor++;} applyGravity(); syncPositions(false); log(tr(`🔰 锻甲：吞下 ${n} 盾（减伤 ${p.armor}）`,`🔰 Forge: ${n} shields (armor ${p.armor})`)); return n; }}},
   miser:{n:['守财奴','Miser'], quip:['钱躺一会儿，利滚利。','Let the gold nap — it wakes up doubled.'], skill:{name:['囤金','Hoard'], short:['锁金生利','Lock gold for interest'], cd:5, f:p=>{ if(p.goldLock>0) return false; const n=4; p.goldLock=n; p.goldFrozen=0; log(tr(`🔒 囤金：锁定 ${n} 回合（期间不产/不花金币，到期返还 2.5 倍）`,`🔒 Hoard: locked ${n} turns (no gold in/out; 2.5× payout at end)`)); return true; }}},
   guildmaster:{n:['会长','Guild Master'], quip:['有钱能使鬼推磨。','Money makes the world go round.'], skill:{name:['收买','Buyout'], short:['金币>全怪血时，怪全转金币','If gold > all enemy HP, enemies→coins'], cd:5, f:p=>{ let hp=0; const cells=[]; for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const t=grid[r][c]; if(t&&t.type==='enemy'){ hp+=t.hp; cells.push([r,c]); } } if(!cells.length || p.gold<=hp) return false; for(const [r,c] of cells){ const nt=makeTile('coin'); nt.curY=cellY(r); grid[r][c]=nt; } syncPositions(false); log(tr(`💰 收买：${cells.length} 只怪被买通，化为金币！`,`💰 Buyout: ${cells.length} enemies bribed into coins!`)); return cells.length; }}},
-  berserker:{n:['狂战士','Berserker'], quip:['疼？疼说明这刀还能更快。','Pain just means I can swing faster.'], skill:{name:['狂怒','Frenzy'], short:['本回合不死+残血增伤','Undying this turn + low-HP dmg'], cd:5, f:p=>{ p.hp=Math.max(1,Math.floor(p.hp/2)); p.lowHpDmg=true; p.undyingTurn=true; log(tr('🔪 狂怒！生命减半并进入不屈（本回合无论受多少伤都保留 1 血），血越少剑伤越高','🔪 Frenzy! HP halved and Undying this turn (keep ≥1 HP no matter the damage); lower HP, higher sword damage')); return true; }}},
-  fighter:{n:['斗士','Fighter'], quip:['越打越精神，血是我的能量饮料。','The more I fight, the better I feel.'], skill:{name:['嗜血','Bloodthirst'], short:['回血+本回合可攻击剑免疫怪','Heal + pierce sword-immunity'], cd:5, f:p=>{ p.bloodthirst=1; p.pierceTurn=true; log(tr('🩸 嗜血：本回合剑链每击中一只怪回 3 血，且可用剑攻击剑免疫的 Boss（幽灵/小丑）','🩸 Bloodthirst: heal 3 per enemy hit this turn, and your sword can hit sword-immune bosses (Ghost/Clown)')); return true; }}},
+  berserker:{n:['狂战士','Berserker'], quip:['疼？疼说明这刀还能更快。','Pain just means I can swing faster.'], skill:{name:['狂怒','Frenzy'], short:['本回合不死+残血增伤','Undying this turn + low-HP dmg'], cd:5, f:p=>{ p.hp=Math.max(1,Math.floor(p.hp/2)); p.lowHpDmg=true; p.undyingTurn=true; log(tr(`${wE()} 狂怒！生命减半并进入不屈（本回合无论受多少伤都保留 1 血），血越少${wN()}伤越高`,`${wE()} Frenzy! HP halved and Undying this turn (keep ≥1 HP no matter the damage); lower HP, higher ${wN()} damage`)); return true; }}},
+  fighter:{n:['斗士','Fighter'], quip:['越打越精神，血是我的能量饮料。','The more I fight, the better I feel.'], skill:{name:['嗜血','Bloodthirst'], short:['回血+本回合可攻击{W}免疫怪','Heal + pierce {W}-immunity'], cd:5, f:p=>{ p.bloodthirst=1; p.pierceTurn=true; log(tr(`🩸 嗜血：本回合${wChain()}每击中一只怪回 3 血，且可用${wN()}攻击${wN()}免疫的 Boss（幽灵/小丑）`,`🩸 Bloodthirst: heal 3 per enemy hit this turn, and your ${wN()} can hit ${wN()}-immune bosses (Ghost/Clown)`)); return true; }}},
   witchdoctor:{n:['巫医','Witch Doctor'], quip:['你的心意我收下，怪替你喝。','Your love? The monsters drink it for you.'], skill:{name:['蛊毒','Hex'], short:['本回合连心改为毒全场怪','Hearts poison all foes this turn'], cd:5, f:p=>{ p.heartPoison=true; log(tr('🧪 蛊毒：本回合连「心」不再回血，而是把这些生命当毒，灌给全场怪！','🧪 Hex: this turn, linking hearts deals that healing as poison to all foes instead!')); return true; }},
     passive:['每回合棋盘摆完后，把 3 个非敌人/非心的棋子变成心','Each turn after the board settles, turns 3 non-enemy non-heart tiles into hearts']},
   swordsaint:{n:['剑圣','Sword Saint'], quip:['在我眼里，万物皆可开刃。','In my eyes, anything can be a blade.'], skill:{name:['化剑','Bladeshift'], short:['全场心/金币→剑','Hearts & coins → swords'], cd:5, f:p=>{ let n=0; for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const t=grid[r][c]; if(t&&(t.type==='heart'||t.type==='coin')){ t.type='sword'; n++; } } if(!n) return false; log(tr(`⚔️ 化剑：${n} 个心/金币化为剑`,`⚔️ Bladeshift: ${n} hearts/coins → swords`)); return n; }},
@@ -499,15 +500,15 @@ const TIER1={
 const TIER2={
   immortal:{n:['不朽','Immortal'], d:['治疗溢出转为永久生命上限','Overheal raises max HP permanently'], f:p=>{ p.overheal=true; }},
   general:{n:['将军','General'], d:['升级时四选一','Level-up offers 4 choices'], f:p=>{ p.upgradeChoices=4; }},
-  sharpshooter:{n:['神射手','Sharpshooter'], d:['剑链击杀怪 +2 经验','+2 XP per sword kill'], f:p=>{ p.killXp=(p.killXp||0)+2; }},
+  sharpshooter:{n:['神射手','Sharpshooter'], d:['{WC}击杀怪 +2 经验','+2 XP per {W} kill'], f:p=>{ p.killXp=(p.killXp||0)+2; }},
   shadow:{n:['影袭','Shadow'], d:['炸弹冷却永久缩为 2 回合','Bomb cooldown becomes 2 turns'], f:p=>{ p.bombCd=2; }},
   demolitionist:{n:['爆破手','Demolitionist'], d:['炸弹伤害更高，但花费金币更多','Bomb hits harder but costs more gold'], f:p=>{ p.bombBoost=true; }},
   tycoon:{n:['财阀','Tycoon'], d:['获得金币时额外按一半转为经验','Gold gained also grants half as XP'], f:p=>{ p.goldXp=true; }},
-  warlord:{n:['巨力','Titan'], d:['最大生命越高，剑链固定伤害越高（每 12 点最大生命 +1）','Higher max HP = higher flat sword damage (+1 per 12 max HP)'], f:p=>{ p.titan=true; }},
+  warlord:{n:['巨力','Titan'], d:['最大生命越高，{WC}固定伤害越高（每 12 点最大生命 +1）','Higher max HP = higher flat {W} damage (+1 per 12 max HP)'], f:p=>{ p.titan=true; }},
   thorns:{n:['荆棘','Thorns'], d:['受到伤害的一半反弹给攻击者','Reflect half of damage taken back to the attacker'], f:p=>{ p.thorns=0.5; }},
   cheapskate:{n:['小气鬼','Cheapskate'], d:['消耗金币的主动（商店治疗/炸弹）花费减半','Gold-spending actives (shop Heal/Bomb) cost half'], f:p=>{ p.cheapskate=true; }},
   rejuvenation:{n:['回春','Rejuvenation'], d:['所有主动技能冷却 -1','All active-skill cooldowns -1'], f:p=>{ p.skillCdMod=(p.skillCdMod||0)-1; }},
-  splash:{n:['溅射','Splash'], d:['攻击溢出伤害随机溅到剩余敌人（含剑免疫 Boss）','Overflow damage splashes to a random remaining foe (incl. sword-immune bosses)'], f:p=>{ p.splash=true; }},
+  splash:{n:['溅射','Splash'], d:['攻击溢出伤害随机溅到剩余敌人（含{W}免疫 Boss）','Overflow damage splashes to a random remaining foe (incl. {W}-immune bosses)'], f:p=>{ p.splash=true; }},
 };
 const RACE_PATHS={
   human:{t1:['knight','priest','swordsaint'], t2:['immortal','general']},
@@ -1296,8 +1297,8 @@ function checkLevel(){
 //==================== 升级（技能三选一）====================
 const UPGRADES=[
   {n:['强化体魄','Fortify Body'],  d:p=>{const v=Math.round(6*(p.maxHpUpMult||1)); return [`最大生命 +${v}，并立即回满`,`+${v} max HP, fully heal now`];}, f:p=>{p.maxHp+=Math.round(6*(p.maxHpUpMult||1)); p.hp=p.maxHp;}}, // 兽人×2=+12，精灵×0.5=+3
-  {n:['磨利刀刃','Sharpen Blade'], d:['剑伤 +50%（连越长收益越大）','+50% sword power (longer chains gain more)'], f:p=>{p.weaponPower+=0.5;}},
-  {n:['淬炼锋芒','Temper Edge'],   d:['每次剑链额外 +3 固定伤害','+3 flat damage per sword chain'], f:p=>{p.swordFlat+=3;}},
+  {n:['磨利刀刃','Sharpen Blade'], d:['{W}伤 +50%（连越长收益越大）','+50% {W} power (longer chains gain more)'], f:p=>{p.weaponPower+=0.5;}},
+  {n:['淬炼锋芒','Temper Edge'],   d:['每次{WC}额外 +3 固定伤害','+3 flat damage per {WC}'], f:p=>{p.swordFlat+=3;}},
   {n:['加固护甲','Reinforce Armor'], d:['立即 +1 护甲（永久减伤）','+1 armor now (permanent damage cut)'], f:p=>{ if(!p.noArmor) p.armor+=1; }}, // 兽人无甲：无效
   {n:['强化盾术','Hone Shielding'], d:['每个盾提供的护甲进度 +1','+1 armor progress per shield'], f:p=>{p.armorPerShield+=1;}},
   {n:['精研医术','Refine Healing'], d:['每颗心回复生命 +1','+1 HP healed per heart'], f:p=>{p.healPerHeart+=1;}},
@@ -1615,12 +1616,12 @@ function tileInfo(t){
     else rows.push([def.trueDmg?tr('攻击力（真实·无视护甲）','Attack (TRUE, ignores armor)'):tr('攻击力','Attack'), `${t.atk}`]);
     if(!def.perTurn) rows.push([tr(def.flee?'逃走倒计时':'倒计时',def.flee?'Escape timer':'Timer'), `${t.cd} / ${t.baseCd}`]);
     if(def.id==='thief'&&t.stolen) rows.push([tr('已偷金币','Stolen gold'), tr(`${t.stolen}（击败夺回）`,`${t.stolen} (recover on kill)`)]);
-    rows.push([tr('攻击方式','How to hit'), def.swordable?tr('剑 / 炸弹','Sword / Bomb'):tr('只能炸弹','Bomb only')]);
+    rows.push([tr('攻击方式','How to hit'), def.swordable?tr(`${wN()} / 炸弹`,`${wN()} / Bomb`):tr('只能炸弹','Bomb only')]);
     rows.push([tr('击败奖励','Kill reward'), '💰+20 · XP+15']);
     return {icon:def.emoji, title:'Boss · '+L(def.name)+` Lv${t.tier||1}`, desc:L(def.desc)+(def.quip?`<br><span style="color:#caa6e6;font-style:italic">「${L(def.quip)}」</span>`:''), rows};
   }
   return {icon:'👹', title:tr('怪物','Enemy'),
-    desc:tr('左上是攻击力，右上是倒计时。每行动一次倒计时 −1，归零就攻击你：先用护甲抵消，剩下的才掉血，但每次至少掉 1 滴。用剑链串过它就能攻击，伤害够高直接点杀。','Top-left is its attack, top-right its timer. The timer drops by 1 each action; at 0 it attacks — your armor soaks most of it, but you always lose at least 1 HP. Drag a sword chain through it to attack; enough damage kills it.'),
+    desc:tr(`左上是攻击力，右上是倒计时。每行动一次倒计时 −1，归零就攻击你：先用护甲抵消，剩下的才掉血，但每次至少掉 1 滴。用${wChain()}串过它就能攻击，伤害够高直接点杀。`,`Top-left is its attack, top-right its timer. The timer drops by 1 each action; at 0 it attacks — your armor soaks most of it, but you always lose at least 1 HP. Drag a ${wChain()} through it to attack; enough damage kills it.`),
     rows:[ [tr('血量','HP'), `${t.hp} / ${t.maxHp}`],
       [tr('攻击力','Attack'), `${t.atk}`],
       [tr('倒计时','Timer'), `${t.cd} / ${t.baseCd}`] ]};
@@ -1657,8 +1658,8 @@ function showPlayerInfo(){
     [tr('💰 每金币','💰 Gold/coin'), `+${p.goldPerCoin}`],
   ].map(([k,v])=>rowItem(k,v)).join('');
   const perks=[];
-  if(p.lowHpDmg) perks.push(tr('狂怒：越缺血剑伤越高','Frenzy: low HP, high dmg'));
-  if(p.titan) perks.push(tr(`巨力：固定剑伤 +${Math.floor(p.maxHp/12)}`,`Titan: +${Math.floor(p.maxHp/12)} flat sword dmg`));
+  if(p.lowHpDmg) perks.push(tr(`狂怒：越缺血${wN()}伤越高`,'Frenzy: low HP, high dmg'));
+  if(p.titan) perks.push(tr(`巨力：固定${wN()}伤 +${Math.floor(p.maxHp/12)}`,`Titan: +${Math.floor(p.maxHp/12)} flat ${wN()} dmg`));
   if(p.thorns) perks.push(tr('荆棘反弹','Thorns'));
   if(p.lifesteal) perks.push(tr(`吸血 +${p.lifesteal}/杀`,`Lifesteal +${p.lifesteal}`));
   if(p.regen) perks.push(tr(`每回合回复 +${p.regen}`,`Regen +${p.regen}`));
