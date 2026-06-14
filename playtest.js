@@ -3,7 +3,8 @@
 const fs = require('fs');
 
 // ---------- 1) 取出真实脚本，并在 IIFE 末尾注入导出钩子 ----------
-const html = fs.readFileSync(__dirname + '/dungeon-raid.html', 'utf8');
+const HTML_FILE = process.argv.includes('--dev') ? 'dungeon-raid-dev.html' : 'dungeon-raid.html';   // --dev：用开发版跑（测未发布的平衡改动）
+const html = fs.readFileSync(__dirname + '/' + HTML_FILE, 'utf8');
 let script = html.match(/<script>([\s\S]*?)<\/script>/)[1];
 
 const EXPORT = `globalThis.__G={RACES,RACE_PATHS,TIER1,TIER2,UPGRADES,BOSSES,startGame,resolve,buyItem,shopCost,SHOP,activateSkill,isSwordTarget,
