@@ -248,7 +248,7 @@ function playGame(rc){
   }
   const p=P();
   const db=p.dmgBy||{}; let deathSrc=null,mx=0; for(const k in db){ if(db[k]>mx){mx=db[k];deathSrc=k;} }  // 致命回合主要死因
-  return { level:p.level, turns:p.turns, gold:p.gold, maxHp:p.maxHp, died:p.hp<=0, loopTurns:turn, t1:p.tier1, t2:p.tier2, deathSrc };
+  return { level:p.level, turns:p.turns, gold:p.gold, maxHp:p.maxHp, died:p.hp<=0, loopTurns:turn, t1:p.tier1, t2:p.tier2, t2b:p.tier2b, skill2:(p.skill2&&p.skill2.id)||null, deathSrc };
 }
 
 // ---------- 5) 批量跑 ----------
@@ -277,7 +277,24 @@ const CANDIDATES=[
   { name:'D atk0.8/cd3-4', v:{ hp:'3 + Math.floor(Math.random()*3) + Math.floor(lv*0.8)', atk:'2 + Math.floor(lv*0.8)', cd:'3 + Math.floor(Math.random()*2)', chance:'Math.min(0.32, 0.11 + player.level*0.015)' } },
   { name:'D2 atk0.85/cd3-4',v:{ hp:'3 + Math.floor(Math.random()*3) + Math.floor(lv*0.82)', atk:'2 + Math.floor(lv*0.85)', cd:'3 + Math.floor(Math.random()*2)', chance:'Math.min(0.33, 0.115 + player.level*0.015)' } },
 ];
-if('submit-ai' in ARG){
+if('survivors' in ARG){
+  // ---- 分析模式：列出撑到 >=阈值 回合的每一局及其完整 build（种族/一阶/二阶/第二被动/换装主动）----
+  G = loadGame(); applyBossFilter(G);
+  const TH = +ARG.survivors || 500, N = ARG.games?+ARG.games:80;
+  const races = ARG.race ? G.RACES.filter(r=>r.id===ARG.race) : G.RACES;
+  const nm = (pool,id)=> id&&pool[id] ? pool[id].n[0] : (id||'—');
+  console.log(`撑到 ≥${TH} 回合的局（每种族 ${N} 局）：\n`);
+  let total=0, hit=0;
+  for(const rc of races){ for(let i=0;i<N;i++){ total++;
+    let o; try{ o=playGame(rc); }catch(e){ continue; }
+    if(o.turns>=TH){ hit++;
+      const t1=nm(G.TIER1,o.t1), t2=nm(G.TIER2,o.t2), t2b=nm(G.TIER2,o.t2b);
+      console.log(`${rc.e}${rc.n[0]}  回合${o.turns} 等级${o.level}  | 一阶 ${t1} · 二阶 ${t2}${o.t2b?` +${t2b}`:''}${o.skill2?` · 换装 ${nm(G.TIER1,o.skill2)}→💥`:''}`);
+    }
+  }}
+  console.log(`\n共 ${hit}/${total} 局撑到 ≥${TH} 回合。`);
+}
+else if('submit-ai' in ARG){
   // ---- 提交模式：跑机器人 → 本地重放校验 → 把可验证录像以 agent=ai 提交到 AI 榜 ----
   G = loadGame(); applyBossFilter(G);
   const API = ARG.api || 'https://api.dungeonraid.win';
