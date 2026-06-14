@@ -66,7 +66,7 @@
 |---|---|---|
 | 🧑 人族 Human | 无（全能基准，适合新手） | 无 |
 | 🧝 精灵 Elf | 连击加成翻倍（每多连 1 个 +30%） | 「强健体魄」升级只 +3 生命上限 |
-| 🧔 矮人 Dwarf | 护甲减伤翻倍（每点护甲抵 2 点） | 剑威力 −0.3 |
+| 🎅 矮人 Dwarf | 护甲减伤翻倍（每点护甲抵 2 点） | 剑威力 −0.3 |
 | 🧌 兽人 Orc | 「强健体魄」升级时生命上限翻倍（每次 +12） | **无甲**——永远无法获得护甲（盾牌从棋盘移除） |
 
 ### 🌟 成长路线
@@ -90,8 +90,8 @@
 | 🧑 人族 | 💗 牧师 Priest | 祝福 Blessing | 清掉全场的心，每颗转 3 点经验 |
 | 🧝 精灵 | 🏹 游侠 Ranger | 箭雨 Arrow Rain | 对全场怪造成「剑威力 ×2」的伤害 |
 | 🧝 精灵 | 💰 盗贼 Rogue | 点金 Gold Touch | 把场上所有的剑变成金币 |
-| 🧔 矮人 | 🔰 锻造师 Blacksmith | 锻甲 Forge Armor | 吞下全场的盾，全部转为护甲进度 |
-| 🧔 矮人 | 🔒 守财奴 Miser | 囤金 Hoard | 锁金 3~10 回合（期间不产/不花金币，到期返还**双倍**）|
+| 🎅 矮人 | 🔰 锻造师 Blacksmith | 锻甲 Forge Armor | 吞下全场的盾，全部转为护甲进度 |
+| 🎅 矮人 | 🔒 守财奴 Miser | 囤金 Hoard | 锁金 3~10 回合（期间不产/不花金币，到期返还**双倍**）|
 | 🧌 兽人 | 🔪 狂战士 Berserker | 狂怒 Frenzy | 生命减半并进入**不屈**（仅**本回合**：无论受多少伤都保留 1 血）；并**永久**开启残血增伤——血越少剑伤越高（最高 +60%）|
 | 🧌 兽人 | 🩸 斗士 Fighter | 嗜血 Bloodthirst | 本回合剑链每击中一只怪回 3 血，**且可用剑攻击剑免疫的 Boss（幽灵/小丑）** |
 
@@ -105,8 +105,8 @@
 | 🧑 人族 | 将军 General | 升级时改为**四选一** |
 | 🧝 精灵 | 神射手 Sharpshooter | 剑链每击杀一只怪额外 +2 经验 |
 | 🧝 精灵 | 影袭 Shadow | 炸弹冷却永久缩为 2 回合 |
-| 🧔 矮人 | 爆破手 Demolitionist | 炸弹伤害更高，但花费金币更多 |
-| 🧔 矮人 | 财阀 Tycoon | 获得金币时额外按一半转为经验 |
+| 🎅 矮人 | 爆破手 Demolitionist | 炸弹伤害更高，但花费金币更多 |
+| 🎅 矮人 | 财阀 Tycoon | 获得金币时额外按一半转为经验 |
 | 🧌 兽人 | 巨力 Titan | 最大生命越高，剑链固定伤害越高（每 12 点最大生命 +1，与兽人 HP×2 特性联动）|
 | 🧌 兽人 | 荆棘 Thorns | 受到伤害的一半反弹给攻击者 |
 
@@ -229,7 +229,7 @@ Pick a race at the start. Each has a unique **trait** and a matching **weakness*
 |---|---|---|
 | 🧑 Human | None (all-round baseline, beginner-friendly) | None |
 | 🧝 Elf | Combo bonus doubled (+30% per extra tile) | Tough Body upgrade gives only +3 max HP |
-| 🧔 Dwarf | Armor counts double (each point blocks 2) | Sword power −0.3 |
+| 🎅 Dwarf | Armor counts double (each point blocks 2) | Sword power −0.3 |
 | 🧌 Orc | Tough Body upgrade gives double max HP (+12 each) | **No Armor** — can never gain armor (shields removed from the board) |
 
 ### 🌟 Progression Path
@@ -253,8 +253,8 @@ Each race has 2 Tier-1 classes; every skill has a **5-turn cooldown**:
 | 🧑 Human | 💗 Priest | Blessing | Clear all hearts on the board; each becomes 3 XP |
 | 🧝 Elf | 🏹 Ranger | Arrow Rain | Deal "sword power ×2" damage to all enemies |
 | 🧝 Elf | 💰 Rogue | Gold Touch | Turn every sword on the board into a coin |
-| 🧔 Dwarf | 🔰 Blacksmith | Forge Armor | Absorb all shields on the board into armor progress |
-| 🧔 Dwarf | 🔒 Miser | Hoard | Lock gold for 3–10 turns (no gold in/out; **double** payout at the end) |
+| 🎅 Dwarf | 🔰 Blacksmith | Forge Armor | Absorb all shields on the board into armor progress |
+| 🎅 Dwarf | 🔒 Miser | Hoard | Lock gold for 3–10 turns (no gold in/out; **double** payout at the end) |
 | 🧌 Orc | 🔪 Berserker | Frenzy | Halve HP and become **Undying** (**this turn only**: keep ≥1 HP no matter the damage); also **permanently** enables low-HP scaling — lower HP means higher sword damage (up to +60%) |
 | 🧌 Orc | 🩸 Fighter | Bloodthirst | Heal 3 HP per enemy your sword chain hits this turn, **and your sword can hit sword-immune bosses (Ghost/Clown)** |
 
@@ -268,8 +268,8 @@ Each race has 2 Tier-2 classes; once chosen they apply permanently:
 | 🧑 Human | General | Level-up offers 4 choices instead of 3 |
 | 🧝 Elf | Sharpshooter | +2 extra XP per enemy killed by a sword chain |
 | 🧝 Elf | Shadow | Bomb cooldown becomes 2 turns permanently |
-| 🧔 Dwarf | Demolitionist | Bomb hits harder but costs more gold |
-| 🧔 Dwarf | Tycoon | Gold gained also grants half as much XP |
+| 🎅 Dwarf | Demolitionist | Bomb hits harder but costs more gold |
+| 🎅 Dwarf | Tycoon | Gold gained also grants half as much XP |
 | 🧌 Orc | Titan | Higher max HP means higher flat sword damage (+1 per 12 max HP; synergizes with the Orc's HP×2 trait) |
 | 🧌 Orc | Thorns | Reflect half of damage taken back to the attacker |
 

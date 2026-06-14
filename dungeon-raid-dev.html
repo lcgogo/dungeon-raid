@@ -158,7 +158,7 @@
 (()=>{
 //==================== 配置 ====================
 // 版本号 v主.次.修：小改动改"修"，新Boss/职业改"次"，大版本变更需先确认。页面底部显示。
-const VERSION='v1.14.1';
+const VERSION='v1.14.2';
 const DEV=true;    // 开发版：指向最新开发版本；独立存档 + DEV 标识。正式版在 dungeon-raid.html（DEV=false）
 const REC_API='https://api.dungeonraid.win';   // 录像分享 API（Cloudflare Worker + KV）
 // 带种子随机数（mulberry32）：游戏全程用 rnd() 取代原生随机，配合录制种子可确定性重放
@@ -403,7 +403,7 @@ function makeTile(type){
 const RACES=[
   {id:'human', e:'🧑', n:['人族','Human'], d:['全能基准：无特性、无削弱，适合新手。','Baseline: no trait, no weakness. Beginner-friendly.'], f:p=>{}},
   {id:'elf',   e:'🧝', n:['精灵','Elf'],   d:['特性：连击加成翻倍（每多连1个 +30%）。削弱：「强健体魄」升级只 +3 上限。','Trait: combo bonus doubled (+30%/tile). Weakness: Tough Body upgrade gives only +3 max HP.'], f:p=>{p.comboMult=2; p.maxHpUpMult=0.5;}},
-  {id:'dwarf', e:'🧔', n:['矮人','Dwarf'], d:['特性：护甲减伤翻倍（每点护甲抵 2 点）。削弱：剑威力 −0.3。','Trait: armor counts double (each point blocks 2). Weakness: sword power −0.3.'], f:p=>{p.armorMult=2; p.weaponPower-=0.3;}},
+  {id:'dwarf', e:'🎅', n:['矮人','Dwarf'], d:['特性：护甲减伤翻倍（每点护甲抵 2 点）。削弱：剑威力 −0.3。','Trait: armor counts double (each point blocks 2). Weakness: sword power −0.3.'], f:p=>{p.armorMult=2; p.weaponPower-=0.3;}},
   {id:'orc',   e:'🧌', n:['兽人','Orc'],   d:['特性：「强健体魄」升级时生命上限翻倍（每次 +12）。削弱：无甲——永远无法获得护甲。','Trait: Tough Body upgrade gives double max HP (+12 each). Weakness: No Armor — can never gain armor.'], f:p=>{p.maxHpUpMult=2; p.noArmor=true;}},
 ];
 // 一阶职业：主动技能（f 返回 false 表示无效不发动；返回值表示自带日志）
