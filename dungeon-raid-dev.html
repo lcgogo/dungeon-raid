@@ -158,7 +158,7 @@
 (()=>{
 //==================== 配置 ====================
 // 版本号 v主.次.修：小改动改"修"，新Boss/职业改"次"，大版本变更需先确认。页面底部显示。
-const VERSION='v1.14.4';
+const VERSION='v1.14.5';
 const DEV=true;    // 开发版：指向最新开发版本；独立存档 + DEV 标识。正式版在 dungeon-raid.html（DEV=false）
 const REC_API='https://api.dungeonraid.win';   // 录像分享 API（Cloudflare Worker + KV）
 // 带种子随机数（mulberry32）：游戏全程用 rnd() 取代原生随机，配合录制种子可确定性重放
@@ -221,6 +221,7 @@ function applyStaticLang(){
 //==================== 状态 ====================
 let grid, player, selection, dragging, anim, busy=false, pendingLevels=0;
 let rec=null, replaying=false;   // rec=本局录像{v,seed,race,acts}；replaying=回放中（回放时不录、抑制弹窗）
+let headless=false;   // 无头机器人模式：抑制升级弹窗(及其抽池消耗RNG)，由机器人自行抽池+录制，保证录像可确定性重放
 
 function newPlayer(){
   return {hp:20,maxHp:20, armor:0, shieldXp:0, toughness:0, shopCd:{}, skillCd:0, dmgBy:{}, bossDue:false, gold:0, xp:0, level:1,
@@ -1151,12 +1152,12 @@ const UPGRADES=[
 // 升级三选一的洗牌（消耗 RNG）——供 UI 与回放共用，确保 RNG 消耗一致
 function rollUpgradePool(){
   // 兽人无甲：剔除护甲相关升级（死选项）
-  const avail=player.noArmor ? UPGRADES.filter(u=>u.n[0]!=='重型护甲'&&u.n[0]!=='坚盾强化') : UPGRADES;
+  const avail=player.noArmor ? UPGRADES.filter(u=>u.n[0]!=='加固护甲'&&u.n[0]!=='强化盾术') : UPGRADES;
   return [...avail].sort(()=>rnd()-0.5).slice(0,(player.upgradeChoices||3));  // 将军：四选一
 }
 function applyUpgrade(u){ u.f(player); player.hp=Math.min(player.hp,player.maxHp); pendingLevels--; }
 function showLevelUp(){
-  if(replaying) return;   // 回放：升级由动作序列驱动，不弹窗（洗牌在回放的 'u' 步里消耗）
+  if(replaying||headless) return;   // 回放/无头：升级由动作序列(或机器人)驱动，不弹窗、不在此抽池（避免重复消耗RNG）
   busy=true;
   const pool=rollUpgradePool();
   const card=document.getElementById('card');

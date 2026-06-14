@@ -8,11 +8,11 @@ const html = fs.readFileSync(__dirname + '/' + HTML_FILE, 'utf8');
 let script = html.match(/<script>([\s\S]*?)<\/script>/)[1];
 
 const EXPORT = `globalThis.__G={RACES,RACE_PATHS,TIER1,TIER2,UPGRADES,BOSSES,startGame,resolve,buyItem,shopCost,SHOP,activateSkill,isSwordTarget,
-  raceById, dispatchReplayAct, dmgSourceLabel,
+  raceById, dispatchReplayAct, dmgSourceLabel, rollUpgradePool, applyUpgrade, recAct,
   get grid(){return grid}, set grid(v){grid=v},
-  get player(){return player},
+  get player(){return player}, get rec(){return rec},
   set selection(v){selection=v},
-  set replaying(v){replaying=v}, set replayRec(v){replayRec=v},
+  set replaying(v){replaying=v}, set replayRec(v){replayRec=v}, set headless(v){headless=v},
   get pendingLevels(){return pendingLevels}, set pendingLevels(v){pendingLevels=v},
   get busy(){return busy}, set busy(v){busy=v}};`;
 if (!script.includes('resize(); showClassSelect(); loop();'))
@@ -162,15 +162,14 @@ function toSelection(path, baseType){
 }
 
 // 升级：模拟"三选一"，按优先级挑
-const UP_PRIORITY=['强健体魄','重型护甲','磨利刀刃','坚盾强化','神圣治疗','狂战之力','吸血鬼','生命恢复'];
+const UP_PRIORITY=['强化体魄','加固护甲','磨利刀刃','强化盾术','精研医术','淬炼锋芒','汲取生命','凝聚生机'];
+const upRank=n=>{const i=UP_PRIORITY.indexOf(n);return i<0?99:i;};
 function resolveLevels(){
   while(G.pendingLevels>0){
-    const avail=P().noArmor ? G.UPGRADES.filter(u=>u.n[0]!=='重型护甲'&&u.n[0]!=='坚盾强化') : G.UPGRADES;
-    const pool=shuffle(avail).slice(0,3);
-    const rank=n=>{const i=UP_PRIORITY.indexOf(n);return i<0?99:i;};
-    pool.sort((a,b)=>rank(a.n)-rank(b.n));
-    pool[0].f(P()); P().hp=Math.min(P().hp,P().maxHp);
-    G.pendingLevels=G.pendingLevels-1;
+    const pool=G.rollUpgradePool();   // 用游戏真实升级池（消耗游戏 RNG），保证录像可确定性重放
+    const choose=pool.slice().sort((a,b)=>upRank(a.n[0])-upRank(b.n[0]))[0];
+    G.recAct(['u', G.UPGRADES.indexOf(choose)]);   // 录制升级选择（按 UPGRADES 索引，与回放一致）
+    G.applyUpgrade(choose);   // 内部 u.f + 钳血 + pendingLevels--
   }
   G.busy=false;
 }
@@ -199,15 +198,16 @@ function maybeSkill(){
 function botTransform(){
   const p=P(); if(!p.awaitingTier) return;
   const t=p.awaitingTier;
-  if(t===1){ const ids=G.RACE_PATHS[p.race].t1; const f=ARG.t1; p.tier1=(f&&ids.includes(f))?f:ids[0]; }
-  else if(t===2){ const ids=G.RACE_PATHS[p.race].t2; const f=ARG.t2; const id=(f&&ids.includes(f))?f:ids[0]; p.tier2=id; G.TIER2[id].f(p); p.hp=Math.min(p.hp,p.maxHp); }
-  else if(t===3){ const id=G.RACE_PATHS[p.race].t2.find(x=>x!==p.tier2); if(id){ p.tier2b=id; G.TIER2[id].f(p); p.hp=Math.min(p.hp,p.maxHp); } }   // 200回合：本种族剩余被动
-  else if(t===4){ p.skill2={id:p.tier1||Object.keys(G.TIER1)[0], slot:'bomb'}; p.skill2Cd=0; }   // 350回合：用自己的一阶主动替换炸弹槽
+  if(t===1){ const ids=G.RACE_PATHS[p.race].t1; const f=ARG.t1; const id=(f&&ids.includes(f))?f:ids[0]; G.recAct(['t',1,id]); p.tier1=id; }
+  else if(t===2){ const ids=G.RACE_PATHS[p.race].t2; const f=ARG.t2; const id=(f&&ids.includes(f))?f:ids[0]; G.recAct(['t',2,id]); p.tier2=id; G.TIER2[id].f(p); p.hp=Math.min(p.hp,p.maxHp); }
+  else if(t===3){ const id=G.RACE_PATHS[p.race].t2.find(x=>x!==p.tier2); if(id){ G.recAct(['t',3,id]); p.tier2b=id; G.TIER2[id].f(p); p.hp=Math.min(p.hp,p.maxHp); } }   // 200回合：本种族剩余被动
+  else if(t===4){ const id2=p.tier1||Object.keys(G.TIER1)[0]; G.recAct(['t',4,id2,'bomb']); p.skill2={id:id2, slot:'bomb'}; p.skill2Cd=0; }   // 350回合：用自己的一阶主动替换炸弹槽
   p.awaitingTier=0; G.busy=false;
 }
 
 // ---------- 4) 单局 ----------
 function playGame(rc){
+  G.headless=true;   // 抑制升级弹窗在 resolve 里抽池，避免与机器人 resolveLevels 重复消耗 RNG（保证录像可重放）
   G.startGame(rc);
   let turn=0;
   for(; turn<4000; turn++){
@@ -277,7 +277,50 @@ const CANDIDATES=[
   { name:'D atk0.8/cd3-4', v:{ hp:'3 + Math.floor(Math.random()*3) + Math.floor(lv*0.8)', atk:'2 + Math.floor(lv*0.8)', cd:'3 + Math.floor(Math.random()*2)', chance:'Math.min(0.32, 0.11 + player.level*0.015)' } },
   { name:'D2 atk0.85/cd3-4',v:{ hp:'3 + Math.floor(Math.random()*3) + Math.floor(lv*0.82)', atk:'2 + Math.floor(lv*0.85)', cd:'3 + Math.floor(Math.random()*2)', chance:'Math.min(0.33, 0.115 + player.level*0.015)' } },
 ];
-if(FOCUS){
+if('submit-ai' in ARG){
+  // ---- 提交模式：跑机器人 → 本地重放校验 → 把可验证录像以 agent=ai 提交到 AI 榜 ----
+  G = loadGame(); applyBossFilter(G);
+  const API = ARG.api || 'https://api.dungeonraid.win';
+  const races = ARG.race ? G.RACES.filter(r=>r.id===ARG.race) : G.RACES;
+  if(ARG.race && !races.length){ console.error('未知种族: '+ARG.race); process.exit(1); }
+  const N = ARG.games?+ARG.games:3, DRY='dry' in ARG;
+  (async()=>{
+    const runs=[];
+    for(const rc of races){ for(let i=0;i<N;i++){
+      let out; try{ out=playGame(rc); }catch(e){ console.log('✗ 跑局出错', rc.id, e.message); continue; }
+      runs.push({race:rc.id, out, rec:JSON.parse(JSON.stringify(G.rec))});   // 深拷贝本局录像（下局 startGame 会覆盖 rec）
+    }}
+    // 本地重放校验：与服务端 verify 同一引擎，本地过即服务端可验证
+    const replayCheck=rec=>{ try{ G.replaying=true; G.replayRec=rec; G.startGame(G.raceById(rec.race));
+      const p=G.player; for(const a of rec.acts){ if(p.hp<=0||p.cleared) break; G.dispatchReplayAct(a); }
+      G.replaying=false; return {turns:p.turns, level:p.level, gold:p.gold, cleared:!!p.cleared};
+    }catch(e){ G.replaying=false; return null; } };
+    const good=[];
+    for(const run of runs){
+      const a=replayCheck(run.rec);
+      const ok = a && a.turns===run.out.turns && a.level===run.out.level && a.gold===run.out.gold;
+      console.log((ok?'✓':'✗')+` ${run.race} 回合${run.out.turns} 等级${run.out.level} 金${run.out.gold}`+(ok?'':` ← 重放不符 ${a?`${a.turns}/${a.level}/${a.gold}`:'ERR'}`));
+      if(ok) good.push({...run, cleared:a.cleared});
+    }
+    console.log(`\n可验证录像 ${good.length}/${runs.length}`+(DRY?'（--dry：不提交）':''));
+    if(DRY) return;
+    let posted=0, failed=0;
+    for(const run of good){
+      const clear = run.cleared || run.out.turns>=511;
+      const ep = clear ? '/clear' : '/score';
+      const body = clear ? {level:run.out.level, rec:run.rec, agent:'ai'} : {level:run.out.level, gold:run.out.gold, rec:run.rec, agent:'ai'};
+      try{
+        const res=await fetch(API+ep,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+        const j=await res.json().catch(()=>({}));
+        if(res.ok && (j.id||j.overall)){ posted++; console.log(`↑ ${ep} ${run.race} 回合${run.out.turns} → id ${j.id||'?'}`); }
+        else { failed++; console.log(`✗ ${ep} ${run.race} HTTP${res.status} ${JSON.stringify(j).slice(0,80)}`); }
+      }catch(e){ failed++; console.log('✗ 提交出错', e.message); }
+      await new Promise(r=>setTimeout(r,4200));   // 限流：避开写入端点 20次/60s
+    }
+    console.log(`\n提交完成：${posted} 成功 / ${failed} 失败（agent=ai）。需等下一次每小时 verify 重放校验通过后才会出现在 AI 榜（榜单只显示 verified=1）。`);
+  })();
+}
+else if(FOCUS){
   // ---- 定向模式：指定职业线/Boss，跑详细统计，便于和历史对比 ----
   const cand = ARG.enemy ? CANDIDATES.find(c=>c.name.split(' ')[0]===ARG.enemy||c.name.startsWith(ARG.enemy)) : null;
   if(ARG.enemy && !cand){ console.error('未知 enemy 候选: '+ARG.enemy+'（可选：'+CANDIDATES.map(c=>c.name.split(' ')[0]).join(', ')+'）'); process.exit(1); }
@@ -310,7 +353,7 @@ if(FOCUS){
 } else {
   // ---- 扫描模式：四族 × 多套敌人数值，找最接近目标回合的一套 ----
   console.log('种族系统平衡扫描（每种族 '+GAMES+' 局，回合中位数），目标 ≈ '+TARGET+'\n');
-  console.log('候选             | 人类  精灵  矮人  兽人 |总回合中位');
+  console.log('候选             | 人族  精灵  矮人  兽人 |总回合中位');
   console.log('-----------------|------------------------|--------');
   let bestCand=null;
   for(const cand of CANDIDATES){
@@ -320,7 +363,7 @@ if(FOCUS){
     const byCls = {}; out.forEach(r=>byCls[r.cls]=r.turn_med);
     console.log(
       cand.name.padEnd(16)+' | '+
-      String(byCls['人类']).padStart(5)+String(byCls['精灵']).padStart(6)+
+      String(byCls['人族']).padStart(5)+String(byCls['精灵']).padStart(6)+
       String(byCls['矮人']).padStart(6)+String(byCls['兽人']).padStart(6)+' | '+
       String(turnMed).padStart(6));
     cand.turnMed=turnMed; cand.byCls=byCls;
