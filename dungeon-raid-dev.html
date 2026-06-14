@@ -161,7 +161,7 @@
 (()=>{
 //==================== 配置 ====================
 // 版本号 v主.次.修：小改动改"修"，新Boss/职业改"次"，大版本变更需先确认。页面底部显示。
-const VERSION='v1.13.2';
+const VERSION='v1.13.3';
 const DEV=true;    // 开发版：指向最新开发版本；独立存档 + DEV 标识。正式版在 dungeon-raid.html（DEV=false）
 const REC_API='https://api.dungeonraid.win';   // 录像分享 API（Cloudflare Worker + KV）
 // 带种子随机数（mulberry32）：游戏全程用 rnd() 取代原生随机，配合录制种子可确定性重放
@@ -417,7 +417,7 @@ const RACES=[
 const TIER1={
   knight:{n:['骑士','Knight'], skill:{name:['圣盾','Aegis'], short:['本回合免伤','No damage this turn'], cd:5, f:p=>{ p.shieldTurn=true; log(tr('🛡️ 圣盾：本回合免疫伤害','🛡️ Aegis: immune to damage this turn')); return true; }}},
   priest:{n:['牧师','Priest'], skill:{name:['祝福','Blessing'], short:['全场❤️转经验','Hearts→XP'], cd:5, f:p=>{ let n=0; for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){const t=grid[r][c]; if(t&&t.type==='heart'){grid[r][c]=null;n++;}} if(!n)return false; player.xp+=n*3; applyGravity(); syncPositions(false); checkLevel(); log(tr(`💗 祝福：${n} 颗心 → ${n*3} 经验`,`💗 Blessing: ${n} hearts → ${n*3} XP`)); return n; }}},
-  ranger:{n:['游侠','Ranger'], skill:{name:['箭雨','Arrow Rain'], short:['全场怪受剑威力×2','×2 sword power to all'], cd:5, f:p=>{ const pool=Math.floor(p.weaponPower*2*(p.swordMult||1)); const r=dealDamage(pool,null); applyGravity(); syncPositions(false); log(tr(`🏹 箭雨：全场 ${r.dmg} 伤害`+(r.kills?`，击杀 ${r.kills}`:''),`🏹 Arrow Rain: ${r.dmg} dmg`+(r.kills?`, ${r.kills} killed`:''))); return true; }}},
+  ranger:{n:['游侠','Ranger'], skill:{name:['箭雨','Arrow Rain'], short:['全场怪受剑威力×2','×2 sword power to all'], cd:5, f:p=>{ const titanFlat=p.titan?Math.floor(p.maxHp/12):0; const pool=Math.floor((p.weaponPower*2 + p.swordFlat + titanFlat)*(p.swordMult||1)); const r=dealDamage(pool,null); applyGravity(); syncPositions(false); log(tr(`🏹 箭雨：全场 ${r.dmg} 伤害`+(r.kills?`，击杀 ${r.kills}`:''),`🏹 Arrow Rain: ${r.dmg} dmg`+(r.kills?`, ${r.kills} killed`:''))); return true; }}},
   rogue:{n:['盗贼','Rogue'], skill:{name:['点金','Gold Touch'], short:['剑变金币','Swords→Coins'], cd:5, f:p=>{ let n=0; for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){const t=grid[r][c]; if(t&&t.type==='sword'){t.type='coin';n++;}} if(!n)return false; log(tr(`💰 点金：${n} 把剑化为金币`,`💰 Gold Touch: ${n} swords → coins`)); return n; }}},
   blacksmith:{n:['锻造师','Blacksmith'], skill:{name:['锻甲','Forge Armor'], short:['收全场盾→护甲','Absorb all shields'], cd:5, f:p=>{ if(p.noArmor) return false; let n=0; for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){const t=grid[r][c]; if(t&&t.type==='shield'){grid[r][c]=null;n++;}} if(!n)return false; p.shieldXp+=n*p.armorPerShield; while(p.shieldXp>=armorNeeded(p.armor)){p.shieldXp-=armorNeeded(p.armor);p.armor++;} applyGravity(); syncPositions(false); log(tr(`🔰 锻甲：吞下 ${n} 盾（减伤 ${p.armor}）`,`🔰 Forge: ${n} shields (armor ${p.armor})`)); return n; }}},
   miser:{n:['守财奴','Miser'], skill:{name:['囤金','Hoard'], short:['锁金生利','Lock gold for interest'], cd:5, f:p=>{ if(p.goldLock>0) return false; const n=Math.max(3,Math.min(10,Math.floor(p.gold/10))); p.goldLock=n; p.goldFrozen=0; log(tr(`🔒 囤金：锁定 ${n} 回合（期间不产/不花金币，到期返还双倍）`,`🔒 Hoard: locked ${n} turns (no gold in/out; doubled payout at end)`)); return true; }}},
@@ -862,7 +862,12 @@ function moveDrag(e){
 }
 function endDrag(e){
   if(!dragging) return; dragging=false;
-  if(selection.length>=2) resolve();
+  if(selection.length>=2){
+    // 剑链必须含至少一把剑（剑是武器）：从怪起手却没把任何剑连进来 → 不算攻击，取消且不消耗回合
+    if(selection[0].type==='sword' && !selection.some(s=>{ const t=grid[s.r][s.c]; return t&&t.type==='sword'; })){
+      log(tr('⚔️ 没把剑连进来，无法攻击——剑才是你的武器！','⚔️ No sword in the chain — link a 🔪 to attack!'));
+    } else resolve();
+  }
   else if(selection.length===1 && !dragExtended){ // 真·轻触单格（从未连出）→ 显示说明；拖出又退回第一格则只取消，不弹说明
     const s=selection[0], t=grid[s.r][s.c];
     if(t) showTileInfo(t);
