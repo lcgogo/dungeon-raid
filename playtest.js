@@ -334,7 +334,7 @@ else if('submit-ai' in ARG){
         if(res.ok && (j.id||j.overall)){ posted++; console.log(`↑ ${ep} ${run.race} 回合${run.out.turns} → id ${j.id||'?'}`); }
         else { failed++; console.log(`✗ ${ep} ${run.race} HTTP${res.status} ${JSON.stringify(j).slice(0,80)}`); }
       }catch(e){ failed++; console.log('✗ 提交出错', e.message); }
-      await new Promise(r=>setTimeout(r,4200));   // 限流：避开写入端点 20次/60s
+      await new Promise(r=>setTimeout(r, +ARG.gap||4200));   // 限流：避开写入端点 20次/60s（--gap 可调，单位 ms）
     }
     console.log(`\n提交完成：${posted} 成功 / ${failed} 失败（agent=ai）。需等下一次每小时 verify 重放校验通过后才会出现在 AI 榜（榜单只显示 verified=1）。`);
   })();
