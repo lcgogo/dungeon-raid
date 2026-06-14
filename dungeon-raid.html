@@ -161,7 +161,7 @@
 (()=>{
 //==================== 配置 ====================
 // 版本号 v主.次.修：小改动改"修"，新Boss/职业改"次"，大版本变更需先确认。页面底部显示。
-const VERSION='v1.12.0';
+const VERSION='v1.12.1';
 const DEV=false;   // release build (DEV=false); dev build is dungeon-raid-dev.html (DEV=true)
 const REC_API='https://api.dungeonraid.win';   // 录像分享 API（Cloudflare Worker + KV）
 // 带种子随机数（mulberry32）：游戏全程用 rnd() 取代原生随机，配合录制种子可确定性重放
@@ -758,7 +758,7 @@ function loop(){
 }
 
 //==================== 输入 ====================
-let lastPointer=null;
+let lastPointer=null, dragExtended=false;   // dragExtended：本次拖动是否曾连到第2格（用于区分"真·轻触"与"拖出又退回第一格")
 function cellFromEvent(e){
   const rect=cv.getBoundingClientRect();
   const sx=cv.width/rect.width, sy=cv.height/rect.height;
@@ -776,7 +776,7 @@ function startDrag(e){
   const base = isSwordTarget(t) ? 'sword' : t.type;   // 怪 / 可攻击Boss 起手 → 剑链
   // 不可连的 Boss 仍允许轻触查看信息（连线不会扩展，松手即弹说明）
   if(t.type!=='boss' && !CONNECTABLE.includes(base)) return;
-  dragging=true; selection=[{r:cell.r,c:cell.c,type:base}];
+  dragging=true; dragExtended=false; selection=[{r:cell.r,c:cell.c,type:base}];
   e.preventDefault();
 }
 function moveDrag(e){
@@ -794,13 +794,13 @@ function moveDrag(e){
   if(base!=='sword' && !CONNECTABLE.includes(base)) return;   // 'boss' 等不可成链的起手仅用于轻触查看信息，不可拖成多格
   const ok = t.type===base || (base==='sword' && isSwordTarget(t)); // 剑链可穿怪/可攻击Boss
   if(!ok) return;
-  if(Math.abs(cell.r-last.r)<=1 && Math.abs(cell.c-last.c)<=1) // 相邻8向
-    selection.push({r:cell.r,c:cell.c,type:t.type});
+  if(Math.abs(cell.r-last.r)<=1 && Math.abs(cell.c-last.c)<=1){ // 相邻8向
+    selection.push({r:cell.r,c:cell.c,type:t.type}); dragExtended=true; }
 }
 function endDrag(e){
   if(!dragging) return; dragging=false;
   if(selection.length>=2) resolve();
-  else if(selection.length===1){ // 轻触单格 → 显示该方块说明
+  else if(selection.length===1 && !dragExtended){ // 真·轻触单格（从未连出）→ 显示说明；拖出又退回第一格则只取消，不弹说明
     const s=selection[0], t=grid[s.r][s.c];
     if(t) showTileInfo(t);
   }
