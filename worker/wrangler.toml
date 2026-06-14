@@ -11,3 +11,11 @@ custom_domain = true
 [[kv_namespaces]]
 binding = "REC"
 id = "4120eb6aa18944e7892d9607bc5cfb06"
+
+# D1：排行榜分数。database_id 在 `wrangler d1 create dungeon-raid-scores` 后填入。
+[[d1_databases]]
+binding = "DB"
+database_name = "dungeon-raid-scores"
+database_id = "eea75d9c-bce5-433a-81a5-10c946a664fd"
+
+# 注：验证密钥 VERIFY_SECRET 用 `wrangler secret put VERIFY_SECRET` 设置（不写在此文件）

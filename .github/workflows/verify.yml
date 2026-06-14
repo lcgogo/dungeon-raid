@@ -1,0 +1,20 @@
+name: verify-leaderboard
+# 每小时验证排行榜上未验证的高分录像（确定性重放比对，挡作弊）
+on:
+  schedule:
+    - cron: '17 * * * *'        # 每小时第 17 分（避开整点高峰）
+  workflow_dispatch:            # 也可手动触发
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Replay-verify pending scores
+        run: node verify.js
+        env:
+          API_BASE: https://api.dungeonraid.win
+          VERIFY_SECRET: ${{ secrets.VERIFY_SECRET }}

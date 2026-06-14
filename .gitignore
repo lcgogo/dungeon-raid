@@ -8,3 +8,6 @@ github-dungeon-raid_ed25519.pub
 # wrangler 本地缓存
 worker/.wrangler/
 node_modules/
+
+# Pages 部署用的临时干净目录（由 deploy-pages.sh 生成）
+public/
