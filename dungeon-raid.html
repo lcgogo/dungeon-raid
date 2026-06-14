@@ -161,8 +161,8 @@
 (()=>{
 //==================== 配置 ====================
 // 版本号 v主.次.修：小改动改"修"，新Boss/职业改"次"，大版本变更需先确认。页面底部显示。
-const VERSION='v1.10.1';
-const DEV=false;   // æ­£å¼çï¼DEV=falseï¼ï¼å¼åçå¨ dungeon-raid-dev.htmlï¼DEV=trueï¼
+const VERSION='v1.11.0';
+const DEV=false;   // release build (DEV=false); dev build is dungeon-raid-dev.html (DEV=true)
 const REC_API='https://api.dungeonraid.win';   // 录像分享 API（Cloudflare Worker + KV）
 // 带种子随机数（mulberry32）：游戏全程用 rnd() 取代原生随机，配合录制种子可确定性重放
 let __rng=null;
@@ -235,7 +235,8 @@ function newPlayer(){
     lifesteal:0, regen:0, coinXp:0, turns:0,
     race:null, tier1:null, tier2:null, t1Pending:false, t2Pending:false,   // 种族/转职
     comboMult:1, swordMult:1, armorMult:1, maxHpUpMult:1, noArmor:false,    // 种族特性修正
-    upgradeChoices:3, bombCd:3, goldLock:0, goldFrozen:0};                  // 转职被动相关
+    upgradeChoices:3, bombCd:3, goldLock:0, goldFrozen:0,                   // 转职被动相关
+    finaleStarted:false, finaleWave:0, cleared:false};                      // 终局：终焉之主浪潮 / 破关
 }
 function xpNeeded(lv){ return 10 + lv*6; }
 function armorNeeded(a){ return 3 + a*3; }   // 护甲像经验一样累积：每升 1 点护甲所需的盾进度递增（越往后越贵）
@@ -290,15 +291,52 @@ const BOSSES=[
     onSpawn(t){ const pct=0.2*(t.tier||1); const steal=Math.floor(player.gold*pct); t.stolen=steal;
       if(steal>0){ player.gold-=steal; log(tr(`🦹 小偷现身，偷走 ${steal} 金币（${Math.round(pct*100)}%）！倒计时内击败它可夺回。`,`🦹 Thief steals ${steal} gold (${Math.round(pct*100)}%)! Beat it before the timer to recover it.`)); }
       else log(tr(`🦹 小偷现身，但你身无分文…`,`🦹 The Thief appears, but you have no gold…`)); } },
-  { id:'spider', emoji:'🕷️', name:['蜘蛛','Spider'], monster:true, swordable:true, perTurn:true,
-    special:['剧毒：每回合按血量百分比掉血','Venom: drains a % of your HP each turn'],
-    desc:['它一现身，你就中了剧毒——血条变绿，并且【每回合】流失生命：一阶 10%、二阶 20%（依档位递增），无视护甲。用剑或炸弹击败它即可解毒，越快越好！','The instant it appears you are poisoned — your HP bar turns green and you lose HP every turn: 10% at Lv1, 20% at Lv2 (scaling per tier), ignoring armor. Sword or bomb it to cure the venom — the faster the better!'],
-    onSpawn(t){ log(tr('🕷️ 蜘蛛吐出毒丝，你中毒了！血条变绿，每回合按血量百分比流失生命。','🕷️ The Spider poisons you! HP bar turns green, losing a % of HP each turn.')); },
-    act(t){ const pct=0.1*(t.tier||1); const dmg=hurtPlayer(Math.max(1,Math.ceil(player.maxHp*pct)), 'spider', true);
-      if(dmg>0) log(tr(`🕷️ 中毒：流失 ${dmg} 生命（${Math.round(pct*100)}%）`,`🕷️ Venom: −${dmg} HP (${Math.round(pct*100)}%)`)); } },
+  { id:'zombie', emoji:'🧟', name:['僵尸','Zombie'], monster:true, swordable:true, perTurn:true,
+    special:['尸毒感染：每回合按血量百分比掉血','Plague: drains a % of your HP each turn'],
+    desc:['它一现身就让你感染尸毒——血条变绿，并且【每回合】流失生命：一阶 10%、二阶 20%（依档位递增），无视护甲。用剑或炸弹击败它即可解除感染，越快越好！','The instant it appears you are infected — your HP bar turns green and you lose HP every turn: 10% at Lv1, 20% at Lv2 (scaling per tier), ignoring armor. Sword or bomb it to cure the infection — the faster the better!'],
+    onSpawn(t){ log(tr('🧟 僵尸抓向你，你感染了尸毒！血条变绿，每回合按血量百分比流失生命。','🧟 The Zombie infects you! HP bar turns green, losing a % of HP each turn.')); },
+    act(t){ const pct=0.1*(t.tier||1); const dmg=hurtPlayer(Math.max(1,Math.ceil(player.maxHp*pct)), 'zombie', true);
+      if(dmg>0) log(tr(`🧟 尸毒感染：流失 ${dmg} 生命（${Math.round(pct*100)}%）`,`🧟 Plague: −${dmg} HP (${Math.round(pct*100)}%)`)); } },
+  // 终焉之主：第 500 回合出现。无血量、无攻击、不可被打。每回合把若干非怪/非Boss棋子变成随机Boss（第1波1个…第10波10个），撑满10波不死即破关。不进随机池。
+  { id:'finale', emoji:'👑', name:['终焉之主','Overlord'], noRandom:true, perTurn:true, finale:true,
+    special:['每回合召唤渐增的Boss浪潮，撑过10波即破关','Summons growing boss waves; survive 10 to clear'],
+    desc:['终局考验：它本身无血、无攻击、打不掉。但【每回合】把若干非怪/非Boss棋子变成随机 Boss——第 1 波 1 个、第 2 波 2 个…第 10 波 10 个。撑满 10 波还活着即【破关】！','The final trial: it has no HP, no attack, and cannot be killed. Each turn it turns several non-enemy tiles into random bosses — 1 on wave 1, 2 on wave 2… 10 on wave 10. Survive all 10 waves to CLEAR the game!'],
+    act(t){
+      if(player.finaleWave>=10){ onClear(); return; }   // 已撑满10波且仍存活 → 破关
+      player.finaleWave++;
+      let made=0; for(let i=0;i<player.finaleWave;i++){ if(spawnRandomBossTile()) made++; }
+      syncPositions(false);
+      log(tr(`👑 终焉第 ${player.finaleWave}/10 波：召唤 ${made} 个 Boss！`,`👑 Wave ${player.finaleWave}/10: ${made} bosses summoned!`));
+    } },
 ];
+function randomBossDef(){ const pool=BOSSES.filter(b=>!b.noRandom); return pool[Math.floor(rnd()*pool.length)]; }
+// 把一个非怪/非Boss棋子变成随机 Boss（终焉浪潮用）；返回是否成功
+function spawnRandomBossTile(){
+  const cells=[];
+  for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const t=grid[r][c]; if(t && t.type!=='enemy' && t.type!=='boss') cells.push([r,c]); }
+  if(!cells.length) return false;
+  const [r,c]=cells[Math.floor(rnd()*cells.length)];
+  const def=randomBossDef(), tier=1;   // 终焉浪潮用基础档：可被清掉，挑战在数量而非单体肉度
+  const s=def.monster?enemyStats():bossStats();
+  const cdv=(s.cd!=null?s.cd:s.baseCd);
+  grid[r][c]={type:'boss', bossId:def.id, tier, hp:s.hp, maxHp:s.hp, atk:s.atk, cd:cdv, baseCd:cdv};
+  if(def.onSpawn) def.onSpawn(grid[r][c]);
+  addBossFx(r,c,false);
+  return true;
+}
+function spawnFinale(){
+  let cells=[];
+  for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const t=grid[r][c]; if(t && t.type!=='enemy' && t.type!=='boss') cells.push([r,c]); }
+  if(!cells.length){ for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const t=grid[r][c]; if(t && t.type!=='boss') cells.push([r,c]); } }
+  if(!cells.length) return;
+  const [r,c]=cells[Math.floor(rnd()*cells.length)];
+  grid[r][c]={type:'boss', bossId:'finale', tier:bossTier(), hp:0, maxHp:0, atk:0, cd:0, baseCd:0, finale:true};
+  syncPositions(false);
+  addBossFx(r,c,true);   // 金色入场特效
+  log(tr('👑 终焉之主降临！撑过 10 波 Boss 浪潮即可破关！','👑 The Overlord descends! Survive 10 waves of bosses to clear the game!'));
+}
 function bossDef(t){ return BOSSES.find(b=>b.id===(t&&t.bossId)) || BOSSES[0]; }
-function isSwordTarget(t){ return !!t && (t.type==='enemy' || (t.type==='boss' && (bossDef(t).swordable || !!(player&&player.pierceTurn)))); }  // 斗士嗜血：本回合可攻击剑免疫 Boss
+function isSwordTarget(t){ return !!t && !t.finale && (t.type==='enemy' || (t.type==='boss' && (bossDef(t).swordable || !!(player&&player.pierceTurn)))); }  // 斗士嗜血：本回合可攻击剑免疫 Boss；终焉之主(finale)永不可攻击
 // 击败小偷：夺回它偷走的金币
 function thiefRecover(t){ if(t&&t.bossId==='thief'&&t.stolen>0){ player.gold+=t.stolen; log(tr(`🦹 抓住小偷！夺回 ${t.stolen} 金币。`,`🦹 Caught the Thief! Recovered ${t.stolen} gold.`)); t.stolen=0; } }
 // 死亡报告：累计各来源对玩家造成的伤害
@@ -314,8 +352,17 @@ function bossStats(){
 }
 function bossTier(){ return 1 + Math.floor(player.turns/50); }  // 每 50 回合 Boss 强度档位 +1
 function hasBoss(){ for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++) if(grid[r][c]&&grid[r][c].type==='boss') return true; return false; }
-// 中毒：场上存在蜘蛛 Boss 时血条变绿（蜘蛛死即解毒）
-function isPoisoned(){ for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const t=grid[r][c]; if(t&&t.type==='boss'&&t.bossId==='spider') return true; } return false; }
+// 是否还有可行连线（同类连接型 ×2，或 剑+相邻可攻击目标）。终局棋盘被Boss填满时用来判负。
+function hasAnyMove(){
+  for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const t=grid[r][c]; if(!t) continue;
+    for(const [dr,dc] of [[0,1],[1,0],[1,1],[1,-1]]){ const nr=r+dr,nc=c+dc; if(nr<0||nr>=ROWS||nc<0||nc>=COLS) continue; const u=grid[nr][nc]; if(!u) continue;
+      if(t.type===u.type && CONNECTABLE.includes(t.type)) return true;                 // 同类连接
+      if(isSwordTarget(t) && isSwordTarget(u)) return true;  // 相邻两个剑目标即可起手成剑链（无需棋盘上有"剑"格）
+    } }
+  return false;
+}
+// 感染：场上存在僵尸 Boss 时血条变绿（僵尸死即解除感染）
+function isInfected(){ for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const t=grid[r][c]; if(t&&t.type==='boss'&&t.bossId==='zombie') return true; } return false; }
 // 随机把 n 个非 Boss 棋子换成新的随机棋子
 function scrambleTiles(n){
   const cells=[];
@@ -332,13 +379,14 @@ function spawnBoss(){
   for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++) if(grid[r][c]) cells.push([r,c]);
   if(!cells.length) return;
   const [r,c]=cells[Math.floor(rnd()*cells.length)];
-  const def=BOSSES[Math.floor(rnd()*BOSSES.length)];
+  const def=randomBossDef();   // 排除终焉之主（noRandom）
   const tier=bossTier();
   const s = def.monster ? enemyStats() : bossStats();   // 怪属性型 Boss 用怪物数值
   const cdv = (s.cd!=null ? s.cd : s.baseCd);
   const mult = def.noTierScale ? 1 : tier;              // 刺客等：血量/攻击始终同级怪物，不吃档位倍率
   const hp=s.hp*mult, atk=s.atk*mult;
   grid[r][c]={type:'boss', bossId:def.id, tier, hp, maxHp:hp, atk, cd:cdv, baseCd:cdv};
+  addBossFx(r,c,false);
   const tlabel = tier>1?` Lv${tier}`:'';
   log(tr(`${def.emoji} Boss【${L(def.name)}】${tlabel} 现身！轻点它查看打法。`,`${def.emoji} Boss [${L(def.name)}]${tlabel} appears! Tap it to see how to fight.`));
   if(def.onSpawn) def.onSpawn(grid[r][c]);
@@ -488,7 +536,7 @@ function onBossKilled(){
 let __seedCtr=0;
 function startGame(rc){
   if(replaying){ srand(replayRec.seed); }                       // 回放：用录像里的种子，不新建录像
-  else { const seed=((Date.now()>>>0)^(__seedCtr++*0x9E3779B9))>>>0; srand(seed); rec={v:1,seed,ver:VERSION,race:rc.id,acts:[]}; saveRec(); }   // ver：录制时的游戏版本，排行榜按版本分桶
+  else { const seed=((Date.now()>>>0)^(__seedCtr++*0x9E3779B9))>>>0; srand(seed); rec={v:1,seed,ver:VERSION,race:rc.id,t0:Date.now(),acts:[]}; saveRec(); }   // ver：录制时的游戏版本，排行榜按版本分桶；t0：开局时刻，各动作时间戳相对它（操作间隔）
   player=newPlayer(); player.race=rc.id; rc.f(player); player.hp=player.maxHp;
   selection=[]; dragging=false; busy=false; pendingLevels=0;
   grid=[];
@@ -508,7 +556,8 @@ function startGame(rc){
 const SAVE_KEY=DEV?'dr_save_dev':'dr_save', BEST_KEY=DEV?'dr_best_dev':'dr_best';   // dev 版独立存档，与正式版互不覆盖
 const REC_KEY=DEV?'dr_rec_dev':'dr_rec', REC_LAST_KEY=DEV?'dr_rec_last_dev':'dr_rec_last';  // 进行中录像 / 上一局完整录像
 // 录制一个玩家动作（回放中不录）。动作：['m',cells,baseType] 连线 / ['b',key] 购买 / ['k'] 技能 / ['u',idx] 升级选择 / ['t',tier,id] 转职选择
-function recAct(a){ if(rec && !replaying){ rec.acts.push(a); saveRec(); } }
+// 每个动作末尾追加一个时间戳（epoch ms，相对开局可算操作间隔）——仅供离线分析（后续黑盒判定是否 AI 录像），回放/校验按固定下标取值，忽略该尾元素，旧录像无此字段也能正常回放。
+function recAct(a){ if(rec && !replaying){ a.push(Date.now()-(rec.t0||0)); rec.acts.push(a); saveRec(); } }
 function saveRec(){ try{ if(rec) localStorage.setItem(REC_KEY, JSON.stringify(rec)); }catch(e){} }
 function loadRec(){ try{ return JSON.parse(localStorage.getItem(REC_KEY)||'null'); }catch(e){ return null; } }
 function getLastRec(){ try{ return JSON.parse(localStorage.getItem(REC_LAST_KEY)||'null'); }catch(e){ return null; } }
@@ -518,7 +567,7 @@ function saveGame(){
     localStorage.setItem(SAVE_KEY, JSON.stringify({
       pendingLevels,
       player:{...player},
-      grid: grid.map(row=>row.map(t=> t?{type:t.type,hp:t.hp,maxHp:t.maxHp,atk:t.atk,cd:t.cd,baseCd:t.baseCd,bossId:t.bossId,tier:t.tier,stolen:t.stolen}:null)),
+      grid: grid.map(row=>row.map(t=> t?{type:t.type,hp:t.hp,maxHp:t.maxHp,atk:t.atk,cd:t.cd,baseCd:t.baseCd,bossId:t.bossId,tier:t.tier,stolen:t.stolen,finale:t.finale}:null)),
     }));
   }catch(e){}
 }
@@ -629,9 +678,10 @@ function draw(){
       ctx.font=Math.floor(TILE*0.30)+'px '+EMOJI_FONT;
       ctx.textAlign='center'; ctx.textBaseline='middle';
       ctx.fillText(doomed?'💀':(isBoss?bdef.emoji:'👹'), cx, y+TILE*0.30);
-      // 血量
+      // 血量（终焉之主无血、打不掉 → 显示 ∞ 而非 0）
       ctx.fillStyle='#fff'; ctx.font='700 '+Math.floor(TILE*0.34)+'px system-ui';
-      ctx.fillText(t.hp, cx, cy+TILE*0.10);
+      if(!t.finale) ctx.fillText(t.hp, cx, cy+TILE*0.10);
+      else { ctx.fillStyle='#ffd54a'; ctx.fillText('∞', cx, cy+TILE*0.10); }
       // 攻击力角标（左上）——特效/大招型 Boss（攻击力无意义）不显示
       if(!isBoss || (!bdef.act && !bdef.cdAttack)){
         const ax=x+10, ay=y+10, ar=TILE*0.16;
@@ -655,6 +705,7 @@ function draw(){
       ctx.fillText(d.emoji, cx, cy);
     }
   }
+  drawBossFx();   // Boss 入场冲击环（叠在棋子之上）
   // 连接线
   if(selection.length){
     const d=DEF[selection[0].type];
@@ -670,12 +721,34 @@ function draw(){
 function hexA(hex,a){ const n=parseInt(hex.slice(1),16);
   return `rgba(${n>>16&255},${n>>8&255},${n&255},${a})`; }
 
+//==================== Boss 入场特效 ====================
+// Boss 降临时从该格爆出扩散冲击环 + 闪光，让"有 Boss 入场"一眼可辨（区别于普通小怪刷新）。纯帧驱动、可重放无关。
+const bossFx=[];           // {r,c,life,max,gold}
+const FX_LIFE=46;          // 帧数（约 0.75s @60fps）
+function addBossFx(r,c,gold){ bossFx.push({r,c,life:FX_LIFE,max:FX_LIFE,gold:!!gold}); }
+function drawBossFx(){
+  for(const f of bossFx){
+    const p=1-f.life/f.max;                          // 0→1 进度
+    const cx=cellX(f.c)+TILE/2, cy=cellY(f.r)+TILE/2;
+    const col=f.gold?'#ffd54a':'#ff5252';            // 终焉之主金，普通 Boss 红
+    ctx.save();
+    if(p<0.35){ ctx.beginPath(); ctx.arc(cx,cy,TILE*0.56,0,7); ctx.fillStyle=hexA(col,0.5*(1-p/0.35)); ctx.fill(); }   // 起手闪光
+    for(let k=0;k<2;k++){ const pp=p-k*0.22; if(pp<=0||pp>=1) continue;   // 双层扩散环
+      ctx.beginPath(); ctx.arc(cx,cy,TILE*(0.18+pp*(f.gold?1.3:1.0)),0,7);
+      ctx.lineWidth=TILE*0.13*(1-pp); ctx.strokeStyle=hexA(col,0.75*(1-pp));
+      ctx.shadowColor=col; ctx.shadowBlur=16*(1-pp); ctx.stroke(); }
+    ctx.restore();
+  }
+  ctx.shadowBlur=0;
+}
+
 function loop(){
   if(!grid){ requestAnimationFrame(loop); return; } // 棋盘未创建（选职业中）
   // 缓动下落
   for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const t=grid[r][c]; if(!t)continue;
     const ty=cellY(r); if(t.curY===undefined)t.curY=ty;
     t.curY += (ty-t.curY)*0.3; if(Math.abs(ty-t.curY)<0.5)t.curY=ty; }
+  for(let i=bossFx.length-1;i>=0;i--){ if(--bossFx[i].life<=0) bossFx.splice(i,1); }   // 推进/回收入场特效
   draw(); requestAnimationFrame(loop);
 }
 
@@ -713,6 +786,7 @@ function moveDrag(e){
   }
   if(selection.some(s=>s.r===cell.r&&s.c===cell.c)) return; // 已选
   const base=selection[0].type;
+  if(base!=='sword' && !CONNECTABLE.includes(base)) return;   // 'boss' 等不可成链的起手仅用于轻触查看信息，不可拖成多格
   const ok = t.type===base || (base==='sword' && isSwordTarget(t)); // 剑链可穿怪/可攻击Boss
   if(!ok) return;
   if(Math.abs(cell.r-last.r)<=1 && Math.abs(cell.c-last.c)<=1) // 相邻8向
@@ -737,7 +811,7 @@ const SHOP={
   heal: {cost:15, f(){ const h=gainHeal(10); log(tr(`💊 喝下药水，回复 ${h} 生命`,`💊 Potion: +${h} HP`)); }},
   bomb: {cost:25, f(){ let kills=0, boss=0; const D=player.bombBoost?10:6;   // 爆破手：伤害更高
     for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const t=grid[r][c];
-      if(t&&(t.type==='enemy'||t.type==='boss')){ t.hp-=D;
+      if(t&&(t.type==='enemy'||t.type==='boss')){ if(t.finale) continue; t.hp-=D;   // 终焉之主打不掉
         if(t.hp<=0){ const isBoss=t.type==='boss'; grid[r][c]=null;
           if(isBoss){ thiefRecover(t); boss++; player.xp+=15; player.gold+=20; onBossKilled(); } else { kills++; player.xp+=3+(player.killXp||0); } } } }
     log(tr(`💥 投掷炸弹，全场 −${D}`,`💥 Bomb: all foes −${D}`) + (kills?tr(`，击杀 ${kills} 只👹`,`, ${kills} killed`):'') + (boss?tr(`，击败 Boss！厚赏 💰+20、经验+15`,`, Boss down! 💰+20, XP+15`):''));
@@ -831,15 +905,22 @@ function resolve(){
   if(player.skillCd>0) player.skillCd--; // 技能冷却递减
   if(player.goldLock>0){ player.goldLock--; if(player.goldLock===0){ const pay=player.goldFrozen*2; player.gold+=pay; player.goldFrozen=0; log(tr(`🔓 囤金到期：返还 ${pay} 金币`,`🔓 Hoard matured: +${pay} gold`)); } } // 守财奴囤金到期
   advanceEnemies();
+  if(player.cleared) return;   // 终焉第10波撑过 → onClear 已结算，停止后续处理
   if(player.regen) gainHeal(player.regen);
-  if(player.turns % 10 === 0) player.bossDue=true;          // 每 10 回合：该来一个 Boss
-  if(player.bossDue && !hasBoss()){ spawnBoss(); player.bossDue=false; }  // 场上无 Boss 才投放；被占用则等清场后补上
+  if(player.turns===500 && !player.finaleStarted){ player.finaleStarted=true; player.finaleWave=0; spawnFinale(); }  // 第500回合：终局降临
+  if(!player.finaleStarted){
+    if(player.turns % 10 === 0) player.bossDue=true;          // 每 10 回合：该来一个 Boss
+    if(player.bossDue && !hasBoss()){ spawnBoss(); player.bossDue=false; }  // 场上无 Boss 才投放；被占用则等清场后补上
+  }
 
   applyGravity();
   syncPositions(false);
   checkLevel();
   updateHUD();
   if(player.hp<=0){ gameOver(); return; }
+  if(player.finaleStarted && !player.cleared && !hasAnyMove()){   // 终局：棋盘被Boss淹没、无路可走 → 判负
+    log(tr('👑 棋盘被 Boss 淹没，无路可走…','👑 Overrun by bosses — no moves left…')); gameOver(); return;
+  }
   if(player.t1Pending){ player.t1Pending=false; showTierSelect(1); return; }   // 击败50回合Boss → 选一阶
   if(player.t2Pending){ player.t2Pending=false; showTierSelect(2); return; }   // 击败100回合Boss → 选二阶
   if(pendingLevels) showLevelUp();
@@ -875,8 +956,13 @@ function dealDamage(pool, targets){
 
 function advanceEnemies(){
   player.dmgBy={};   // 死亡报告只统计死亡那一回合的伤害：每回合敌人行动前清零
+  // 先快照本回合的行动者：终焉浪潮在 act 中途生成的新 Boss 不应在同一回合再行动一次
+  const actors=[];
   for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const t=grid[r][c];
-    if(!t || (t.type!=='enemy' && t.type!=='boss')) continue;
+    if(t && (t.type==='enemy' || t.type==='boss')) actors.push({r,c,t}); }
+  for(const {r,c,t} of actors){
+    if(player.cleared) break;          // 破关已结算（终焉第10波）：停止其余 Boss 行动
+    if(grid[r][c]!==t) continue;        // 已被本回合其它效果移除/替换（如小偷逃走）→ 跳过
     const def = t.type==='boss' ? bossDef(t) : null;
     if(def && def.everyTurn) def.everyTurn(t);        // 每回合持续效果（饕餮吞噬），仍走倒计时
     if(def && def.perTurn){ def.act(t); continue; }    // 纯每回合型（小丑/吸血鬼）：无倒计时
@@ -913,7 +999,7 @@ function hurtPlayer(atk, sourceKey, ignoreArmor){
   return dmg;
 }
 function reflectThorns(amt){
-  const es=[]; for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const t=grid[r][c]; if(t&&(t.type==='enemy'||t.type==='boss')) es.push([r,c,t]); }
+  const es=[]; for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const t=grid[r][c]; if(t&&(t.type==='enemy'||t.type==='boss')&&!t.finale) es.push([r,c,t]); }
   if(!es.length) return;
   const [r,c,t]=es[Math.floor(rnd()*es.length)];
   t.hp-=amt;
@@ -975,7 +1061,8 @@ function showLevelUp(){
 
 function gameOver(){
   busy=true;
-  if(replaying){ stopReplay(); }                 // 回放播到死亡：停止回放，照常显示死亡报告
+  const wasReplay=replaying;
+  if(wasReplay){ stopReplay(); }                 // 回放播到死亡：停止回放，照常显示死亡报告
   else { saveBest(); clearSave();
     try{ if(rec) localStorage.setItem(REC_LAST_KEY, JSON.stringify(rec)); }catch(e){}  // 保存本局完整录像供回放
   }
@@ -1011,15 +1098,60 @@ function gameOver(){
     <button class="btn" id="again">${tr('换个职业再来','Play again')}</button>`;
   document.getElementById('again').onclick=showClassSelect;
   const finished=getLastRec();
+  wireEndButtons(finished);
+  showOverlay();
+  if(!DEV && !wasReplay && finished) submitScore(finished, player.level, player.gold);   // 正式版：上报分数 + 显示百分位（dev/回放不参与排名）
+}
+// 破关：撑过终焉 10 波。胜利结算 + 破关榜（按最低等级排名）
+function onClear(){
+  busy=true; player.cleared=true;
+  const wasReplay=replaying;
+  for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const t=grid[r][c]; if(t&&t.bossId==='finale') grid[r][c]=null; }  // 移除终焉之主
+  if(wasReplay){ stopReplay(); }
+  else { saveBest(); clearSave(); try{ if(rec) localStorage.setItem(REC_LAST_KEY, JSON.stringify(rec)); }catch(e){} }
+  const card=document.getElementById('card');
+  card.innerHTML=`<h2 style="color:var(--gold)">🏆 ${tr('破关！','CLEARED!')}</h2>
+    <p>${tr('你撑过了终焉之主的 10 波 Boss 浪潮，征服了地牢！','You survived all 10 waves of the Overlord and conquered the dungeon!')}</p>
+    <div style="font-size:15px;line-height:2;margin-bottom:6px">
+      ${tr('破关等级','Clear level')} <b style="color:var(--gold)">${player.level}</b> <span style="color:var(--dim);font-size:12px">${tr('（越低越强）','(lower = better)')}</span><br>
+      ${tr('累计金币','Total gold')} <b style="color:var(--gold)">💰 ${player.gold}</b><br>
+      ${tr('坚持回合','Turns survived')} <b style="color:var(--gold)">${player.turns}</b>
+    </div>
+    ${DEV?'':`<div id="rankBox" style="text-align:left;margin:4px 0 12px;background:var(--panel2);border-radius:10px;padding:6px 4px;min-height:20px"></div>`}
+    <div style="display:flex;gap:6px;justify-content:center;margin-bottom:8px;flex-wrap:wrap">
+      <button class="choice" id="goReplay" style="width:auto;margin:0;padding:7px 12px">🎬 ${tr('回放本局','Replay')}</button>
+      <button class="choice" id="goShare" style="width:auto;margin:0;padding:7px 12px">🔗 ${tr('分享链接','Share')}</button>
+      <button class="choice" id="goCopy" style="width:auto;margin:0;padding:7px 12px">📋 ${tr('复制录像','Copy')}</button>
+      <button class="choice" id="goExport" style="width:auto;margin:0;padding:7px 12px">⏬ ${tr('导出','Export')}</button>
+    </div>
+    <button class="btn" id="again">${tr('再来一局','Play again')}</button>`;
+  document.getElementById('again').onclick=showClassSelect;
+  const finished=getLastRec();
+  wireEndButtons(finished);
+  showOverlay();
+  if(!DEV && !wasReplay && finished) submitClear(finished, player.level);   // 正式版：上报破关榜（dev/回放不参与）
+}
+function wireEndButtons(finished){
   const rep=document.getElementById('goReplay'), sh=document.getElementById('goShare'), cp=document.getElementById('goCopy'), ex=document.getElementById('goExport');
   if(finished){
     rep.onclick=()=>startReplay(finished);
     sh.onclick=()=>shareRec(finished, sh);
     cp.onclick=()=>{ const s=JSON.stringify(finished); try{ navigator.clipboard.writeText(s); log(tr('📋 录像已复制到剪贴板','📋 Recording copied')); }catch(e){ prompt(tr('复制以下录像：','Copy this recording:'), s); } };
     ex.onclick=()=>exportRec(finished);
-  } else { rep.style.display=sh.style.display=cp.style.display=ex.style.display='none'; }
-  showOverlay();
-  if(!DEV && finished) submitScore(finished, player.level, player.gold);   // 正式版：上报分数 + 显示百分位（dev 不参与排名）
+  } else if(rep){ rep.style.display=sh.style.display=cp.style.display=ex.style.display='none'; }
+}
+// 正式版上报破关，回填破关榜（按最低破关等级）名次
+async function submitClear(r, level){
+  const box=document.getElementById('rankBox'); if(!box) return;
+  box.innerHTML=`<div style="text-align:center;color:var(--dim);font-size:12px">🏆 ${tr('破关榜上传中…','Submitting clear…')}</div>`;
+  try{
+    const res=await fetch(REC_API+'/clear',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({level,rec:r})});
+    const j=await res.json(); if(!j.overall) throw new Error(j.error||'no rank');
+    const raceName=L(raceById(r.race).n);
+    box.innerHTML=`<div style="text-align:center;color:var(--gold);font-size:12px;margin-bottom:2px">🏆 ${tr('破关榜','Clear board')}（${tr('按最低破关等级','by lowest clear level')}）</div>`
+      + rankRow(tr('总榜','Overall'), j.overall)
+      + rankRow(`${tr('种族榜','Race')}·${raceName}`, j.race);
+  }catch(e){ box.innerHTML=`<div style="text-align:center;color:var(--dim);font-size:12px">${tr('破关榜上传失败','Clear board unavailable')}</div>`; }
 }
 // 正式版死亡上报分数，回填总榜/种族榜百分位（dev 版无此功能）
 function rankRow(label, o){
@@ -1084,7 +1216,7 @@ function replayStep(){
   // 倒数 10 回合自动暂停一次，方便看清怎么死的
   if(!replayAutoPaused && replayTotalTurns>10 && player && player.hp>0 && player.turns>=replayTotalTurns-10){
     replayAutoPaused=true; replayPaused=true;
-    log(tr('⏸ 临近死亡，已自动暂停。点 ▶ 继续看结局。','⏸ Auto-paused near death. Press ▶ to watch the ending.'));
+    log(tr('⏸ 接近尾声，已自动暂停。点 ▶ 继续看结局。','⏸ Auto-paused near the ending. Press ▶ to watch how it ends.'));
   }
   updateReplayBar(); scheduleReplay();
 }
@@ -1244,7 +1376,7 @@ function bar(idBar,idTxt,cur,max,suffix){
 }
 function updateHUD(){
   bar('hpBar','hpTxt',player.hp,player.maxHp);
-  document.getElementById('hpBar').style.background = isPoisoned() ? '#27ae60' : 'var(--hp)';  // 蜘蛛剧毒：血条变绿
+  document.getElementById('hpBar').style.background = isInfected() ? '#27ae60' : 'var(--hp)';  // 僵尸尸毒感染：血条变绿
   updateDanger();
   const an=armorNeeded(player.armor);
   document.getElementById('arBar').style.width=Math.min(100,player.shieldXp/an*100)+'%';
