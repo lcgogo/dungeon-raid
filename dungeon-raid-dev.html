@@ -161,7 +161,7 @@
 (()=>{
 //==================== 配置 ====================
 // 版本号 v主.次.修：小改动改"修"，新Boss/职业改"次"，大版本变更需先确认。页面底部显示。
-const VERSION='v1.13.0';
+const VERSION='v1.13.1';
 const DEV=true;    // 开发版：指向最新开发版本；独立存档 + DEV 标识。正式版在 dungeon-raid.html（DEV=false）
 const REC_API='https://api.dungeonraid.win';   // 录像分享 API（Cloudflare Worker + KV）
 // 带种子随机数（mulberry32）：游戏全程用 rnd() 取代原生随机，配合录制种子可确定性重放
@@ -456,7 +456,14 @@ function showClassSelect(){   // 现在是「选种族」
   const buildBadge = DEV
     ? `<div style="display:inline-block;background:#7d3cad;color:#fff;font-size:12px;font-weight:700;padding:3px 12px;border-radius:12px;margin-bottom:8px;letter-spacing:1px">🚧 DEV ${tr('开发版·最新','build · latest')}</div>`
     : `<div style="display:inline-block;background:#2e7d46;color:#fff;font-size:12px;font-weight:700;padding:3px 12px;border-radius:12px;margin-bottom:8px;letter-spacing:1px">✅ ${tr('正式版','Release')}</div>`;
-  card.innerHTML=`${buildBadge}<h2>${tr('选择种族','Choose your race')}</h2>${bestLine}<p>${tr('击败第50回合Boss可转一阶职业（主动），击败第100回合Boss可转二阶（被动）','Beat the turn-50 boss to advance to a tier-1 class (active), and the turn-100 boss for tier-2 (passive)')}</p>`;
+  card.innerHTML=`${buildBadge}
+    <div style="text-align:left;font-size:11.5px;line-height:1.65;background:var(--panel2);border-radius:10px;padding:10px 12px;margin-bottom:10px">
+      <div style="color:var(--gold);font-weight:700;margin-bottom:2px">🕯️ ${tr('地牢之下','Beneath the Dungeon')}</div>
+      <div style="color:var(--dim)">${tr('传说地心深处藏着无尽宝藏，也封印着「终焉之主」。一代代冒险者循着传说潜入地牢，却再无人生还。如今轮到你——拖动连接相邻的同类符文来消除：🔪剑斩杀怪物、🔰盾凝成护甲、💗心回复生命、💰金币换取补给。怪物在倒计时归零时出手，每 50 回合 Boss 强一档；活得越久，越接近地心的终焉之主。','Deep at the world’s core lie endless treasures — and the sealed Overlord. Generations of adventurers followed the legend into the dungeon; none returned. Now it’s your turn. Drag to link adjacent matching runes: 🔪 swords slay monsters, 🔰 shields forge armor, 💗 hearts heal, 💰 coins buy supplies. Monsters strike when their countdown hits zero, and bosses grow stronger every 50 turns. The longer you survive, the deeper you descend toward the Overlord.')}</div>
+      <div style="color:var(--gold);font-weight:700;margin:9px 0 2px">🙏 ${tr('致敬原作','A Tribute')}</div>
+      <div style="color:var(--dim)">${tr('本作是向 Fireflame Games 于 2011 年推出的 iOS 经典《Dungeon Raid》致敬的网页复刻，玩法深受其启发，仅为非官方粉丝习作，与原作者无任何关联。我们始终未能联系上原作者——若你认识 TA，恳请通过我的 GitHub 转达：','This is a web remake paying tribute to the classic 2011 iOS game “Dungeon Raid” by Fireflame Games — deeply inspired by it, an unofficial fan work with no affiliation to the original author. We have never been able to reach them. If you know the original author, please pass word along via my GitHub:')} <a href="https://github.com/lcgogo" target="_blank" rel="noopener" style="color:var(--gold);text-decoration:underline">github.com/lcgogo</a></div>
+    </div>
+    <h2>${tr('选择种族','Choose your race')}</h2>${bestLine}<p>${tr('击败第50回合Boss可转一阶职业（主动），击败第100回合Boss可转二阶（被动）','Beat the turn-50 boss to advance to a tier-1 class (active), and the turn-100 boss for tier-2 (passive)')}</p>`;
   if(hasSave()){
     const cont=document.createElement('button'); cont.className='btn';
     cont.style.width='100%'; cont.style.marginBottom='12px';
@@ -1191,7 +1198,8 @@ function onClear(){
   else { saveBest(); clearSave(); try{ if(rec) localStorage.setItem(REC_LAST_KEY, JSON.stringify(rec)); }catch(e){} }
   const card=document.getElementById('card');
   card.innerHTML=`<h2 style="color:var(--gold)">🏆 ${tr('破关！','CLEARED!')}</h2>
-    <p>${tr('你撑过了终焉之主的 10 波 Boss 浪潮，征服了地牢！','You survived all 10 waves of the Overlord and conquered the dungeon!')}</p>
+    <p style="line-height:1.65">${tr('🎉 终焉之主的浪潮退去，地心的王座崩塌。你撑过了全部 10 波，成为第一个走出地牢、活着归来的冒险者——那条「再无人生还」的传说，终于有了结局。','🎉 The Overlord’s waves recede and the throne at the world’s core crumbles. You endured all 10 waves and became the first adventurer to walk out of the dungeon alive — the legend that “none returned” finally has its ending.')}</p>
+    <p style="color:var(--dim);font-size:12px;margin-top:-2px">${tr('感谢游玩这份向《Dungeon Raid》致敬的作品。🙏','Thank you for playing this tribute to “Dungeon Raid.” 🙏')}</p>
     <div style="font-size:15px;line-height:2;margin-bottom:6px">
       ${tr('破关等级','Clear level')} <b style="color:var(--gold)">${player.level}</b> <span style="color:var(--dim);font-size:12px">${tr('（越低越强）','(lower = better)')}</span><br>
       ${tr('累计金币','Total gold')} <b style="color:var(--gold)">💰 ${player.gold}</b><br>
