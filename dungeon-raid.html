@@ -161,7 +161,7 @@
 (()=>{
 //==================== 配置 ====================
 // 版本号 v主.次.修：小改动改"修"，新Boss/职业改"次"，大版本变更需先确认。页面底部显示。
-const VERSION='v1.11.0';
+const VERSION='v1.12.0';
 const DEV=false;   // release build (DEV=false); dev build is dungeon-raid-dev.html (DEV=true)
 const REC_API='https://api.dungeonraid.win';   // 录像分享 API（Cloudflare Worker + KV）
 // 带种子随机数（mulberry32）：游戏全程用 rnd() 取代原生随机，配合录制种子可确定性重放
@@ -482,6 +482,11 @@ function showClassSelect(){   // 现在是「选种族」
   ib.innerHTML=`<b>📥 ${tr('导入回放','Import replay')}</b><small>${tr('粘贴录像 JSON 回放','Paste a recording JSON to replay')}</small>`;
   ib.onclick=()=>importReplay();
   card.appendChild(ib);
+  const lb=document.createElement('button'); lb.className='choice';
+  lb.style.borderColor='#a8852c';
+  lb.innerHTML=`<b>🏆 ${tr('排行榜','Leaderboard')}</b><small>${tr('人类榜 / AI 榜 · 闯关 / 破关','Human / AI · Survival / Clears')}</small>`;
+  lb.onclick=()=>showLeaderboard();
+  card.appendChild(lb);
   showOverlay();
 }
 function importReplay(){
@@ -1094,6 +1099,7 @@ function gameOver(){
       <button class="choice" id="goShare" style="width:auto;margin:0;padding:7px 12px">🔗 ${tr('分享链接','Share')}</button>
       <button class="choice" id="goCopy" style="width:auto;margin:0;padding:7px 12px">📋 ${tr('复制录像','Copy')}</button>
       <button class="choice" id="goExport" style="width:auto;margin:0;padding:7px 12px">⏬ ${tr('导出','Export')}</button>
+      <button class="choice" id="goBoard" style="width:auto;margin:0;padding:7px 12px;border-color:#a8852c">🏆 ${tr('排行榜','Board')}</button>
     </div>
     <button class="btn" id="again">${tr('换个职业再来','Play again')}</button>`;
   document.getElementById('again').onclick=showClassSelect;
@@ -1123,6 +1129,7 @@ function onClear(){
       <button class="choice" id="goShare" style="width:auto;margin:0;padding:7px 12px">🔗 ${tr('分享链接','Share')}</button>
       <button class="choice" id="goCopy" style="width:auto;margin:0;padding:7px 12px">📋 ${tr('复制录像','Copy')}</button>
       <button class="choice" id="goExport" style="width:auto;margin:0;padding:7px 12px">⏬ ${tr('导出','Export')}</button>
+      <button class="choice" id="goBoard" style="width:auto;margin:0;padding:7px 12px;border-color:#a8852c">🏆 ${tr('排行榜','Board')}</button>
     </div>
     <button class="btn" id="again">${tr('再来一局','Play again')}</button>`;
   document.getElementById('again').onclick=showClassSelect;
@@ -1133,6 +1140,7 @@ function onClear(){
 }
 function wireEndButtons(finished){
   const rep=document.getElementById('goReplay'), sh=document.getElementById('goShare'), cp=document.getElementById('goCopy'), ex=document.getElementById('goExport');
+  const bd=document.getElementById('goBoard'); if(bd) bd.onclick=()=>showLeaderboard();   // 看榜与是否有录像无关
   if(finished){
     rep.onclick=()=>startReplay(finished);
     sh.onclick=()=>shareRec(finished, sh);
@@ -1145,7 +1153,7 @@ async function submitClear(r, level){
   const box=document.getElementById('rankBox'); if(!box) return;
   box.innerHTML=`<div style="text-align:center;color:var(--dim);font-size:12px">🏆 ${tr('破关榜上传中…','Submitting clear…')}</div>`;
   try{
-    const res=await fetch(REC_API+'/clear',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({level,rec:r})});
+    const res=await fetch(REC_API+'/clear',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({level,rec:r,agent:'human'})});   // 真人破关上报人类榜
     const j=await res.json(); if(!j.overall) throw new Error(j.error||'no rank');
     const raceName=L(raceById(r.race).n);
     box.innerHTML=`<div style="text-align:center;color:var(--gold);font-size:12px;margin-bottom:2px">🏆 ${tr('破关榜','Clear board')}（${tr('按最低破关等级','by lowest clear level')}）</div>`
@@ -1158,12 +1166,51 @@ function rankRow(label, o){
   return `<div style="display:flex;justify-content:space-between;gap:8px;padding:3px 6px;font-size:13px">
     <span>${label}</span><b style="color:var(--gold)">#${o.rank} / ${o.total} · ${tr('超过','beats')} ${o.pct}%</b></div>`;
 }
+// ==================== 排行榜浏览（人类 / AI 切换） ====================
+let lbAgent='human', lbBoard='top';   // 当前查看：human|ai，top(闯关·按回合)|clear(破关·按最低等级)
+function medal(i){ return i===0?'🥇':i===1?'🥈':i===2?'🥉':`#${i+1}`; }
+function showLeaderboard(){ busy=true; renderLeaderboard(); }
+async function renderLeaderboard(){
+  const card=document.getElementById('card');
+  const tab=(id,lab,on)=>`<button class="choice" id="${id}" style="width:auto;margin:0;padding:5px 12px;${on?'border-color:var(--gold);color:var(--gold)':''}">${lab}</button>`;
+  card.innerHTML=`<h2 style="color:var(--gold)">🏆 ${tr('排行榜','Leaderboard')}</h2>
+    <p style="color:var(--dim);font-size:12px;margin:-6px 0 8px">${tr('本版','Build')} ${VERSION} · ${tr('仅已验证成绩','verified only')}</p>
+    <div style="display:flex;gap:6px;justify-content:center;margin-bottom:6px">
+      ${tab('lbHuman','🧑 '+tr('人类','Human'),lbAgent==='human')}${tab('lbAi','🤖 '+tr('AI','AI'),lbAgent==='ai')}</div>
+    <div style="display:flex;gap:6px;justify-content:center;margin-bottom:8px">
+      ${tab('lbTop','⚔️ '+tr('闯关榜','Survival'),lbBoard==='top')}${tab('lbClear','👑 '+tr('破关榜','Clears'),lbBoard==='clear')}</div>
+    <div id="lbList" style="text-align:left;min-height:90px;background:var(--panel2);border-radius:10px;padding:6px 4px;margin-bottom:10px">${tr('加载中…','Loading…')}</div>
+    <button class="btn" id="lbBack">${tr('返回','Back')}</button>`;
+  document.getElementById('lbHuman').onclick=()=>{ lbAgent='human'; renderLeaderboard(); };
+  document.getElementById('lbAi').onclick=()=>{ lbAgent='ai'; renderLeaderboard(); };
+  document.getElementById('lbTop').onclick=()=>{ lbBoard='top'; renderLeaderboard(); };
+  document.getElementById('lbClear').onclick=()=>{ lbBoard='clear'; renderLeaderboard(); };
+  document.getElementById('lbBack').onclick=showClassSelect;
+  showOverlay();
+  const list=document.getElementById('lbList');
+  try{
+    const ep = lbBoard==='clear'
+      ? `/clearboard?version=${encodeURIComponent(VERSION)}&agent=${lbAgent}&n=10`
+      : `/top?version=${encodeURIComponent(VERSION)}&agent=${lbAgent}&n=10`;
+    const res=await fetch(REC_API+ep); const j=await res.json();
+    const rows = lbBoard==='clear' ? (j.clears||[]) : (j.top||[]);
+    if(!rows.length){ list.innerHTML=`<div style="text-align:center;color:var(--dim);padding:20px 0">${tr('暂无记录','No entries yet')}</div>`; return; }
+    list.innerHTML=rows.map((e,i)=>{
+      const rc=raceById(e.race); const rn=rc?`${rc.e} ${L(rc.n)}`:'❓';
+      const metric = lbBoard==='clear'
+        ? `${tr('等级','Lv')} <b style="color:var(--gold)">${e.level}</b> · ${e.turns}${tr('回合','t')}`
+        : `<b style="color:var(--gold)">${e.turns}</b>${tr('回合','t')} · Lv${e.level} · 💰${e.gold}`;
+      return `<div style="display:flex;justify-content:space-between;gap:8px;padding:4px 8px;font-size:13px;${i%2?'background:rgba(255,255,255,.03)':''}">
+        <span>${medal(i)} ${rn}</span><span>${metric}</span></div>`;
+    }).join('');
+  }catch(e){ list.innerHTML=`<div style="text-align:center;color:var(--dim);padding:20px 0">${tr('榜单加载失败','Leaderboard unavailable')}</div>`; }
+}
 async function submitScore(r, level, gold){
   const box=document.getElementById('rankBox'); if(!box) return;
   box.innerHTML=`<div style="text-align:center;color:var(--dim);font-size:12px">🏆 ${tr('排名上传中…','Submitting score…')}</div>`;
   try{
     const res=await fetch(REC_API+'/score',{method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({level,gold,rec:r})});
+      body:JSON.stringify({level,gold,rec:r,agent:'human'})});   // 真人对局上报人类榜（AI/机器人自报 'ai'）
     const j=await res.json(); if(!j.overall) throw new Error(j.error||'no rank');
     const raceName=L(raceById(r.race).n);
     box.innerHTML=`<div style="text-align:center;color:var(--dim);font-size:12px;margin-bottom:2px">🏆 ${tr('排名','Ranking')}（${tr('按坚持回合','by turns')} ${j.turns}）</div>`
