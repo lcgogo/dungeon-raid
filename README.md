@@ -138,7 +138,8 @@
 
 ### ✨ 其他特性
 
-- 📖 **开篇引言 / 破关祝贺**：开始界面有虚构背景 + 玩法速览与致敬原作的说明；撑过终焉之主 10 波破关后，有故事化的祝贺结算页。
+- 📖 **开篇引言 / 玩法演示 / 破关祝贺**：开始界面有虚构背景 + 玩法速览（含 `🔪━👹━🔪` 穿怪剑链演示）与致敬原作的说明；**新手第一局**棋盘必有「剑-怪-剑」可连组合，便于立刻上手；撑过终焉之主 10 波破关后，有故事化的祝贺结算页。
+- 🔴 **Boss 红字日志**：游戏日志位于状态栏与棋盘正下方；**场上有 Boss 时日志变红**警示。
 - 💾 **本地存档**：自动保存进度与最佳纪录，可「继续上局」。
 - 💡 **轻点任意方块**：查看说明与当前实时数值（如剑的当前威力与固定剑伤）；轻点 HUD 查看角色全部属性与职业详情。
 - 🩸 **低血预警**：生命越低，屏幕边缘越红；危急时呼吸闪烁，生命条同步闪烁。
@@ -300,7 +301,8 @@ Clearing shows a story-flavored congratulations screen; the Release build report
 
 ### ✨ Other Features
 
-- 📖 **Opening intro / clear celebration**: the start screen has a fictional backstory + gameplay primer and a tribute note; surviving all 10 Overlord waves shows a story-flavored congratulations screen.
+- 📖 **Opening intro / gameplay demo / clear celebration**: the start screen has a fictional backstory + gameplay primer (with a `🔪━👹━🔪` chain-through-monster demo) and a tribute note; your **first-ever run** is guaranteed a “sword–monster–sword” combo to learn the core move immediately; surviving all 10 Overlord waves shows a story-flavored congratulations screen.
+- 🔴 **Red log for bosses**: the game log sits right under the status bar and board; **it turns red while a boss is on the board** as a warning.
 - 💾 **Local save**: progress and best record are saved automatically; resume your last run anytime.
 - 💡 **Tap any tile**: see its description and current live stats (e.g. your current sword power and flat bonus); tap the HUD to view all your stats and class details.
 - 🩸 **Low-HP warning**: the screen edges redden as health drops, pulsing when critical, with the HP bar blinking too.

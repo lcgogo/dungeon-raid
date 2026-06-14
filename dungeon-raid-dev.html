@@ -128,17 +128,14 @@
 
   <canvas id="board"></canvas>
 
+  <div id="log"></div>
+
   <div id="shop">
     <button id="skillBtn" class="shopBtn skillBtn" style="display:none"><span></span><small></small><em></em></button>
     <button class="shopBtn" data-buy="heal"><span id="shHealName">💊 治疗</span><small id="shHealDesc">回复10生命</small><em></em></button>
     <button class="shopBtn" data-buy="bomb"><span id="shBombName">💥 炸弹</span><small id="shBombDesc">全场怪-6血</small><em></em></button>
   </div>
 
-  <div id="log"></div>
-  <div class="footer" id="footer">
-    拖动连接 <b>2+</b> 相邻同类消除（横竖斜）；🔪剑链可穿过 👹 点杀，连得越多收益越高。<br>
-    💡 <b>轻点任意方块</b>查看玩法说明与当前数值。
-  </div>
   <div id="ver" style="text-align:center; font-size:11px; color:var(--dim); margin-top:6px; letter-spacing:1px;"></div>
 </div>
 
@@ -161,7 +158,7 @@
 (()=>{
 //==================== 配置 ====================
 // 版本号 v主.次.修：小改动改"修"，新Boss/职业改"次"，大版本变更需先确认。页面底部显示。
-const VERSION='v1.13.6';
+const VERSION='v1.14.0';
 const DEV=true;    // 开发版：指向最新开发版本；独立存档 + DEV 标识。正式版在 dungeon-raid.html（DEV=false）
 const REC_API='https://api.dungeonraid.win';   // 录像分享 API（Cloudflare Worker + KV）
 // 带种子随机数（mulberry32）：游戏全程用 rnd() 取代原生随机，配合录制种子可确定性重放
@@ -219,10 +216,6 @@ function applyStaticLang(){
   set('shHealDesc', tr('回复10生命','Restore 10 HP'));
   set('shBombName', tr('💥 炸弹','💥 Bomb'));
   set('shBombDesc', tr('全场怪-6血','All foes -6 HP'));
-  const ft=document.getElementById('footer');
-  if(ft) ft.innerHTML = tr(
-    '拖动连接 <b>2+</b> 相邻同类消除（横竖斜）；🔪剑链可穿过 👹 点杀，连得越多收益越高。<br>💡 <b>轻点任意方块</b>查看玩法说明与当前数值。',
-    'Drag to link <b>2+</b> adjacent same tiles (incl. diagonals); 🔪 sword chains pass through 👹 to kill — longer chains pay more.<br>💡 <b>Tap any tile</b> for how it works and current values.');
 }
 
 //==================== 状态 ====================
@@ -460,6 +453,9 @@ function showClassSelect(){
     <div style="text-align:left;font-size:11.5px;line-height:1.6;background:var(--panel2);border-radius:10px;padding:9px 11px;margin-bottom:10px">
       <span style="color:var(--gold);font-weight:700">🕯️ ${tr('地牢之下','Beneath the Dungeon')}</span>
       <span style="color:var(--dim)"> ${tr('地心封印着「终焉之主」，历代冒险者潜入地牢、无人生还——轮到你了。拖动连接相邻同类符文：🔪斩怪、🔰凝甲、💗回血、💰补给；怪物倒计时归零出手，每 50 回合 Boss 强一档，撑到第 500 回合破关。','The Overlord lies sealed at the world’s core; generations went in, none returned — your turn now. Link adjacent matching runes: 🔪 slay, 🔰 armor, 💗 heal, 💰 supplies. Bosses grow every 50 turns; survive to turn 500 to clear.')}</span>
+      <div style="display:flex;align-items:center;justify-content:center;gap:2px;font-size:21px;margin:8px 0 3px">
+        <span>🔪</span><span style="color:var(--gold);font-size:15px">━</span><span>👹</span><span style="color:var(--gold);font-size:15px">━</span><span>🔪</span></div>
+      <div style="color:var(--dim);text-align:center;font-size:10.5px">${tr('🔪剑链可直接穿过 👹 怪物——把剑和怪串成一条线即可攻击（每只怪独立吃满整条伤害）。轻点任意方块看说明。','A 🔪 sword chain runs straight through 👹 — link swords and monsters into one line to attack (each takes full chain damage). Tap any tile for details.')}</div>
     </div>`;
   // ▶ START（主按钮）→ 选种族页
   const start=document.createElement('button'); start.className='btn';
@@ -601,8 +597,15 @@ function onBossKilled(){
 //==================== 初始化 ====================
 let __seedCtr=0;
 function startGame(rc){
-  if(replaying){ srand(replayRec.seed); }                       // 回放：用录像里的种子，不新建录像
-  else { const seed=((Date.now()>>>0)^(__seedCtr++*0x9E3779B9))>>>0; srand(seed); rec={v:1,seed,ver:VERSION,race:rc.id,t0:Date.now(),acts:[]}; saveRec(); }   // ver：录制时的游戏版本，排行榜按版本分桶；t0：开局时刻，各动作时间戳相对它（操作间隔）
+  let firstGame=false;
+  if(replaying){ srand(replayRec.seed); firstGame=!!replayRec.tut; }   // 回放：是否新手局以录像里的 tut 标志为准（保持棋盘可复现）
+  else {
+    try{ firstGame = !localStorage.getItem(TUT_KEY); }catch(e){}        // 本机第一次游玩
+    const seed=((Date.now()>>>0)^(__seedCtr++*0x9E3779B9))>>>0; srand(seed);
+    rec={v:1,seed,ver:VERSION,race:rc.id,t0:Date.now(),acts:[]};        // ver：版本分桶；t0：开局时刻
+    if(firstGame){ rec.tut=1; try{ localStorage.setItem(TUT_KEY,'1'); }catch(e){} }
+    saveRec();
+  }
   player=newPlayer(); player.race=rc.id; rc.f(player); player.hp=player.maxHp;
   selection=[]; dragging=false; busy=false; pendingLevels=0;
   grid=[];
@@ -612,14 +615,22 @@ function startGame(rc){
              : pool[Math.floor(rnd()*pool.length)];
     grid[r][c]=makeTile(type);
   }}
+  if(firstGame) seedTutorialBoard();   // 新手第一局：保证棋盘里有一只怪、且能被多把剑连起来（剑-怪-剑）
   syncPositions(true);
   hideOverlay(); logClear();
   log(tr(`【${rc.e}${L(rc.n)}】踏入地牢… 祝你好运！`, `${rc.e}${L(rc.n)} enters the dungeon… good luck!`));
   updateHUD();
 }
+// 新手第一局教学棋盘：在内部格放一只弱怪，左右各一把剑（剑-怪-剑，可连成穿怪剑链一击带走）。用 rnd() 故确定可重放。
+function seedTutorialBoard(){
+  const r=1+Math.floor(rnd()*(ROWS-2)), c=1+Math.floor(rnd()*(COLS-2));
+  const e=makeTile('enemy'); e.hp=e.maxHp=2;   // 压低血量，2 把剑即可秒杀，教学手感更好
+  grid[r][c]=e; grid[r][c-1]=makeTile('sword'); grid[r][c+1]=makeTile('sword');
+}
 
 //==================== 本地存档 ====================
 const SAVE_KEY=DEV?'dr_save_dev':'dr_save', BEST_KEY=DEV?'dr_best_dev':'dr_best';   // dev 版独立存档，与正式版互不覆盖
+const TUT_KEY=DEV?'dr_tut_dev':'dr_tut';   // 新手第一局标记（置位后不再给教学棋盘）
 const REC_KEY=DEV?'dr_rec_dev':'dr_rec', REC_LAST_KEY=DEV?'dr_rec_last_dev':'dr_rec_last';  // 进行中录像 / 上一局完整录像
 // 录制一个玩家动作（回放中不录）。动作：['m',cells,baseType] 连线 / ['b',key] 购买 / ['k'] 技能 / ['u',idx] 升级选择 / ['t',tier,id] 转职选择
 // 每个动作末尾追加一个时间戳（epoch ms，相对开局可算操作间隔）——仅供离线分析（后续黑盒判定是否 AI 录像），回放/校验按固定下标取值，忽略该尾元素，旧录像无此字段也能正常回放。
@@ -1583,7 +1594,9 @@ function updateDanger(){
 }
 const logEl=document.getElementById('log'); let logs=[];
 function log(m){ logs.push(m); if(logs.length>2)logs.shift();
-  logEl.innerHTML=logs.map((x,i)=>i===logs.length-1?`<span style="color:var(--txt)">${x}</span>`:x).join('<br>'); }
+  const boss = (grid && typeof hasBoss==='function') ? hasBoss() : false;   // 场上有 Boss → 日志红字警示
+  const cur = boss ? '#ff5252' : 'var(--txt)';
+  logEl.innerHTML=logs.map((x,i)=>i===logs.length-1?`<span style="color:${cur}">${x}</span>`:x).join('<br>'); }
 function logClear(){ logs=[]; logEl.innerHTML=''; }
 
 //==================== 启动 ====================
