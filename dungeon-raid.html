@@ -158,7 +158,7 @@
 (()=>{
 //==================== 配置 ====================
 // 版本号 v主.次.修：小改动改"修"，新Boss/职业改"次"，大版本变更需先确认。页面底部显示。
-const VERSION='v1.14.3';
+const VERSION='v1.14.4';
 const DEV=false;   // release build (DEV=false); dev build is dungeon-raid-dev.html (DEV=true)
 const REC_API='https://api.dungeonraid.win';   // 录像分享 API（Cloudflare Worker + KV）
 // 带种子随机数（mulberry32）：游戏全程用 rnd() 取代原生随机，配合录制种子可确定性重放
@@ -403,7 +403,7 @@ function makeTile(type){
 const RACES=[
   {id:'human', e:'🧑', n:['人族','Human'], d:['全能基准：无特性、无削弱，适合新手。','Baseline: no trait, no weakness. Beginner-friendly.'], f:p=>{}},
   {id:'elf',   e:'🧝', n:['精灵','Elf'],   d:['特性：连击加成翻倍（每多连1个 +30%）。削弱：「强化体魄」升级只 +3 上限。','Trait: combo bonus doubled (+30%/tile). Weakness: Fortify Body upgrade gives only +3 max HP.'], f:p=>{p.comboMult=2; p.maxHpUpMult=0.5;}},
-  {id:'dwarf', e:'🎅', n:['矮人','Dwarf'], d:['特性：护甲减伤翻倍（每点护甲抵 2 点）。削弱：剑威力 −0.3。','Trait: armor counts double (each point blocks 2). Weakness: sword power −0.3.'], f:p=>{p.armorMult=2; p.weaponPower-=0.3;}},
+  {id:'dwarf', e:'🎅', n:['矮人','Dwarf'], d:['特性：护甲减伤翻倍（每点护甲抵 2 点）。削弱：剑链总伤 ×0.85（含固定伤害一起算）。','Trait: armor counts double (each point blocks 2). Weakness: ×0.85 total sword damage (flat included).'], f:p=>{p.armorMult=2; p.swordMult=0.85;}},
   {id:'orc',   e:'🧌', n:['兽人','Orc'],   d:['特性：「强化体魄」升级时生命上限翻倍（每次 +12）。削弱：无甲——永远无法获得护甲。','Trait: Fortify Body upgrade gives double max HP (+12 each). Weakness: No Armor — can never gain armor.'], f:p=>{p.maxHpUpMult=2; p.noArmor=true;}},
 ];
 // 一阶职业：主动技能（f 返回 false 表示无效不发动；返回值表示自带日志）
@@ -716,6 +716,7 @@ function previewKills(){
   const targets=selection.filter(s=>isSwordTarget(grid[s.r][s.c]));
   if(!targets.length) return null; // 没串到怪 → 不造成伤害，无击杀预览
   const nS=selection.filter(s=>{const t=grid[s.r][s.c]; return t&&t.type==='sword';}).length;
+  if(nS<1) return null;   // 没连进任何剑 → 不算攻击（与 endDrag 一致），不显示骷髅预览
   const combo=1+Math.max(0,nS-2)*0.15*(player.comboMult||1);
   const titanFlat=player.titan?Math.floor(player.maxHp/12):0;   // 巨力：最大生命越高，固定剑伤越高
   let pool=(nS*player.weaponPower+player.swordFlat+titanFlat)*combo*(player.swordMult||1);
@@ -1488,7 +1489,7 @@ function showPlayerInfo(){
     [tr('🔰 护甲(减伤)','🔰 Armor'), p.noArmor?tr('无甲','none'):`${p.armor}${p.armorMult>1?` ×${p.armorMult}`:''}　${p.shieldXp}/${an}`],
     [tr('📈 等级 · 经验','📈 Level · XP'), `Lv.${p.level} · ${p.xp}/${xpNeeded(p.level)}`],
     [tr('💰 金币 · 回合','💰 Gold · Turn'), `${p.gold} · ${p.turns}`],
-    [tr('🔪 剑威力','🔪 Sword power'), `×${p.weaponPower}${p.swordFlat?` +${p.swordFlat}`:''}${p.swordMult>1?` ·蛮力×${p.swordMult}`:''}`],
+    [tr('🔪 剑威力','🔪 Sword power'), `×${p.weaponPower}${p.swordFlat?` +${p.swordFlat}`:''}${p.swordMult!=1?` ·总伤×${p.swordMult}`:''}`],
     [tr('🔢 连击加成','🔢 Combo'), `+${Math.round(15*(p.comboMult||1))}%/${tr('个','tile')}`],
     [tr('💗 每心回复','💗 Heal/heart'), `+${p.healPerHeart}`],
     [tr('💰 每金币','💰 Gold/coin'), `+${p.goldPerCoin}`],
