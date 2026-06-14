@@ -68,6 +68,7 @@
 | 🧝 精灵 Elf | 连击加成翻倍（每多连 1 个 +30%） | 「强化体魄」升级只 +3 生命上限 |
 | 🎅 矮人 Dwarf | 护甲减伤翻倍（每点护甲抵 2 点） | 剑链总伤 ×0.85（含固定伤害一起算） |
 | 🧌 兽人 Orc | 「强化体魄」升级时生命上限翻倍（每次 +12） | **无甲**——永远无法获得护甲（盾牌从棋盘移除） |
+| 🪦 活死人 Undead | **迷惑**：所有怪物（含 Boss）攻击倒计时 +1（更慢出手） | 所有主动技能冷却 +1 |
 
 ### 🌟 成长路线
 
@@ -96,6 +97,8 @@
 | 🧌 兽人 | 🔪 狂战士 Berserker | 狂怒 Frenzy | 生命减半并进入**不屈**（仅**本回合**：无论受多少伤都保留 1 血）；并**永久**开启残血增伤——血越少剑伤越高（最高 +60%）|
 | 🧌 兽人 | 🩸 斗士 Fighter | 嗜血 Bloodthirst | 本回合剑链每击中一只怪回 3 血，**且可用剑攻击剑免疫的 Boss（幽灵/小丑）** |
 | 🧌 兽人 | 🧪 巫医 Witch Doctor | 蛊毒 Hex | **主动**：本回合连「心」不再回血，而是把这些生命当毒灌给全场怪。**被动**：每回合棋盘摆完后，把 3 个非敌人/非心的棋子变成心 |
+| 🪦 活死人 | 🪄 死灵 Necromancer | 吸魂大法 Soul Drain | 随机吸取 2 只怪的生命补给自己，单只吸取量 = 玩家生命上限；吸取量 ≥ 怪生命则该怪死亡 |
+| 🪦 活死人 | 💀 骷髅王 Skeleton King | 重生 Rebirth | 本回合若被击败则不死、生命回满；此后「重生」自身冷却 +2（每次真正复活递增）|
 
 > **剑圣 / 巫医** 是「主动+被动」双修职业：除主动技能外，每回合棋盘摆完后还会自动把 3 个棋子转成剑/心。
 
@@ -113,6 +116,8 @@
 | 🎅 矮人 | 财阀 Tycoon | 获得金币时额外按一半转为经验 |
 | 🧌 兽人 | 巨力 Titan | 最大生命越高，剑链固定伤害越高（每 12 点最大生命 +1，与兽人 HP×2 特性联动）|
 | 🧌 兽人 | 荆棘 Thorns | 受到伤害的一半反弹给攻击者 |
+| 🪦 活死人 | 回春 Rejuvenation | 所有主动技能冷却 −1（正好抵消「迷惑」的 +1）|
+| 🪦 活死人 | 溅射 Splash | 攻击的溢出伤害随机砸到棋盘上剩余的一个敌人（**含不可被剑攻击的 Boss**）|
 
 ### 👹 Boss 图鉴
 
@@ -151,14 +156,14 @@
 - ☠️ **死亡报告**：倒下时列出致命回合各伤害来源的占比。
 - 🎬 **操作录制 / 回放**：自动记录每一局（种子 + 操作序列，确定性重放，一局约 2–4 KB）。死亡后可 **回放本局 / 复制 / 导出 / 🔗分享链接**；开始界面可 **回放上一局** 或 **粘贴导入** 别人的录像。回放支持暂停与 1×/2×/4× 调速。
 - 🏆 **云排行榜 + 百分位（仅正式版 `dungeonraid.win`）**：死亡后显示你在**总榜**和**本种族榜**的名次与百分位。按**坚持回合**排名；榜单**合并最近 3 个版本**展示（避免频繁补丁把榜单切碎），**只展示已重放验证的成绩**，前列每小时自动重放校验防作弊。开发版不参与排名。可在开始页设置**排行榜名字**（最长 12 汉字，🎲 随机起名，本机记住），榜单每行显示「种族头像 + 名字」。
-- 🏅 **人类榜 / AI 榜**：成绩按 `agent`(human / ai)分流、互不混排。游戏内「🏆 排行榜」面板可在 **人类 / AI**、**闯关榜 / 破关榜** 间切换，并**按种族筛选**（全部 / 人族 / 精灵 / 矮人 / 兽人）查看 Top 10。真人对局上报人类榜，AI/机器人自报 `ai` 进 AI 榜（后端 `/top?agent=&race=`、`/clearboard?agent=&race=`，私有改判接口 `/classify`）。写入端点按 IP 限流防刷。
+- 🏅 **人类榜 / AI 榜**：成绩按 `agent`(human / ai)分流、互不混排。游戏内「🏆 排行榜」面板可在 **人类 / AI**、**闯关榜 / 破关榜** 间切换，并**按种族筛选**（全部 / 人族 / 精灵 / 矮人 / 兽人 / 活死人）查看 Top 10。真人对局上报人类榜，AI/机器人自报 `ai` 进 AI 榜（后端 `/top?agent=&race=`、`/clearboard?agent=&race=`，私有改判接口 `/classify`）。写入端点按 IP 限流防刷。
 
 ### 🛠️ 开发 / 平衡测试
 
 `playtest.js` 是一个**无头玩法机器人**：它加载 `dungeon-raid.html` 里的真实游戏逻辑（用桩件顶替 DOM/Canvas），用贪心策略自动游玩，统计各种族/职业线的存活回合与到达等级，用于数值平衡回归测试。
 
 ```bash
-node playtest.js                  # 扫描模式：四族 × 多套敌人数值，找最接近目标回合的一套
+node playtest.js                  # 扫描模式：各种族 × 多套敌人数值，找最接近目标回合的一套
 
 # 定向模式：固定某条职业线或某个 Boss，跑详细统计，便于和历史对比
 node playtest.js --race=orc                          # 只测兽人
@@ -238,6 +243,7 @@ Pick a race at the start. Each has a unique **trait** and a matching **weakness*
 | 🧝 Elf | Combo bonus doubled (+30% per extra tile) | Fortify Body upgrade gives only +3 max HP |
 | 🎅 Dwarf | Armor counts double (each point blocks 2) | ×0.85 total sword damage (flat included) |
 | 🧌 Orc | Fortify Body upgrade gives double max HP (+12 each) | **No Armor** — can never gain armor (shields removed from the board) |
+| 🪦 Undead | **Confusion**: all monsters (incl. bosses) attack 1 turn slower | All active-skill cooldowns +1 |
 
 ### 🌟 Progression Path
 
@@ -266,6 +272,8 @@ Each race has Tier-1 classes (**Human and Orc have 3, Elf and Dwarf have 2**); e
 | 🧌 Orc | 🔪 Berserker | Frenzy | Halve HP and become **Undying** (**this turn only**: keep ≥1 HP no matter the damage); also **permanently** enables low-HP scaling — lower HP means higher sword damage (up to +60%) |
 | 🧌 Orc | 🩸 Fighter | Bloodthirst | Heal 3 HP per enemy your sword chain hits this turn, **and your sword can hit sword-immune bosses (Ghost/Clown)** |
 | 🧌 Orc | 🧪 Witch Doctor | Hex | **Active**: this turn, linking hearts deals that healing as poison to all foes instead of healing you. **Passive**: each turn after the board settles, turn 3 non-enemy non-heart tiles into hearts |
+| 🪦 Undead | 🪄 Necromancer | Soul Drain | Drain HP from 2 random foes to heal yourself; per-foe drain = your max HP, so any foe with HP ≤ your max HP dies |
+| 🪦 Undead | 💀 Skeleton King | Rebirth | If slain this turn, cheat death and refill to full HP; afterward Rebirth's own cooldown grows +2 (each actual revive) |
 
 > **Sword Saint / Witch Doctor** are hybrid (active + passive) classes: besides the active skill, each turn after the board settles they auto-convert 3 tiles into swords/hearts.
 
@@ -283,6 +291,8 @@ Each race has 2 Tier-2 classes; once chosen they apply permanently:
 | 🎅 Dwarf | Tycoon | Gold gained also grants half as much XP |
 | 🧌 Orc | Titan | Higher max HP means higher flat sword damage (+1 per 12 max HP; synergizes with the Orc's HP×2 trait) |
 | 🧌 Orc | Thorns | Reflect half of damage taken back to the attacker |
+| 🪦 Undead | Rejuvenation | All active-skill cooldowns −1 (exactly offsets Confusion's +1) |
+| 🪦 Undead | Splash | Overflow damage from your attacks splashes to a random remaining foe (**including sword-immune bosses**) |
 
 ### 👹 Bestiary
 
@@ -321,14 +331,14 @@ Clearing shows a story-flavored congratulations screen; the Release build report
 - ☠️ **Death report**: when you fall, it lists each damage source's share of the killing turn.
 - 🎬 **Record / replay**: every run is recorded (seed + input sequence — deterministic replay, ~2–4 KB per run). After death you can **replay / copy / export / 🔗 share-link** the recording; the start screen offers **replay last run** or **paste-import** someone else's. Replay supports pause and 1×/2×/4× speed.
 - 🏆 **Cloud leaderboard + percentile (Release build `dungeonraid.win` only)**: after death, see your rank and percentile on the **overall** and **per-race** boards. Ranked by **turns survived**; the board **merges the latest 3 builds** (so frequent patches don't fragment it), **shows verified scores only**, and the top is re-verified hourly to block cheats. The Dev build does not participate in ranking. Set a **leaderboard name** on the start screen (≤12 CJK, 🎲 to randomize, remembered locally); each row shows "race avatar + name".
-- 🏅 **Human / AI boards**: scores are split by `agent` (human / ai) and never mixed. The in-game "🏆 Leaderboard" panel toggles between **Human / AI** and **Survival / Clears**, and **filters by race** (All / Human / Elf / Dwarf / Orc), showing the Top 10. Real play reports to the human board; AI/bots self-report `ai` (backend `/top?agent=&race=`, `/clearboard?agent=&race=`, private reclassify endpoint `/classify`). Write endpoints are IP-rate-limited.
+- 🏅 **Human / AI boards**: scores are split by `agent` (human / ai) and never mixed. The in-game "🏆 Leaderboard" panel toggles between **Human / AI** and **Survival / Clears**, and **filters by race** (All / Human / Elf / Dwarf / Orc / Undead), showing the Top 10. Real play reports to the human board; AI/bots self-report `ai` (backend `/top?agent=&race=`, `/clearboard?agent=&race=`, private reclassify endpoint `/classify`). Write endpoints are IP-rate-limited.
 
 ### 🛠️ Development / Balance Testing
 
 `playtest.js` is a **headless bot** that loads the real game logic from `dungeon-raid.html` (with DOM/Canvas stubbed out), plays automatically with a greedy strategy, and reports survival turns and levels reached per race/class line — handy for balance regression testing.
 
 ```bash
-node playtest.js                  # scan mode: 4 races × several enemy-stat sets, find the closest to the target turn
+node playtest.js                  # scan mode: all races × several enemy-stat sets, find the closest to the target turn
 
 # Targeted mode: pin a class line or a single boss, run detailed stats for comparison
 node playtest.js --race=orc                          # test Orc only
