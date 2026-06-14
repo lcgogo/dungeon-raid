@@ -158,7 +158,7 @@
 (()=>{
 //==================== 配置 ====================
 // 版本号 v主.次.修：小改动改"修"，新Boss/职业改"次"，大版本变更需先确认。页面底部显示。
-const VERSION='v1.14.0';
+const VERSION='v1.14.1';
 const DEV=true;    // 开发版：指向最新开发版本；独立存档 + DEV 标识。正式版在 dungeon-raid.html（DEV=false）
 const REC_API='https://api.dungeonraid.win';   // 录像分享 API（Cloudflare Worker + KV）
 // 带种子随机数（mulberry32）：游戏全程用 rnd() 取代原生随机，配合录制种子可确定性重放
@@ -543,8 +543,9 @@ function showTierSelect(tier){
       if(tier===1){ player.tier1=id; }
       else if(tier===3){ player.tier2b=id; def.f(player); player.hp=Math.min(player.hp,player.maxHp); }
       else { player.tier2=id; def.f(player); player.hp=Math.min(player.hp,player.maxHp); }
-      player.awaitingTier=0; busy=false; hideOverlay(); updateHUD();
+      player.awaitingTier=0; updateHUD();
       log(tr(`✨ 获得 ${L(def.n)}！`,`✨ Gained ${L(def.n)}!`));
+      if(pendingLevels){ showLevelUp(); } else { busy=false; hideOverlay(); }   // 转职同时若有待升级，接着弹升级；否则会卡住不能划
     };
     card.appendChild(b);
   });
@@ -578,8 +579,9 @@ function chooseSwapSlot(skillId){
     b.onclick=()=>{
       recAct(['t', 4, skillId, slot]);
       player.skill2={id:skillId, slot}; player.skill2Cd=0;
-      player.awaitingTier=0; busy=false; hideOverlay(); updateHUD();
+      player.awaitingTier=0; updateHUD();
       log(tr(`🔁 ${L(sk.name)} 已替换 ${slot==='heal'?'💊治疗':'💥炸弹'}！`,`🔁 ${L(sk.name)} now replaces ${slot==='heal'?'Heal':'Bomb'}!`));
+      if(pendingLevels){ showLevelUp(); } else { busy=false; hideOverlay(); }   // 同上：避免转职/换装与升级同回合时卡住
     };
     card.appendChild(b);
   });
