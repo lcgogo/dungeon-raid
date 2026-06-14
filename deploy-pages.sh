@@ -12,4 +12,7 @@ cp pages/functions/_middleware.js public/functions/
 echo "public/ 内容（应只有网页文件，无私钥）："
 ls -R public
 
+# 确保 Pages 项目存在（已存在则忽略报错）
+npx --yes wrangler pages project create dungeon-raid --production-branch=main 2>/dev/null || true
+
 npx --yes wrangler pages deploy public --project-name=dungeon-raid --branch=main --commit-dirty=true

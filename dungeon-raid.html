@@ -87,8 +87,12 @@
   /* 回放控制条 */
   #replayBar{display:none; position:fixed; left:0; right:0; bottom:0; z-index:30;
     background:#241b30; border-top:1px solid #6a4fa3; padding:7px 10px;
-    align-items:center; gap:7px; font-size:12px; color:#d9ccff;}
+    flex-direction:column; gap:6px; font-size:12px; color:#d9ccff;}
   #replayBar.show{display:flex;}
+  #replayBar .rbRow{display:flex; align-items:center; gap:7px;}
+  #rbJumps{display:flex; flex-wrap:wrap; gap:5px; align-items:center;}
+  #rbJumps:empty{display:none;}
+  #rbJumps .rbLbl{color:var(--dim); font-size:11px;}
   #replayBar .rbProg{flex:1; min-width:0;}
   #replayBar .rbBar{height:6px; border-radius:4px; background:#15101e; overflow:hidden; margin-top:3px;}
   #replayBar .rbBar > i{display:block; height:100%; background:#7d3cad; width:0;}
@@ -142,20 +146,23 @@
 <div id="overlay"><div class="card" id="card"></div></div>
 
 <div id="replayBar">
-  <div class="rbProg"><span id="rbTxt">🎬 回放</span><div class="rbBar"><i id="rbFill"></i></div></div>
-  <button id="rbPause">⏸</button>
-  <button class="rbSpd" data-spd="1">1×</button>
-  <button class="rbSpd" data-spd="2">2×</button>
-  <button class="rbSpd" data-spd="4">4×</button>
-  <button id="rbExit">⏹</button>
+  <div class="rbRow">
+    <div class="rbProg"><span id="rbTxt">🎬 回放</span><div class="rbBar"><i id="rbFill"></i></div></div>
+    <button id="rbPause">⏸</button>
+    <button class="rbSpd" data-spd="1">1×</button>
+    <button class="rbSpd" data-spd="2">2×</button>
+    <button class="rbSpd" data-spd="4">4×</button>
+    <button id="rbExit">⏹</button>
+  </div>
+  <div id="rbJumps"></div>
 </div>
 
 <script>
 (()=>{
 //==================== 配置 ====================
 // 版本号 v主.次.修：小改动改"修"，新Boss/职业改"次"，大版本变更需先确认。页面底部显示。
-const VERSION='v1.10.0';
-const DEV=false;   // 开发版（dungeon-raid-dev.html）将此置 true：独立存档 + DEV 标识；正式版保持 false
+const VERSION='v1.10.1';
+const DEV=false;   // æ­£å¼çï¼DEV=falseï¼ï¼å¼åçå¨ dungeon-raid-dev.htmlï¼DEV=trueï¼
 const REC_API='https://api.dungeonraid.win';   // 录像分享 API（Cloudflare Worker + KV）
 // 带种子随机数（mulberry32）：游戏全程用 rnd() 取代原生随机，配合录制种子可确定性重放
 let __rng=null;
@@ -1056,15 +1063,16 @@ function exportRec(r){
 }
 
 //==================== 录像回放 ====================
-let replayRec=null, replayIdx=0, replayTimer=null, replaySpeed=1, replayPaused=false;
+let replayRec=null, replayIdx=0, replayTimer=null, replaySpeed=1, replayPaused=false, replayTotalTurns=0, replayAutoPaused=false;
 const REPLAY_BASE=620;   // 每步基础间隔 ms（按倍速缩短）
 function startReplay(recObj){
   if(!recObj||!Array.isArray(recObj.acts)){ alert(tr('录像无效','Invalid recording')); return; }
-  replaying=true; replayRec=recObj; replayIdx=0; replaySpeed=1; replayPaused=false; rec=null;
+  replaying=true; replayRec=recObj; replayIdx=0; replaySpeed=1; replayPaused=false; replayAutoPaused=false; rec=null;
+  replayTotalTurns=recObj.acts.filter(a=>a[0]==='m').length;   // 总回合数（=连线动作数）
   hideOverlay(); busy=false;
   startGame(raceById(recObj.race));    // replaying=true → 用 recObj.seed 播种、不新建录像
   document.getElementById('replayBar').classList.add('show');
-  updateReplayBar(); scheduleReplay();
+  renderJumps(); updateReplayBar(); scheduleReplay();
 }
 function scheduleReplay(){ clearTimeout(replayTimer); if(replayPaused||!replaying) return; replayTimer=setTimeout(replayStep, REPLAY_BASE/replaySpeed); }
 function replayStep(){
@@ -1072,7 +1080,13 @@ function replayStep(){
   if(replayIdx>=replayRec.acts.length){ replayDone(); return; }
   const a=replayRec.acts[replayIdx++];
   try{ dispatchReplayAct(a); }catch(e){ log('回放出错: '+e.message); replayDone(); return; }
-  if(replaying){ updateReplayBar(); scheduleReplay(); }   // resolve 可能已触发 gameOver→stopReplay
+  if(!replaying) return;   // resolve 可能已触发 gameOver→stopReplay
+  // 倒数 10 回合自动暂停一次，方便看清怎么死的
+  if(!replayAutoPaused && replayTotalTurns>10 && player && player.hp>0 && player.turns>=replayTotalTurns-10){
+    replayAutoPaused=true; replayPaused=true;
+    log(tr('⏸ 临近死亡，已自动暂停。点 ▶ 继续看结局。','⏸ Auto-paused near death. Press ▶ to watch the ending.'));
+  }
+  updateReplayBar(); scheduleReplay();
 }
 function dispatchReplayAct(a){
   const k=a[0];
@@ -1096,6 +1110,25 @@ function updateReplayBar(){
 }
 function replayDone(){ clearTimeout(replayTimer); replayTimer=null; replayPaused=true; updateReplayBar(); log(tr('🎬 回放结束（点 ⏹ 退出）','🎬 Replay finished (⏹ to exit)')); }
 function stopReplay(){ clearTimeout(replayTimer); replayTimer=null; replaying=false; replayRec=null; document.getElementById('replayBar').classList.remove('show'); }
+// 跳到指定回合：从种子重头快进（确定性、瞬间），到目标回合后暂停
+function jumpToTurn(target){
+  if(!replaying||!replayRec) return;
+  clearTimeout(replayTimer); replayTimer=null;
+  replayAutoPaused = target>=replayTotalTurns-10;   // 跳到接近终点就别再自动暂停
+  replayIdx=0; busy=false;
+  startGame(raceById(replayRec.race));              // replaying=true → 用 replayRec.seed 重新播种
+  while(replayIdx<replayRec.acts.length && player.hp>0 && player.turns<target){
+    try{ dispatchReplayAct(replayRec.acts[replayIdx++]); }catch(e){ break; }
+  }
+  replayPaused=true; updateReplayBar();
+  log(tr(`⏭ 跳到第 ${player.turns} 回合（已暂停，点 ▶ 继续）`,`⏭ Jumped to turn ${player.turns} (paused, ▶ to play)`));
+}
+function renderJumps(){
+  const box=document.getElementById('rbJumps'); if(!box) return; box.innerHTML='';
+  if(replayTotalTurns<50) return;
+  const lbl=document.createElement('span'); lbl.className='rbLbl'; lbl.textContent=tr('跳到回合','Jump to'); box.appendChild(lbl);
+  for(let t=50;t<replayTotalTurns;t+=50){ const b=document.createElement('button'); b.textContent=t; b.onclick=()=>jumpToTurn(t); box.appendChild(b); }
+}
 document.getElementById('rbPause').onclick=()=>{ if(replayIdx>=(replayRec?replayRec.acts.length:0)) return; replayPaused=!replayPaused; updateReplayBar(); scheduleReplay(); };
 document.getElementById('rbExit').onclick=()=>{ stopReplay(); showClassSelect(); };
 document.querySelectorAll('#replayBar .rbSpd').forEach(b=>{ b.onclick=()=>{ replaySpeed=+b.dataset.spd; updateReplayBar(); scheduleReplay(); }; });
