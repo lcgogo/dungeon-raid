@@ -56,7 +56,7 @@
 - **经验**只来自**击杀怪物**（每杀一只 +3），升级时**技能三选一**。
 - **连击加成**：一次连得越多收益越高，整体收益 `× (1 + (个数−2) × 15%)`（连 5 ≈ ×1.45，连 7 ≈ ×1.75）。
 - **护甲累积**：盾不直接给护甲，而是累积「护甲进度」，攒满 +1 护甲（越往后越贵）。受击时护甲先减伤，剩下的才掉血。
-- **金币商店**：💊 治疗（回复 10 生命）/ 💥 炸弹（全场怪 −6 血）。每件商品有独立冷却。
+- **金币商店**：💊 治疗（回复 10 生命，**每用一次 +2 恢复、+1 金**）/ 💥 炸弹（全场怪 −6 血）。每件商品有独立冷却。
 
 ### 🧬 种族（开局选择）
 
@@ -231,7 +231,7 @@ Each enemy tile shows three numbers:
 - **XP comes only from kills** (+3 per enemy). On level-up, **pick 1 of 3** upgrades.
 - **Combo bonus**: longer chains pay more — total reward `× (1 + (N − 2) × 15%)` (5-chain ≈ ×1.45, 7-chain ≈ ×1.75).
 - **Armor accumulates**: shields do not grant armor directly; they fill "armor progress," and filling it gives +1 armor (costs more each time). Armor soaks each hit, then the rest comes off your HP.
-- **Gold shop**: 💊 Heal (restore 10 HP) / 💥 Bomb (all foes −6 HP). Each item has its own cooldown.
+- **Gold shop**: 💊 Heal (restore 10 HP, **+2 healing and +1 gold cost per use**) / 💥 Bomb (all foes −6 HP). Each item has its own cooldown.
 
 ### 🧬 Races (chosen at start)
 
