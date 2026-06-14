@@ -61,6 +61,30 @@ async function clearRanking(env, version, race, level, agent = 'human') {
   };
 }
 
+// 最近 n 个版本（按 semver 倒序）：榜单只保留最近几个版本，避免频繁补丁把榜单切碎
+async function recentVersions(env, n) {
+  const { results } = await env.DB.prepare("SELECT DISTINCT version FROM scores WHERE version != ''").all();
+  const sv = v => v.replace(/^v/, '').split('.').map(x => parseInt(x, 10) || 0);
+  const vers = (results || []).map(r => r.version).sort((a, b) => {
+    const A = sv(a), B = sv(b);
+    for (let i = 0; i < 3; i++) { if ((A[i] || 0) !== (B[i] || 0)) return (B[i] || 0) - (A[i] || 0); }
+    return 0;
+  });
+  return vers.slice(0, n);
+}
+// 把 version / recent 参数翻译成 where 片段（version IN (...) 或 单版本）；返回 {sql, binds, versions}
+async function versionFilter(env, url) {
+  const recent = url.searchParams.get('recent');
+  if (recent) {
+    const vers = await recentVersions(env, Math.min(5, Math.max(1, +recent || 3)));
+    if (vers.length) return { sql: ` AND version IN (${vers.map(() => '?').join(',')})`, binds: vers, versions: vers };
+    return { sql: '', binds: [], versions: [] };
+  }
+  const version = url.searchParams.get('version');
+  if (version) return { sql: ' AND version=?', binds: [version], versions: [version] };
+  return { sql: '', binds: [], versions: null };
+}
+
 export default {
   async fetch(req, env) {
     if (req.method === 'OPTIONS') return new Response(null, { headers: CORS });
@@ -140,32 +164,32 @@ export default {
     // GET /clearboard?version=&race=&n= —— 破关榜（按最低破关等级 ASC）
     if (req.method === 'GET' && p === '/clearboard') {
       const race = url.searchParams.get('race');
-      const version = url.searchParams.get('version');
       const agent = url.searchParams.get('agent') === 'ai' ? 'ai' : 'human';   // 默认人类榜
       const n = Math.min(50, Math.max(1, +(url.searchParams.get('n') || 10)));
+      const vf = await versionFilter(env, url);
       let where = "cleared=1 AND verified=1 AND agent=?", binds = [agent];   // 只展示已重放验证的真破关
-      if (version) { where += ' AND version=?'; binds.push(version); }
+      where += vf.sql; binds.push(...vf.binds);
       if (race) { where += ' AND race=?'; binds.push(race); }
       binds.push(n);
       const { results } = await env.DB.prepare(
         `SELECT id,version,race,level,turns,verified FROM scores WHERE ${where} ORDER BY level ASC, turns ASC LIMIT ?`).bind(...binds).all();
-      return json({ clears: results || [], agent });
+      return json({ clears: results || [], agent, versions: vf.versions });
     }
 
     // GET /top?version=&race=&n=  —— 榜单（按版本过滤，不传则只看有版本号的最新成绩）
     if (req.method === 'GET' && p === '/top') {
       const race = url.searchParams.get('race');
-      const version = url.searchParams.get('version');
       const n = Math.min(50, Math.max(1, +(url.searchParams.get('n') || 10)));
       const agent = url.searchParams.get('agent') === 'ai' ? 'ai' : 'human';   // 默认人类榜
       const cols = 'id,version,race,turns,level,gold,verified';
       const order = 'ORDER BY turns DESC, level DESC, gold DESC LIMIT ?';
+      const vf = await versionFilter(env, url);
       let where = "source='play' AND verified=1 AND agent=?", binds = [agent];   // 榜单只展示已重放验证的成绩（伪造在验证前不可见，验证失败转 -1 永不上榜）；百分位 ranking() 仍按 verified>=0 给即时近似排名
-      if (version) { where += ' AND version=?'; binds.push(version); }
+      where += vf.sql; binds.push(...vf.binds);
       if (race) { where += ' AND race=?'; binds.push(race); }
       binds.push(n);
       const { results } = await env.DB.prepare(`SELECT ${cols} FROM scores WHERE ${where} ${order}`).bind(...binds).all();
-      return json({ top: results || [], agent });
+      return json({ top: results || [], agent, versions: vf.versions });
     }
 
     // GET /pending?k= —— 最强的未验证录像（含 share 触发），交给定时任务
