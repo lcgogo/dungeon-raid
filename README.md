@@ -134,6 +134,7 @@
 | 🦹 小偷 Thief | 剑 / 炸弹 | 现身即偷走一定比例金币（一阶 20%、二阶 40%…）；倒计时内击败夺回，让它逃走则永久失去 |
 | 🧟 僵尸 Zombie | 剑 / 炸弹 | 现身即让你感染尸毒（血条变绿），**潜伏一回合后**每回合按生命百分比掉血（随档位递增，单回合最高 30%，无视护甲）；趁潜伏期击败它即解除感染 |
 | 🦅 鸟人 Birdman | 剑 / 炸弹 | **每回合**俯冲啄你一下（半攻击力），并在回合末和棋盘上**任意一个棋子互换位置（瞬移）**——飘忽难缠，想连它的剑链得算准它的落点，速战速决 |
+| 🗿 石像 Statue | 剑 / 炸弹（慎用） | 它【受到多少伤害，就把等量伤害当作**真实伤害（无视护甲）反弹给你**】——攻击它=伤害自己。想杀它先确保血够厚，别一刀连自己也送走（剑/炸弹/溅射/吸魂都会反弹）|
 
 > Boss 入场时会有**扩散冲击环 + 闪光**特效（普通 Boss 红、终焉之主金），一眼可辨。每个 Boss 与一阶主动技能在信息弹窗里都附带一句**俏皮话**。
 
@@ -309,6 +310,7 @@ About every **10 turns** a random boss appears; beating one rewards 💰+20 and 
 | 🦹 Thief | Sword / Bomb | Steals a share of gold on arrival (20% at Lv1, 40% at Lv2…); kill it before its timer to recover, let it flee and the gold is gone forever |
 | 🧟 Zombie | Sword / Bomb | Infects you on arrival (HP bar turns green); **after a 1-turn incubation** you lose a % of HP each turn (scaling per tier, capped at 30%/turn, ignoring armor); kill it during incubation to cure |
 | 🦅 Birdman | Sword / Bomb | **Every turn** it dives to peck you (half attack) and, at turn end, **swaps places with a random tile (teleport)** — elusive and nagging, so line up your chain where it lands and finish it fast |
+| 🗿 Statue | Sword / Bomb (careful!) | **Whatever damage it takes, it reflects back at you as TRUE damage (ignoring armor)** — attacking it hurts you. Make sure you have the HP to survive the kill; don't one-shot yourself (sword/bomb/splash/drain all reflect) |
 
 > Each boss arrives with a **shockwave ring + flash** effect (crimson for normal bosses, gold for the Overlord), so you never miss one. Every boss and every Tier-1 active also carries a one-line **quip** in its info popup.
 
