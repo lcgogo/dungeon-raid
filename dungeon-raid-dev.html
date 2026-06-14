@@ -161,7 +161,7 @@
 (()=>{
 //==================== 配置 ====================
 // 版本号 v主.次.修：小改动改"修"，新Boss/职业改"次"，大版本变更需先确认。页面底部显示。
-const VERSION='v1.12.2';
+const VERSION='v1.12.3';
 const DEV=true;    // 开发版：指向最新开发版本；独立存档 + DEV 标识。正式版在 dungeon-raid.html（DEV=false）
 const REC_API='https://api.dungeonraid.win';   // 录像分享 API（Cloudflare Worker + KV）
 // 带种子随机数（mulberry32）：游戏全程用 rnd() 取代原生随机，配合录制种子可确定性重放
@@ -728,13 +728,16 @@ function hexA(hex,a){ const n=parseInt(hex.slice(1),16);
 
 //==================== Boss 入场特效 ====================
 // Boss 降临时从该格爆出扩散冲击环 + 闪光，让"有 Boss 入场"一眼可辨（区别于普通小怪刷新）。纯帧驱动、可重放无关。
-const bossFx=[];           // {r,c,life,max,gold}
+const bossFx=[];           // {tile,c,r,life,max,gold}：锚定到 Boss 棋子对象，跟随其下落动画
 const FX_LIFE=46;          // 帧数（约 0.75s @60fps）
-function addBossFx(r,c,gold){ bossFx.push({r,c,life:FX_LIFE,max:FX_LIFE,gold:!!gold}); }
+// 锚定到刚放下的 Boss 棋子本身：之后 applyGravity 会让它沿列下落，特效需跟随，否则会落在掉进原格的别的棋子上。
+function addBossFx(r,c,gold){ bossFx.push({tile:grid[r][c],c,r,life:FX_LIFE,max:FX_LIFE,gold:!!gold}); }
 function drawBossFx(){
   for(const f of bossFx){
     const p=1-f.life/f.max;                          // 0→1 进度
-    const cx=cellX(f.c)+TILE/2, cy=cellY(f.r)+TILE/2;
+    const t=f.tile;
+    const cx=cellX(f.c)+TILE/2;                       // 列在重力下不变
+    const cy=((t&&t.curY!==undefined)?t.curY:cellY(f.r))+TILE/2;   // 跟随 Boss 当前（下落中的）y
     const col=f.gold?'#ffd54a':'#ff5252';            // 终焉之主金，普通 Boss 红
     ctx.save();
     if(p<0.35){ ctx.beginPath(); ctx.arc(cx,cy,TILE*0.56,0,7); ctx.fillStyle=hexA(col,0.5*(1-p/0.35)); ctx.fill(); }   // 起手闪光
