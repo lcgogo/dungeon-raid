@@ -158,7 +158,7 @@
 (()=>{
 //==================== 配置 ====================
 // 版本号 v主.次.修：小改动改"修"，新Boss/职业改"次"，大版本变更需先确认。页面底部显示。
-const VERSION='v1.16.2';
+const VERSION='v1.17.0';
 const DEV=false;   // release build (DEV=false); dev build is dungeon-raid-dev.html (DEV=true)
 const REC_API='https://api.dungeonraid.win';   // 录像分享 API（Cloudflare Worker + KV）
 // 带种子随机数（mulberry32）：游戏全程用 rnd() 取代原生随机，配合录制种子可确定性重放
@@ -232,6 +232,7 @@ function newPlayer(){
     skill2:null, skill2Cd:0, t4Pending:false,                              // 350回合：任选主动替换治疗/炸弹槽
     comboMult:1, swordMult:1, armorMult:1, maxHpUpMult:1, noArmor:false,    // 种族特性修正
     heartPoison:false,                                                      // 巫医蛊毒：本回合连心改为毒怪
+    foeCdBonus:0, skillCdMod:0, splash:false, rebirthTurn:false, rebirthSaves:0,  // 活死人：迷惑/技能冷却修正/溅射/重生
     upgradeChoices:3, bombCd:3, goldLock:0, goldFrozen:0,                   // 转职被动相关
     finaleStarted:false, finaleWave:0, cleared:false};                      // 终局：终焉之主浪潮 / 破关
 }
@@ -247,6 +248,7 @@ function enemyStats(){
   };
 }
 function enemyChance(){ return Math.min(0.30, 0.10 + player.level*0.014); }
+function extraFoeCd(){ return (player&&player.foeCdBonus)||0; }   // 活死人「迷惑」：所有怪物（含 Boss）攻击倒计时 +1
 
 // ===== Boss 池：每 10 回合从中随机挑一个现身。剑链免疫，只能用炸弹炸，奖励丰厚 =====
 const BOSSES=[
@@ -331,7 +333,7 @@ function spawnRandomBossTile(){
   const [r,c]=cells[Math.floor(rnd()*cells.length)];
   const def=randomBossDef(), tier=1;   // 终焉浪潮用基础档：可被清掉，挑战在数量而非单体肉度
   const s=def.monster?enemyStats():bossStats();
-  const cdv=(s.cd!=null?s.cd:s.baseCd);
+  const cdv=(s.cd!=null?s.cd:s.baseCd)+extraFoeCd();
   grid[r][c]={type:'boss', bossId:def.id, tier, hp:s.hp, maxHp:s.hp, atk:s.atk, cd:cdv, baseCd:cdv};
   if(def.onSpawn) def.onSpawn(grid[r][c]);
   addBossFx(r,c,false);
@@ -404,7 +406,7 @@ function spawnBoss(){
   const def=randomBossDef();   // 排除终焉之主（noRandom）
   const tier=bossTier();
   const s = def.monster ? enemyStats() : bossStats();   // 怪属性型 Boss 用怪物数值
-  const cdv = (s.cd!=null ? s.cd : s.baseCd);
+  const cdv = (s.cd!=null ? s.cd : s.baseCd) + extraFoeCd();
   const mult = def.noTierScale ? 1 : tier;              // 刺客等：血量/攻击始终同级怪物，不吃档位倍率
   const hp=s.hp*mult, atk=s.atk*mult;
   grid[r][c]={type:'boss', bossId:def.id, tier, hp, maxHp:hp, atk, cd:cdv, baseCd:cdv};
@@ -421,7 +423,7 @@ function makeTile(type){
          : pool[Math.floor(rnd()*pool.length)];
   }
   const t={type};
-  if(type==='enemy'){ const s=enemyStats(); t.hp=s.hp; t.maxHp=s.hp; t.atk=s.atk; t.cd=s.baseCd; t.baseCd=s.baseCd; }
+  if(type==='enemy'){ const s=enemyStats(); t.hp=s.hp; t.maxHp=s.hp; t.atk=s.atk; const bc=s.baseCd+extraFoeCd(); t.cd=bc; t.baseCd=bc; }
   return t;
 }
 
@@ -432,6 +434,7 @@ const RACES=[
   {id:'elf',   e:'🧝', n:['精灵','Elf'],   d:['特性：连击加成翻倍（每多连1个 +30%）。削弱：「强化体魄」升级只 +3 上限。','Trait: combo bonus doubled (+30%/tile). Weakness: Fortify Body upgrade gives only +3 max HP.'], f:p=>{p.comboMult=2; p.maxHpUpMult=0.5;}},
   {id:'dwarf', e:'🎅', n:['矮人','Dwarf'], d:['特性：护甲减伤翻倍（每点护甲抵 2 点）。削弱：剑链总伤 ×0.85（含固定伤害一起算）。','Trait: armor counts double (each point blocks 2). Weakness: ×0.85 total sword damage (flat included).'], f:p=>{p.armorMult=2; p.swordMult=0.85;}},
   {id:'orc',   e:'🧌', n:['兽人','Orc'],   d:['特性：「强化体魄」升级时生命上限翻倍（每次 +12）。削弱：无甲——永远无法获得护甲。','Trait: Fortify Body upgrade gives double max HP (+12 each). Weakness: No Armor — can never gain armor.'], f:p=>{p.maxHpUpMult=2; p.noArmor=true;}},
+  {id:'undead',e:'🪦', n:['活死人','Undead'], d:['特性：迷惑——所有怪物（含 Boss）攻击倒计时 +1（更慢出手）。削弱：所有主动技能冷却 +1。','Trait: Confusion — all monsters (incl. bosses) attack 1 turn slower. Weakness: all active-skill cooldowns +1.'], f:p=>{p.foeCdBonus=1; p.skillCdMod=(p.skillCdMod||0)+1;}},
 ];
 // 一阶职业：主动技能（f 返回 false 表示无效不发动；返回值表示自带日志）
 const TIER1={
@@ -447,6 +450,16 @@ const TIER1={
     passive:['每回合棋盘摆完后，把 3 个非敌人/非心的棋子变成心','Each turn after the board settles, turns 3 non-enemy non-heart tiles into hearts']},
   swordsaint:{n:['剑圣','Sword Saint'], quip:['在我眼里，万物皆可开刃。','In my eyes, anything can be a blade.'], skill:{name:['化剑','Bladeshift'], short:['全场心/金币→剑','Hearts & coins → swords'], cd:5, f:p=>{ let n=0; for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const t=grid[r][c]; if(t&&(t.type==='heart'||t.type==='coin')){ t.type='sword'; n++; } } if(!n) return false; log(tr(`⚔️ 化剑：${n} 个心/金币化为剑`,`⚔️ Bladeshift: ${n} hearts/coins → swords`)); return n; }},
     passive:['每回合棋盘摆完后，把 3 个非敌人/非剑的棋子变成剑','Each turn after the board settles, turns 3 non-enemy non-sword tiles into swords']},
+  necromancer:{n:['死灵','Necromancer'], quip:['你的魂，我借来续命。','Your soul keeps me going. Thanks.'], skill:{name:['吸魂大法','Soul Drain'], short:['随机吸 2 只怪的命补自己','Drain 2 random foes to heal'], cd:5, f:p=>{
+    const foes=[]; for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const t=grid[r][c]; if(t&&(t.type==='enemy'||(t.type==='boss'&&!t.finale))) foes.push([r,c]); }
+    if(!foes.length) return false;
+    for(let i=foes.length-1;i>0;i--){ const j=Math.floor(rnd()*(i+1)); [foes[i],foes[j]]=[foes[j],foes[i]]; }
+    let healed=0, kills=0; const pick=foes.slice(0,2);
+    for(const [r,c] of pick){ const t=grid[r][c]; const drain=Math.min(p.maxHp, t.hp); t.hp-=drain; healed+=drain;
+      if(t.hp<=0){ const isB=t.type==='boss'; grid[r][c]=null; kills++; if(isB){thiefRecover(t);p.xp+=15;p.gold+=20;onBossKilled();} else {p.xp+=3+(p.killXp||0);p.gold+=1;} } }
+    const h=gainHeal(healed); applyGravity(); syncPositions(false);
+    log(tr(`🪄 吸魂大法：吸取 ${pick.length} 只怪 ${healed} 生命，回血 ${h}`+(kills?`，吸死 ${kills} 只`:''),`🪄 Soul Drain: drained ${healed} from ${pick.length} foes, +${h} HP`+(kills?`, ${kills} killed`:''))); return true; }}},
+  skeletonking:{n:['骷髅王','Skeleton King'], quip:['死过一次，再死一次又何妨。','Died once already — what is one more?'], skill:{name:['重生','Rebirth'], short:['本回合致死则满血复活(此后冷却+2)','Cheat death this turn, full heal'], cd:5, f:p=>{ p.rebirthTurn=true; log(tr('💀 重生待命：本回合若被击败，将满血复活！','💀 Rebirth armed: if slain this turn, revive at full HP!')); return true; }}},
 };
 // 二阶职业：被动
 const TIER2={
@@ -458,11 +471,14 @@ const TIER2={
   tycoon:{n:['财阀','Tycoon'], d:['获得金币时额外按一半转为经验','Gold gained also grants half as XP'], f:p=>{ p.goldXp=true; }},
   warlord:{n:['巨力','Titan'], d:['最大生命越高，剑链固定伤害越高（每 12 点最大生命 +1）','Higher max HP = higher flat sword damage (+1 per 12 max HP)'], f:p=>{ p.titan=true; }},
   thorns:{n:['荆棘','Thorns'], d:['受到伤害的一半反弹给攻击者','Reflect half of damage taken back to the attacker'], f:p=>{ p.thorns=0.5; }},
+  rejuvenation:{n:['回春','Rejuvenation'], d:['所有主动技能冷却 -1','All active-skill cooldowns -1'], f:p=>{ p.skillCdMod=(p.skillCdMod||0)-1; }},
+  splash:{n:['溅射','Splash'], d:['攻击溢出伤害随机溅到剩余敌人（含剑免疫 Boss）','Overflow damage splashes to a random remaining foe (incl. sword-immune bosses)'], f:p=>{ p.splash=true; }},
 };
 const RACE_PATHS={
   human:{t1:['knight','priest','swordsaint'], t2:['immortal','general']},
   elf:  {t1:['ranger','rogue'],      t2:['sharpshooter','shadow']},
   dwarf:{t1:['blacksmith','miser'],  t2:['demolitionist','tycoon']},
+  undead:{t1:['necromancer','skeletonking'], t2:['rejuvenation','splash']},
   orc:  {t1:['berserker','fighter','witchdoctor'], t2:['warlord','thorns']},
 };
 function raceById(id){ return RACES.find(r=>r.id===id)||RACES[0]; }
@@ -989,7 +1005,7 @@ function castSkill2(key){
   const def=TIER1[player.skill2.id], sk=def&&def.skill; if(!sk) return;
   const r=sk.f(player);
   if(r===false) return;        // 技能无效（如对无甲用锻甲）：不进冷却、不刷日志
-  player.skill2Cd=sk.cd;
+  player.skill2Cd=effSkillCd(player.skill2.id);
   recAct(['b',key]);   // 录制（占用槽位 key）；回放 dispatchReplayAct('b',key)→buyItem→castSkill2
   if(r===undefined) log(tr(`✨ 【${L(sk.name)}】发动！`,`✨ ${L(sk.name)} activated!`));
   checkLevel(); updateHUD();
@@ -1002,13 +1018,20 @@ document.querySelectorAll('.shopBtn[data-buy]').forEach(b=>{
 });
 
 //==================== 职业主动技能 ====================
+// 实际冷却 = 技能基础冷却 + 全局修正（活死人迷惑 +1 / 回春 -1），最低 1；骷髅王「重生」每实际复活一次再 +2（递增）。
+function effSkillCd(id){
+  const sk=id&&TIER1[id]&&TIER1[id].skill; if(!sk) return 5;
+  let cd=sk.cd+(player.skillCdMod||0);
+  if(id==='skeletonking') cd+=2*(player.rebirthSaves||0);
+  return Math.max(1, cd);
+}
 function activateSkill(){
   if(busy||pendingLevels) return;
   const sk=player&&player.tier1&&TIER1[player.tier1]&&TIER1[player.tier1].skill; if(!sk) return;  // 一阶职业的主动
   if(player.skillCd>0) return;
   const r=sk.f(player);
   if(r===false) return;        // 技能判定无效（如锻甲场上没护甲）：不进冷却、不刷日志
-  player.skillCd=sk.cd;
+  player.skillCd=effSkillCd(player.tier1);
   recAct(['k']);   // 录制技能发动
   if(r===undefined) log(tr(`✨ 【${L(sk.name)}】发动！`,`✨ ${L(sk.name)} activated!`)); // 技能没自带日志才用通用日志
   checkLevel(); updateHUD();
@@ -1118,15 +1141,29 @@ function dealDamage(pool, targets){
   else { for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const t=grid[r][c];
     if(t&&t.type==='enemy') list.push({r,c,t}); } }
   // 原版算法：剑链伤害对每只目标【独立、全额】生效，不共享、不分配
+  const splashes=[];
   for(const e of list){
-    const hit=Math.min(pool, e.t.hp);
+    const before=e.t.hp;
+    const hit=Math.min(pool, before);
     e.t.hp-=hit; dmg+=hit;
     if(e.t.hp<=0){ grid[e.r][e.c]=null; kills++;
       if(e.t.type==='boss'){ thiefRecover(e.t); player.xp+=15; player.gold+=20; onBossKilled(); }  // 剑杀 Boss：厚赏 + 可能触发转职
       else { player.xp+=3+(player.killXp||0); player.gold += 1; }                // 神射手：击杀额外经验
+      if(player.splash && pool>before) splashes.push(pool-before);   // 溅射：本次击杀的溢出留待砸向其它敌人
     }
   }
+  // 溅射（骷髅王被动）：每份溢出随机砸到棋盘上剩余的一个敌人/Boss（含剑免疫，排除终焉之主）
+  for(const over of splashes){ const r=splashHit(over); dmg+=r.dmg; kills+=r.kills; }
   return {dmg,kills};
+}
+// 溅射落点：随机选一个剩余敌人/Boss（含剑免疫，排除终焉之主），造成 over 伤害
+function splashHit(over){
+  const foes=[]; for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const t=grid[r][c]; if(t&&(t.type==='enemy'||(t.type==='boss'&&!t.finale))) foes.push([r,c]); }
+  if(!foes.length) return {dmg:0,kills:0};
+  const [r,c]=foes[Math.floor(rnd()*foes.length)]; const t=grid[r][c];
+  const hit=Math.min(over,t.hp); t.hp-=hit; let kills=0;
+  if(t.hp<=0){ const isB=t.type==='boss'; grid[r][c]=null; kills=1; if(isB){thiefRecover(t);player.xp+=15;player.gold+=20;onBossKilled();} else {player.xp+=3+(player.killXp||0);player.gold+=1;} }
+  return {dmg:hit, kills};
 }
 
 function advanceEnemies(){
@@ -1162,6 +1199,7 @@ function advanceEnemies(){
   }
   if(player.shieldTurn) player.shieldTurn=false;   // 圣盾仅护本回合
   if(player.undyingTurn) player.undyingTurn=false; // 狂怒不屈仅本回合
+  if(player.rebirthTurn) player.rebirthTurn=false; // 骷髅王重生仅护本回合（未触发则失效）
 }
 // 玩家受伤的统一入口：圣盾免伤 / 狂怒不屈保命 / 矮人护甲翻倍 / 荆棘反弹 / 伤害统计
 function hurtPlayer(atk, sourceKey, ignoreArmor){
@@ -1169,6 +1207,8 @@ function hurtPlayer(atk, sourceKey, ignoreArmor){
   const dmg = ignoreArmor ? atk : Math.max(1, atk - player.armor*(player.armorMult||1) - (player.toughness||0));
   player.hp -= dmg;
   if(player.undyingTurn && player.hp<1) player.hp=1; // 狂怒不屈：本回合最低保留 1 血
+  if(player.rebirthTurn && player.hp<=0){ player.hp=player.maxHp; player.rebirthTurn=false; player.rebirthSaves=(player.rebirthSaves||0)+1; // 骷髅王重生：本回合致死则满血复活，此后重生冷却 +2
+    log(tr('💀 骷髅王重生！生命恢复至满（重生冷却 +2）','💀 Skeleton King reborn! Full HP (Rebirth cooldown +2)')); }
   addDmg(sourceKey, dmg);
   if(player.thorns && dmg>0) reflectThorns(Math.ceil(dmg*player.thorns));
   return dmg;
