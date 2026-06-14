@@ -302,10 +302,12 @@ if('submit-ai' in ARG){
       console.log((ok?'✓':'✗')+` ${run.race} 回合${run.out.turns} 等级${run.out.level} 金${run.out.gold}`+(ok?'':` ← 重放不符 ${a?`${a.turns}/${a.level}/${a.gold}`:'ERR'}`));
       if(ok) good.push({...run, cleared:a.cleared});
     }
-    console.log(`\n可验证录像 ${good.length}/${runs.length}`+(DRY?'（--dry：不提交）':''));
+    const MINT = +ARG.min || 50;
+    const toPost = good.filter(r=>r.out.turns>=MINT);   // 跳过太短的局，AI 榜不堆噪声
+    console.log(`\n可验证录像 ${good.length}/${runs.length}，待提交(回合≥${MINT}) ${toPost.length}`+(DRY?'（--dry：不提交）':''));
     if(DRY) return;
     let posted=0, failed=0;
-    for(const run of good){
+    for(const run of toPost){
       const clear = run.cleared || run.out.turns>=511;
       const ep = clear ? '/clear' : '/score';
       const body = clear ? {level:run.out.level, rec:run.rec, agent:'ai'} : {level:run.out.level, gold:run.out.gold, rec:run.rec, agent:'ai'};
