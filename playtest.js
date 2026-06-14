@@ -192,6 +192,7 @@ function maybeSkill(){
   else if(id==='blacksmith' && bestSimple('shield')) G.activateSkill(); // 锻甲：有盾时
   else if(id==='fighter' && (immuneBoss || ens>=2)) G.activateSkill();  // 嗜血：有剑免疫Boss(开穿透)或怪多时
   else if(id==='berserker' && threat && p.hp<=0.5*p.maxHp) G.activateSkill(); // 狂怒：将被打死时用不屈保命
+  else if(id==='guildmaster' && ens>=2) G.activateSkill();      // 收买：怪多时（技能自带「金币>全怪血」门槛）
   resolveLevels();
 }
 // 机器人处理转职选择（resolve/buyItem 触发 showTierSelect/showSkillSwap 后，apply 第一个选项）

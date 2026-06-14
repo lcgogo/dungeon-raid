@@ -83,7 +83,7 @@
 
 ### ⚔️ 一阶职业 · 主动技能
 
-每个种族对应一阶职业（**人族、兽人各 3 个，精灵、矮人各 2 个**），技能冷却均为 **5 回合**：
+每个种族对应**多个**一阶职业，技能冷却均为 **5 回合**：
 
 | 种族 | 职业 | 技能 | 效果 |
 |---|---|---|---|
@@ -94,6 +94,7 @@
 | 🧝 精灵 | 💰 盗贼 Rogue | 点金 Gold Touch | 把场上所有的剑变成金币 |
 | 🎅 矮人 | 🔰 锻造师 Blacksmith | 锻甲 Forge Armor | 吞下全场的盾，全部转为护甲进度 |
 | 🎅 矮人 | 🔒 守财奴 Miser | 囤金 Hoard | 锁金 **4 回合**（期间不产/不花金币，到期返还 **2.5 倍**）|
+| 🎅 矮人 | 💼 会长 Guild Master | 收买 Buyout | 当**金币 > 棋盘上所有怪的总血量**时方可发动：把全部怪物**变成金币**（有钱能使鬼推磨；对 Boss 无效）|
 | 🧌 兽人 | 🔪 狂战士 Berserker | 狂怒 Frenzy | 生命减半并进入**不屈**（仅**本回合**：无论受多少伤都保留 1 血）；并**永久**开启残血增伤——血越少剑伤越高（最高 +60%）|
 | 🧌 兽人 | 🩸 斗士 Fighter | 嗜血 Bloodthirst | 本回合剑链每击中一只怪回 3 血，**且可用剑攻击剑免疫的 Boss（幽灵/小丑）** |
 | 🧌 兽人 | 🧪 巫医 Witch Doctor | 蛊毒 Hex | **主动**：本回合连「心」不再回血，而是把这些生命当毒灌给全场怪。**被动**：每回合棋盘摆完后，把 3 个非敌人/非心的棋子变成心 |
@@ -104,7 +105,7 @@
 
 ### 🎖️ 二阶职业 · 被动
 
-每个种族对应 2 个二阶职业，转职后永久生效：
+各种族对应**多个**二阶职业，转职后永久生效（第 100 回合 Boss 选一个，第 200 回合 Boss 再从本种族剩余的里选一个）：
 
 | 种族 | 职业 | 效果 |
 |---|---|---|
@@ -114,6 +115,7 @@
 | 🧝 精灵 | 影袭 Shadow | 炸弹冷却永久缩为 2 回合 |
 | 🎅 矮人 | 爆破手 Demolitionist | 炸弹伤害更高，但花费金币更多 |
 | 🎅 矮人 | 财阀 Tycoon | 获得金币时额外按一半转为经验 |
+| 🎅 矮人 | 小气鬼 Cheapskate | 消耗金币的主动（商店 💊治疗 / 💥炸弹）花费减半 |
 | 🧌 兽人 | 巨力 Titan | 最大生命越高，剑链固定伤害越高（每 12 点最大生命 +1，与兽人 HP×2 特性联动）|
 | 🧌 兽人 | 荆棘 Thorns | 受到伤害的一半反弹给攻击者 |
 | 🪦 活死人 | 回春 Rejuvenation | 所有主动技能冷却 −1（正好抵消「迷惑」的 +1）|
@@ -261,7 +263,7 @@ Pick a race at the start. Each has a unique **trait** and a matching **weakness*
 
 ### ⚔️ Tier-1 Classes · Active Skills
 
-Each race has Tier-1 classes (**Human and Orc have 3, Elf and Dwarf have 2**); every skill has a **5-turn cooldown**:
+Each race has **several** Tier-1 classes; every skill has a **5-turn cooldown**:
 
 | Race | Class | Skill | Effect |
 |---|---|---|---|
@@ -272,6 +274,7 @@ Each race has Tier-1 classes (**Human and Orc have 3, Elf and Dwarf have 2**); e
 | 🧝 Elf | 💰 Rogue | Gold Touch | Turn every sword on the board into a coin |
 | 🎅 Dwarf | 🔰 Blacksmith | Forge Armor | Absorb all shields on the board into armor progress |
 | 🎅 Dwarf | 🔒 Miser | Hoard | Lock gold for **4 turns** (no gold in/out; **2.5×** payout at the end) |
+| 🎅 Dwarf | 💼 Guild Master | Buyout | Only usable when **gold > total HP of all enemies**: turn every enemy **into coins** (money talks; bosses unaffected) |
 | 🧌 Orc | 🔪 Berserker | Frenzy | Halve HP and become **Undying** (**this turn only**: keep ≥1 HP no matter the damage); also **permanently** enables low-HP scaling — lower HP means higher sword damage (up to +60%) |
 | 🧌 Orc | 🩸 Fighter | Bloodthirst | Heal 3 HP per enemy your sword chain hits this turn, **and your sword can hit sword-immune bosses (Ghost/Clown)** |
 | 🧌 Orc | 🧪 Witch Doctor | Hex | **Active**: this turn, linking hearts deals that healing as poison to all foes instead of healing you. **Passive**: each turn after the board settles, turn 3 non-enemy non-heart tiles into hearts |
@@ -282,7 +285,7 @@ Each race has Tier-1 classes (**Human and Orc have 3, Elf and Dwarf have 2**); e
 
 ### 🎖️ Tier-2 Classes · Passives
 
-Each race has 2 Tier-2 classes; once chosen they apply permanently:
+Each race has **several** Tier-2 classes; they apply permanently once chosen (pick one at the turn-100 boss, then another of your race's remaining ones at the turn-200 boss):
 
 | Race | Class | Effect |
 |---|---|---|
@@ -292,6 +295,7 @@ Each race has 2 Tier-2 classes; once chosen they apply permanently:
 | 🧝 Elf | Shadow | Bomb cooldown becomes 2 turns permanently |
 | 🎅 Dwarf | Demolitionist | Bomb hits harder but costs more gold |
 | 🎅 Dwarf | Tycoon | Gold gained also grants half as much XP |
+| 🎅 Dwarf | Cheapskate | Gold-spending actives (shop 💊Heal / 💥Bomb) cost half |
 | 🧌 Orc | Titan | Higher max HP means higher flat sword damage (+1 per 12 max HP; synergizes with the Orc's HP×2 trait) |
 | 🧌 Orc | Thorns | Reflect half of damage taken back to the attacker |
 | 🪦 Undead | Rejuvenation | All active-skill cooldowns −1 (exactly offsets Confusion's +1) |
