@@ -158,7 +158,7 @@
 (()=>{
 //==================== 配置 ====================
 // 版本号 v主.次.修：小改动改"修"，新Boss/职业改"次"，大版本变更需先确认。页面底部显示。
-const VERSION='v1.15.2';
+const VERSION='v1.16.0';
 const DEV=false;   // release build (DEV=false); dev build is dungeon-raid-dev.html (DEV=true)
 const REC_API='https://api.dungeonraid.win';   // 录像分享 API（Cloudflare Worker + KV）
 // 带种子随机数（mulberry32）：游戏全程用 rnd() 取代原生随机，配合录制种子可确定性重放
@@ -231,6 +231,7 @@ function newPlayer(){
     tier2b:null, t3Pending:false,                                          // 200回合：本种族第二个被动
     skill2:null, skill2Cd:0, t4Pending:false,                              // 350回合：任选主动替换治疗/炸弹槽
     comboMult:1, swordMult:1, armorMult:1, maxHpUpMult:1, noArmor:false,    // 种族特性修正
+    heartPoison:false,                                                      // 巫医蛊毒：本回合连心改为毒怪
     upgradeChoices:3, bombCd:3, goldLock:0, goldFrozen:0,                   // 转职被动相关
     finaleStarted:false, finaleWave:0, cleared:false};                      // 终局：终焉之主浪潮 / 破关
 }
@@ -249,21 +250,21 @@ function enemyChance(){ return Math.min(0.30, 0.10 + player.level*0.014); }
 
 // ===== Boss 池：每 10 回合从中随机挑一个现身。剑链免疫，只能用炸弹炸，奖励丰厚 =====
 const BOSSES=[
-  { id:'ghost', emoji:'👻', name:['幽灵','Ghost'],
+  { id:'ghost', emoji:'👻', name:['幽灵','Ghost'], quip:['剑？穿过去了，挠痒痒都算不上。','Swords? They pass right through me.'],
     desc:['剑链对它无效，只能用 💥炸弹 炸（每次 −6 血）。倒计时归零会对你重击！','Immune to sword chains — only the 💥 Bomb hurts it (−6 each). It strikes you hard at 0!'] },
-  { id:'clown', emoji:'🤡', name:['小丑','Clown'], perTurn:true,
+  { id:'clown', emoji:'🤡', name:['小丑','Clown'], quip:['笑一个嘛，反正棋盘已经乱了。','Smile! Your board is a mess anyway.'], perTurn:true,
     special:['每回合打乱 3 个棋子','Scrambles 3 tiles each turn'],
     desc:['剑链对它无效，只能用 💥炸弹 炸。它【每回合】都会随机打乱棋盘上 3 个棋子，制造持续混乱！','Immune to sword chains — only the 💥 Bomb works. Every turn it scrambles 3 random tiles, causing constant chaos!'],
     act(t){ const k=scrambleTiles(2+(t.tier||1)); log(tr(`🤡 小丑捣乱，打乱了 ${k} 个棋子！`,`🤡 The Clown scrambles ${k} tiles!`)); } },
-  { id:'vampire', emoji:'🧛', name:['吸血鬼','Vampire'], perTurn:true, swordable:true,
+  { id:'vampire', emoji:'🧛', name:['吸血鬼','Vampire'], quip:['你的心留着也浪费，我喝了。','Those hearts are wasted on you. Mine now.'], perTurn:true, swordable:true,
     special:['每回合吸取场上的 ❤️ 回血','Drains ❤️ each turn to heal'],
     desc:['可以用剑攻击它（也能用炸弹）。但它【每回合】会吸取棋盘上所有的心来回血——别把心留在场上！','You CAN hit it with sword chains (and bombs). But every turn it drains all hearts on the board to heal — do not leave hearts on the board!'],
     act(t){ let n=0; for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const x=grid[r][c]; if(x&&x.type==='heart'){ grid[r][c]=null; n++; } }
       if(n){ t.hp=Math.min(t.maxHp, t.hp+n*(2+(t.tier||1))); applyGravity(); syncPositions(false);
         log(tr(`🧛 吸血鬼吸取 ${n} 颗心回血（→${t.hp}）`,`🧛 Vampire drains ${n} hearts (→${t.hp})`)); } } },
-  { id:'assassin', emoji:'🥷', name:['刺客','Assassin'], monster:true, swordable:true, trueDmg:true, noTierScale:true,
+  { id:'assassin', emoji:'🥷', name:['刺客','Assassin'], quip:['护甲？那只是好看的装饰。','Armor? Cute. Purely decorative.'], monster:true, swordable:true, trueDmg:true, noTierScale:true,
     desc:['属性和普通怪差不多，但它的攻击是【真实伤害】——无视护甲和额外减伤，直接掉血！可以用剑砍它，趁早解决。','Stats like a normal enemy, but its hits are TRUE damage — they ignore armor and any reduction, straight to your HP! You can sword it down, so kill it fast.'] },
-  { id:'devourer', emoji:'🦖', name:['饕餮','Devourer'], monster:true, swordable:true,
+  { id:'devourer', emoji:'🦖', name:['饕餮','Devourer'], quip:['先吃你的怪，再吃你。','I eat your monsters first, then you.'], monster:true, swordable:true,
     special:['吞噬怪物壮大，倒计时放大招','Devours to grow; nukes at 0'],
     desc:['每回合吸取场上每个怪一半的生命来壮大自己；倒计时归零时，释放等于它当前血量 50% 的强力一击！趁它还小赶紧用剑砍掉。','Each turn it drains half the HP from every enemy to grow; at 0 it unleashes a hit worth 50% of its current HP! Sword it down while it is still small.'],
     everyTurn(t){ const cap=(12+player.level*3)*(t.tier||1); if(t.hp>=cap) return;   // 自身血量封顶（随档位提升），防止无限爆涨
@@ -273,7 +274,7 @@ const BOSSES=[
       const dmg=hurtPlayer(raw, 'devourer', false);
       t.hp=Math.max(1, t.hp-raw);   // 放大招消耗自身一半生命，需重新吃
       log(tr(`🦖 饕餮释放积蓄之力，造成 ${dmg} 伤害（自损至 ${t.hp}）！`,`🦖 Devourer unleashes ${dmg} damage (drops to ${t.hp})!`)); } },
-  { id:'summoner', emoji:'🧙', name:['召唤师','Summoner'], monster:true, swordable:true, perTurn:true,
+  { id:'summoner', emoji:'🧙', name:['召唤师','Summoner'], quip:['一个不够热闹，再加几个。','One is lonely — let me add a few.'], monster:true, swordable:true, perTurn:true,
     special:['每回合召唤一只怪','Summons an enemy each turn'],
     desc:['属性和普通怪一样，可被剑砍。它【每回合】把场上一个非怪/非Boss的棋子变成一只怪——拖得越久怪越多，速战速决！','Stats like a normal enemy and sword-attackable. Every turn it turns one non-enemy tile into an enemy — the longer it lives, the more enemies. End it fast!'],
     act(t){ const n=t.tier||1; let made=0;
@@ -281,13 +282,13 @@ const BOSSES=[
         if(!cells.length) break; const [r,c]=cells[Math.floor(rnd()*cells.length)];
         const e=makeTile('enemy'); e.curY=cellY(r); grid[r][c]=e; made++; }
       if(made){ syncPositions(false); log(tr(`🧙 召唤师召唤出 ${made} 只怪！`,`🧙 The Summoner conjures ${made} enemies!`)); } } },
-  { id:'thief', emoji:'🦹', name:['小偷','Thief'], monster:true, swordable:true, flee:true,
+  { id:'thief', emoji:'🦹', name:['小偷','Thief'], quip:['你的金币，我先替你保管。','Your gold? I will hold it. Forever.'], monster:true, swordable:true, flee:true,
     special:['现身即偷金币，逃走则永久失去','Steals gold on arrival; flees with it'],
     desc:['一现身就偷走你一定比例的金币（一阶偷 20%、二阶偷 40%，依档位递增）。在它的倒计时内用剑或炸弹击败它，就能夺回被偷的金币；一旦让它逃走，这笔金币就永久消失！','The instant it appears it steals a share of your gold (20% at Lv1, 40% at Lv2, scaling per tier). Beat it with a sword chain or bomb before its timer runs out to recover the stolen gold — let it escape and that gold is gone forever!'],
     onSpawn(t){ const pct=0.2*(t.tier||1); const steal=Math.floor(player.gold*pct); t.stolen=steal;
       if(steal>0){ player.gold-=steal; log(tr(`🦹 小偷现身，偷走 ${steal} 金币（${Math.round(pct*100)}%）！倒计时内击败它可夺回。`,`🦹 Thief steals ${steal} gold (${Math.round(pct*100)}%)! Beat it before the timer to recover it.`)); }
       else log(tr(`🦹 小偷现身，但你身无分文…`,`🦹 The Thief appears, but you have no gold…`)); } },
-  { id:'zombie', emoji:'🧟', name:['僵尸','Zombie'], monster:true, swordable:true, perTurn:true,
+  { id:'zombie', emoji:'🧟', name:['僵尸','Zombie'], quip:['不急，反正这毒你跑不掉。','No rush — the rot has you already.'], monster:true, swordable:true, perTurn:true,
     special:['尸毒感染：潜伏一回合后每回合掉血（最高30%）','Plague: incubates 1 turn, then drains HP each turn (≤30%)'],
     desc:['它一现身就让你感染尸毒——血条变绿，但【潜伏一回合后才开始发作】；之后每回合按生命百分比流失（随档位递增，单回合最高 30%，无视护甲）。趁潜伏期用剑或炸弹击败它即可解除感染！','The instant it appears you are infected (HP bar turns green), but it【incubates for one turn before striking】; then each turn you lose a % of HP (scaling per tier, capped at 30%/turn, ignoring armor). Sword or bomb it during the incubation to cure!'],
     onSpawn(t){ log(tr('🧟 僵尸抓向你，你感染了尸毒！血条变绿——下回合开始发作，趁现在干掉它！','🧟 The Zombie infects you! HP bar turns green — it strikes next turn, kill it now!')); },
@@ -296,8 +297,21 @@ const BOSSES=[
       const pct=Math.min(0.1*(t.tier||1), 0.3);   // 单回合最高 30%，不再秒杀
       const dmg=hurtPlayer(Math.max(1,Math.ceil(player.maxHp*pct)), 'zombie', true);
       if(dmg>0) log(tr(`🧟 尸毒发作：流失 ${dmg} 生命（${Math.round(pct*100)}%）`,`🧟 Plague: −${dmg} HP (${Math.round(pct*100)}%)`)); } },
+  { id:'birdman', emoji:'🦅', name:['鸟人','Birdman'], quip:['抓不住我，我会飞（还会瞬移）。','Catch me? I fly — and teleport.'], monster:true, swordable:true, perTurn:true,
+    special:['每回合啄你一下并瞬移换位','Pecks you and teleports each turn'],
+    desc:['可以用剑攻击它（也能用炸弹）。它【每回合】都会俯冲啄你一下，并在回合末和棋盘上任意一个棋子【互换位置】——飘忽难缠，想连它的剑链得算准它的落点，速战速决！','You CAN sword it (and bomb it). Every turn it dives to peck you, then swaps places with a random tile at turn end — elusive and nagging, so line up your chain where it lands and finish it fast!'],
+    act(t){
+      const dmg=hurtPlayer(Math.max(1,Math.ceil(t.atk*0.5)), 'birdman', false);
+      if(dmg>0) log(tr(`🦅 鸟人俯冲啄击，掉 ${dmg} 血！`,`🦅 The Birdman dives and pecks for ${dmg}!`));
+      let pos=null; for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ if(grid[r][c]===t) pos=[r,c]; }
+      if(!pos) return;
+      const cells=[]; for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const x=grid[r][c]; if(x&&x!==t) cells.push([r,c]); }
+      if(!cells.length) return;
+      const [nr,nc]=cells[Math.floor(rnd()*cells.length)]; const [r,c]=pos; const tmp=grid[nr][nc];
+      grid[nr][nc]=t; grid[r][c]=tmp; t.curY=cellY(nr); if(tmp) tmp.curY=cellY(r); syncPositions(false);
+      log(tr('🦅 鸟人振翅，和一个棋子换了位置！','🦅 The Birdman flaps to a new spot!')); } },
   // 终焉之主：第 500 回合出现。无血量、无攻击、不可被打。每回合把若干非怪/非Boss棋子变成随机Boss（第1波1个…第10波10个），撑满10波不死即破关。不进随机池。
-  { id:'finale', emoji:'👑', name:['终焉之主','Overlord'], noRandom:true, perTurn:true, finale:true,
+  { id:'finale', emoji:'👑', name:['终焉之主','Overlord'], quip:['走到这一步？那就别想走了。','Made it this far? You leave no more.'], noRandom:true, perTurn:true, finale:true,
     special:['每回合召唤渐增的Boss浪潮，撑过10波即破关','Summons growing boss waves; survive 10 to clear'],
     desc:['终局考验：它本身无血、无攻击、打不掉。但【每回合】把若干非怪/非Boss棋子变成随机 Boss——第 1 波 1 个、第 2 波 2 个…第 10 波 10 个。撑满 10 波还活着即【破关】！','The final trial: it has no HP, no attack, and cannot be killed. Each turn it turns several non-enemy tiles into random bosses — 1 on wave 1, 2 on wave 2… 10 on wave 10. Survive all 10 waves to CLEAR the game!'],
     act(t){
@@ -372,6 +386,15 @@ function scrambleTiles(n){
   syncPositions(false);
   return k;
 }
+// 新职业被动：每回合摆盘后，把至多 n 个 fromTypes 棋子转成 toType（巫医→心、剑圣→剑）。用 rnd 确定性洗牌，回放可复现。
+function convertTiles(n, toType, fromTypes){
+  const cells=[];
+  for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const t=grid[r][c]; if(t && fromTypes.includes(t.type)) cells.push([r,c]); }
+  for(let i=cells.length-1;i>0;i--){ const j=Math.floor(rnd()*(i+1)); [cells[i],cells[j]]=[cells[j],cells[i]]; }
+  const k=Math.min(n,cells.length);
+  for(let i=0;i<k;i++){ const [r,c]=cells[i]; const nt=makeTile(toType); nt.curY=cellY(r); grid[r][c]=nt; }
+  return k;
+}
 function spawnBoss(){
   if(hasBoss()) return;                       // 同时只存在一个 Boss
   const cells=[];
@@ -412,14 +435,18 @@ const RACES=[
 ];
 // 一阶职业：主动技能（f 返回 false 表示无效不发动；返回值表示自带日志）
 const TIER1={
-  knight:{n:['骑士','Knight'], skill:{name:['圣盾','Aegis'], short:['本回合免伤','No damage this turn'], cd:5, f:p=>{ p.shieldTurn=true; log(tr('🛡️ 圣盾：本回合免疫伤害','🛡️ Aegis: immune to damage this turn')); return true; }}},
-  priest:{n:['牧师','Priest'], skill:{name:['祝福','Blessing'], short:['全场❤️转经验','Hearts→XP'], cd:5, f:p=>{ let n=0; for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){const t=grid[r][c]; if(t&&t.type==='heart'){grid[r][c]=null;n++;}} if(!n)return false; player.xp+=n*3; applyGravity(); syncPositions(false); checkLevel(); log(tr(`💗 祝福：${n} 颗心 → ${n*3} 经验`,`💗 Blessing: ${n} hearts → ${n*3} XP`)); return n; }}},
-  ranger:{n:['游侠','Ranger'], skill:{name:['箭雨','Arrow Rain'], short:['全场怪受剑威力×2','×2 sword power to all'], cd:5, f:p=>{ const titanFlat=p.titan?Math.floor(p.maxHp/12):0; const pool=Math.floor((p.weaponPower*2 + p.swordFlat + titanFlat)*(p.swordMult||1)); const r=dealDamage(pool,null); applyGravity(); syncPositions(false); log(tr(`🏹 箭雨：全场 ${r.dmg} 伤害`+(r.kills?`，击杀 ${r.kills}`:''),`🏹 Arrow Rain: ${r.dmg} dmg`+(r.kills?`, ${r.kills} killed`:''))); return true; }}},
-  rogue:{n:['盗贼','Rogue'], skill:{name:['点金','Gold Touch'], short:['剑变金币','Swords→Coins'], cd:5, f:p=>{ let n=0; for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){const t=grid[r][c]; if(t&&t.type==='sword'){t.type='coin';n++;}} if(!n)return false; log(tr(`💰 点金：${n} 把剑化为金币`,`💰 Gold Touch: ${n} swords → coins`)); return n; }}},
-  blacksmith:{n:['锻造师','Blacksmith'], skill:{name:['锻甲','Forge Armor'], short:['收全场盾→护甲','Absorb all shields'], cd:5, f:p=>{ if(p.noArmor) return false; let n=0; for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){const t=grid[r][c]; if(t&&t.type==='shield'){grid[r][c]=null;n++;}} if(!n)return false; p.shieldXp+=n*p.armorPerShield; while(p.shieldXp>=armorNeeded(p.armor)){p.shieldXp-=armorNeeded(p.armor);p.armor++;} applyGravity(); syncPositions(false); log(tr(`🔰 锻甲：吞下 ${n} 盾（减伤 ${p.armor}）`,`🔰 Forge: ${n} shields (armor ${p.armor})`)); return n; }}},
-  miser:{n:['守财奴','Miser'], skill:{name:['囤金','Hoard'], short:['锁金生利','Lock gold for interest'], cd:5, f:p=>{ if(p.goldLock>0) return false; const n=Math.max(3,Math.min(10,Math.floor(p.gold/10))); p.goldLock=n; p.goldFrozen=0; log(tr(`🔒 囤金：锁定 ${n} 回合（期间不产/不花金币，到期返还双倍）`,`🔒 Hoard: locked ${n} turns (no gold in/out; doubled payout at end)`)); return true; }}},
-  berserker:{n:['狂战士','Berserker'], skill:{name:['狂怒','Frenzy'], short:['本回合不死+残血增伤','Undying this turn + low-HP dmg'], cd:5, f:p=>{ p.hp=Math.max(1,Math.floor(p.hp/2)); p.lowHpDmg=true; p.undyingTurn=true; log(tr('🔪 狂怒！生命减半并进入不屈（本回合无论受多少伤都保留 1 血），血越少剑伤越高','🔪 Frenzy! HP halved and Undying this turn (keep ≥1 HP no matter the damage); lower HP, higher sword damage')); return true; }}},
-  fighter:{n:['斗士','Fighter'], skill:{name:['嗜血','Bloodthirst'], short:['回血+本回合可攻击剑免疫怪','Heal + pierce sword-immunity'], cd:5, f:p=>{ p.bloodthirst=1; p.pierceTurn=true; log(tr('🩸 嗜血：本回合剑链每击中一只怪回 3 血，且可用剑攻击剑免疫的 Boss（幽灵/小丑）','🩸 Bloodthirst: heal 3 per enemy hit this turn, and your sword can hit sword-immune bosses (Ghost/Clown)')); return true; }}},
+  knight:{n:['骑士','Knight'], quip:['盾举起来，伤害？不存在的。','Shield up. Damage? Never heard of it.'], skill:{name:['圣盾','Aegis'], short:['本回合免伤','No damage this turn'], cd:5, f:p=>{ p.shieldTurn=true; log(tr('🛡️ 圣盾：本回合免疫伤害','🛡️ Aegis: immune to damage this turn')); return true; }}},
+  priest:{n:['牧师','Priest'], quip:['心给我，经验你拿，公平交易。','Hearts to me, XP to you. Fair deal.'], skill:{name:['祝福','Blessing'], short:['全场❤️转经验','Hearts→XP'], cd:5, f:p=>{ let n=0; for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){const t=grid[r][c]; if(t&&t.type==='heart'){grid[r][c]=null;n++;}} if(!n)return false; player.xp+=n*3; applyGravity(); syncPositions(false); checkLevel(); log(tr(`💗 祝福：${n} 颗心 → ${n*3} 经验`,`💗 Blessing: ${n} hearts → ${n*3} XP`)); return n; }}},
+  ranger:{n:['游侠','Ranger'], quip:['抬头——那不是雨，是箭。','Heads up — those are not raindrops.'], skill:{name:['箭雨','Arrow Rain'], short:['全场怪受剑威力×2','×2 sword power to all'], cd:5, f:p=>{ const titanFlat=p.titan?Math.floor(p.maxHp/12):0; const pool=Math.floor((p.weaponPower*2 + p.swordFlat + titanFlat)*(p.swordMult||1)); const r=dealDamage(pool,null); applyGravity(); syncPositions(false); log(tr(`🏹 箭雨：全场 ${r.dmg} 伤害`+(r.kills?`，击杀 ${r.kills}`:''),`🏹 Arrow Rain: ${r.dmg} dmg`+(r.kills?`, ${r.kills} killed`:''))); return true; }}},
+  rogue:{n:['盗贼','Rogue'], quip:['剑能砍人，但金币能买命。','Swords kill. Coins buy your life back.'], skill:{name:['点金','Gold Touch'], short:['剑变金币','Swords→Coins'], cd:5, f:p=>{ let n=0; for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){const t=grid[r][c]; if(t&&t.type==='sword'){t.type='coin';n++;}} if(!n)return false; log(tr(`💰 点金：${n} 把剑化为金币`,`💰 Gold Touch: ${n} swords → coins`)); return n; }}},
+  blacksmith:{n:['锻造师','Blacksmith'], quip:['盾别拿手里，焊身上才香。','Do not hold shields — wear them.'], skill:{name:['锻甲','Forge Armor'], short:['收全场盾→护甲','Absorb all shields'], cd:5, f:p=>{ if(p.noArmor) return false; let n=0; for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){const t=grid[r][c]; if(t&&t.type==='shield'){grid[r][c]=null;n++;}} if(!n)return false; p.shieldXp+=n*p.armorPerShield; while(p.shieldXp>=armorNeeded(p.armor)){p.shieldXp-=armorNeeded(p.armor);p.armor++;} applyGravity(); syncPositions(false); log(tr(`🔰 锻甲：吞下 ${n} 盾（减伤 ${p.armor}）`,`🔰 Forge: ${n} shields (armor ${p.armor})`)); return n; }}},
+  miser:{n:['守财奴','Miser'], quip:['钱躺一会儿，利滚利。','Let the gold nap — it wakes up doubled.'], skill:{name:['囤金','Hoard'], short:['锁金生利','Lock gold for interest'], cd:5, f:p=>{ if(p.goldLock>0) return false; const n=Math.max(3,Math.min(10,Math.floor(p.gold/10))); p.goldLock=n; p.goldFrozen=0; log(tr(`🔒 囤金：锁定 ${n} 回合（期间不产/不花金币，到期返还双倍）`,`🔒 Hoard: locked ${n} turns (no gold in/out; doubled payout at end)`)); return true; }}},
+  berserker:{n:['狂战士','Berserker'], quip:['疼？疼说明这刀还能更快。','Pain just means I can swing faster.'], skill:{name:['狂怒','Frenzy'], short:['本回合不死+残血增伤','Undying this turn + low-HP dmg'], cd:5, f:p=>{ p.hp=Math.max(1,Math.floor(p.hp/2)); p.lowHpDmg=true; p.undyingTurn=true; log(tr('🔪 狂怒！生命减半并进入不屈（本回合无论受多少伤都保留 1 血），血越少剑伤越高','🔪 Frenzy! HP halved and Undying this turn (keep ≥1 HP no matter the damage); lower HP, higher sword damage')); return true; }}},
+  fighter:{n:['斗士','Fighter'], quip:['越打越精神，血是我的能量饮料。','The more I fight, the better I feel.'], skill:{name:['嗜血','Bloodthirst'], short:['回血+本回合可攻击剑免疫怪','Heal + pierce sword-immunity'], cd:5, f:p=>{ p.bloodthirst=1; p.pierceTurn=true; log(tr('🩸 嗜血：本回合剑链每击中一只怪回 3 血，且可用剑攻击剑免疫的 Boss（幽灵/小丑）','🩸 Bloodthirst: heal 3 per enemy hit this turn, and your sword can hit sword-immune bosses (Ghost/Clown)')); return true; }}},
+  witchdoctor:{n:['巫医','Witch Doctor'], quip:['你的心意我收下，怪替你喝。','Your love? The monsters drink it for you.'], skill:{name:['蛊毒','Hex'], short:['本回合连心改为毒全场怪','Hearts poison all foes this turn'], cd:5, f:p=>{ p.heartPoison=true; log(tr('🧪 蛊毒：本回合连「心」不再回血，而是把这些生命当毒，灌给全场怪！','🧪 Hex: this turn, linking hearts deals that healing as poison to all foes instead!')); return true; }},
+    passive:['每回合棋盘摆完后，把 3 个非敌人/非心的棋子变成心','Each turn after the board settles, turns 3 non-enemy non-heart tiles into hearts']},
+  swordsaint:{n:['剑圣','Sword Saint'], quip:['在我眼里，万物皆可开刃。','In my eyes, anything can be a blade.'], skill:{name:['化剑','Bladeshift'], short:['全场心/金币→剑','Hearts & coins → swords'], cd:5, f:p=>{ let n=0; for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const t=grid[r][c]; if(t&&(t.type==='heart'||t.type==='coin')){ t.type='sword'; n++; } } if(!n) return false; log(tr(`⚔️ 化剑：${n} 个心/金币化为剑`,`⚔️ Bladeshift: ${n} hearts/coins → swords`)); return n; }},
+    passive:['每回合棋盘摆完后，把 3 个非敌人/非剑的棋子变成剑','Each turn after the board settles, turns 3 non-enemy non-sword tiles into swords']},
 };
 // 二阶职业：被动
 const TIER2={
@@ -433,10 +460,10 @@ const TIER2={
   thorns:{n:['荆棘','Thorns'], d:['受到伤害的一半反弹给攻击者','Reflect half of damage taken back to the attacker'], f:p=>{ p.thorns=0.5; }},
 };
 const RACE_PATHS={
-  human:{t1:['knight','priest'],     t2:['immortal','general']},
+  human:{t1:['knight','priest','swordsaint'], t2:['immortal','general']},
   elf:  {t1:['ranger','rogue'],      t2:['sharpshooter','shadow']},
   dwarf:{t1:['blacksmith','miser'],  t2:['demolitionist','tycoon']},
-  orc:  {t1:['berserker','fighter'], t2:['warlord','thorns']},
+  orc:  {t1:['berserker','fighter','witchdoctor'], t2:['warlord','thorns']},
 };
 function raceById(id){ return RACES.find(r=>r.id===id)||RACES[0]; }
 let __bootHandled=false;
@@ -549,7 +576,11 @@ function showTierSelect(tier){
   ids.forEach(id=>{
     const def=pool[id];
     const b=document.createElement('button'); b.className='choice';
-    const detail = tier===1 ? `${tr('主动','Active')}【${L(def.skill.name)}】${L(def.skill.short)}` : L(def.d);
+    const detail = tier===1
+      ? `${tr('主动','Active')}【${L(def.skill.name)}】${L(def.skill.short)}`
+        + (def.passive?`<br>${tr('被动','Passive')}：${L(def.passive)}`:'')
+        + `<br><i style="color:#caa6e6">「${L(def.quip)}」</i>`
+      : L(def.d);
     b.innerHTML=`<b>${L(def.n)}</b><small>${detail}</small>`;
     b.onclick=()=>{
       recAct(['t', tier, id]);   // 录制转职选择
@@ -1022,8 +1053,12 @@ function resolve(){
         let gained=0; while(player.shieldXp>=armorNeeded(player.armor)){ player.shieldXp-=armorNeeded(player.armor); player.armor++; gained++; }
         msg=`${d.emoji}×${count}${comboTxt} → `+tr(`护甲进度 ${player.shieldXp}/${armorNeeded(player.armor)}`,`armor ${player.shieldXp}/${armorNeeded(player.armor)}`)+(gained?tr(`，护甲 +${gained}！（减伤 ${player.armor}）`,`, armor +${gained}! (reduce ${player.armor})`):''); } }
     else if(type==='heart'){
-      const h=gainHeal(Math.round(count*player.healPerHeart*combo));
-      msg=`${d.emoji}×${count}${comboTxt} → `+tr(`回复 ${h} 生命`,`+${h} HP`); }
+      const amt=Math.round(count*player.healPerHeart*combo);
+      if(player.heartPoison){ player.heartPoison=false;   // 巫医蛊毒：本回合连心不回血，把这些生命当毒灌给全场怪
+        const r=dealDamage(amt, null); applyGravity(); syncPositions(false);
+        msg=`${d.emoji}×${count}${comboTxt} → `+tr(`🧪 蛊毒全场 ${r.dmg} 伤害`+(r.kills?`，击杀 ${r.kills}`:''),`🧪 Hex: ${r.dmg} dmg to all`+(r.kills?`, ${r.kills} killed`:'')); }
+      else { const h=gainHeal(amt);
+        msg=`${d.emoji}×${count}${comboTxt} → `+tr(`回复 ${h} 生命`,`+${h} HP`); } }
     else if(type==='coin'){ const g=Math.round(count*player.goldPerCoin*combo);
       if(player.goldLock>0){ player.goldFrozen+=g; msg=`${d.emoji}×${count}${comboTxt} → `+tr(`囤金中，冻结 +${g}`,`hoarding, frozen +${g}`); }
       else { player.gold+=g; if(player.goldXp) player.xp+=Math.floor(g/2);
@@ -1031,6 +1066,7 @@ function resolve(){
   }
   log(msg);
   if(player.pierceTurn) player.pierceTurn=false;   // 斗士嗜血穿透仅本回合
+  if(player.heartPoison) player.heartPoison=false; // 巫医蛊毒仅本回合（未连心则失效）
 
   // 回合推进：怪物倒计时 / 攻击
   player.turns++;
@@ -1049,6 +1085,9 @@ function resolve(){
 
   applyGravity();
   syncPositions(false);
+  // 新职业被动：每回合棋盘摆完后，转 3 个棋子（巫医→心、剑圣→剑）
+  if(player.tier1==='witchdoctor'){ if(convertTiles(3,'heart',['sword','shield','coin'])) syncPositions(false); }
+  else if(player.tier1==='swordsaint'){ if(convertTiles(3,'sword',['shield','heart','coin'])) syncPositions(false); }
   checkLevel();
   updateHUD();
   if(player.hp<=0){ gameOver(); return; }
@@ -1479,7 +1518,7 @@ function tileInfo(t){
     if(def.id==='thief'&&t.stolen) rows.push([tr('已偷金币','Stolen gold'), tr(`${t.stolen}（击败夺回）`,`${t.stolen} (recover on kill)`)]);
     rows.push([tr('攻击方式','How to hit'), def.swordable?tr('剑 / 炸弹','Sword / Bomb'):tr('只能炸弹','Bomb only')]);
     rows.push([tr('击败奖励','Kill reward'), '💰+20 · XP+15']);
-    return {icon:def.emoji, title:'Boss · '+L(def.name)+` Lv${t.tier||1}`, desc:L(def.desc), rows};
+    return {icon:def.emoji, title:'Boss · '+L(def.name)+` Lv${t.tier||1}`, desc:L(def.desc)+(def.quip?`<br><span style="color:#caa6e6;font-style:italic">「${L(def.quip)}」</span>`:''), rows};
   }
   return {icon:'👹', title:tr('怪物','Enemy'),
     desc:tr('左上是攻击力，右上是倒计时。每行动一次倒计时 −1，归零就攻击你：先用护甲抵消，剩下的才掉血，但每次至少掉 1 滴。用剑链串过它就能攻击，伤害够高直接点杀。','Top-left is its attack, top-right its timer. The timer drops by 1 each action; at 0 it attacks — your armor soaks most of it, but you always lose at least 1 HP. Drag a sword chain through it to attack; enough damage kills it.'),
@@ -1531,13 +1570,15 @@ function showPlayerInfo(){
   const t1 = p.tier1?TIER1[p.tier1]:null, t2 = p.tier2?TIER2[p.tier2]:null;
   const t2b = p.tier2b?TIER2[p.tier2b]:null, s2 = p.skill2&&TIER1[p.skill2.id]?TIER1[p.skill2.id]:null;
   let cls=`<div style="text-align:left;font-size:12px;margin:8px 0 0;padding:8px;background:var(--panel2);border-radius:10px">`;
-  if(t1) cls+=`${tr('一阶','T1')}【${L(t1.n)}】${tr('主动','Active')}：${L(t1.skill.short)}（${tr('每','every')} ${t1.skill.cd} ${tr('回合','t')}）<br>`;
+  if(t1){ cls+=`${tr('一阶','T1')}【${L(t1.n)}】${tr('主动','Active')}：${L(t1.skill.short)}（${tr('每','every')} ${t1.skill.cd} ${tr('回合','t')}）<br>`;
+    if(t1.passive) cls+=`　${tr('被动','Passive')}：${L(t1.passive)}<br>`;
+    cls+=`<i style="color:#caa6e6">「${L(t1.quip)}」</i><br>`; }
   else cls+=tr('击败第50回合 Boss 解锁一阶职业（主动技能）<br>','Beat the turn-50 boss to unlock a tier-1 class (active).<br>');
   if(t2) cls+=`${tr('二阶','T2')}【${L(t2.n)}】${tr('被动','Passive')}：${L(t2.d)}<br>`;
   else cls+=tr('击败第100回合 Boss 解锁二阶职业（被动）<br>','Beat the turn-100 boss to unlock a tier-2 class (passive).<br>');
   if(t2b) cls+=`${tr('被动②','P2')}【${L(t2b.n)}】${tr('被动','Passive')}：${L(t2b.d)}<br>`;
   else cls+=tr('击败第200回合 Boss 获得第二被动<br>','Beat the turn-200 boss for a second passive.<br>');
-  if(s2) cls+=`${tr('换装','Swap')}【${L(s2.skill.name)}】→ ${p.skill2.slot==='heal'?'💊':'💥'}（${tr('每','every')} ${s2.skill.cd} ${tr('回合','t')}）`;
+  if(s2) cls+=`${tr('换装','Swap')}【${L(s2.skill.name)}】→ ${p.skill2.slot==='heal'?'💊':'💥'}（${tr('每','every')} ${s2.skill.cd} ${tr('回合','t')}）${s2.quip?`<br><i style="color:#caa6e6">「${L(s2.quip)}」</i>`:''}`;
   else cls+=tr('击败第350回合 Boss 用任意主动替换治疗/炸弹','Beat the turn-350 boss to swap an active into Heal/Bomb.');
   cls+='</div>';
   const card=document.getElementById('card');
