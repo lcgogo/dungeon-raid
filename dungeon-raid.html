@@ -158,7 +158,7 @@
 (()=>{
 //==================== 配置 ====================
 // 版本号 v主.次.修：小改动改"修"，新Boss/职业改"次"，大版本变更需先确认。页面底部显示。
-const VERSION='v1.16.0';
+const VERSION='v1.16.1';
 const DEV=false;   // release build (DEV=false); dev build is dungeon-raid-dev.html (DEV=true)
 const REC_API='https://api.dungeonraid.win';   // 录像分享 API（Cloudflare Worker + KV）
 // 带种子随机数（mulberry32）：游戏全程用 rnd() 取代原生随机，配合录制种子可确定性重放
@@ -956,7 +956,7 @@ cv.addEventListener('pointercancel',endDrag);
 //==================== 金币商店 ====================
 const SHOP={
   heal: {cost:15, f(){ const h=gainHeal(10); log(tr(`💊 喝下药水，回复 ${h} 生命`,`💊 Potion: +${h} HP`)); }},
-  bomb: {cost:25, f(){ let kills=0, boss=0; const D=player.bombBoost?10:6;   // 爆破手：伤害更高
+  bomb: {cost:25, f(){ let kills=0, boss=0; const D=player.bombBoost?8:6;   // 爆破手：伤害更高（8，原10偏强）
     for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const t=grid[r][c];
       if(t&&(t.type==='enemy'||t.type==='boss')){ if(t.finale) continue; t.hp-=D;   // 终焉之主打不掉
         if(t.hp<=0){ const isBoss=t.type==='boss'; grid[r][c]=null;
@@ -964,7 +964,7 @@ const SHOP={
     log(tr(`💥 投掷炸弹，全场 −${D}`,`💥 Bomb: all foes −${D}`) + (kills?tr(`，击杀 ${kills} 只👹`,`, ${kills} killed`):'') + (boss?tr(`，击败 Boss！厚赏 💰+20、经验+15`,`, Boss down! 💰+20, XP+15`):''));
     applyGravity(); syncPositions(false); }},
 };
-function shopCost(key){ let c=SHOP[key].cost; if(key==='bomb'&&player.bombBoost) c=Math.ceil(c*1.6); return c; } // 爆破手：炸弹更贵
+function shopCost(key){ let c=SHOP[key].cost; if(key==='bomb'&&player.bombBoost) c=Math.ceil(c*2.0); return c; } // 爆破手：炸弹更贵（×2，抑制连炸/经济回报）
 function buyItem(key){
   if(busy||pendingLevels) return;
   if(player.skill2 && player.skill2.slot===key){ castSkill2(key); return; }   // 该槽被换装主动占用 → 施放，不再购买消耗品
