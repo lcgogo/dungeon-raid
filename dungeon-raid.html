@@ -158,7 +158,7 @@
 (()=>{
 //==================== 配置 ====================
 // 版本号 v主.次.修：小改动改"修"，新Boss/职业改"次"，大版本变更需先确认。页面底部显示。
-const VERSION='v1.14.6';
+const VERSION='v1.15.0';
 const DEV=false;   // release build (DEV=false); dev build is dungeon-raid-dev.html (DEV=true)
 const REC_API='https://api.dungeonraid.win';   // 录像分享 API（Cloudflare Worker + KV）
 // 带种子随机数（mulberry32）：游戏全程用 rnd() 取代原生随机，配合录制种子可确定性重放
@@ -467,6 +467,15 @@ function showClassSelect(){
   start.textContent='▶ '+tr('开始游戏','START');
   start.onclick=()=>showRaceSelect();
   card.appendChild(start);
+  // 排行榜展示名：自动填上次的，🎲 随机起名（形容词+的+名词）
+  const nrow=document.createElement('div');
+  nrow.style.cssText='display:flex;gap:6px;margin-bottom:8px;align-items:center';
+  nrow.innerHTML=`<input id="nameInput" maxlength="24" placeholder="${tr('排行榜名字（最长12字）','Leaderboard name (≤12 CJK)')}" style="flex:1;min-width:0;background:var(--panel2);border:1px solid #4a3a63;color:var(--txt);border-radius:10px;padding:9px 11px;font-size:13px">
+    <button id="nameDice" title="${tr('随机起名','Random')}" style="flex:none;background:var(--panel2);border:1px solid #4a3a63;border-radius:10px;padding:9px 12px;cursor:pointer;font-size:15px">🎲</button>`;
+  card.appendChild(nrow);
+  const ni=document.getElementById('nameInput'); ni.value=getName();
+  ni.oninput=()=>{ const c=clampName(ni.value); if(c!==ni.value) ni.value=c; setName(c); };
+  document.getElementById('nameDice').onclick=()=>{ ni.value=genName(); setName(ni.value); };
   // 紧凑单行次级按钮（省竖向空间，整页控制在一屏内）
   const mk=(border,html,fn)=>{ const b=document.createElement('button'); b.className='choice'; b.style.cssText='padding:9px 12px;margin:0 0 6px;text-align:left;border-color:'+border; b.innerHTML=html; b.onclick=fn; card.appendChild(b); };
   if(hasSave()) mk('#2e7d46', `<b>▶ ${tr('继续上局','Continue last run')}</b>`, ()=>loadGame());
@@ -637,6 +646,16 @@ function seedTutorialBoard(){
 //==================== 本地存档 ====================
 const SAVE_KEY=DEV?'dr_save_dev':'dr_save', BEST_KEY=DEV?'dr_best_dev':'dr_best';   // dev 版独立存档，与正式版互不覆盖
 const TUT_KEY=DEV?'dr_tut_dev':'dr_tut';   // 新手第一局标记（置位后不再给教学棋盘）
+const NAME_KEY=DEV?'dr_name_dev':'dr_name';   // 排行榜展示名（alias，本机持久，自动填上次的）
+function clampName(s){ s=(s||'').replace(/[ -]/g,''); let o='',w=0; for(const ch of s){ const cw=ch.codePointAt(0)>0x2e7f?2:1; if(w+cw>24) break; o+=ch; w+=cw; } return o; }   // 最长 12 汉字（宽度24）
+function getName(){ try{ return localStorage.getItem(NAME_KEY)||''; }catch(e){ return ''; } }
+function setName(v){ try{ localStorage.setItem(NAME_KEY, clampName(v)); }catch(e){} }
+// 随机名：形容词+的+名词（玩家🎲；中英按语言）
+const NM_ADJ_ZH=['勇敢','狡猾','无畏','暴躁','沉默','闪光','幸运','落魄','狂热','冷酷','神秘','贪婪','永恒','嗜血','迅捷','孤独'];
+const NM_NOUN_ZH=['剑客','游侠','骑士','守卫','屠夫','浪人','行者','亡魂','君王','流寇','影子','猎手','老兵','圣徒','赌徒','莽夫'];
+const NM_ADJ_EN=['Brave','Sly','Fearless','Grumpy','Silent','Shining','Lucky','Reckless','Cold','Greedy','Eternal','Swift','Lonely','Savage'];
+const NM_NOUN_EN=['Knight','Ranger','Rogue','Warden','Butcher','Wanderer','Hunter','Ghost','King','Veteran','Saint','Gambler','Brute','Outlaw'];
+function genName(){ const pick=a=>a[Math.floor(Math.random()*a.length)]; return lang==='en' ? pick(NM_ADJ_EN)+' '+pick(NM_NOUN_EN) : pick(NM_ADJ_ZH)+'的'+pick(NM_NOUN_ZH); }
 const REC_KEY=DEV?'dr_rec_dev':'dr_rec', REC_LAST_KEY=DEV?'dr_rec_last_dev':'dr_rec_last';  // 进行中录像 / 上一局完整录像
 // 录制一个玩家动作（回放中不录）。动作：['m',cells,baseType] 连线 / ['b',key] 购买 / ['k'] 技能 / ['u',idx] 升级选择 / ['t',tier,id] 转职选择
 // 每个动作末尾追加一个时间戳（epoch ms，相对开局可算操作间隔）——仅供离线分析（后续黑盒判定是否 AI 录像），回放/校验按固定下标取值，忽略该尾元素，旧录像无此字段也能正常回放。
@@ -1254,7 +1273,7 @@ async function submitClear(r, level){
   const box=document.getElementById('rankBox'); if(!box) return;
   box.innerHTML=`<div style="text-align:center;color:var(--dim);font-size:12px">🏆 ${tr('破关榜上传中…','Submitting clear…')}</div>`;
   try{
-    const res=await fetch(REC_API+'/clear',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({level,rec:r,agent:'human'})});   // 真人破关上报人类榜
+    const res=await fetch(REC_API+'/clear',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({level,rec:r,agent:'human',name:getName()})});   // 真人破关上报人类榜
     const j=await res.json(); if(!j.overall) throw new Error(j.error||'no rank');
     const raceName=L(raceById(r.race).n);
     box.innerHTML=`<div style="text-align:center;color:var(--gold);font-size:12px;margin-bottom:2px">🏆 ${tr('破关榜','Clear board')}（${tr('按最低破关等级','by lowest clear level')}）</div>`
@@ -1303,7 +1322,7 @@ async function renderLeaderboard(){
     const rows = lbBoard==='clear' ? (j.clears||[]) : (j.top||[]);
     if(!rows.length){ list.innerHTML=`<div style="text-align:center;color:var(--dim);padding:20px 0">${tr('暂无记录','No entries yet')}</div>`; return; }
     list.innerHTML=rows.map((e,i)=>{
-      const rc=raceById(e.race); const rn=rc?`${rc.e} ${L(rc.n)}`:'❓';
+      const rc=raceById(e.race); const rn=`${rc?rc.e:'❓'} ${e.name||tr('无名','Anon')}`;   // 种族头像 + 玩家名
       const ver=e.version&&e.version!==VERSION?` <span style="color:var(--dim);font-size:10px">${e.version}</span>`:'';   // 非本版的标出版本号
       const metric = lbBoard==='clear'
         ? `${tr('等级','Lv')} <b style="color:var(--gold)">${e.level}</b> · ${e.turns}${tr('回合','t')}`
@@ -1318,7 +1337,7 @@ async function submitScore(r, level, gold){
   box.innerHTML=`<div style="text-align:center;color:var(--dim);font-size:12px">🏆 ${tr('排名上传中…','Submitting score…')}</div>`;
   try{
     const res=await fetch(REC_API+'/score',{method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({level,gold,rec:r,agent:'human'})});   // 真人对局上报人类榜（AI/机器人自报 'ai'）
+      body:JSON.stringify({level,gold,rec:r,agent:'human',name:getName()})});   // 真人对局上报人类榜（AI/机器人自报 'ai'）
     const j=await res.json(); if(!j.overall) throw new Error(j.error||'no rank');
     const raceName=L(raceById(r.race).n);
     box.innerHTML=`<div style="text-align:center;color:var(--dim);font-size:12px;margin-bottom:2px">🏆 ${tr('排名','Ranking')}（${tr('按坚持回合','by turns')} ${j.turns}）</div>`
