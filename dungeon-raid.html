@@ -158,7 +158,7 @@
 (()=>{
 //==================== 配置 ====================
 // 版本号 v主.次.修：小改动改"修"，新Boss/职业改"次"，大版本变更需先确认。页面底部显示。
-const VERSION='v1.15.0';
+const VERSION='v1.15.1';
 const DEV=false;   // release build (DEV=false); dev build is dungeon-raid-dev.html (DEV=true)
 const REC_API='https://api.dungeonraid.win';   // 录像分享 API（Cloudflare Worker + KV）
 // 带种子随机数（mulberry32）：游戏全程用 rnd() 取代原生随机，配合录制种子可确定性重放
@@ -288,11 +288,14 @@ const BOSSES=[
       if(steal>0){ player.gold-=steal; log(tr(`🦹 小偷现身，偷走 ${steal} 金币（${Math.round(pct*100)}%）！倒计时内击败它可夺回。`,`🦹 Thief steals ${steal} gold (${Math.round(pct*100)}%)! Beat it before the timer to recover it.`)); }
       else log(tr(`🦹 小偷现身，但你身无分文…`,`🦹 The Thief appears, but you have no gold…`)); } },
   { id:'zombie', emoji:'🧟', name:['僵尸','Zombie'], monster:true, swordable:true, perTurn:true,
-    special:['尸毒感染：每回合按血量百分比掉血','Plague: drains a % of your HP each turn'],
-    desc:['它一现身就让你感染尸毒——血条变绿，并且【每回合】流失生命：一阶 10%、二阶 20%（依档位递增），无视护甲。用剑或炸弹击败它即可解除感染，越快越好！','The instant it appears you are infected — your HP bar turns green and you lose HP every turn: 10% at Lv1, 20% at Lv2 (scaling per tier), ignoring armor. Sword or bomb it to cure the infection — the faster the better!'],
-    onSpawn(t){ log(tr('🧟 僵尸抓向你，你感染了尸毒！血条变绿，每回合按血量百分比流失生命。','🧟 The Zombie infects you! HP bar turns green, losing a % of HP each turn.')); },
-    act(t){ const pct=0.1*(t.tier||1); const dmg=hurtPlayer(Math.max(1,Math.ceil(player.maxHp*pct)), 'zombie', true);
-      if(dmg>0) log(tr(`🧟 尸毒感染：流失 ${dmg} 生命（${Math.round(pct*100)}%）`,`🧟 Plague: −${dmg} HP (${Math.round(pct*100)}%)`)); } },
+    special:['尸毒感染：潜伏一回合后每回合掉血（最高30%）','Plague: incubates 1 turn, then drains HP each turn (≤30%)'],
+    desc:['它一现身就让你感染尸毒——血条变绿，但【潜伏一回合后才开始发作】；之后每回合按生命百分比流失（随档位递增，单回合最高 30%，无视护甲）。趁潜伏期用剑或炸弹击败它即可解除感染！','The instant it appears you are infected (HP bar turns green), but it【incubates for one turn before striking】; then each turn you lose a % of HP (scaling per tier, capped at 30%/turn, ignoring armor). Sword or bomb it during the incubation to cure!'],
+    onSpawn(t){ log(tr('🧟 僵尸抓向你，你感染了尸毒！血条变绿——下回合开始发作，趁现在干掉它！','🧟 The Zombie infects you! HP bar turns green — it strikes next turn, kill it now!')); },
+    act(t){
+      if(!t.incub){ t.incub=1; log(tr('🧟 尸毒在体内潜伏，下回合开始发作！','🧟 The plague incubates — it strikes next turn!')); return; }   // 回合后才生效：首回合只潜伏，不掉血
+      const pct=Math.min(0.1*(t.tier||1), 0.3);   // 单回合最高 30%，不再秒杀
+      const dmg=hurtPlayer(Math.max(1,Math.ceil(player.maxHp*pct)), 'zombie', true);
+      if(dmg>0) log(tr(`🧟 尸毒发作：流失 ${dmg} 生命（${Math.round(pct*100)}%）`,`🧟 Plague: −${dmg} HP (${Math.round(pct*100)}%)`)); } },
   // 终焉之主：第 500 回合出现。无血量、无攻击、不可被打。每回合把若干非怪/非Boss棋子变成随机Boss（第1波1个…第10波10个），撑满10波不死即破关。不进随机池。
   { id:'finale', emoji:'👑', name:['终焉之主','Overlord'], noRandom:true, perTurn:true, finale:true,
     special:['每回合召唤渐增的Boss浪潮，撑过10波即破关','Summons growing boss waves; survive 10 to clear'],
@@ -473,9 +476,9 @@ function showClassSelect(){
   nrow.innerHTML=`<input id="nameInput" maxlength="24" placeholder="${tr('排行榜名字（最长12字）','Leaderboard name (≤12 CJK)')}" style="flex:1;min-width:0;background:var(--panel2);border:1px solid #4a3a63;color:var(--txt);border-radius:10px;padding:9px 11px;font-size:13px">
     <button id="nameDice" title="${tr('随机起名','Random')}" style="flex:none;background:var(--panel2);border:1px solid #4a3a63;border-radius:10px;padding:9px 12px;cursor:pointer;font-size:15px">🎲</button>`;
   card.appendChild(nrow);
-  const ni=document.getElementById('nameInput'); ni.value=getName();
-  ni.oninput=()=>{ const c=clampName(ni.value); if(c!==ni.value) ni.value=c; setName(c); };
-  document.getElementById('nameDice').onclick=()=>{ ni.value=genName(); setName(ni.value); };
+  const ni=document.getElementById('nameInput'); const nd=document.getElementById('nameDice');
+  if(ni){ ni.value=getName(); ni.oninput=()=>{ const c=clampName(ni.value); if(c!==ni.value) ni.value=c; setName(c); }; }
+  if(nd) nd.onclick=()=>{ if(ni){ ni.value=genName(); setName(ni.value); } };
   // 紧凑单行次级按钮（省竖向空间，整页控制在一屏内）
   const mk=(border,html,fn)=>{ const b=document.createElement('button'); b.className='choice'; b.style.cssText='padding:9px 12px;margin:0 0 6px;text-align:left;border-color:'+border; b.innerHTML=html; b.onclick=fn; card.appendChild(b); };
   if(hasSave()) mk('#2e7d46', `<b>▶ ${tr('继续上局','Continue last run')}</b>`, ()=>loadGame());
@@ -670,7 +673,7 @@ function saveGame(){
       ver: VERSION,   // 存档版本：正式版换版本即判不兼容、从头开始（dev 不受影响）
       pendingLevels,
       player:{...player},
-      grid: grid.map(row=>row.map(t=> t?{type:t.type,hp:t.hp,maxHp:t.maxHp,atk:t.atk,cd:t.cd,baseCd:t.baseCd,bossId:t.bossId,tier:t.tier,stolen:t.stolen,finale:t.finale}:null)),
+      grid: grid.map(row=>row.map(t=> t?{type:t.type,hp:t.hp,maxHp:t.maxHp,atk:t.atk,cd:t.cd,baseCd:t.baseCd,bossId:t.bossId,tier:t.tier,stolen:t.stolen,finale:t.finale,incub:t.incub}:null)),
     }));
   }catch(e){}
 }
