@@ -158,7 +158,7 @@
 (()=>{
 //==================== 配置 ====================
 // 版本号 v主.次.修：小改动改"修"，新Boss/职业改"次"，大版本变更需先确认。页面底部显示。
-const VERSION='v1.17.2';
+const VERSION='v1.17.3';
 const DEV=false;   // release build (DEV=false); dev build is dungeon-raid-dev.html (DEV=true)
 const REC_API='https://api.dungeonraid.win';   // 录像分享 API（Cloudflare Worker + KV）
 // 带种子随机数（mulberry32）：游戏全程用 rnd() 取代原生随机，配合录制种子可确定性重放
@@ -233,7 +233,7 @@ function newPlayer(){
     comboMult:1, swordMult:1, armorMult:1, maxHpUpMult:1, noArmor:false,    // 种族特性修正
     heartPoison:false,                                                      // 巫医蛊毒：本回合连心改为毒怪
     foeCdBonus:0, skillCdMod:0, splash:false, rebirthTurn:false, rebirthSaves:0, healMult:1,  // 活死人：迷惑/技能冷却修正/溅射/重生/治疗减半
-    upgradeChoices:3, bombCd:3, goldLock:0, goldFrozen:0,                   // 转职被动相关
+    upgradeChoices:3, bombCd:3, goldLock:0, goldFrozen:0, healUses:0,        // 转职被动相关；healUses：治疗已用次数（恢复量/耗金随次数递增）
     finaleStarted:false, finaleWave:0, cleared:false};                      // 终局：终焉之主浪潮 / 破关
 }
 function xpNeeded(lv){ return 10 + lv*6; }
@@ -971,7 +971,7 @@ cv.addEventListener('pointercancel',endDrag);
 
 //==================== 金币商店 ====================
 const SHOP={
-  heal: {cost:15, f(){ const h=gainHeal(10); log(tr(`💊 喝下药水，回复 ${h} 生命`,`💊 Potion: +${h} HP`)); }},
+  heal: {cost:15, f(){ const base=10+2*(player.healUses||0); const h=gainHeal(base); player.healUses=(player.healUses||0)+1; log(tr(`💊 喝下药水，回复 ${h} 生命`,`💊 Potion: +${h} HP`)); }},   // 每使用一次：恢复量 +2、耗金 +1（后期不再鸡肋）
   bomb: {cost:25, f(){ let kills=0, boss=0; const D=player.bombBoost?8:6;   // 爆破手：伤害更高（8，原10偏强）
     for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const t=grid[r][c];
       if(t&&(t.type==='enemy'||t.type==='boss')){ if(t.finale) continue; t.hp-=D;   // 终焉之主打不掉
@@ -980,7 +980,7 @@ const SHOP={
     log(tr(`💥 投掷炸弹，全场 −${D}`,`💥 Bomb: all foes −${D}`) + (kills?tr(`，击杀 ${kills} 只👹`,`, ${kills} killed`):'') + (boss?tr(`，击败 Boss！厚赏 💰+20、经验+15`,`, Boss down! 💰+20, XP+15`):''));
     applyGravity(); syncPositions(false); }},
 };
-function shopCost(key){ let c=SHOP[key].cost; if(key==='bomb'&&player.bombBoost) c=Math.ceil(c*2.0); return c; } // 爆破手：炸弹更贵（×2，抑制连炸/经济回报）
+function shopCost(key){ let c=SHOP[key].cost; if(key==='heal') c+=(player.healUses||0); if(key==='bomb'&&player.bombBoost) c=Math.ceil(c*2.0); return c; } // 治疗：每用一次 +1 金；爆破手：炸弹更贵（×2）
 function buyItem(key){
   if(busy||pendingLevels) return;
   if(player.skill2 && player.skill2.slot===key){ castSkill2(key); return; }   // 该槽被换装主动占用 → 施放，不再购买消耗品
@@ -1680,6 +1680,7 @@ function updateHUD(){
       return;
     }
     const c=shopCost(key), cd=scd[key]||0;
+    if(key==='heal'){ const hv=Math.round((10+2*(player.healUses||0))*(player.healMult||1)); btn.querySelector('small').textContent=tr(`回复 ${hv} 生命`,`Restore ${hv} HP`); }   // 治疗恢复量随次数递增（活死人按 healMult 折算）
     btn.querySelector('em').textContent = cd>0 ? `⏳${cd}${tr('回合','t')}` : c+'💰';
     btn.disabled = busy || pendingLevels || cd>0 || player.goldLock>0 || player.gold < c; });
   const sb=document.getElementById('skillBtn'), sk=player.tier1&&TIER1[player.tier1]&&TIER1[player.tier1].skill;
