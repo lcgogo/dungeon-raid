@@ -44,11 +44,12 @@ function replay(G, rec) {
 }
 
 async function main() {
-  const pend = (await (await fetch(`${API}/pending?k=${encodeURIComponent(SECRET)}`)).json()).pending || [];
-  if (!pend.length) { console.log('没有待验证项'); return; }
-  // 引擎实例可复用（startGame 每次重置状态）；正式版分数用 prod 引擎重放
+  // 先读当前 prod 引擎版本，只向 /pending 要这个版本的待验证项（旧版本录像无对应引擎可重放，跳过也只会空转）
   const html = fs.readFileSync(__dirname + '/dungeon-raid.html', 'utf8');
   const ENGINE_VER = (html.match(/const VERSION='([^']+)'/) || [])[1] || '';
+  const purl = `${API}/pending?k=${encodeURIComponent(SECRET)}` + (ENGINE_VER ? `&version=${encodeURIComponent(ENGINE_VER)}` : '');
+  const pend = (await (await fetch(purl)).json()).pending || [];
+  if (!pend.length) { console.log(`没有待验证项（引擎版本 ${ENGINE_VER}）`); return; }
   const G = loadEngine('dungeon-raid.html');
   let pass = 0, fail = 0, skip = 0;
   for (const e of pend) {

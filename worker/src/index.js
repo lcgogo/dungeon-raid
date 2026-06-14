@@ -171,8 +171,11 @@ export default {
     // GET /pending?k= —— 最强的未验证录像（含 share 触发），交给定时任务
     if (req.method === 'GET' && p === '/pending') {
       if (url.searchParams.get('k') !== env.VERIFY_SECRET) return json({ error: 'forbidden' }, 403);
+      const ver = url.searchParams.get('version');   // 只取当前引擎版本的待验证项：旧版本录像没有对应引擎可重放，否则会长期占满队列、饿死新版本成绩
+      let where = 'verified=0', binds = [];
+      if (ver) { where += ' AND version=?'; binds.push(ver); }
       const { results } = await env.DB.prepare(
-        "SELECT id,version,race,turns,level,gold,source,cleared,agent FROM scores WHERE verified=0 ORDER BY turns DESC LIMIT 50").all();
+        `SELECT id,version,race,turns,level,gold,source,cleared,agent FROM scores WHERE ${where} ORDER BY turns DESC LIMIT 50`).bind(...binds).all();
       return json({ pending: results || [] });
     }
 
