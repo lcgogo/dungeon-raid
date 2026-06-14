@@ -158,7 +158,7 @@
 (()=>{
 //==================== 配置 ====================
 // 版本号 v主.次.修：小改动改"修"，新Boss/职业改"次"，大版本变更需先确认。页面底部显示。
-const VERSION='v1.18.0';
+const VERSION='v1.19.0';
 const DEV=true;    // 开发版：指向最新开发版本；独立存档 + DEV 标识。正式版在 dungeon-raid.html（DEV=false）
 const REC_API='https://api.dungeonraid.win';   // 录像分享 API（Cloudflare Worker + KV）
 // 带种子随机数（mulberry32）：游戏全程用 rnd() 取代原生随机，配合录制种子可确定性重放
@@ -262,8 +262,12 @@ const BOSSES=[
     special:['每回合吸取场上的 ❤️ 回血','Drains ❤️ each turn to heal'],
     desc:['可以用剑攻击它（也能用炸弹）。但它【每回合】会吸取棋盘上所有的心来回血——别把心留在场上！','You CAN hit it with sword chains (and bombs). But every turn it drains all hearts on the board to heal — do not leave hearts on the board!'],
     act(t){ let n=0; for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const x=grid[r][c]; if(x&&x.type==='heart'){ grid[r][c]=null; n++; } }
-      if(n){ t.hp=Math.min(t.maxHp, t.hp+n*(2+(t.tier||1))); applyGravity(); syncPositions(false);
-        log(tr(`🧛 吸血鬼吸取 ${n} 颗心回血（→${t.hp}）`,`🧛 Vampire drains ${n} hearts (→${t.hp})`)); } } },
+      if(n){ const amt=n*(2+(t.tier||1));
+        if(pollutionActive()){ t.hp-=amt;   // 同时有污染怪：吸到的是毒心，反被毒、掉血而非回血
+          if(t.hp<=0){ for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ if(grid[r][c]===t) grid[r][c]=null; } thiefRecover(t); player.xp+=15; player.gold+=20; onBossKilled(); applyGravity(); syncPositions(false); log(tr('🧛 吸血鬼吸到毒心，中毒身亡！','🧛 The Vampire drank poison hearts and died!')); }
+          else { applyGravity(); syncPositions(false); log(tr(`🧛 吸血鬼吸到毒心，反中毒掉 ${amt} 血（→${t.hp}）`,`🧛 Vampire drinks poison hearts: −${amt} HP (→${t.hp})`)); } }
+        else { t.hp=Math.min(t.maxHp, t.hp+amt); applyGravity(); syncPositions(false);
+          log(tr(`🧛 吸血鬼吸取 ${n} 颗心回血（→${t.hp}）`,`🧛 Vampire drains ${n} hearts (→${t.hp})`)); } } } },
   { id:'assassin', emoji:'🥷', name:['刺客','Assassin'], quip:['护甲？那只是好看的装饰。','Armor? Cute. Purely decorative.'], monster:true, swordable:true, trueDmg:true, noTierScale:true,
     desc:['属性和普通怪差不多，但它的攻击是【真实伤害】——无视护甲和额外减伤，直接掉血！可以用剑砍它，趁早解决。','Stats like a normal enemy, but its hits are TRUE damage — they ignore armor and any reduction, straight to your HP! You can sword it down, so kill it fast.'] },
   { id:'devourer', emoji:'🦖', name:['饕餮','Devourer'], quip:['先吃你的怪，再吃你。','I eat your monsters first, then you.'], monster:true, swordable:true,
@@ -302,6 +306,9 @@ const BOSSES=[
   { id:'statue', emoji:'🗿', name:['石像','Statue'], quip:['打我？你打的是你自己。','Hit me? You are hitting yourself.'], monster:true, swordable:true, noTierScale:true,
     special:['受到的伤害真实反弹给你','Reflects damage taken as TRUE damage'],
     desc:['可以用剑/炸弹攻击它，但它【受到多少伤害，就把等量伤害当作真实伤害（无视护甲）反弹给你】！想杀它得先确保自己血够厚——别一刀连自己也送走。倒计时归零也会重击你。','You CAN sword/bomb it, but【whatever damage it takes is reflected back at you as TRUE damage (ignoring armor)】! Make sure you have the HP to survive the kill — do not one-shot yourself. It also strikes you when its timer hits 0.'] },
+  { id:'pollution', emoji:'🦠', name:['污染怪','Corruptor'], quip:['你的心，我给染绿了。','I dyed your hearts rotten green.'], monster:true, noTierScale:true,
+    special:['在场时全场心变毒心（连之扣血）','While alive, all hearts are poison (linking drains HP)'],
+    desc:['剑链对它无效，只能用 💥炸弹 炸。只要它在场，棋盘上所有的心都变成毒心（绿心 💚）——连毒心不再回血，反而按等量【扣血】（无视护甲）！炸掉它，心就恢复正常。倒计时归零它也会重击你。','Immune to sword chains — only the 💥 Bomb works. While it is on the board, ALL hearts become poison (green 💚) — linking them DRAINS that much HP instead of healing (ignoring armor)! Bomb it and hearts return to normal. It also strikes you when its timer hits 0.'] },
   { id:'birdman', emoji:'🦅', name:['鸟人','Birdman'], quip:['抓不住我，我会飞（还会瞬移）。','Catch me? I fly — and teleport.'], monster:true, swordable:true, perTurn:true,
     special:['每回合啄你一下并瞬移换位','Pecks you and teleports each turn'],
     desc:['可以用剑攻击它（也能用炸弹）。它【每回合】都会俯冲啄你一下，并在回合末和棋盘上任意一个棋子【互换位置】——飘忽难缠，想连它的剑链得算准它的落点，速战速决！','You CAN sword it (and bomb it). Every turn it dives to peck you, then swaps places with a random tile at turn end — elusive and nagging, so line up your chain where it lands and finish it fast!'],
@@ -381,6 +388,8 @@ function hasAnyMove(){
 }
 // 感染：场上存在僵尸 Boss 时血条变绿（僵尸死即解除感染）
 function isInfected(){ for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const t=grid[r][c]; if(t&&t.type==='boss'&&t.bossId==='zombie') return true; } return false; }
+// 污染怪在场：全场心变毒心（绿心），连之扣血；炸掉它即恢复正常（光环式，不留持久状态）
+function pollutionActive(){ for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const t=grid[r][c]; if(t&&t.type==='boss'&&t.bossId==='pollution') return true; } return false; }
 // 随机把 n 个非 Boss 棋子换成新的随机棋子
 function scrambleTiles(n){
   const cells=[];
@@ -807,15 +816,17 @@ function draw(){
   const sel=new Set(selection.map(s=>s.r+','+s.c));
   const chainType=selection.length?selection[0].type:null;
   const killSet=previewKills();
+  const poisoned=pollutionActive();   // 污染怪在场时全场心显示为毒心（绿心）
   for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){
     const t=grid[r][c]; if(!t) continue;
+    const isPoisonHeart = t.type==='heart' && poisoned;
     const x=cellX(c), y=(t.curY!==undefined?t.curY:cellY(r));
     const d=DEF[t.type], g=TILE-8;
     const picked=sel.has(t.r+','+t.c);
     // 能被剑攻击的（怪 / 可剑连的Boss，以及剑本身）统一红底，一眼看出可攻击
-    const baseCol = (isSwordTarget(t) || t.type==='sword') ? DEF.sword.color : d.color;
+    const baseCol = (isSwordTarget(t) || t.type==='sword') ? DEF.sword.color : (isPoisonHeart ? '#27ae60' : d.color);   // 毒心：绿底
     // 被剑链穿过的怪/可攻击Boss → 红色高亮（表示正被攻击）
-    const gl = (picked && chainType==='sword' && isSwordTarget(t)) ? DEF.sword.glow : d.glow;
+    const gl = (picked && chainType==='sword' && isSwordTarget(t)) ? DEF.sword.glow : (isPoisonHeart ? '#2ecc71' : d.glow);
     // 背景
     ctx.save();
     roundRect(x+4,y+4,g,g,12);
@@ -860,7 +871,7 @@ function draw(){
     } else {
       ctx.font=Math.floor(TILE*0.46)+'px '+EMOJI_FONT;
       ctx.textAlign='center'; ctx.textBaseline='middle';
-      ctx.fillText(d.emoji, cx, cy);
+      ctx.fillText(isPoisonHeart?'💚':d.emoji, cx, cy);   // 毒心显示绿心
     }
   }
   drawBossFx();   // Boss 入场冲击环（叠在棋子之上）
@@ -1069,6 +1080,7 @@ function resolve(){
       : tr('（未串到怪）','(no enemy hit)'));
   } else {
     const count=selection.length;
+    const poisonHeart = type==='heart' && pollutionActive();   // 污染怪在场：心是毒心，连之扣血
     selection.forEach(s=>{ grid[s.r][s.c]=null; });
     const combo=1+Math.max(0,count-2)*0.15;            // 多连奖励：每超出2个 +15%
     const comboTxt=combo>1?tr(` 连击×${combo.toFixed(2)}`,` combo×${combo.toFixed(2)}`):'';
@@ -1080,7 +1092,9 @@ function resolve(){
         msg=`${d.emoji}×${count}${comboTxt} → `+tr(`护甲进度 ${player.shieldXp}/${armorNeeded(player.armor)}`,`armor ${player.shieldXp}/${armorNeeded(player.armor)}`)+(gained?tr(`，护甲 +${gained}！（减伤 ${player.armor}）`,`, armor +${gained}! (reduce ${player.armor})`):''); } }
     else if(type==='heart'){
       const amt=Math.round(count*player.healPerHeart*combo);
-      if(player.heartPoison){ player.heartPoison=false;   // 巫医蛊毒：本回合连心不回血，把这些生命当毒灌给全场怪
+      if(poisonHeart){ const dd=hurtPlayer(amt,'pollution',true);   // 污染怪毒心：连之不回血，反而按等量扣血（无视护甲）
+        msg=`💚×${count}${comboTxt} → `+tr(`毒心反噬 −${dd} 生命！`,`poison hearts: −${dd} HP!`); }
+      else if(player.heartPoison){ player.heartPoison=false;   // 巫医蛊毒：本回合连心不回血，把这些生命当毒灌给全场怪
         const r=dealDamage(amt, null); applyGravity(); syncPositions(false);
         msg=`${d.emoji}×${count}${comboTxt} → `+tr(`🧪 蛊毒全场 ${r.dmg} 伤害`+(r.kills?`，击杀 ${r.kills}`:''),`🧪 Hex: ${r.dmg} dmg to all`+(r.kills?`, ${r.kills} killed`:'')); }
       else { const h=gainHeal(amt);
@@ -1546,6 +1560,10 @@ function tileInfo(t){
       [tr('护甲进度','Armor progress'), p.noArmor?'—':`${p.shieldXp} / ${armorNeeded(p.armor)}`],
       [tr('每个盾 +进度','Progress per shield'), `+${p.armorPerShield}`],
       [tr('减伤倍率(矮人)','Armor mult (Dwarf)'), p.armorMult>1?`×${p.armorMult}`:'—'] ]};
+  if(t.type==='heart'&&pollutionActive()) return {icon:'💚', title:tr('毒心 · 危险','Poison Heart · Danger'),
+    desc:tr('被污染怪 🦠 染绿的心。连接它不再回血，反而按等量【扣血】（无视护甲）！炸掉污染怪即可不再产生新毒心。','A heart corrupted by the Corruptor 🦠. Linking it DRAINS that much HP instead of healing (ignores armor)! Bomb the Corruptor to stop new ones.'),
+    rows:[ [tr('连接后果','If linked'), tr('扣血（=本会回复的量）','HP loss (= would-be heal)')],
+      [tr('解法','Fix'), tr('炸掉污染怪 / 别碰','Bomb Corruptor / avoid')] ]};
   if(t.type==='heart') return {icon:'💗', title:tr('心 · 治疗','Heart · Heal'),
     desc:tr('连接 2 颗及以上的心回复生命。','Link 2+ hearts to restore HP.'),
     rows:[ [tr('每颗心回复','Heal per heart'), `+${p.healPerHeart}`],

@@ -225,7 +225,8 @@ function playGame(rc){
 
     // 选招
     const sword=bestSword();
-    const heart=bestSimple('heart');
+    let heart=bestSimple('heart');
+    if(boss && boss.bossId==='pollution') heart=null;   // 污染怪在场：心变毒心，连之扣血——机器人不碰，改靠炸弹清掉它
     const shield=bestSimple('shield');
     const coin=bestSimple('coin');
 
