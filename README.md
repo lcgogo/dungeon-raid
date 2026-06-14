@@ -120,7 +120,7 @@
 | 🦖 饕餮 Devourer | 剑 / 炸弹 | 每回合吸取场上每只怪一半生命壮大；倒计时归零放出等于自身 50% 血量的强击 |
 | 🧙 召唤师 Summoner | 剑 / 炸弹 | 每回合把一个非怪棋子变成一只怪，拖得越久怪越多 |
 | 🦹 小偷 Thief | 剑 / 炸弹 | 现身即偷走一定比例金币（一阶 20%、二阶 40%…）；倒计时内击败夺回，让它逃走则永久失去 |
-| 🕷️ 蜘蛛 Spider | 剑 / 炸弹 | 现身即让你中毒（血条变绿），每回合按生命百分比掉血（一阶 10%、二阶 20%…，无视护甲）；击败即解毒 |
+| 🧟 僵尸 Zombie | 剑 / 炸弹 | 现身即让你感染尸毒（血条变绿），每回合按生命百分比掉血（一阶 10%、二阶 20%…，无视护甲）；击败即解除感染 |
 
 ### ✨ 其他特性
 
@@ -141,7 +141,7 @@ node playtest.js                  # 扫描模式：四族 × 多套敌人数值�
 # 定向模式：固定某条职业线或某个 Boss，跑详细统计，便于和历史对比
 node playtest.js --race=orc                          # 只测兽人
 node playtest.js --race=human --t1=knight --t2=immortal   # 指定一阶/二阶
-node playtest.js --boss=spider                       # 只刷蜘蛛（隔离单个 Boss 的影响）
+node playtest.js --boss=zombie                       # 只刷僵尸（隔离单个 Boss 的影响）
 node playtest.js --race=elf --boss=assassin --games=40    # 组合 + 自定局数
 node playtest.js --race=dwarf --enemy=C2             # 指定敌人数值候选（默认用文件实时值）
 ```
@@ -266,7 +266,7 @@ About every **10 turns** a random boss appears; beating one rewards 💰+20 and 
 | 🦖 Devourer | Sword / Bomb | Drains half the HP from every enemy each turn to grow; at 0 unleashes a hit worth 50% of its HP |
 | 🧙 Summoner | Sword / Bomb | Turns a non-enemy tile into an enemy each turn — the longer it lives, the more enemies |
 | 🦹 Thief | Sword / Bomb | Steals a share of gold on arrival (20% at Lv1, 40% at Lv2…); kill it before its timer to recover, let it flee and the gold is gone forever |
-| 🕷️ Spider | Sword / Bomb | Poisons you on arrival (HP bar turns green); each turn you lose a % of HP (10% at Lv1, 20% at Lv2…, ignoring armor); kill it to cure |
+| 🧟 Zombie | Sword / Bomb | Infects you on arrival (HP bar turns green); each turn you lose a % of HP (10% at Lv1, 20% at Lv2…, ignoring armor); kill it to cure |
 
 ### ✨ Other Features
 
@@ -287,7 +287,7 @@ node playtest.js                  # scan mode: 4 races × several enemy-stat set
 # Targeted mode: pin a class line or a single boss, run detailed stats for comparison
 node playtest.js --race=orc                          # test Orc only
 node playtest.js --race=human --t1=knight --t2=immortal   # pin tier-1 / tier-2
-node playtest.js --boss=spider                       # only spawn the Spider (isolate one boss)
+node playtest.js --boss=zombie                       # only spawn the Zombie (isolate one boss)
 node playtest.js --race=elf --boss=assassin --games=40    # combine + custom game count
 node playtest.js --race=dwarf --enemy=C2             # pick an enemy-stat candidate (defaults to live file values)
 ```

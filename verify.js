@@ -34,13 +34,13 @@ function loadEngine(file) {
   return globalThis.__E;
 }
 
-// 确定性重放一份录像，返回真实结局
+// 确定性重放一份录像，返回真实结局（含是否破关）
 function replay(G, rec) {
   G.replayRec = rec; G.replaying = true;
   G.startGame(G.raceById(rec.race));
   const p = G.player;
-  for (const a of rec.acts) { if (p.hp <= 0) break; G.dispatchReplayAct(a); }
-  return { turns: p.turns, level: p.level, gold: p.gold };
+  for (const a of rec.acts) { if (p.hp <= 0 || p.cleared) break; G.dispatchReplayAct(a); }
+  return { turns: p.turns, level: p.level, gold: p.gold, cleared: !!p.cleared };
 }
 
 async function main() {
@@ -61,6 +61,7 @@ async function main() {
     } catch (err) { actual = null; }
     let ok;
     if (!actual) ok = false;
+    else if (e.cleared) ok = actual.cleared === true && actual.level === e.level;  // 破关：必须真的破关且等级吻合
     else if (e.source === 'share') ok = actual.turns >= e.turns - 1;             // 分享：能跑出≈声称回合即视为真录像
     else ok = actual.turns === e.turns && actual.level === e.level && actual.gold === e.gold;  // 分数：三项全中才算真
     await fetch(`${API}/verify?k=${encodeURIComponent(SECRET)}`, {

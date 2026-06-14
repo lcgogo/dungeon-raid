@@ -42,6 +42,22 @@ async function ranking(env, version, race, turns) {
     race: { rank: rbetter + 1, total: rtot, pct: pct(rbetter, rtot) },
   };
 }
+// 破关榜名次：按【最低破关等级】，level 越低越前。rank = 比我等级更低的 + 1。
+async function clearRanking(env, version, race, level) {
+  const base = "cleared=1 AND verified=1 AND version=?";   // 仅计已重放验证的真破关，伪造的待验证记录不入榜/不计名次
+  const tot = await cnt(env, base, version);
+  const better = await cnt(env, base + ' AND level<?', version, level);
+  const worse = await cnt(env, base + ' AND level>?', version, level);
+  const rtot = await cnt(env, base + ' AND race=?', version, race);
+  const rbetter = await cnt(env, base + ' AND race=? AND level<?', version, race, level);
+  const rworse = await cnt(env, base + ' AND race=? AND level>?', version, race, level);
+  const pct = (w, t) => t > 0 ? Math.round((w / t) * 1000) / 10 : 100;   // 我比 w 个更强（等级更高的）领先
+  return {
+    version,
+    overall: { rank: better + 1, total: tot, pct: pct(worse, tot) },
+    race: { rank: rbetter + 1, total: rtot, pct: pct(rworse, rtot) },
+  };
+}
 
 export default {
   async fetch(req, env) {
@@ -93,6 +109,37 @@ export default {
       return json({ id, turns, ...rk });
     }
 
+    // POST /clear —— 正式版破关上报（撑过终焉10波）。按最低破关等级排名。
+    if (req.method === 'POST' && p === '/clear') {
+      const body = await req.text();
+      if (body.length > MAX_BYTES) return json({ error: 'too large' }, 413);
+      let d; try { d = JSON.parse(body); } catch { return json({ error: 'invalid json' }, 400); }
+      if (!d || !validRec(d.rec)) return json({ error: 'invalid' }, 400);
+      const turns = turnCount(d.rec);
+      if (turns < 510) return json({ error: 'not a clear (need >=510 turns)' }, 422);
+      const level = d.level | 0, race = d.rec.race, version = d.rec.ver || '';
+      const id = shortId();
+      await env.REC.put(id, JSON.stringify(d.rec));
+      await env.DB.prepare("INSERT INTO scores(id,version,race,turns,level,gold,source,cleared,verified,created) VALUES(?,?,?,?,?,0,'play',1,0,?)")
+        .bind(id, version, race, turns, level, Date.now()).run();
+      const rk = await clearRanking(env, version, race, level);
+      return json({ id, level, ...rk });
+    }
+
+    // GET /clearboard?version=&race=&n= —— 破关榜（按最低破关等级 ASC）
+    if (req.method === 'GET' && p === '/clearboard') {
+      const race = url.searchParams.get('race');
+      const version = url.searchParams.get('version');
+      const n = Math.min(50, Math.max(1, +(url.searchParams.get('n') || 10)));
+      let where = "cleared=1 AND verified=1", binds = [];   // 只展示已重放验证的真破关
+      if (version) { where += ' AND version=?'; binds.push(version); }
+      if (race) { where += ' AND race=?'; binds.push(race); }
+      binds.push(n);
+      const { results } = await env.DB.prepare(
+        `SELECT id,version,race,level,turns,verified FROM scores WHERE ${where} ORDER BY level ASC, turns ASC LIMIT ?`).bind(...binds).all();
+      return json({ clears: results || [] });
+    }
+
     // GET /top?version=&race=&n=  —— 榜单（按版本过滤，不传则只看有版本号的最新成绩）
     if (req.method === 'GET' && p === '/top') {
       const race = url.searchParams.get('race');
@@ -112,7 +159,7 @@ export default {
     if (req.method === 'GET' && p === '/pending') {
       if (url.searchParams.get('k') !== env.VERIFY_SECRET) return json({ error: 'forbidden' }, 403);
       const { results } = await env.DB.prepare(
-        "SELECT id,version,race,turns,level,gold,source FROM scores WHERE verified=0 ORDER BY turns DESC LIMIT 50").all();
+        "SELECT id,version,race,turns,level,gold,source,cleared FROM scores WHERE verified=0 ORDER BY turns DESC LIMIT 50").all();
       return json({ pending: results || [] });
     }
 

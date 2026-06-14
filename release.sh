@@ -8,7 +8,7 @@ cd "$(dirname "$0")"
 
 # 1) 同步 dev → 正式版（两文件仅 const DEV 一行不同）
 cp dungeon-raid-dev.html dungeon-raid.html
-perl -CSD -i -pe 's/^const DEV=true;.*/const DEV=false;   \/\/ 正式版（DEV=false）；开发版在 dungeon-raid-dev.html（DEV=true）/' dungeon-raid.html
+perl -i -pe 's/^const DEV=true;.*/const DEV=false;   \/\/ release build (DEV=false); dev build is dungeon-raid-dev.html (DEV=true)/' dungeon-raid.html
 echo "两文件差异（应仅 DEV 一行）："
 diff dungeon-raid.html dungeon-raid-dev.html || true
 
