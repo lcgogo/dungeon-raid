@@ -123,7 +123,7 @@
 | 🦖 饕餮 Devourer | 剑 / 炸弹 | 每回合吸取场上每只怪一半生命壮大；倒计时归零放出等于自身 50% 血量的强击 |
 | 🧙 召唤师 Summoner | 剑 / 炸弹 | 每回合把一个非怪棋子变成一只怪，拖得越久怪越多 |
 | 🦹 小偷 Thief | 剑 / 炸弹 | 现身即偷走一定比例金币（一阶 20%、二阶 40%…）；倒计时内击败夺回，让它逃走则永久失去 |
-| 🧟 僵尸 Zombie | 剑 / 炸弹 | 现身即让你感染尸毒（血条变绿），每回合按生命百分比掉血（一阶 10%、二阶 20%…，无视护甲）；击败即解除感染 |
+| 🧟 僵尸 Zombie | 剑 / 炸弹 | 现身即让你感染尸毒（血条变绿），**潜伏一回合后**每回合按生命百分比掉血（随档位递增，单回合最高 30%，无视护甲）；趁潜伏期击败它即解除感染 |
 
 > Boss 入场时会有**扩散冲击环 + 闪光**特效（普通 Boss 红、终焉之主金），一眼可辨。
 
@@ -288,7 +288,7 @@ About every **10 turns** a random boss appears; beating one rewards 💰+20 and 
 | 🦖 Devourer | Sword / Bomb | Drains half the HP from every enemy each turn to grow; at 0 unleashes a hit worth 50% of its HP |
 | 🧙 Summoner | Sword / Bomb | Turns a non-enemy tile into an enemy each turn — the longer it lives, the more enemies |
 | 🦹 Thief | Sword / Bomb | Steals a share of gold on arrival (20% at Lv1, 40% at Lv2…); kill it before its timer to recover, let it flee and the gold is gone forever |
-| 🧟 Zombie | Sword / Bomb | Infects you on arrival (HP bar turns green); each turn you lose a % of HP (10% at Lv1, 20% at Lv2…, ignoring armor); kill it to cure |
+| 🧟 Zombie | Sword / Bomb | Infects you on arrival (HP bar turns green); **after a 1-turn incubation** you lose a % of HP each turn (scaling per tier, capped at 30%/turn, ignoring armor); kill it during incubation to cure |
 
 > Each boss arrives with a **shockwave ring + flash** effect (crimson for normal bosses, gold for the Overlord), so you never miss one.
 
