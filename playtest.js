@@ -194,13 +194,14 @@ function maybeSkill(){
   else if(id==='berserker' && threat && p.hp<=0.5*p.maxHp) G.activateSkill(); // 狂怒：将被打死时用不屈保命
   resolveLevels();
 }
-// 机器人处理转职选择（resolve/buyItem 触发 showTierSelect 后，apply 第一个选项）
+// 机器人处理转职选择（resolve/buyItem 触发 showTierSelect/showSkillSwap 后，apply 第一个选项）
 function botTransform(){
   const p=P(); if(!p.awaitingTier) return;
-  const t=p.awaitingTier, ids=G.RACE_PATHS[p.race][t===1?'t1':'t2'];
-  const forced=t===1?ARG.t1:ARG.t2;                 // CLI 指定的转职线
-  const id=(forced && ids.includes(forced))?forced:ids[0];
-  if(t===1){ p.tier1=id; } else { p.tier2=id; G.TIER2[id].f(p); p.hp=Math.min(p.hp,p.maxHp); }
+  const t=p.awaitingTier;
+  if(t===1){ const ids=G.RACE_PATHS[p.race].t1; const f=ARG.t1; p.tier1=(f&&ids.includes(f))?f:ids[0]; }
+  else if(t===2){ const ids=G.RACE_PATHS[p.race].t2; const f=ARG.t2; const id=(f&&ids.includes(f))?f:ids[0]; p.tier2=id; G.TIER2[id].f(p); p.hp=Math.min(p.hp,p.maxHp); }
+  else if(t===3){ const id=G.RACE_PATHS[p.race].t2.find(x=>x!==p.tier2); if(id){ p.tier2b=id; G.TIER2[id].f(p); p.hp=Math.min(p.hp,p.maxHp); } }   // 200回合：本种族剩余被动
+  else if(t===4){ p.skill2={id:p.tier1||Object.keys(G.TIER1)[0], slot:'bomb'}; p.skill2Cd=0; }   // 350回合：用自己的一阶主动替换炸弹槽
   p.awaitingTier=0; G.busy=false;
 }
 

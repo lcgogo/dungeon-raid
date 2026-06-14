@@ -161,7 +161,7 @@
 (()=>{
 //==================== 配置 ====================
 // 版本号 v主.次.修：小改动改"修"，新Boss/职业改"次"，大版本变更需先确认。页面底部显示。
-const VERSION='v1.12.3';
+const VERSION='v1.13.0';
 const DEV=true;    // 开发版：指向最新开发版本；独立存档 + DEV 标识。正式版在 dungeon-raid.html（DEV=false）
 const REC_API='https://api.dungeonraid.win';   // 录像分享 API（Cloudflare Worker + KV）
 // 带种子随机数（mulberry32）：游戏全程用 rnd() 取代原生随机，配合录制种子可确定性重放
@@ -234,6 +234,8 @@ function newPlayer(){
     weaponPower:1, swordFlat:0, armorPerShield:1, healPerHeart:1, goldPerCoin:1,
     lifesteal:0, regen:0, coinXp:0, turns:0,
     race:null, tier1:null, tier2:null, t1Pending:false, t2Pending:false,   // 种族/转职
+    tier2b:null, t3Pending:false,                                          // 200回合：本种族第二个被动
+    skill2:null, skill2Cd:0, t4Pending:false,                              // 350回合：任选主动替换治疗/炸弹槽
     comboMult:1, swordMult:1, armorMult:1, maxHpUpMult:1, noArmor:false,    // 种族特性修正
     upgradeChoices:3, bombCd:3, goldLock:0, goldFrozen:0,                   // 转职被动相关
     finaleStarted:false, finaleWave:0, cleared:false};                      // 终局：终焉之主浪潮 / 破关
@@ -507,14 +509,21 @@ async function loadSharedReplay(id){
   }catch(e){ log(tr('分享录像加载失败：','Failed to load shared replay: ')+e.message); __bootHandled=true; showClassSelect(); }
 }
 
-// 转职选择：tier=1 选一阶（主动），tier=2 选二阶（被动）
+// 转职选择：tier=1 一阶（主动），tier=2 二阶（被动），tier=3 本种族第二个被动（200回合）
 function showTierSelect(tier){
   if(replaying) return;   // 回放：转职由动作序列驱动，不弹窗
   busy=true; player.awaitingTier=tier;
-  const path=RACE_PATHS[player.race]; const ids=tier===1?path.t1:path.t2; const pool=tier===1?TIER1:TIER2;
+  const path=RACE_PATHS[player.race];
+  const ids = tier===1 ? path.t1 : tier===3 ? path.t2.filter(id=>id!==player.tier2) : path.t2;   // 第二被动：排除已拥有的
+  const pool = tier===1 ? TIER1 : TIER2;
+  const head = tier===1 ? tr('⚔️ 转职：一阶职业','⚔️ Advance: Tier-1 Class')
+             : tier===3 ? tr('🌟 第二被动：本种族另一项','🌟 Second passive: your race’s other')
+             : tr('🌟 转职：二阶职业','🌟 Advance: Tier-2 Class');
+  const sub  = tier===1 ? tr('击败强敌！选择一个职业，解锁主动技能','Boss slain! Pick a class to unlock an active skill')
+             : tier===3 ? tr('第200回合 Boss 被斩！再获得一项本种族被动','Turn-200 boss slain! Gain another passive of your race')
+             : tr('再次证明自己！选择一个二阶职业，获得被动','Proven again! Pick a tier-2 class for a passive');
   const card=document.getElementById('card');
-  card.innerHTML=`<h2>${tier===1?tr('⚔️ 转职：一阶职业','⚔️ Advance: Tier-1 Class'):tr('🌟 转职：二阶职业','🌟 Advance: Tier-2 Class')}</h2>
-    <p>${tier===1?tr('击败强敌！选择一个职业，解锁主动技能','Boss slain! Pick a class to unlock an active skill'):tr('再次证明自己！选择一个二阶职业，获得被动','Proven again! Pick a tier-2 class for a passive')}</p>`;
+  card.innerHTML=`<h2>${head}</h2><p>${sub}</p>`;
   ids.forEach(id=>{
     const def=pool[id];
     const b=document.createElement('button'); b.className='choice';
@@ -523,18 +532,60 @@ function showTierSelect(tier){
     b.onclick=()=>{
       recAct(['t', tier, id]);   // 录制转职选择
       if(tier===1){ player.tier1=id; }
+      else if(tier===3){ player.tier2b=id; def.f(player); player.hp=Math.min(player.hp,player.maxHp); }
       else { player.tier2=id; def.f(player); player.hp=Math.min(player.hp,player.maxHp); }
       player.awaitingTier=0; busy=false; hideOverlay(); updateHUD();
-      log(tr(`✨ 转职为 ${L(def.n)}！`,`✨ Became ${L(def.n)}!`));
+      log(tr(`✨ 获得 ${L(def.n)}！`,`✨ Gained ${L(def.n)}!`));
     };
     card.appendChild(b);
   });
+  showOverlay();
+}
+// 350回合：从全种族全职业的主动里选一个，替换掉商店的 治疗 或 炸弹 槽
+function showSkillSwap(){
+  if(replaying) return;
+  busy=true; player.awaitingTier=4;
+  const card=document.getElementById('card');
+  card.innerHTML=`<h2>${tr('🔁 终极传承：换装主动','🔁 Ultimate: equip an active')}</h2>
+    <p>${tr('第350回合 Boss 被斩！任选一个职业主动，替换掉商店的 💊治疗 或 💥炸弹 槽（带该技能冷却）','Turn-350 boss slain! Pick any class active to replace your 💊Heal or 💥Bomb shop slot (uses that skill’s cooldown)')}</p>`;
+  Object.keys(TIER1).forEach(id=>{
+    const def=TIER1[id], sk=def.skill;
+    const b=document.createElement('button'); b.className='choice';
+    b.innerHTML=`<b>✨ ${L(sk.name)}</b><small>${L(def.n)} · ${L(sk.short)} · ${tr('冷却','CD')} ${sk.cd}</small>`;
+    b.onclick=()=>chooseSwapSlot(id);
+    card.appendChild(b);
+  });
+  showOverlay();
+}
+// 选好主动后，再选替换哪个槽位
+function chooseSwapSlot(skillId){
+  const sk=TIER1[skillId].skill;
+  const card=document.getElementById('card');
+  card.innerHTML=`<h2>✨ ${L(sk.name)}</h2>
+    <p>${tr('替换掉哪个商店槽？','Replace which shop slot?')}</p>`;
+  [['heal','💊 '+tr('治疗','Heal')],['bomb','💥 '+tr('炸弹','Bomb')]].forEach(([slot,lab])=>{
+    const b=document.createElement('button'); b.className='choice';
+    b.innerHTML=`<b>${lab}</b><small>${tr('用','use')} ${L(sk.name)} ${tr('替换此槽','to replace this slot')}</small>`;
+    b.onclick=()=>{
+      recAct(['t', 4, skillId, slot]);
+      player.skill2={id:skillId, slot}; player.skill2Cd=0;
+      player.awaitingTier=0; busy=false; hideOverlay(); updateHUD();
+      log(tr(`🔁 ${L(sk.name)} 已替换 ${slot==='heal'?'💊治疗':'💥炸弹'}！`,`🔁 ${L(sk.name)} now replaces ${slot==='heal'?'Heal':'Bomb'}!`));
+    };
+    card.appendChild(b);
+  });
+  const back=document.createElement('button'); back.className='btn'; back.style.marginTop='4px';
+  back.textContent=tr('← 重选主动','← Pick another');
+  back.onclick=()=>showSkillSwap();
+  card.appendChild(back);
   showOverlay();
 }
 // Boss 被击败时调用：到点则标记可转职（结算后弹选择）
 function onBossKilled(){
   if(!player.tier1 && player.turns>=50) player.t1Pending=true;
   else if(player.tier1 && !player.tier2 && player.turns>=100) player.t2Pending=true;
+  else if(player.tier2 && !player.tier2b && player.turns>=200) player.t3Pending=true;     // 200回合：本种族第二被动
+  else if(player.tier2b && !player.skill2 && player.turns>=350) player.t4Pending=true;     // 350回合：主动替换商店槽
 }
 
 //==================== 初始化 ====================
@@ -828,6 +879,7 @@ const SHOP={
 function shopCost(key){ let c=SHOP[key].cost; if(key==='bomb'&&player.bombBoost) c=Math.ceil(c*1.6); return c; } // 爆破手：炸弹更贵
 function buyItem(key){
   if(busy||pendingLevels) return;
+  if(player.skill2 && player.skill2.slot===key){ castSkill2(key); return; }   // 该槽被换装主动占用 → 施放，不再购买消耗品
   if(typeof player.shopCd!=='object'||!player.shopCd) player.shopCd={}; // 兼容旧存档
   if(player.goldLock>0) return;               // 守财奴囤金期间不可用商店
   if(player.shopCd[key]>0) return;            // 该商品冷却中
@@ -839,6 +891,22 @@ function buyItem(key){
   checkLevel(); updateHUD();
   if(player.t1Pending){ player.t1Pending=false; showTierSelect(1); return; }  // 炸弹击败Boss也可触发转职
   if(player.t2Pending){ player.t2Pending=false; showTierSelect(2); return; }
+  if(player.t3Pending){ player.t3Pending=false; showTierSelect(3); return; }
+  if(player.t4Pending){ player.t4Pending=false; showSkillSwap(); return; }
+  if(pendingLevels) showLevelUp();
+}
+// 施放换装主动（占用 治疗/炸弹 槽）。走独立冷却 skill2Cd；录像用占用的槽位 key，回放经 buyItem 复现。
+function castSkill2(key){
+  if(player.skill2Cd>0) return;
+  const def=TIER1[player.skill2.id], sk=def&&def.skill; if(!sk) return;
+  const r=sk.f(player);
+  if(r===false) return;        // 技能无效（如对无甲用锻甲）：不进冷却、不刷日志
+  player.skill2Cd=sk.cd;
+  recAct(['b',key]);   // 录制（占用槽位 key）；回放 dispatchReplayAct('b',key)→buyItem→castSkill2
+  if(r===undefined) log(tr(`✨ 【${L(sk.name)}】发动！`,`✨ ${L(sk.name)} activated!`));
+  checkLevel(); updateHUD();
+  if(player.t3Pending){ player.t3Pending=false; showTierSelect(3); return; }
+  if(player.t4Pending){ player.t4Pending=false; showSkillSwap(); return; }
   if(pendingLevels) showLevelUp();
 }
 document.querySelectorAll('.shopBtn[data-buy]').forEach(b=>{
@@ -911,6 +979,7 @@ function resolve(){
   player.turns++;
   if(typeof player.shopCd==='object') for(const k in player.shopCd){ if(player.shopCd[k]>0) player.shopCd[k]--; } // 各商品冷却递减
   if(player.skillCd>0) player.skillCd--; // 技能冷却递减
+  if(player.skill2Cd>0) player.skill2Cd--; // 换装主动冷却递减
   if(player.goldLock>0){ player.goldLock--; if(player.goldLock===0){ const pay=player.goldFrozen*2; player.gold+=pay; player.goldFrozen=0; log(tr(`🔓 囤金到期：返还 ${pay} 金币`,`🔓 Hoard matured: +${pay} gold`)); } } // 守财奴囤金到期
   advanceEnemies();
   if(player.cleared) return;   // 终焉第10波撑过 → onClear 已结算，停止后续处理
@@ -931,6 +1000,8 @@ function resolve(){
   }
   if(player.t1Pending){ player.t1Pending=false; showTierSelect(1); return; }   // 击败50回合Boss → 选一阶
   if(player.t2Pending){ player.t2Pending=false; showTierSelect(2); return; }   // 击败100回合Boss → 选二阶
+  if(player.t3Pending){ player.t3Pending=false; showTierSelect(3); return; }   // 击败200回合Boss → 第二被动
+  if(player.t4Pending){ player.t4Pending=false; showSkillSwap(); return; }     // 击败350回合Boss → 主动换装
   if(pendingLevels) showLevelUp();
 }
 
@@ -1279,7 +1350,10 @@ function dispatchReplayAct(a){
   else if(k==='k'){ activateSkill(); }
   else if(k==='u'){ rollUpgradePool(); applyUpgrade(UPGRADES[a[1]]); updateHUD(); }   // 洗牌消耗等量 RNG（丢弃结果），按录像索引应用
   else if(k==='t'){ const tier=a[1], id=a[2];
-    if(tier===1){ player.tier1=id; } else { player.tier2=id; TIER2[id].f(player); player.hp=Math.min(player.hp,player.maxHp); }
+    if(tier===1){ player.tier1=id; }
+    else if(tier===3){ player.tier2b=id; TIER2[id].f(player); player.hp=Math.min(player.hp,player.maxHp); }
+    else if(tier===4){ player.skill2={id, slot:a[3]}; player.skill2Cd=0; }
+    else { player.tier2=id; TIER2[id].f(player); player.hp=Math.min(player.hp,player.maxHp); }
     player.awaitingTier=0; updateHUD();
   }
 }
@@ -1399,11 +1473,16 @@ function showPlayerInfo(){
   if(p.goldXp) perks.push(tr('金币转经验','Gold→XP'));
   const perkLine = perks.length ? `<div style="text-align:left;font-size:12px;color:var(--gold);margin:8px 0 0">${tr('✦ 特性：','✦ Perks: ')}${perks.join('　')}</div>` : '';
   const t1 = p.tier1?TIER1[p.tier1]:null, t2 = p.tier2?TIER2[p.tier2]:null;
+  const t2b = p.tier2b?TIER2[p.tier2b]:null, s2 = p.skill2&&TIER1[p.skill2.id]?TIER1[p.skill2.id]:null;
   let cls=`<div style="text-align:left;font-size:12px;margin:8px 0 0;padding:8px;background:var(--panel2);border-radius:10px">`;
   if(t1) cls+=`${tr('一阶','T1')}【${L(t1.n)}】${tr('主动','Active')}：${L(t1.skill.short)}（${tr('每','every')} ${t1.skill.cd} ${tr('回合','t')}）<br>`;
   else cls+=tr('击败第50回合 Boss 解锁一阶职业（主动技能）<br>','Beat the turn-50 boss to unlock a tier-1 class (active).<br>');
-  if(t2) cls+=`${tr('二阶','T2')}【${L(t2.n)}】${tr('被动','Passive')}：${L(t2.d)}`;
-  else cls+=tr('击败第100回合 Boss 解锁二阶职业（被动）','Beat the turn-100 boss to unlock a tier-2 class (passive).');
+  if(t2) cls+=`${tr('二阶','T2')}【${L(t2.n)}】${tr('被动','Passive')}：${L(t2.d)}<br>`;
+  else cls+=tr('击败第100回合 Boss 解锁二阶职业（被动）<br>','Beat the turn-100 boss to unlock a tier-2 class (passive).<br>');
+  if(t2b) cls+=`${tr('被动②','P2')}【${L(t2b.n)}】${tr('被动','Passive')}：${L(t2b.d)}<br>`;
+  else cls+=tr('击败第200回合 Boss 获得第二被动<br>','Beat the turn-200 boss for a second passive.<br>');
+  if(s2) cls+=`${tr('换装','Swap')}【${L(s2.skill.name)}】→ ${p.skill2.slot==='heal'?'💊':'💥'}（${tr('每','every')} ${s2.skill.cd} ${tr('回合','t')}）`;
+  else cls+=tr('击败第350回合 Boss 用任意主动替换治疗/炸弹','Beat the turn-350 boss to swap an active into Heal/Bomb.');
   cls+='</div>';
   const card=document.getElementById('card');
   card.innerHTML=`<h2>${rc?`${rc.e} ${L(rc.n)}`:tr('冒险者','Adventurer')}</h2>
@@ -1453,7 +1532,16 @@ function updateHUD(){
   document.getElementById('bonusTxt').textContent=b.join('　');
   const scd=(player.shopCd&&typeof player.shopCd==='object')?player.shopCd:{};
   document.querySelectorAll('.shopBtn[data-buy]').forEach(btn=>{
-    const c=shopCost(btn.dataset.buy), cd=scd[btn.dataset.buy]||0;
+    const key=btn.dataset.buy;
+    if(player.skill2 && player.skill2.slot===key && TIER1[player.skill2.id]){   // 该槽已换成换装主动
+      const sk=TIER1[player.skill2.id].skill;
+      btn.querySelector('span').textContent=`✨${L(sk.name)}`;
+      btn.querySelector('small').textContent=L(sk.short);
+      btn.querySelector('em').textContent = player.skill2Cd>0 ? `⏳${player.skill2Cd}${tr('回合','t')}` : tr('可发动','Ready');
+      btn.disabled = busy || pendingLevels || player.skill2Cd>0;
+      return;
+    }
+    const c=shopCost(key), cd=scd[key]||0;
     btn.querySelector('em').textContent = cd>0 ? `⏳${cd}${tr('回合','t')}` : c+'💰';
     btn.disabled = busy || pendingLevels || cd>0 || player.goldLock>0 || player.gold < c; });
   const sb=document.getElementById('skillBtn'), sk=player.tier1&&TIER1[player.tier1]&&TIER1[player.tier1].skill;
