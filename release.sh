@@ -20,4 +20,7 @@ git push
 # 3) 部署 Pages（正式版 + 开发版同一项目，按域名分发）
 bash deploy-pages.sh
 
+# 4) 创建/更新 GitHub Release（按 const VERSION 打 tag，notes 取 CHANGELOG 对应版本节）
+bash gh-release.sh
+
 echo "✅ 发版完成。"
