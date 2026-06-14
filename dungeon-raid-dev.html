@@ -158,7 +158,7 @@
 (()=>{
 //==================== 配置 ====================
 // 版本号 v主.次.修：小改动改"修"，新Boss/职业改"次"，大版本变更需先确认。页面底部显示。
-const VERSION='v1.21.0';
+const VERSION='v1.21.1';
 const DEV=true;    // 开发版：指向最新开发版本；独立存档 + DEV 标识。正式版在 dungeon-raid.html（DEV=false）
 const REC_API='https://api.dungeonraid.win';   // 录像分享 API（Cloudflare Worker + KV）
 // 带种子随机数（mulberry32）：游戏全程用 rnd() 取代原生随机，配合录制种子可确定性重放
@@ -178,6 +178,18 @@ const DEF = {
   enemy:  {emoji:'👹', color:'#7d3cad', glow:'#c08bff', name:'怪'},
   boss:   {emoji:'👻', color:'#1f6f5c', glow:'#7fffd4', name:'Boss'},
 };
+// 各种族的武器（攻击格图标 + 名称）：人族剑 / 精灵箭 / 矮人斧 / 兽人狼牙棒 / 活死人骨
+const WEAPON={
+  human: {e:'🔪', n:['剑','Sword']},
+  elf:   {e:'🏹', n:['箭','Arrow']},
+  dwarf: {e:'🪓', n:['斧','Axe']},
+  orc:   {e:'🔨', n:['狼牙棒','Mace']},
+  undead:{e:'🦴', n:['骨','Bone']},
+};
+function weap(){ return WEAPON[player&&player.race] || WEAPON.human; }
+function wE(){ return weap().e; }                                       // 武器 emoji（攻击格图标）
+function wN(){ return L(weap().n); }                                    // 武器名（本地化）：剑/箭/斧/狼牙棒/骨
+function wChain(){ return tr(weap().n[0]+'链', weap().n[1]+' chain'); } // 武器链：剑链/箭链/斧链/狼牙棒链/骨链
 const CONNECTABLE=['sword','shield','heart','coin'];
 // 无甲种族（兽人）盾牌是死格，从生成池里移除
 function connectablePool(){ return (player&&player.noArmor) ? ['sword','heart','coin'] : CONNECTABLE; }
@@ -890,7 +902,7 @@ function draw(){
     } else {
       ctx.font=Math.floor(TILE*0.46)+'px '+EMOJI_FONT;
       ctx.textAlign='center'; ctx.textBaseline='middle';
-      ctx.fillText(isPoisonHeart?'💚':d.emoji, cx, cy);   // 毒心显示绿心
+      ctx.fillText(t.type==='sword'?wE():(isPoisonHeart?'💚':d.emoji), cx, cy);   // 攻击格按种族武器；毒心显示绿心
     }
   }
   drawBossFx();   // Boss 入场冲击环（叠在棋子之上）
@@ -988,7 +1000,7 @@ function endDrag(e){
   if(selection.length>=2){
     // 剑链必须含至少一把剑（剑是武器）：从怪起手却没把任何剑连进来 → 不算攻击，取消且不消耗回合
     if(selection[0].type==='sword' && !selection.some(s=>{ const t=grid[s.r][s.c]; return t&&t.type==='sword'; })){
-      log(tr('⚔️ 没把剑连进来，无法攻击——剑才是你的武器！','⚔️ No sword in the chain — link a 🔪 to attack!'));
+      log(tr(`⚔️ 没把${wN()}连进来，无法攻击——${wN()}才是你的武器！`,`⚔️ No ${wN()} in the chain — link a ${wE()} to attack!`));
     } else resolve();
   }
   else if(selection.length===1 && !dragExtended){ // 真·轻触单格（从未连出）→ 显示说明；拖出又退回第一格则只取消，不弹说明
@@ -1096,7 +1108,7 @@ function resolve(){
     let blood=0;
     if(player.bloodthirst && targets.length){ blood=gainHeal(targets.length*3); player.bloodthirst=0; } // 斗士嗜血
     const comboTxt=combo>1?tr(` 连击×${combo.toFixed(2)}`,` combo×${combo.toFixed(2)}`):'';
-    msg=`🔪×${nS}${comboTxt}` + (targets.length
+    msg=`${wE()}×${nS}${comboTxt}` + (targets.length
       ? tr(` 直击 ${targets.length} 只怪 → ${dmg} 伤害`,` hit ${targets.length} → ${dmg} dmg`) + (kills?tr(`，击杀 ${kills} 只👹`,`, ${kills} killed`):'') + (blood?tr(`，回血 ${blood}`,`, +${blood} HP`):'')
       : tr('（未串到怪）','(no enemy hit)'));
   } else {
@@ -1570,11 +1582,11 @@ document.querySelectorAll('#replayBar .rbSpd').forEach(b=>{ b.onclick=()=>{ repl
 //==================== 方块说明（点击查看）====================
 function tileInfo(t){
   const p=player;
-  if(t.type==='sword') return {icon:'🔪', title:tr('剑 · 攻击','Sword · Attack'),
-    desc:tr('连接 2 把及以上的剑攻击怪物。剑链可直接拖过 👹，串到的怪各自独立吃满伤害。','Link 2+ swords to attack. Sword chains pass straight through 👹 — each linked enemy takes the full damage.'),
-    rows:[ [tr('每把剑威力','Power per sword'), `×${p.weaponPower}`],
-      [tr('固定剑伤','Flat damage'), `+${p.swordFlat}`],
-      [tr('多连奖励','Combo bonus'), tr(`每超出 2 把 +${Math.round(15*(p.comboMult||1))}%`,`+${Math.round(15*(p.comboMult||1))}% per sword over 2`)],
+  if(t.type==='sword') return {icon:wE(), title:tr(`${wN()} · 攻击`,`${wN()} · Attack`),
+    desc:tr(`连接 2 个及以上的${wN()}攻击怪物。${wChain()}可直接拖过 👹，串到的怪各自独立吃满伤害。`,`Link 2+ ${wN()} tiles to attack. A ${wChain()} passes straight through 👹 — each linked enemy takes the full damage.`),
+    rows:[ [tr(`每个${wN()}威力`,`Power per ${wN()}`), `×${p.weaponPower}`],
+      [tr('固定伤害','Flat damage'), `+${p.swordFlat}`],
+      [tr('多连奖励','Combo bonus'), tr(`每超出 2 个 +${Math.round(15*(p.comboMult||1))}%`,`+${Math.round(15*(p.comboMult||1))}% per tile over 2`)],
       [tr('伤害加成','Damage bonus'), ((p.lowHpDmg?tr('越缺血越猛','low HP↑'):'')+(p.titan?tr(` ·巨力+${Math.floor(p.maxHp/12)}`,` ·Titan+${Math.floor(p.maxHp/12)}`):'')).trim()||'—'] ]};
   if(t.type==='shield') return {icon:'🔰', title:tr('盾 · 减伤','Shield · Armor'),
     desc:tr('连接盾累积「护甲进度」，攒满就 +1 护甲（永久减伤）。受击时先用护甲抵消，剩下的才掉血，但每次至少掉 1 滴。','Linking shields fills armor progress; fill it for +1 permanent armor. Armor soaks each hit, but you always lose at least 1 HP.'),
@@ -1639,7 +1651,7 @@ function showPlayerInfo(){
     [tr('🔰 护甲(减伤)','🔰 Armor'), p.noArmor?tr('无甲','none'):`${p.armor}${p.armorMult>1?` ×${p.armorMult}`:''}　${p.shieldXp}/${an}`],
     [tr('📈 等级 · 经验','📈 Level · XP'), `Lv.${p.level} · ${p.xp}/${xpNeeded(p.level)}`],
     [tr('💰 金币 · 回合','💰 Gold · Turn'), `${p.gold} · ${p.turns}`],
-    [tr('🔪 剑威力','🔪 Sword power'), `×${p.weaponPower}${p.swordFlat?` +${p.swordFlat}`:''}${p.swordMult!=1?` ·总伤×${p.swordMult}`:''}`],
+    [tr(`${wE()} ${wN()}威力`,`${wE()} ${wN()} power`), `×${p.weaponPower}${p.swordFlat?` +${p.swordFlat}`:''}${p.swordMult!=1?` ·总伤×${p.swordMult}`:''}`],
     [tr('🔢 连击加成','🔢 Combo'), `+${Math.round(15*(p.comboMult||1))}%/${tr('个','tile')}`],
     [tr('💗 每心回复','💗 Heal/heart'), `+${p.healPerHeart}`],
     [tr('💰 每金币','💰 Gold/coin'), `+${p.goldPerCoin}`],
@@ -1706,7 +1718,7 @@ function updateHUD(){
     if(player.tier1) id+=` · ${L(TIER1[player.tier1].n)}`;
     if(player.tier2) id+=` · ${L(TIER2[player.tier2].n)}`;
     b.push(id); }
-  b.push(`🔪×${player.weaponPower}${player.swordFlat?`+${player.swordFlat}`:''}`);
+  b.push(`${wE()}×${player.weaponPower}${player.swordFlat?`+${player.swordFlat}`:''}`);
   b.push(player.noArmor?tr('无甲','No armor'):`🔰${player.armorPerShield}`);
   b.push(`💗${player.healPerHeart}`);
   b.push(`💰${player.goldPerCoin}`);
