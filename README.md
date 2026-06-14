@@ -129,7 +129,8 @@
 - 🩸 **低血预警**：生命越低，屏幕边缘越红；危急时呼吸闪烁，生命条同步闪烁。
 - ☠️ **死亡报告**：倒下时列出致命回合各伤害来源的占比。
 - 🎬 **操作录制 / 回放**：自动记录每一局（种子 + 操作序列，确定性重放，一局约 2–4 KB）。死亡后可 **回放本局 / 复制 / 导出 / 🔗分享链接**；开始界面可 **回放上一局** 或 **粘贴导入** 别人的录像。回放支持暂停与 1×/2×/4× 调速。
-- 🏆 **云排行榜 + 百分位（仅正式版 `dungeonraid.win`）**：死亡后显示你在**总榜**和**本种族榜**的名次与百分位。按**坚持回合**排名、**按版本分桶**统计；录像可确定性重放，榜单前列每小时自动重放校验防作弊。开发版不参与排名。
+- 🏆 **云排行榜 + 百分位（仅正式版 `dungeonraid.win`）**：死亡后显示你在**总榜**和**本种族榜**的名次与百分位。按**坚持回合**排名、**按版本分桶**统计；录像可确定性重放，榜单**只展示已重放验证的成绩**，前列每小时自动重放校验防作弊。开发版不参与排名。
+- 🏅 **人类榜 / AI 榜**：成绩按 `agent`(human / ai)分流、互不混排。游戏内「🏆 排行榜」面板可在 **人类 / AI** 与 **闯关榜 / 破关榜** 间切换查看 Top 10。真人对局上报人类榜，AI/机器人自报 `ai` 进 AI 榜（后端 `/top?agent=`、`/clearboard?agent=`，私有改判接口 `/classify`）。写入端点按 IP 限流防刷。
 
 ### 🛠️ 开发 / 平衡测试
 
@@ -275,7 +276,8 @@ About every **10 turns** a random boss appears; beating one rewards 💰+20 and 
 - 🩸 **Low-HP warning**: the screen edges redden as health drops, pulsing when critical, with the HP bar blinking too.
 - ☠️ **Death report**: when you fall, it lists each damage source's share of the killing turn.
 - 🎬 **Record / replay**: every run is recorded (seed + input sequence — deterministic replay, ~2–4 KB per run). After death you can **replay / copy / export / 🔗 share-link** the recording; the start screen offers **replay last run** or **paste-import** someone else's. Replay supports pause and 1×/2×/4× speed.
-- 🏆 **Cloud leaderboard + percentile (Release build `dungeonraid.win` only)**: after death, see your rank and percentile on the **overall** and **per-race** boards. Ranked by **turns survived**, **bucketed by version**; recordings are deterministically replayed, and the top of the board is re-verified hourly to block cheats. The Dev build does not participate in ranking.
+- 🏆 **Cloud leaderboard + percentile (Release build `dungeonraid.win` only)**: after death, see your rank and percentile on the **overall** and **per-race** boards. Ranked by **turns survived**, **bucketed by version**; recordings are deterministically replayed, the board **shows verified scores only**, and the top is re-verified hourly to block cheats. The Dev build does not participate in ranking.
+- 🏅 **Human / AI boards**: scores are split by `agent` (human / ai) and never mixed. The in-game "🏆 Leaderboard" panel toggles between **Human / AI** and **Survival / Clears** Top 10. Real play reports to the human board; AI/bots self-report `ai` (backend `/top?agent=`, `/clearboard?agent=`, private reclassify endpoint `/classify`). Write endpoints are IP-rate-limited.
 
 ### 🛠️ Development / Balance Testing
 

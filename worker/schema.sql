@@ -12,6 +12,7 @@ CREATE TABLE scores (
   gold     INTEGER NOT NULL,
   source   TEXT NOT NULL DEFAULT 'play',  -- play=正式版上报 | share=分享触发的待验证
   cleared  INTEGER NOT NULL DEFAULT 0,    -- 1=破关（撑过终焉10波），上破关榜（按最低等级）
+  agent    TEXT NOT NULL DEFAULT 'human', -- human | ai（提交自报，日后黑盒可改判）；人类榜/AI榜分流
   verified INTEGER NOT NULL DEFAULT 0,    -- 0 待验证 | 1 已验证真实 | -1 验证失败(作弊/伪造)
   created  INTEGER NOT NULL
 );
@@ -19,3 +20,5 @@ CREATE INDEX idx_rank  ON scores (version, turns DESC, level DESC, gold DESC);
 CREATE INDEX idx_race  ON scores (version, race, turns DESC);
 CREATE INDEX idx_pend  ON scores (verified, turns DESC);
 CREATE INDEX idx_clear ON scores (cleared, version, level ASC, turns ASC);
+CREATE INDEX idx_rank_agent  ON scores (agent, version, turns DESC, level DESC, gold DESC);
+CREATE INDEX idx_clear_agent ON scores (agent, cleared, version, level ASC, turns ASC);

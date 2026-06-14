@@ -5,7 +5,9 @@
 //   GET  /top?race=&n=        排行榜（仅 source=play 且已重放验证 verified=1；百分位按 verified>=0 近似）
 //   GET  /pending?k=secret    待验证的高分录像（给定时任务）
 //   POST /verify?k=secret     回写验证结果 { id, ok, turns?,level?,gold? }
+//   POST /classify?k=secret   私有黑盒改判 { id, agent:'human'|'ai' }（人类榜↔AI榜）
 // 排名：回合↓ → 等级↓ → 金币↓。百分位按回合近似。
+// agent 维度：human | ai（提交自报，默认 human；日后黑盒可改判）。/top、/clearboard 按 ?agent= 分人类榜/AI榜。
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
@@ -29,12 +31,12 @@ async function cnt(env, where, ...bind) {
   return row ? row.c : 0;
 }
 // 百分位：超过了多少比例（按回合近似）。只在【同版本】内统计，不同版本不混排。
-async function ranking(env, version, race, turns) {
-  const base = "source='play' AND verified>=0 AND version=?";
-  const tot = await cnt(env, base, version);
-  const better = await cnt(env, base + ' AND turns>?', version, turns);
-  const rtot = await cnt(env, base + ' AND race=?', version, race);
-  const rbetter = await cnt(env, base + ' AND race=? AND turns>?', version, race, turns);
+async function ranking(env, version, race, turns, agent = 'human') {
+  const base = "source='play' AND verified>=0 AND agent=? AND version=?";   // 人类榜/AI榜分开计名次
+  const tot = await cnt(env, base, agent, version);
+  const better = await cnt(env, base + ' AND turns>?', agent, version, turns);
+  const rtot = await cnt(env, base + ' AND race=?', agent, version, race);
+  const rbetter = await cnt(env, base + ' AND race=? AND turns>?', agent, version, race, turns);
   const pct = (b, t) => t > 0 ? Math.round((1 - b / t) * 1000) / 10 : 100;
   return {
     version,
@@ -43,14 +45,14 @@ async function ranking(env, version, race, turns) {
   };
 }
 // 破关榜名次：按【最低破关等级】，level 越低越前。rank = 比我等级更低的 + 1。
-async function clearRanking(env, version, race, level) {
-  const base = "cleared=1 AND verified=1 AND version=?";   // 仅计已重放验证的真破关，伪造的待验证记录不入榜/不计名次
-  const tot = await cnt(env, base, version);
-  const better = await cnt(env, base + ' AND level<?', version, level);
-  const worse = await cnt(env, base + ' AND level>?', version, level);
-  const rtot = await cnt(env, base + ' AND race=?', version, race);
-  const rbetter = await cnt(env, base + ' AND race=? AND level<?', version, race, level);
-  const rworse = await cnt(env, base + ' AND race=? AND level>?', version, race, level);
+async function clearRanking(env, version, race, level, agent = 'human') {
+  const base = "cleared=1 AND verified=1 AND agent=? AND version=?";   // 仅计已重放验证的真破关；人类榜/AI榜分开
+  const tot = await cnt(env, base, agent, version);
+  const better = await cnt(env, base + ' AND level<?', agent, version, level);
+  const worse = await cnt(env, base + ' AND level>?', agent, version, level);
+  const rtot = await cnt(env, base + ' AND race=?', agent, version, race);
+  const rbetter = await cnt(env, base + ' AND race=? AND level<?', agent, version, race, level);
+  const rworse = await cnt(env, base + ' AND race=? AND level>?', agent, version, race, level);
   const pct = (w, t) => t > 0 ? Math.round((w / t) * 1000) / 10 : 100;   // 我比 w 个更强（等级更高的）领先
   return {
     version,
@@ -108,12 +110,13 @@ export default {
       if (!d || !validRec(d.rec)) return json({ error: 'invalid' }, 400);
       const turns = turnCount(d.rec);                 // 回合以录像动作数为准，防止伪报
       const level = d.level | 0, gold = d.gold | 0, race = d.rec.race, version = d.rec.ver || '';
+      const agent = d.agent === 'ai' ? 'ai' : 'human';   // 自报，非 'ai' 一律按人类
       const id = shortId();
       await env.REC.put(id, JSON.stringify(d.rec));
-      await env.DB.prepare("INSERT INTO scores(id,version,race,turns,level,gold,source,verified,created) VALUES(?,?,?,?,?,?,'play',0,?)")
-        .bind(id, version, race, turns, level, gold, Date.now()).run();
-      const rk = await ranking(env, version, race, turns);
-      return json({ id, turns, ...rk });
+      await env.DB.prepare("INSERT INTO scores(id,version,race,turns,level,gold,source,agent,verified,created) VALUES(?,?,?,?,?,?,'play',?,0,?)")
+        .bind(id, version, race, turns, level, gold, agent, Date.now()).run();
+      const rk = await ranking(env, version, race, turns, agent);
+      return json({ id, turns, agent, ...rk });
     }
 
     // POST /clear —— 正式版破关上报（撑过终焉10波）。按最低破关等级排名。
@@ -125,26 +128,28 @@ export default {
       const turns = turnCount(d.rec);
       if (turns < 510) return json({ error: 'not a clear (need >=510 turns)' }, 422);
       const level = d.level | 0, race = d.rec.race, version = d.rec.ver || '';
+      const agent = d.agent === 'ai' ? 'ai' : 'human';   // 自报，非 'ai' 一律按人类
       const id = shortId();
       await env.REC.put(id, JSON.stringify(d.rec));
-      await env.DB.prepare("INSERT INTO scores(id,version,race,turns,level,gold,source,cleared,verified,created) VALUES(?,?,?,?,?,0,'play',1,0,?)")
-        .bind(id, version, race, turns, level, Date.now()).run();
-      const rk = await clearRanking(env, version, race, level);
-      return json({ id, level, ...rk });
+      await env.DB.prepare("INSERT INTO scores(id,version,race,turns,level,gold,source,cleared,agent,verified,created) VALUES(?,?,?,?,?,0,'play',1,?,0,?)")
+        .bind(id, version, race, turns, level, agent, Date.now()).run();
+      const rk = await clearRanking(env, version, race, level, agent);
+      return json({ id, level, agent, ...rk });
     }
 
     // GET /clearboard?version=&race=&n= —— 破关榜（按最低破关等级 ASC）
     if (req.method === 'GET' && p === '/clearboard') {
       const race = url.searchParams.get('race');
       const version = url.searchParams.get('version');
+      const agent = url.searchParams.get('agent') === 'ai' ? 'ai' : 'human';   // 默认人类榜
       const n = Math.min(50, Math.max(1, +(url.searchParams.get('n') || 10)));
-      let where = "cleared=1 AND verified=1", binds = [];   // 只展示已重放验证的真破关
+      let where = "cleared=1 AND verified=1 AND agent=?", binds = [agent];   // 只展示已重放验证的真破关
       if (version) { where += ' AND version=?'; binds.push(version); }
       if (race) { where += ' AND race=?'; binds.push(race); }
       binds.push(n);
       const { results } = await env.DB.prepare(
         `SELECT id,version,race,level,turns,verified FROM scores WHERE ${where} ORDER BY level ASC, turns ASC LIMIT ?`).bind(...binds).all();
-      return json({ clears: results || [] });
+      return json({ clears: results || [], agent });
     }
 
     // GET /top?version=&race=&n=  —— 榜单（按版本过滤，不传则只看有版本号的最新成绩）
@@ -152,22 +157,32 @@ export default {
       const race = url.searchParams.get('race');
       const version = url.searchParams.get('version');
       const n = Math.min(50, Math.max(1, +(url.searchParams.get('n') || 10)));
+      const agent = url.searchParams.get('agent') === 'ai' ? 'ai' : 'human';   // 默认人类榜
       const cols = 'id,version,race,turns,level,gold,verified';
       const order = 'ORDER BY turns DESC, level DESC, gold DESC LIMIT ?';
-      let where = "source='play' AND verified=1", binds = [];   // 榜单只展示已重放验证的成绩（伪造在验证前不可见，验证失败转 -1 永不上榜）；百分位 ranking() 仍按 verified>=0 给即时近似排名
+      let where = "source='play' AND verified=1 AND agent=?", binds = [agent];   // 榜单只展示已重放验证的成绩（伪造在验证前不可见，验证失败转 -1 永不上榜）；百分位 ranking() 仍按 verified>=0 给即时近似排名
       if (version) { where += ' AND version=?'; binds.push(version); }
       if (race) { where += ' AND race=?'; binds.push(race); }
       binds.push(n);
       const { results } = await env.DB.prepare(`SELECT ${cols} FROM scores WHERE ${where} ${order}`).bind(...binds).all();
-      return json({ top: results || [] });
+      return json({ top: results || [], agent });
     }
 
     // GET /pending?k= —— 最强的未验证录像（含 share 触发），交给定时任务
     if (req.method === 'GET' && p === '/pending') {
       if (url.searchParams.get('k') !== env.VERIFY_SECRET) return json({ error: 'forbidden' }, 403);
       const { results } = await env.DB.prepare(
-        "SELECT id,version,race,turns,level,gold,source,cleared FROM scores WHERE verified=0 ORDER BY turns DESC LIMIT 50").all();
+        "SELECT id,version,race,turns,level,gold,source,cleared,agent FROM scores WHERE verified=0 ORDER BY turns DESC LIMIT 50").all();
       return json({ pending: results || [] });
+    }
+
+    // POST /classify?k= —— 私有黑盒改判某条成绩的 agent（human↔ai）。仅密钥可调。
+    if (req.method === 'POST' && p === '/classify') {
+      if (url.searchParams.get('k') !== env.VERIFY_SECRET) return json({ error: 'forbidden' }, 403);
+      let d; try { d = JSON.parse(await req.text()); } catch { return json({ error: 'invalid json' }, 400); }
+      if (!d || !d.id || (d.agent !== 'ai' && d.agent !== 'human')) return json({ error: 'invalid' }, 400);
+      await env.DB.prepare("UPDATE scores SET agent=? WHERE id=?").bind(d.agent, d.id).run();
+      return json({ ok: true, id: d.id, agent: d.agent });
     }
 
     // POST /verify?k= —— 回写验证结果
