@@ -40,7 +40,7 @@
   | 💰 金币 | 赚取金币，用于商店 |
   | 👹 怪 | 敌人 |
 
-- **剑链可以直接拖过 👹**，串到的怪会被攻击；每只串到的怪**独立吃满**整条剑链的伤害，伤害够高就能点杀。
+- **剑链可以直接拖过 👹**，串到的怪会被攻击；每只串到的怪**独立吃满**整条剑链的伤害，伤害够高就能点杀。剑是武器，**剑链里至少要连进一把剑**才能造成伤害（只连怪、不连剑不算攻击，也不消耗回合）。
 - 拖动时，会被这一刀杀死的怪会**实时变成 💀** 预览。
 
 ### 👹 怪物信息
@@ -76,6 +76,7 @@
 3. **第 100 回合 Boss**：击败它可转入**二阶职业**（被动），同样从本种族的 2 个里二选一。
 4. **第 200 回合 Boss**：击败它可再获得**本种族另一项被动**（至此集齐本种族两个被动）。
 5. **第 350 回合 Boss**：击败它可从**全种族全职业的主动技能**里任选一个，**替换掉商店的 💊治疗 或 💥炸弹 槽**——该槽位变成施放此主动（带技能冷却，可跨种族搭配）。
+6. **第 500 回合 · 终焉之主 👑**：终局降临，是否破关在此一举（见下）。
 
 > 用剑或炸弹击败 Boss 都能触发转职。
 
@@ -123,6 +124,17 @@
 | 🧙 召唤师 Summoner | 剑 / 炸弹 | 每回合把一个非怪棋子变成一只怪，拖得越久怪越多 |
 | 🦹 小偷 Thief | 剑 / 炸弹 | 现身即偷走一定比例金币（一阶 20%、二阶 40%…）；倒计时内击败夺回，让它逃走则永久失去 |
 | 🧟 僵尸 Zombie | 剑 / 炸弹 | 现身即让你感染尸毒（血条变绿），每回合按生命百分比掉血（一阶 10%、二阶 20%…，无视护甲）；击败即解除感染 |
+
+> Boss 入场时会有**扩散冲击环 + 闪光**特效（普通 Boss 红、终焉之主金），一眼可辨。
+
+### 👑 终局：终焉之主 与 破关
+
+到 **第 500 回合**，终局 Boss **终焉之主 👑** 降临。它**本身无血、无攻击、打不掉**，但**每回合**会把若干非怪/非 Boss 棋子变成随机 Boss——**第 1 波 1 个、第 2 波 2 个……第 10 波 10 个**（浪潮 Boss 为基础档、可清）。
+
+- 撑满 **10 波**还活着 → **破关！** 🏆（约第 511 回合）
+- 棋盘被 Boss 淹没、再无可行连线 → **判负**
+
+破关后有故事化祝贺页；正式版会把破关上报**破关榜**（按**最低破关等级**排名，越低越强）。
 
 ### ✨ 其他特性
 
@@ -190,7 +202,7 @@ The two builds keep **separate, non-overwriting saves** (Dev uses its own localS
   | 💰 Coin | Earn gold for the shop |
   | 👹 Enemy | A monster |
 
-- A **sword chain can be dragged straight through 👹**. Every enemy on the chain takes the **full** chain damage **independently** — enough damage means an instant kill.
+- A **sword chain can be dragged straight through 👹**. Every enemy on the chain takes the **full** chain damage **independently** — enough damage means an instant kill. The sword is your weapon, so a chain must include **at least one 🔪** to deal damage (chaining only monsters with no sword isn't an attack and costs no turn).
 - While dragging, any enemy that **would die** turns into 💀 as a live preview.
 
 ### 👹 Enemy Info
@@ -224,6 +236,9 @@ Pick a race at the start. Each has a unique **trait** and a matching **weakness*
 1. **Start**: choose a race.
 2. **Turn-50 boss**: beat it to advance to a **Tier-1 class** (active skill), picking 1 of your race's 2 options.
 3. **Turn-100 boss**: beat it to advance to a **Tier-2 class** (passive), again 1 of your race's 2 options.
+4. **Turn-200 boss**: beat it to gain **your race's other passive** (now you have both of your race's passives).
+5. **Turn-350 boss**: beat it to pick **any active skill from any race/class** and **replace your 💊Heal or 💥Bomb shop slot** — that slot now casts the active (with the skill's cooldown; cross-race builds allowed).
+6. **Turn-500 · the Overlord 👑**: the final trial — clear or fall (see below).
 
 > Beating a boss with either a sword chain or a bomb triggers the advance.
 
@@ -271,6 +286,17 @@ About every **10 turns** a random boss appears; beating one rewards 💰+20 and 
 | 🧙 Summoner | Sword / Bomb | Turns a non-enemy tile into an enemy each turn — the longer it lives, the more enemies |
 | 🦹 Thief | Sword / Bomb | Steals a share of gold on arrival (20% at Lv1, 40% at Lv2…); kill it before its timer to recover, let it flee and the gold is gone forever |
 | 🧟 Zombie | Sword / Bomb | Infects you on arrival (HP bar turns green); each turn you lose a % of HP (10% at Lv1, 20% at Lv2…, ignoring armor); kill it to cure |
+
+> Each boss arrives with a **shockwave ring + flash** effect (crimson for normal bosses, gold for the Overlord), so you never miss one.
+
+### 👑 Endgame: the Overlord & Clearing
+
+At **turn 500**, the final boss — the **Overlord 👑** — descends. It has **no HP, no attack, and cannot be killed**, but **every turn** it turns several non-enemy tiles into random bosses — **1 on wave 1, 2 on wave 2 … 10 on wave 10** (wave bosses are base-tier and killable).
+
+- Survive all **10 waves** → **CLEARED!** 🏆 (around turn 511)
+- Overrun by bosses with no legal move left → **defeat**
+
+Clearing shows a story-flavored congratulations screen; the Release build reports clears to the **clear board**, ranked by **lowest clear level** (lower = stronger).
 
 ### ✨ Other Features
 
