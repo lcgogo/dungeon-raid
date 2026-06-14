@@ -2,7 +2,7 @@
 //   POST /rec        存录像 → { id }（分享用；<30回合拒收；回合远超榜单则标记待验证）
 //   GET  /rec/:id    取录像
 //   POST /score      正式版死亡上报 { race,turns,level,gold,rec } → 入库 + 返回总榜/种族榜百分位
-//   GET  /top?race=&n=        排行榜（仅 source=play 且未被判作弊）
+//   GET  /top?race=&n=        排行榜（仅 source=play 且已重放验证 verified=1；百分位按 verified>=0 近似）
 //   GET  /pending?k=secret    待验证的高分录像（给定时任务）
 //   POST /verify?k=secret     回写验证结果 { id, ok, turns?,level?,gold? }
 // 排名：回合↓ → 等级↓ → 金币↓。百分位按回合近似。
@@ -63,6 +63,13 @@ export default {
   async fetch(req, env) {
     if (req.method === 'OPTIONS') return new Response(null, { headers: CORS });
     const url = new URL(req.url), p = url.pathname;
+
+    // 写入类端点按来源 IP 限流（每 IP 20 次/60s），挡刷榜/批量伪造。绑定缺失时（本地/未配）跳过。
+    if (req.method === 'POST' && (p === '/rec' || p === '/score' || p === '/clear') && env.WRITE_LIMITER) {
+      const ip = req.headers.get('cf-connecting-ip') || 'unknown';
+      const { success } = await env.WRITE_LIMITER.limit({ key: ip });
+      if (!success) return json({ error: 'too many requests, slow down' }, 429);
+    }
 
     // GET /rec/:id
     const m = p.match(/^\/rec\/([a-z0-9]{4,16})$/);
@@ -147,7 +154,7 @@ export default {
       const n = Math.min(50, Math.max(1, +(url.searchParams.get('n') || 10)));
       const cols = 'id,version,race,turns,level,gold,verified';
       const order = 'ORDER BY turns DESC, level DESC, gold DESC LIMIT ?';
-      let where = "source='play' AND verified>=0", binds = [];
+      let where = "source='play' AND verified=1", binds = [];   // 榜单只展示已重放验证的成绩（伪造在验证前不可见，验证失败转 -1 永不上榜）；百分位 ranking() 仍按 verified>=0 给即时近似排名
       if (version) { where += ' AND version=?'; binds.push(version); }
       if (race) { where += ' AND race=?'; binds.push(race); }
       binds.push(n);

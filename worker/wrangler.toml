@@ -21,3 +21,10 @@ database_id = "eea75d9c-bce5-433a-81a5-10c946a664fd"
 migrations_dir = "migrations"
 
 # 注：验证密钥 VERIFY_SECRET 用 `wrangler secret put VERIFY_SECRET` 设置（不写在此文件）
+
+# 限流：写入类端点（/rec /score /clear）按来源 IP 限速，挡刷榜/批量伪造。period 仅支持 10 或 60 秒。
+[[unsafe.bindings]]
+name = "WRITE_LIMITER"
+type = "ratelimit"
+namespace_id = "1001"
+simple = { limit = 20, period = 60 }
