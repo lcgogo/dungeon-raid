@@ -10,6 +10,7 @@
 - 版本号 `v主.次.修`：小改/修 bug/调参 → 修；新 Boss/职业/机制 → 次；大重构 → 主（大版本先问用户）。页面 `const VERSION` 与 CHANGELOG 同步。
 - **两个 HTML，仅 `const DEV` 一行不同**：开发版 `dungeon-raid-dev.html`（DEV=true），正式版 `dungeon-raid.html`（DEV=false）。
 - **默认只改开发版**；正式版晋级需用户明确指示，用 `bash release.sh`（同步 dev→prod + 提交 + push + 部署 Pages + **创建/更新 GitHub Release**，提交说明读 `/tmp/dr_commit_msg.txt`）。
+- **发正式版要二次确认**：所有改动先进 dev（可 commit）→ **跑回测、呈回测报告** → **等用户明确确认**后才 `bash release.sh`。不要改完就自动推 prod。
 - **每次推送/发版都要更新 GitHub Release**：`release.sh` 末尾自动调 `gh-release.sh`——按正式版 `const VERSION` 打 tag、release notes 取 CHANGELOG 对应版本节（幂等：已存在则更新）。回填历史版本：`bash gh-release.sh vX.Y.Z`。若是手动推送（没走 release.sh），也补跑一次 `bash gh-release.sh`。
 - 固定顺序：**写完 CHANGELOG 新版本节后，紧接着更新 README（中英两侧）**，再一起提交——别只写 changelog 漏掉 readme。提交免确认、用多段 `-m`。
 
