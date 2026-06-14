@@ -453,9 +453,12 @@ function showClassSelect(){
     <div style="text-align:left;font-size:11.5px;line-height:1.6;background:var(--panel2);border-radius:10px;padding:9px 11px;margin-bottom:10px">
       <span style="color:var(--gold);font-weight:700">🕯️ ${tr('地牢之下','Beneath the Dungeon')}</span>
       <span style="color:var(--dim)"> ${tr('地心封印着「终焉之主」，历代冒险者潜入地牢、无人生还——轮到你了。拖动连接相邻同类符文：🔪斩怪、🔰凝甲、💗回血、💰补给；怪物倒计时归零出手，每 50 回合 Boss 强一档，撑到第 500 回合破关。','The Overlord lies sealed at the world’s core; generations went in, none returned — your turn now. Link adjacent matching runes: 🔪 slay, 🔰 armor, 💗 heal, 💰 supplies. Bosses grow every 50 turns; survive to turn 500 to clear.')}</span>
-      <div style="display:flex;align-items:center;justify-content:center;gap:2px;font-size:21px;margin:8px 0 3px">
-        <span>🔪</span><span style="color:var(--gold);font-size:15px">━</span><span>👹</span><span style="color:var(--gold);font-size:15px">━</span><span>🔪</span></div>
-      <div style="color:var(--dim);text-align:center;font-size:10.5px">${tr('🔪剑链可直接穿过 👹 怪物——把剑和怪串成一条线即可攻击（每只怪独立吃满整条伤害）。<br>💡 <b>轻点任意方块</b>查看玩法说明与当前数值。','A 🔪 sword chain runs straight through 👹 — link swords and monsters into one line to attack (each takes full chain damage).<br>💡 <b>Tap any tile</b> for how it works and its current values.')}</div>
+      <div style="display:flex;justify-content:center;margin:8px 0 3px">
+        <div style="display:inline-grid;grid-template-columns:auto auto auto;justify-items:center;align-items:center;font-size:19px;column-gap:3px;row-gap:0">
+          <span>🔪</span><span></span><span></span>
+          <span style="color:var(--gold);font-size:15px">↘</span><span>👹</span><span><span style="color:var(--gold);font-size:15px">━</span>🔪</span>
+        </div></div>
+      <div style="color:var(--dim);text-align:center;font-size:10.5px">${tr('🔪剑链可穿过 👹 怪物——<b>横、竖、斜 8 向</b>都能连，串成一条线即可攻击（每只怪独立吃满整条伤害）。<br>💡 <b>轻点任意方块</b>查看玩法说明与当前数值。','A 🔪 sword chain runs through 👹 — connect in <b>any of 8 directions (incl. diagonals)</b>; each monster takes the full chain damage.<br>💡 <b>Tap any tile</b> for how it works and its current values.')}</div>
     </div>`;
   // ▶ START（主按钮）→ 选种族页
   const start=document.createElement('button'); start.className='btn';
