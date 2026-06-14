@@ -64,7 +64,7 @@
 
 | 种族 | 特性 | 削弱 |
 |---|---|---|
-| 🧑 人类 Human | 无（全能基准，适合新手） | 无 |
+| 🧑 人族 Human | 无（全能基准，适合新手） | 无 |
 | 🧝 精灵 Elf | 连击加成翻倍（每多连 1 个 +30%） | 「强健体魄」升级只 +3 生命上限 |
 | 🧔 矮人 Dwarf | 护甲减伤翻倍（每点护甲抵 2 点） | 剑威力 −0.3 |
 | 🧌 兽人 Orc | 「强健体魄」升级时生命上限翻倍（每次 +12） | **无甲**——永远无法获得护甲（盾牌从棋盘移除） |
@@ -86,8 +86,8 @@
 
 | 种族 | 职业 | 技能 | 效果 |
 |---|---|---|---|
-| 🧑 人类 | 🛡️ 骑士 Knight | 圣盾 Aegis | 本回合免疫所有伤害 |
-| 🧑 人类 | 💗 牧师 Priest | 祝福 Blessing | 清掉全场的心，每颗转 3 点经验 |
+| 🧑 人族 | 🛡️ 骑士 Knight | 圣盾 Aegis | 本回合免疫所有伤害 |
+| 🧑 人族 | 💗 牧师 Priest | 祝福 Blessing | 清掉全场的心，每颗转 3 点经验 |
 | 🧝 精灵 | 🏹 游侠 Ranger | 箭雨 Arrow Rain | 对全场怪造成「剑威力 ×2」的伤害 |
 | 🧝 精灵 | 💰 盗贼 Rogue | 点金 Gold Touch | 把场上所有的剑变成金币 |
 | 🧔 矮人 | 🔰 锻造师 Blacksmith | 锻甲 Forge Armor | 吞下全场的盾，全部转为护甲进度 |
@@ -101,8 +101,8 @@
 
 | 种族 | 职业 | 效果 |
 |---|---|---|
-| 🧑 人类 | 不朽 Immortal | 治疗溢出的部分转为永久生命上限 |
-| 🧑 人类 | 将军 General | 升级时改为**四选一** |
+| 🧑 人族 | 不朽 Immortal | 治疗溢出的部分转为永久生命上限 |
+| 🧑 人族 | 将军 General | 升级时改为**四选一** |
 | 🧝 精灵 | 神射手 Sharpshooter | 剑链每击杀一只怪额外 +2 经验 |
 | 🧝 精灵 | 影袭 Shadow | 炸弹冷却永久缩为 2 回合 |
 | 🧔 矮人 | 爆破手 Demolitionist | 炸弹伤害更高，但花费金币更多 |
@@ -145,7 +145,7 @@
 - ☠️ **死亡报告**：倒下时列出致命回合各伤害来源的占比。
 - 🎬 **操作录制 / 回放**：自动记录每一局（种子 + 操作序列，确定性重放，一局约 2–4 KB）。死亡后可 **回放本局 / 复制 / 导出 / 🔗分享链接**；开始界面可 **回放上一局** 或 **粘贴导入** 别人的录像。回放支持暂停与 1×/2×/4× 调速。
 - 🏆 **云排行榜 + 百分位（仅正式版 `dungeonraid.win`）**：死亡后显示你在**总榜**和**本种族榜**的名次与百分位。按**坚持回合**排名、**按版本分桶**统计；录像可确定性重放，榜单**只展示已重放验证的成绩**，前列每小时自动重放校验防作弊。开发版不参与排名。
-- 🏅 **人类榜 / AI 榜**：成绩按 `agent`(human / ai)分流、互不混排。游戏内「🏆 排行榜」面板可在 **人类 / AI** 与 **闯关榜 / 破关榜** 间切换查看 Top 10。真人对局上报人类榜，AI/机器人自报 `ai` 进 AI 榜（后端 `/top?agent=`、`/clearboard?agent=`，私有改判接口 `/classify`）。写入端点按 IP 限流防刷。
+- 🏅 **人类榜 / AI 榜**：成绩按 `agent`(human / ai)分流、互不混排。游戏内「🏆 排行榜」面板可在 **人类 / AI**、**闯关榜 / 破关榜** 间切换，并**按种族筛选**（全部 / 人族 / 精灵 / 矮人 / 兽人）查看 Top 10。真人对局上报人类榜，AI/机器人自报 `ai` 进 AI 榜（后端 `/top?agent=&race=`、`/clearboard?agent=&race=`，私有改判接口 `/classify`）。写入端点按 IP 限流防刷。
 
 ### 🛠️ 开发 / 平衡测试
 
@@ -307,7 +307,7 @@ Clearing shows a story-flavored congratulations screen; the Release build report
 - ☠️ **Death report**: when you fall, it lists each damage source's share of the killing turn.
 - 🎬 **Record / replay**: every run is recorded (seed + input sequence — deterministic replay, ~2–4 KB per run). After death you can **replay / copy / export / 🔗 share-link** the recording; the start screen offers **replay last run** or **paste-import** someone else's. Replay supports pause and 1×/2×/4× speed.
 - 🏆 **Cloud leaderboard + percentile (Release build `dungeonraid.win` only)**: after death, see your rank and percentile on the **overall** and **per-race** boards. Ranked by **turns survived**, **bucketed by version**; recordings are deterministically replayed, the board **shows verified scores only**, and the top is re-verified hourly to block cheats. The Dev build does not participate in ranking.
-- 🏅 **Human / AI boards**: scores are split by `agent` (human / ai) and never mixed. The in-game "🏆 Leaderboard" panel toggles between **Human / AI** and **Survival / Clears** Top 10. Real play reports to the human board; AI/bots self-report `ai` (backend `/top?agent=`, `/clearboard?agent=`, private reclassify endpoint `/classify`). Write endpoints are IP-rate-limited.
+- 🏅 **Human / AI boards**: scores are split by `agent` (human / ai) and never mixed. The in-game "🏆 Leaderboard" panel toggles between **Human / AI** and **Survival / Clears**, and **filters by race** (All / Human / Elf / Dwarf / Orc), showing the Top 10. Real play reports to the human board; AI/bots self-report `ai` (backend `/top?agent=&race=`, `/clearboard?agent=&race=`, private reclassify endpoint `/classify`). Write endpoints are IP-rate-limited.
 
 ### 🛠️ Development / Balance Testing
 
