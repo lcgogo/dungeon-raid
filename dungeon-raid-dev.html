@@ -158,7 +158,7 @@
 (()=>{
 //==================== 配置 ====================
 // 版本号 v主.次.修：小改动改"修"，新Boss/职业改"次"，大版本变更需先确认。页面底部显示。
-const VERSION='v1.16.1';
+const VERSION='v1.16.2';
 const DEV=true;    // 开发版：指向最新开发版本；独立存档 + DEV 标识。正式版在 dungeon-raid.html（DEV=false）
 const REC_API='https://api.dungeonraid.win';   // 录像分享 API（Cloudflare Worker + KV）
 // 带种子随机数（mulberry32）：游戏全程用 rnd() 取代原生随机，配合录制种子可确定性重放
@@ -305,7 +305,7 @@ const BOSSES=[
       if(dmg>0) log(tr(`🦅 鸟人俯冲啄击，掉 ${dmg} 血！`,`🦅 The Birdman dives and pecks for ${dmg}!`));
       let pos=null; for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ if(grid[r][c]===t) pos=[r,c]; }
       if(!pos) return;
-      const cells=[]; for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const x=grid[r][c]; if(x&&x!==t) cells.push([r,c]); }
+      const cells=[]; for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const x=grid[r][c]; if(x&&x!==t&&!x.finale) cells.push([r,c]); }   // 不和终焉之主换位（否则它被移位、advanceEnemies 快照守卫会跳过其推进，破关被拖到 511 之后）
       if(!cells.length) return;
       const [nr,nc]=cells[Math.floor(rnd()*cells.length)]; const [r,c]=pos; const tmp=grid[nr][nc];
       grid[nr][nc]=t; grid[r][c]=tmp; t.curY=cellY(nr); if(tmp) tmp.curY=cellY(r); syncPositions(false);
