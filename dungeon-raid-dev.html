@@ -158,7 +158,7 @@
 (()=>{
 //==================== 配置 ====================
 // 版本号 v主.次.修：小改动改"修"，新Boss/职业改"次"，大版本变更需先确认。页面底部显示。
-const VERSION='v1.17.1';
+const VERSION='v1.17.2';
 const DEV=true;    // 开发版：指向最新开发版本；独立存档 + DEV 标识。正式版在 dungeon-raid.html（DEV=false）
 const REC_API='https://api.dungeonraid.win';   // 录像分享 API（Cloudflare Worker + KV）
 // 带种子随机数（mulberry32）：游戏全程用 rnd() 取代原生随机，配合录制种子可确定性重放
@@ -443,7 +443,7 @@ const TIER1={
   ranger:{n:['游侠','Ranger'], quip:['抬头——那不是雨，是箭。','Heads up — those are not raindrops.'], skill:{name:['箭雨','Arrow Rain'], short:['全场怪受剑威力×2','×2 sword power to all'], cd:5, f:p=>{ const titanFlat=p.titan?Math.floor(p.maxHp/12):0; const pool=Math.floor((p.weaponPower*2 + p.swordFlat + titanFlat)*(p.swordMult||1)); const r=dealDamage(pool,null); applyGravity(); syncPositions(false); log(tr(`🏹 箭雨：全场 ${r.dmg} 伤害`+(r.kills?`，击杀 ${r.kills}`:''),`🏹 Arrow Rain: ${r.dmg} dmg`+(r.kills?`, ${r.kills} killed`:''))); return true; }}},
   rogue:{n:['盗贼','Rogue'], quip:['剑能砍人，但金币能买命。','Swords kill. Coins buy your life back.'], skill:{name:['点金','Gold Touch'], short:['剑变金币','Swords→Coins'], cd:5, f:p=>{ let n=0; for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){const t=grid[r][c]; if(t&&t.type==='sword'){t.type='coin';n++;}} if(!n)return false; log(tr(`💰 点金：${n} 把剑化为金币`,`💰 Gold Touch: ${n} swords → coins`)); return n; }}},
   blacksmith:{n:['锻造师','Blacksmith'], quip:['盾别拿手里，焊身上才香。','Do not hold shields — wear them.'], skill:{name:['锻甲','Forge Armor'], short:['收全场盾→护甲','Absorb all shields'], cd:5, f:p=>{ if(p.noArmor) return false; let n=0; for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){const t=grid[r][c]; if(t&&t.type==='shield'){grid[r][c]=null;n++;}} if(!n)return false; p.shieldXp+=n*p.armorPerShield; while(p.shieldXp>=armorNeeded(p.armor)){p.shieldXp-=armorNeeded(p.armor);p.armor++;} applyGravity(); syncPositions(false); log(tr(`🔰 锻甲：吞下 ${n} 盾（减伤 ${p.armor}）`,`🔰 Forge: ${n} shields (armor ${p.armor})`)); return n; }}},
-  miser:{n:['守财奴','Miser'], quip:['钱躺一会儿，利滚利。','Let the gold nap — it wakes up doubled.'], skill:{name:['囤金','Hoard'], short:['锁金生利','Lock gold for interest'], cd:5, f:p=>{ if(p.goldLock>0) return false; const n=Math.max(3,Math.min(10,Math.floor(p.gold/10))); p.goldLock=n; p.goldFrozen=0; log(tr(`🔒 囤金：锁定 ${n} 回合（期间不产/不花金币，到期返还双倍）`,`🔒 Hoard: locked ${n} turns (no gold in/out; doubled payout at end)`)); return true; }}},
+  miser:{n:['守财奴','Miser'], quip:['钱躺一会儿，利滚利。','Let the gold nap — it wakes up doubled.'], skill:{name:['囤金','Hoard'], short:['锁金生利','Lock gold for interest'], cd:5, f:p=>{ if(p.goldLock>0) return false; const n=4; p.goldLock=n; p.goldFrozen=0; log(tr(`🔒 囤金：锁定 ${n} 回合（期间不产/不花金币，到期返还 2.5 倍）`,`🔒 Hoard: locked ${n} turns (no gold in/out; 2.5× payout at end)`)); return true; }}},
   berserker:{n:['狂战士','Berserker'], quip:['疼？疼说明这刀还能更快。','Pain just means I can swing faster.'], skill:{name:['狂怒','Frenzy'], short:['本回合不死+残血增伤','Undying this turn + low-HP dmg'], cd:5, f:p=>{ p.hp=Math.max(1,Math.floor(p.hp/2)); p.lowHpDmg=true; p.undyingTurn=true; log(tr('🔪 狂怒！生命减半并进入不屈（本回合无论受多少伤都保留 1 血），血越少剑伤越高','🔪 Frenzy! HP halved and Undying this turn (keep ≥1 HP no matter the damage); lower HP, higher sword damage')); return true; }}},
   fighter:{n:['斗士','Fighter'], quip:['越打越精神，血是我的能量饮料。','The more I fight, the better I feel.'], skill:{name:['嗜血','Bloodthirst'], short:['回血+本回合可攻击剑免疫怪','Heal + pierce sword-immunity'], cd:5, f:p=>{ p.bloodthirst=1; p.pierceTurn=true; log(tr('🩸 嗜血：本回合剑链每击中一只怪回 3 血，且可用剑攻击剑免疫的 Boss（幽灵/小丑）','🩸 Bloodthirst: heal 3 per enemy hit this turn, and your sword can hit sword-immune bosses (Ghost/Clown)')); return true; }}},
   witchdoctor:{n:['巫医','Witch Doctor'], quip:['你的心意我收下，怪替你喝。','Your love? The monsters drink it for you.'], skill:{name:['蛊毒','Hex'], short:['本回合连心改为毒全场怪','Hearts poison all foes this turn'], cd:5, f:p=>{ p.heartPoison=true; log(tr('🧪 蛊毒：本回合连「心」不再回血，而是把这些生命当毒，灌给全场怪！','🧪 Hex: this turn, linking hearts deals that healing as poison to all foes instead!')); return true; }},
@@ -1096,7 +1096,7 @@ function resolve(){
   if(typeof player.shopCd==='object') for(const k in player.shopCd){ if(player.shopCd[k]>0) player.shopCd[k]--; } // 各商品冷却递减
   if(player.skillCd>0) player.skillCd--; // 技能冷却递减
   if(player.skill2Cd>0) player.skill2Cd--; // 换装主动冷却递减
-  if(player.goldLock>0){ player.goldLock--; if(player.goldLock===0){ const pay=player.goldFrozen*2; player.gold+=pay; player.goldFrozen=0; log(tr(`🔓 囤金到期：返还 ${pay} 金币`,`🔓 Hoard matured: +${pay} gold`)); } } // 守财奴囤金到期
+  if(player.goldLock>0){ player.goldLock--; if(player.goldLock===0){ const pay=Math.round(player.goldFrozen*2.5); player.gold+=pay; player.goldFrozen=0; log(tr(`🔓 囤金到期：返还 ${pay} 金币`,`🔓 Hoard matured: +${pay} gold`)); } } // 守财奴囤金到期（2.5 倍）
   advanceEnemies();
   if(player.cleared) return;   // 终焉第10波撑过 → onClear 已结算，停止后续处理
   if(player.regen) gainHeal(player.regen);
