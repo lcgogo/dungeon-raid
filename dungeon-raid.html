@@ -161,7 +161,7 @@
 (()=>{
 //==================== 配置 ====================
 // 版本号 v主.次.修：小改动改"修"，新Boss/职业改"次"，大版本变更需先确认。页面底部显示。
-const VERSION='v1.13.3';
+const VERSION='v1.13.4';
 const DEV=false;   // release build (DEV=false); dev build is dungeon-raid-dev.html (DEV=true)
 const REC_API='https://api.dungeonraid.win';   // 录像分享 API（Cloudflare Worker + KV）
 // 带种子随机数（mulberry32）：游戏全程用 rnd() 取代原生随机，配合录制种子可确定性重放
@@ -443,7 +443,8 @@ const RACE_PATHS={
 };
 function raceById(id){ return RACES.find(r=>r.id===id)||RACES[0]; }
 let __bootHandled=false;
-function showClassSelect(){   // 现在是「选种族」
+// 开始页（落地）：标题 + 开篇引言 + START + 继续/回放/导入/排行榜 + 致敬（最下）
+function showClassSelect(){
   // 首次进入：若 URL 带 ?rec=<id> → 拉取分享录像并回放（仅 boot 时触发一次）
   if(!__bootHandled){ __bootHandled=true;
     const id = (typeof location!=='undefined') ? new URLSearchParams(location.search).get('rec') : null;
@@ -451,51 +452,53 @@ function showClassSelect(){   // 现在是「选种族」
   }
   busy=true;
   const card=document.getElementById('card');
-  const best=getBest();
-  const bestLine = best ? `<p>${tr('🏆 最佳纪录：等级','🏆 Best: Level')} ${best.level} · 💰${best.gold}</p>` : '';
   const buildBadge = DEV
     ? `<div style="display:inline-block;background:#7d3cad;color:#fff;font-size:12px;font-weight:700;padding:3px 12px;border-radius:12px;margin-bottom:8px;letter-spacing:1px">🚧 DEV ${tr('开发版·最新','build · latest')}</div>`
     : `<div style="display:inline-block;background:#2e7d46;color:#fff;font-size:12px;font-weight:700;padding:3px 12px;border-radius:12px;margin-bottom:8px;letter-spacing:1px">✅ ${tr('正式版','Release')}</div>`;
   card.innerHTML=`${buildBadge}
-    <div style="text-align:left;font-size:11.5px;line-height:1.65;background:var(--panel2);border-radius:10px;padding:10px 12px;margin-bottom:10px">
-      <div style="color:var(--gold);font-weight:700;margin-bottom:2px">🕯️ ${tr('地牢之下','Beneath the Dungeon')}</div>
-      <div style="color:var(--dim)">${tr('传说地心深处藏着无尽宝藏，也封印着「终焉之主」。一代代冒险者循着传说潜入地牢，却再无人生还。如今轮到你——拖动连接相邻的同类符文来消除：🔪剑斩杀怪物、🔰盾凝成护甲、💗心回复生命、💰金币换取补给。怪物在倒计时归零时出手，每 50 回合 Boss 强一档；活得越久，越接近地心的终焉之主。','Deep at the world’s core lie endless treasures — and the sealed Overlord. Generations of adventurers followed the legend into the dungeon; none returned. Now it’s your turn. Drag to link adjacent matching runes: 🔪 swords slay monsters, 🔰 shields forge armor, 💗 hearts heal, 💰 coins buy supplies. Monsters strike when their countdown hits zero, and bosses grow stronger every 50 turns. The longer you survive, the deeper you descend toward the Overlord.')}</div>
-      <div style="color:var(--gold);font-weight:700;margin:9px 0 2px">🙏 ${tr('致敬原作','A Tribute')}</div>
-      <div style="color:var(--dim)">${tr('本作是向 Fireflame Games 于 2011 年推出的 iOS 经典《Dungeon Raid》致敬的网页复刻，玩法深受其启发，仅为非官方粉丝习作，与原作者无任何关联。我们始终未能联系上原作者——若你认识 TA，恳请通过我的 GitHub 转达：','This is a web remake paying tribute to the classic 2011 iOS game “Dungeon Raid” by Fireflame Games — deeply inspired by it, an unofficial fan work with no affiliation to the original author. We have never been able to reach them. If you know the original author, please pass word along via my GitHub:')} <a href="https://github.com/lcgogo/dungeon-raid/issues" target="_blank" rel="noopener" style="color:var(--gold);text-decoration:underline">github.com/lcgogo/dungeon-raid/issues</a></div>
-    </div>
-    <h2>${tr('选择种族','Choose your race')}</h2>${bestLine}<p>${tr('击败第50回合Boss可转一阶职业（主动），击败第100回合Boss可转二阶（被动）','Beat the turn-50 boss to advance to a tier-1 class (active), and the turn-100 boss for tier-2 (passive)')}</p>`;
-  if(hasSave()){
-    const cont=document.createElement('button'); cont.className='btn';
-    cont.style.width='100%'; cont.style.marginBottom='12px';
-    cont.textContent=tr('▶ 继续上局','▶ Continue last run');
-    cont.onclick=()=>loadGame();
-    card.appendChild(cont);
-  }
+    <h2 style="margin:2px 0 6px">⚔️ ${tr('地牢突袭','Dungeon Raid')}</h2>
+    <div style="text-align:left;font-size:11.5px;line-height:1.6;background:var(--panel2);border-radius:10px;padding:9px 11px;margin-bottom:10px">
+      <span style="color:var(--gold);font-weight:700">🕯️ ${tr('地牢之下','Beneath the Dungeon')}</span>
+      <span style="color:var(--dim)"> ${tr('地心封印着「终焉之主」，历代冒险者潜入地牢、无人生还——轮到你了。拖动连接相邻同类符文：🔪斩怪、🔰凝甲、💗回血、💰补给；怪物倒计时归零出手，每 50 回合 Boss 强一档，撑到第 500 回合破关。','The Overlord lies sealed at the world’s core; generations went in, none returned — your turn now. Link adjacent matching runes: 🔪 slay, 🔰 armor, 💗 heal, 💰 supplies. Bosses grow every 50 turns; survive to turn 500 to clear.')}</span>
+    </div>`;
+  // ▶ START（主按钮）→ 选种族页
+  const start=document.createElement('button'); start.className='btn';
+  start.style.width='100%'; start.style.marginBottom='8px'; start.style.fontSize='17px';
+  start.textContent='▶ '+tr('开始游戏','START');
+  start.onclick=()=>showRaceSelect();
+  card.appendChild(start);
+  // 紧凑单行次级按钮（省竖向空间，整页控制在一屏内）
+  const mk=(border,html,fn)=>{ const b=document.createElement('button'); b.className='choice'; b.style.cssText='padding:9px 12px;margin:0 0 6px;text-align:left;border-color:'+border; b.innerHTML=html; b.onclick=fn; card.appendChild(b); };
+  if(hasSave()) mk('#2e7d46', `<b>▶ ${tr('继续上局','Continue last run')}</b>`, ()=>loadGame());
+  const lastRec=getLastRec();
+  if(lastRec) mk('#6a4fa3', `<b>🎬 ${tr('回放上一局','Replay last run')}</b>`, ()=>startReplay(lastRec));
+  mk('#6a4fa3', `<b>📥 ${tr('导入回放','Import replay')}</b>`, ()=>importReplay());
+  mk('#a8852c', `<b>🏆 ${tr('排行榜','Leaderboard')}</b>`, ()=>showLeaderboard());
+  // 🙏 致敬原作（放最下面）
+  const trib=document.createElement('div');
+  trib.style.cssText='text-align:left;font-size:10.5px;line-height:1.55;color:var(--dim);margin-top:8px';
+  trib.innerHTML=`🙏 ${tr('致敬 2011 年 iOS 经典《Dungeon Raid》(Fireflame Games)，非官方粉丝复刻。联系不上原作者，知情者请到','A tribute to the 2011 iOS classic “Dungeon Raid” (Fireflame Games) — unofficial fan remake. Can’t reach the original author; if you know them, please reach me at')} <a href="https://github.com/lcgogo/dungeon-raid/issues" target="_blank" rel="noopener" style="color:var(--gold)">github.com/lcgogo/dungeon-raid/issues</a>`;
+  card.appendChild(trib);
+  showOverlay();
+}
+// 选种族页（点 START 后进入）
+function showRaceSelect(){
+  busy=true;
+  const card=document.getElementById('card');
+  const best=getBest();
+  const bestLine = best ? `<p>${tr('🏆 最佳纪录：等级','🏆 Best: Level')} ${best.level} · 💰${best.gold}</p>` : '';
+  card.innerHTML=`<h2>${tr('选择种族','Choose your race')}</h2>${bestLine}
+    <p style="font-size:12px;color:var(--dim);line-height:1.6">${tr('里程碑 Boss：第50回合转一阶（主动）· 100 转二阶（被动）· 200 第二被动 · 350 换装主动 · 500 终焉之主破关','Milestone bosses — 50: tier-1 active · 100: tier-2 passive · 200: 2nd passive · 350: swap an active · 500: final Overlord clear')}</p>`;
   RACES.forEach(rc=>{
     const b=document.createElement('button'); b.className='choice';
     b.innerHTML=`<b>${rc.e} ${L(rc.n)}</b><small>${L(rc.d)}</small>`;
     b.onclick=()=>startGame(rc);
     card.appendChild(b);
   });
-  // 录像：回放上一局 / 导入回放
-  const lastRec=getLastRec();
-  if(lastRec){
-    const rb=document.createElement('button'); rb.className='choice';
-    rb.style.borderColor='#6a4fa3';
-    rb.innerHTML=`<b>🎬 ${tr('回放上一局','Replay last run')}</b><small>${tr('自动重演你上一局的完整操作','Auto-replays your last full run')}</small>`;
-    rb.onclick=()=>startReplay(lastRec);
-    card.appendChild(rb);
-  }
-  const ib=document.createElement('button'); ib.className='choice';
-  ib.style.borderColor='#6a4fa3';
-  ib.innerHTML=`<b>📥 ${tr('导入回放','Import replay')}</b><small>${tr('粘贴录像 JSON 回放','Paste a recording JSON to replay')}</small>`;
-  ib.onclick=()=>importReplay();
-  card.appendChild(ib);
-  const lb=document.createElement('button'); lb.className='choice';
-  lb.style.borderColor='#a8852c';
-  lb.innerHTML=`<b>🏆 ${tr('排行榜','Leaderboard')}</b><small>${tr('人类榜 / AI 榜 · 闯关 / 破关','Human / AI · Survival / Clears')}</small>`;
-  lb.onclick=()=>showLeaderboard();
-  card.appendChild(lb);
+  const back=document.createElement('button'); back.className='btn'; back.style.marginTop='4px';
+  back.textContent='← '+tr('返回','Back');
+  back.onclick=()=>showClassSelect();
+  card.appendChild(back);
   showOverlay();
 }
 function importReplay(){
@@ -1190,7 +1193,7 @@ function gameOver(){
       <button class="choice" id="goBoard" style="width:auto;margin:0;padding:7px 12px;border-color:#a8852c">🏆 ${tr('排行榜','Board')}</button>
     </div>
     <button class="btn" id="again">${tr('换个职业再来','Play again')}</button>`;
-  document.getElementById('again').onclick=showClassSelect;
+  document.getElementById('again').onclick=showRaceSelect;   // 重开直接到选种族（落地页仅 boot 看）
   const finished=getLastRec();
   wireEndButtons(finished);
   showOverlay();
@@ -1221,7 +1224,7 @@ function onClear(){
       <button class="choice" id="goBoard" style="width:auto;margin:0;padding:7px 12px;border-color:#a8852c">🏆 ${tr('排行榜','Board')}</button>
     </div>
     <button class="btn" id="again">${tr('再来一局','Play again')}</button>`;
-  document.getElementById('again').onclick=showClassSelect;
+  document.getElementById('again').onclick=showRaceSelect;   // 重开直接到选种族（落地页仅 boot 看）
   const finished=getLastRec();
   wireEndButtons(finished);
   showOverlay();
