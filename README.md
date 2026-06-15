@@ -73,17 +73,18 @@
 ### 🌟 成长路线
 
 1. **开局**：选一个种族。
-2. **第 50 回合 Boss**：击败它可转入**一阶职业**（主动技能），从本种族专属的 2 个里二选一。
-3. **第 100 回合 Boss**：击败它可转入**二阶职业**（被动），同样从本种族的 2 个里二选一。
-4. **第 200 回合 Boss**：击败它可再获得**本种族另一项被动**（至此集齐本种族两个被动）。
-5. **第 350 回合 Boss**：击败它可从**全种族全职业的主动技能**里任选一个，**替换掉商店的 💊治疗 或 💥炸弹 槽**——该槽位变成施放此主动（带技能冷却，可跨种族搭配）。
+2. **第 50 回合 Boss**：击败它可转职，获得**职业**（主动技能），从本种族专属的职业里挑一个。
+3. **第 100 回合 Boss**：击败它解锁**二阶技能**（被动），从本种族的被动里挑一个。
+4. **第 200 回合 Boss**：击败它再得一项**本族技能**（本种族剩下的另一项被动；至此集齐两项被动）。
+5. **第 350 回合 Boss**：击败它解锁**跨界技能**——从**全种族全职业的主动技能**里任选一个，**替换掉商店的 💊治疗 或 💥炸弹 槽**（带该技能冷却，可跨种族搭配）。
 6. **第 500 回合 · 终焉之主 👑**：终局降临，是否破关在此一举（见下）。
 
-> 用剑或炸弹击败 Boss 都能触发转职。
+> 用剑（或对应武器）/ 炸弹击败 Boss 都能触发转职。
+> 进阶链：**职业 → 二阶技能 → 本族技能 → 跨界技能**。
 
-### ⚔️ 一阶职业 · 主动技能
+### ⚔️ 职业 · 主动技能
 
-每个种族对应**多个**一阶职业，技能冷却均为 **5 回合**：
+每个种族对应**多个**职业，技能冷却均为 **5 回合**：
 
 | 种族 | 职业 | 技能 | 效果 |
 |---|---|---|---|
@@ -103,9 +104,9 @@
 
 > **剑圣 / 巫医** 是「主动+被动」双修职业：除主动技能外，每回合棋盘摆完后还会自动把 3 个棋子转成剑/心。
 
-### 🎖️ 二阶职业 · 被动
+### 🎖️ 二阶技能 / 本族技能 · 被动
 
-各种族对应**多个**二阶职业，转职后永久生效（第 100 回合 Boss 选一个，第 200 回合 Boss 再从本种族剩余的里选一个）：
+各种族对应**多个**被动技能，转职后永久生效：第 100 回合 Boss 解锁第一项（**二阶技能**），第 200 回合 Boss 再解锁一项（**本族技能**）：
 
 | 种族 | 职业 | 效果 |
 |---|---|---|
@@ -138,9 +139,9 @@
 | 🦅 鸟人 Birdman | 剑 / 炸弹 | **每回合**俯冲啄你一下（半攻击力），并在回合末和棋盘上**任意一个棋子互换位置（瞬移）**——飘忽难缠，想连它的剑链得算准它的落点，速战速决 |
 | 🗿 石像 Statue | 剑 / 炸弹（慎用） | 它【受到多少伤害，就把等量伤害当作**真实伤害（无视护甲）反弹给你**】——攻击它=伤害自己。想杀它先确保血够厚，别一刀连自己也送走（剑/炸弹/溅射/吸魂都会反弹）|
 | 🦠 污染怪 Corruptor | 仅炸弹 | 只要它在场，**全场的心都变成毒心（绿心 💚）**——连毒心不再回血、反而按等量【**扣血**（无视护甲）】！炸掉它，心立刻恢复正常（低血量，一两发炸弹即可）|
-| ⛄ 雪人 Snowman | 仅炸弹 | 现身就**随机冰封你的主动**——一阶冻 1 个、二阶冻 2 个、三阶冻 3 个（在 一阶主动/💊治疗/💥炸弹 里随机），**4 回合内不可用**（❄️ 标记；限时解冻，炸弹被冻也不会卡死）|
+| ⛄ 雪人 Snowman | 仅炸弹 | 现身就**随机冰封你的主动**——按 Boss 档位冻 1~3 个（在 职业主动/💊治疗/💥炸弹 里随机），**4 回合内不可用**（❄️ 标记；限时解冻，炸弹被冻也不会卡死）|
 
-> Boss 入场时会有**扩散冲击环 + 闪光**特效（普通 Boss 红、终焉之主金），一眼可辨。每个 Boss 与一阶主动技能在信息弹窗里都附带一句**俏皮话**。
+> Boss 入场时会有**扩散冲击环 + 闪光**特效（普通 Boss 红、终焉之主金），一眼可辨。每个 Boss 与职业主动技能在信息弹窗里都附带一句**俏皮话**。
 
 ### 👑 终局：终焉之主 与 破关
 
@@ -253,17 +254,18 @@ Pick a race at the start. Each has a unique **trait** and a matching **weakness*
 ### 🌟 Progression Path
 
 1. **Start**: choose a race.
-2. **Turn-50 boss**: beat it to advance to a **Tier-1 class** (active skill), picking 1 of your race's 2 options.
-3. **Turn-100 boss**: beat it to advance to a **Tier-2 class** (passive), again 1 of your race's 2 options.
-4. **Turn-200 boss**: beat it to gain **your race's other passive** (now you have both of your race's passives).
-5. **Turn-350 boss**: beat it to pick **any active skill from any race/class** and **replace your 💊Heal or 💥Bomb shop slot** — that slot now casts the active (with the skill's cooldown; cross-race builds allowed).
+2. **Turn-50 boss**: beat it to take a **Class** (active skill), picking one of your race's classes.
+3. **Turn-100 boss**: beat it to unlock a **Tier-2 Skill** (passive), one of your race's passives.
+4. **Turn-200 boss**: beat it to gain a **Race Skill** (your race's other passive — now you have both).
+5. **Turn-350 boss**: beat it to unlock a **Crossover Skill** — pick **any class's active (any race)** and **replace your 💊Heal or 💥Bomb shop slot** (with the skill's cooldown; cross-race builds allowed).
 6. **Turn-500 · the Overlord 👑**: the final trial — clear or fall (see below).
 
-> Beating a boss with either a sword chain or a bomb triggers the advance.
+> Beating a boss with your weapon chain or a bomb triggers the advance.
+> Progression: **Class → Tier-2 Skill → Race Skill → Crossover Skill**.
 
-### ⚔️ Tier-1 Classes · Active Skills
+### ⚔️ Classes · Active Skills
 
-Each race has **several** Tier-1 classes; every skill has a **5-turn cooldown**:
+Each race has **several** classes; every skill has a **5-turn cooldown**:
 
 | Race | Class | Skill | Effect |
 |---|---|---|---|
@@ -283,9 +285,9 @@ Each race has **several** Tier-1 classes; every skill has a **5-turn cooldown**:
 
 > **Sword Saint / Witch Doctor** are hybrid (active + passive) classes: besides the active skill, each turn after the board settles they auto-convert 3 tiles into swords/hearts.
 
-### 🎖️ Tier-2 Classes · Passives
+### 🎖️ Tier-2 Skill / Race Skill · Passives
 
-Each race has **several** Tier-2 classes; they apply permanently once chosen (pick one at the turn-100 boss, then another of your race's remaining ones at the turn-200 boss):
+Each race has **several** passives, applied permanently once chosen: the turn-100 boss unlocks the first (**Tier-2 Skill**), the turn-200 boss unlocks another (**Race Skill**):
 
 | Race | Class | Effect |
 |---|---|---|
@@ -320,7 +322,7 @@ About every **10 turns** a random boss appears; beating one rewards 💰+20 and 
 | 🦠 Corruptor | Bomb only | While it's on the board, **all hearts become poison (green 💚)** — linking them DRAINS that much HP (ignoring armor) instead of healing! Bomb it and hearts return to normal (low HP, one or two bombs) |
 | ⛄ Snowman | Bomb only | On arrival it **freezes random actives** — 1 at Lv1, 2 at Lv2, 3 at Lv3 (among your class active / 💊Heal / 💥Bomb), **unusable for 4 turns** (❄️ marker; time-limited thaw, so a frozen bomb never soft-locks) |
 
-> Each boss arrives with a **shockwave ring + flash** effect (crimson for normal bosses, gold for the Overlord), so you never miss one. Every boss and every Tier-1 active also carries a one-line **quip** in its info popup.
+> Each boss arrives with a **shockwave ring + flash** effect (crimson for normal bosses, gold for the Overlord), so you never miss one. Every boss and every class active also carries a one-line **quip** in its info popup.
 
 ### 👑 Endgame: the Overlord & Clearing
 
