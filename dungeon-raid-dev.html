@@ -49,13 +49,14 @@
            align-items:center; gap:1px; font-size:12px; transition:.15s;}
   .shopBtn em{font-style:normal; font-size:11px; color:var(--gold);}
   .shopBtn small{font-size:10px; color:var(--dim); line-height:1.2;}
-  .shopBtn:disabled{opacity:.38; cursor:not-allowed;}
-  .shopBtn:not(:disabled):hover{border-color:var(--gold); transform:translateY(-1px);}
+  /* .off = 视觉禁用（不可买/冷却中）；仍接收 pointer 事件，长按可看说明（点击由 buyItem/activateSkill 自行拦截） */
+  .shopBtn.off{opacity:.38; cursor:not-allowed;}
+  .shopBtn:not(.off):hover{border-color:var(--gold); transform:translateY(-1px);}
 
   /* 职业主动技能按钮：复用 shopBtn 布局，仅换配色 */
   .shopBtn.skillBtn{background:linear-gradient(160deg,#5a2e85,#7d3cad); border-color:#c08bff; color:#fff; font-weight:700;}
   .shopBtn.skillBtn em{color:#e7c9ff;}
-  .shopBtn.skillBtn:not(:disabled):hover{border-color:#e6c2ff;}
+  .shopBtn.skillBtn:not(.off):hover{border-color:#e6c2ff;}
 
   /* overlay */
   #overlay{position:fixed; inset:0; background:rgba(10,6,18,.82); backdrop-filter:blur(3px);
@@ -158,7 +159,7 @@
 (()=>{
 //==================== 配置 ====================
 // 版本号 v主.次.修：小改动改"修"，新Boss/职业改"次"，大版本变更需先确认。页面底部显示。
-const VERSION='v1.22.3';
+const VERSION='v1.22.4';
 const DEV=true;    // 开发版：指向最新开发版本；独立存档 + DEV 标识。正式版在 dungeon-raid.html（DEV=false）
 const REC_API='https://api.dungeonraid.win';   // 录像分享 API（Cloudflare Worker + KV）
 // 带种子随机数（mulberry32）：游戏全程用 rnd() 取代原生随机，配合录制种子可确定性重放
@@ -567,7 +568,7 @@ function showClassSelect(){
           <span>🔪</span><span></span><span></span>
           <span style="color:var(--gold);font-size:15px">↘</span><span>👹</span><span><span style="color:var(--gold);font-size:15px">━</span>🔪</span>
         </div></div>
-      <div style="color:var(--dim);text-align:center;font-size:10.5px">${tr('🔪剑链可穿过 👹 怪物——<b>横、竖、斜 8 向</b>都能连，串成一条线即可攻击（每只怪独立吃满整条伤害）。<br>💡 <b>轻点任意方块</b>查看玩法说明与当前数值。','A 🔪 sword chain runs through 👹 — connect in <b>any of 8 directions (incl. diagonals)</b>; each monster takes the full chain damage.<br>💡 <b>Tap any tile</b> for how it works and its current values.')}</div>
+      <div style="color:var(--dim);text-align:center;font-size:10.5px">${tr('🔪剑链可穿过 👹 怪物——<b>横、竖、斜 8 向</b>都能连，串成一条线即可攻击（每只怪独立吃满整条伤害）。<br>💡 <b>轻点任意方块</b>查看说明；<b>长按商店/技能块</b>看详细数值。','A 🔪 sword chain runs through 👹 — connect in <b>any of 8 directions (incl. diagonals)</b>; each monster takes the full chain damage.<br>💡 <b>Tap any tile</b> for info; <b>long-press a shop/skill block</b> for details.')}</div>
     </div>`;
   // ▶ START（主按钮）→ 选种族页
   const start=document.createElement('button'); start.className='btn';
@@ -1111,6 +1112,74 @@ document.querySelectorAll('.shopBtn[data-buy]').forEach(b=>{
   b.onclick=()=>buyItem(b.dataset.buy);
 });
 
+// 长按商店/技能块 → 弹出详细说明（纯 UI，不进录像、不影响对局）。即使按钮置灰（冷却/买不起）也可长按查看。
+function attachLongPress(el, key){
+  let timer=null, fired=false, sx=0, sy=0;
+  const clear=()=>{ if(timer){ clearTimeout(timer); timer=null; } };
+  el.addEventListener('pointerdown', e=>{ if(busy||pendingLevels) return; fired=false; sx=e.clientX; sy=e.clientY; clear();
+    timer=setTimeout(()=>{ timer=null; fired=true; showShopInfo(key); }, 450); });
+  el.addEventListener('pointermove', e=>{ if(timer && (Math.abs(e.clientX-sx)>10 || Math.abs(e.clientY-sy)>10)) clear(); });
+  el.addEventListener('pointerup', clear);
+  el.addEventListener('pointercancel', clear);
+  el.addEventListener('pointerleave', clear);
+  el.addEventListener('click', e=>{ if(fired){ e.preventDefault(); e.stopImmediatePropagation(); fired=false; } }, true);  // 长按已触发 → 吞掉随后的点击，不误买/误放
+}
+// 组装某个槽（heal/bomb/skill）的详细说明数据；换装主动占用 heal/bomb 槽时显示该跨界技能
+function shopInfoData(key){
+  const p=player; if(!p) return null;
+  if((key==='heal'||key==='bomb') && p.skill2 && p.skill2.slot===key && TIER1[p.skill2.id]){
+    const t=TIER1[p.skill2.id], sk=t.skill;
+    return { icon:'✨', title:`${L(sk.name)} · ${tr('跨界','Crossover')}`,
+      desc:L(sk.short)+(t.quip?`<br><i style="color:#caa6e6">「${L(t.quip)}」</i>`:''),
+      rows:[ [tr('占用槽','Slot'), key==='heal'?'💊':'💥'],
+             [tr('冷却','Cooldown'), `${Math.max(1,sk.cd+(p.skillCdMod||0))} ${tr('回合','t')}`],
+             [tr('状态','Status'), p.skill2Cd>0?`⏳${p.skill2Cd}${tr('回合','t')}`:tr('可发动','Ready')] ] };
+  }
+  if(key==='heal'){
+    const hv=Math.round((10+2*(p.healUses||0))*(p.healMult||1)), half=(p.healMult&&p.healMult!==1);
+    return { icon:'💊', title:tr('治疗','Heal'),
+      desc:tr('喝下药水回复生命。每使用一次：恢复量 +2、耗金 +1，后期也跟得上。'+(half?'（活死人：一切治疗减半）':''),
+              'Drink a potion to restore HP. Each use: +2 healing and +1 cost, so it keeps up late-game.'+(half?' (Undead: all healing halved.)':'')),
+      rows:[ [tr('当前恢复','Heals now'), `+${hv} ❤️`],
+             [tr('花费','Cost'), `${shopCost('heal')} 💰`],
+             [tr('冷却','Cooldown'), `3 ${tr('回合','t')}`],
+             [tr('已使用','Used'), `${p.healUses||0} ${tr('次','×')}`] ] };
+  }
+  if(key==='bomb'){
+    const D=p.bombBoost?8:6, cd=p.bombCd||3;
+    return { icon:'💥', title:tr('炸弹','Bomb'),
+      desc:tr('投掷炸弹，对全场怪与 Boss 造成固定伤害（无视档位倍率）。能炸剑免疫的 Boss（幽灵/小丑/污染怪/雪人）；终焉之主无效；石像会把伤害反弹给你。',
+              'Throw a bomb for fixed damage to all monsters & bosses (ignores tier scaling). Hits sword-immune bosses (Ghost/Clown/Corruptor/Snowman); no effect on the Overlord; the Statue reflects it back.'),
+      rows:[ [tr('当前伤害','Damage'), `−${D}`+(p.bombBoost?tr('（爆破手）','(Demo)'):'')],
+             [tr('花费','Cost'), `${shopCost('bomb')} 💰`+(p.cheapskate?tr('（小气鬼半价）',' (½)'):'')+(p.bombBoost?tr('（爆破手×2）',' (×2)'):'')],
+             [tr('冷却','Cooldown'), `${cd} ${tr('回合','t')}`+(p.bombCd?tr('（影袭）',' (Shadow)'):'')] ] };
+  }
+  if(key==='skill'){
+    const t1=p.tier1&&TIER1[p.tier1]; if(!t1||!t1.skill) return null; const sk=t1.skill;
+    const st=(p.frozen&&p.frozen.skill>0)?`❄️${p.frozen.skill}${tr('回合','t')}`:(p.tier1==='miser'&&p.goldLock>0)?`🔒${p.goldLock}${tr('回合','t')}`:p.skillCd>0?`⏳${p.skillCd}${tr('回合','t')}`:tr('可发动','Ready');
+    let desc=`<b>${L(sk.short)}</b>`;
+    if(t1.passive) desc+=`<br>${tr('被动','Passive')}：${L(t1.passive)}`;
+    if(t1.quip) desc+=`<br><i style="color:#caa6e6">「${L(t1.quip)}」</i>`;
+    return { icon:'✨', title:`${L(t1.n)} · ${L(sk.name)}`, desc,
+      rows:[ [tr('冷却','Cooldown'), `${effSkillCd(p.tier1)} ${tr('回合','t')}`],
+             [tr('状态','Status'), st] ] };
+  }
+  return null;
+}
+function showShopInfo(key){
+  if(busy||pendingLevels) return;
+  const info=shopInfoData(key); if(!info) return;
+  busy=true;
+  const rows=info.rows.map(([k,v])=>`<div style="display:flex;justify-content:space-between;gap:10px;padding:7px 2px;border-bottom:1px solid #3a2d4d"><span style="color:var(--dim)">${k}</span><b style="text-align:right">${v}</b></div>`).join('');
+  const card=document.getElementById('card');
+  card.innerHTML=`<h2>${info.icon} ${info.title}</h2><p style="font-size:13px;line-height:1.5">${info.desc}</p>
+    <div style="text-align:left;font-size:13px;margin:0 0 14px">${rows}</div>
+    <button class="btn" id="infoClose" style="width:100%">${tr('关闭','Close')}</button>`;
+  document.getElementById('infoClose').onclick=()=>{ busy=false; hideOverlay(); updateHUD(); };
+  showOverlay();
+}
+document.querySelectorAll('.shopBtn[data-buy]').forEach(b=>attachLongPress(b, b.dataset.buy));
+
 //==================== 职业主动技能 ====================
 // 实际冷却 = 技能基础冷却 + 全局修正（活死人迷惑 +1 / 回春 -1），最低 1；骷髅王「重生」每实际复活一次再 +2（递增）。
 function effSkillCd(id){
@@ -1134,6 +1203,7 @@ function activateSkill(){
   checkDeadlock();   // 用掉最后的改盘动作后若仍无棋可连 → 判负，不卡死
 }
 document.getElementById('skillBtn').onclick=activateSkill;
+attachLongPress(document.getElementById('skillBtn'), 'skill');
 
 //==================== 核心结算 ====================
 function resolve(){
@@ -1798,14 +1868,14 @@ function updateHUD(){
       btn.querySelector('small').textContent=L(sk.short);
       const fz2=player.frozen&&player.frozen[key]>0;
       btn.querySelector('em').textContent = fz2 ? `❄️${player.frozen[key]}${tr('回合','t')}` : player.skill2Cd>0 ? `⏳${player.skill2Cd}${tr('回合','t')}` : tr('可发动','Ready');
-      btn.disabled = busy || pendingLevels || player.skill2Cd>0 || fz2;
+      btn.classList.toggle('off', busy || pendingLevels || player.skill2Cd>0 || fz2);
       return;
     }
     const c=shopCost(key), cd=scd[key]||0, fz=player.frozen&&player.frozen[key]>0;   // 雪人冰封该槽
     if(key==='heal'){ const hv=Math.round((10+2*(player.healUses||0))*(player.healMult||1)); btn.querySelector('small').textContent=tr(`回复 ${hv} 生命`,`Restore ${hv} HP`); }   // 治疗恢复量随次数递增（活死人按 healMult 折算）
     if(key==='bomb'){ const D=player.bombBoost?8:6; btn.querySelector('small').textContent=tr(`全场怪 -${D} 血`,`All foes -${D} HP`); }   // 炸弹伤害可能随爆破手变化，动态显示
     btn.querySelector('em').textContent = fz ? `❄️${player.frozen[key]}${tr('回合','t')}` : cd>0 ? `⏳${cd}${tr('回合','t')}` : c+'💰';
-    btn.disabled = busy || pendingLevels || cd>0 || player.goldLock>0 || player.gold < c || fz; });
+    btn.classList.toggle('off', busy || pendingLevels || cd>0 || player.goldLock>0 || player.gold < c || fz); });
   const sb=document.getElementById('skillBtn'), sk=player.tier1&&TIER1[player.tier1]&&TIER1[player.tier1].skill;
   if(sk){ sb.style.display='flex';
     sb.querySelector('span').textContent=`✨${L(sk.name)}`;
@@ -1815,7 +1885,7 @@ function updateHUD(){
     sb.querySelector('em').textContent = fzs ? `❄️${player.frozen.skill}${tr('回合','t')}`
       : hoarding ? `🔒${player.goldLock}${tr('回合','t')}`
       : player.skillCd>0 ? `⏳${player.skillCd}${tr('回合','t')}` : tr('可发动','Ready');
-    sb.disabled = busy || pendingLevels || player.skillCd>0 || hoarding || fzs;
+    sb.classList.toggle('off', busy || pendingLevels || player.skillCd>0 || hoarding || fzs);
   } else { sb.style.display='none'; }
   saveGame();
 }
