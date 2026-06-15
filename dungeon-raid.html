@@ -40,7 +40,7 @@
   /* board */
   #board{display:block; width:100%; touch-action:none; border-radius:12px;
          background:var(--panel2); border:1px solid #3a2d4d;}
-  #log{font-size:11px; color:var(--dim); height:31px; overflow:hidden; margin:5px 4px; line-height:1.4;}
+  #log{font-size:11px; color:var(--dim); height:31px; overflow:hidden; margin:5px 4px; line-height:1.4; cursor:pointer;}
 
   /* shop */
   #shop{display:flex; gap:6px; margin:6px 0 0;}
@@ -137,7 +137,8 @@
     <button class="shopBtn" data-buy="bomb"><span id="shBombName">💥 炸弹</span><small id="shBombDesc">全场怪-6血</small><em></em></button>
   </div>
 
-  <div id="ver" style="text-align:center; font-size:11px; color:var(--dim); margin-top:6px; letter-spacing:1px;"></div>
+  <div id="tapHint" style="text-align:center; font-size:10.5px; color:var(--dim); margin-top:6px;"></div>
+  <div id="ver" style="text-align:center; font-size:11px; color:var(--dim); margin-top:3px; letter-spacing:1px; cursor:pointer;"></div>
 </div>
 
 <div id="vignette"></div>
@@ -159,7 +160,7 @@
 (()=>{
 //==================== 配置 ====================
 // 版本号 v主.次.修：小改动改"修"，新Boss/职业改"次"，大版本变更需先确认。页面底部显示。
-const VERSION='v1.24.0';
+const VERSION='v1.24.1';
 const DEV=false;   // release build (DEV=false); dev build is dungeon-raid-dev.html (DEV=true)
 const REC_API='https://api.dungeonraid.win';   // 录像分享 API（Cloudflare Worker + KV）
 // 带种子随机数（mulberry32）：游戏全程用 rnd() 取代原生随机，配合录制种子可确定性重放
@@ -230,6 +231,8 @@ function applyStaticLang(){
   set('shHealDesc', tr('回复10生命','Restore 10 HP'));
   set('shBombName', tr('💥 炸弹','💥 Bomb'));
   set('shBombDesc', tr('全场怪-6血','All foes -6 HP'));
+  set('tapHint', tr('💡：点开任意方块查看更多','💡: Tap any tile for more'));
+  set('ver', VERSION+(DEV?tr(' · 🚧 DEV 开发版',' · 🚧 DEV build'):tr(' · 正式版',' · Release'))+' 📝');
 }
 
 //==================== 状态 ====================
@@ -512,7 +515,7 @@ const TIER1={
     passive:['每回合棋盘摆完后，把 3 个非敌人/非心的棋子变成心','Each turn after the board settles, turns 3 non-enemy non-heart tiles into hearts']},
   swordsaint:{n:['剑圣','Sword Saint'], quip:['在我眼里，万物皆可开刃。','In my eyes, anything can be a blade.'], skill:{name:['化剑','Bladeshift'], short:['全场心/金币→剑','Hearts & coins → swords'], cd:5, f:p=>{ let n=0; for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const t=grid[r][c]; if(t&&(t.type==='heart'||t.type==='coin')){ t.type='sword'; n++; } } if(!n) return false; log(tr(`⚔️ 化剑：${n} 个心/金币化为剑`,`⚔️ Bladeshift: ${n} hearts/coins → swords`)); return n; }},
     passive:['每回合棋盘摆完后，把 3 个非敌人/非剑的棋子变成剑','Each turn after the board settles, turns 3 non-enemy non-sword tiles into swords']},
-  necromancer:{n:['死灵','Necromancer'], quip:['你的魂，我借来续命。','Your soul keeps me going. Thanks.'], skill:{name:['吸魂大法','Soul Drain'], short:['随机吸 2 个目标补自己，每个最多吸你的生命上限（含{W}免疫 Boss）','Drain 2 random targets to heal — each up to your max HP (incl. {W}-immune bosses)'], desc:['随机选 2 个目标（怪或 Boss，含{W}免疫的，终焉之主除外）。每个吸取「你的生命上限」与「它当前血量」中的较小值——即单个最多吸等于你生命上限的血，吸取量≥它血量就把它吸死。吸到的总量给你回血（受治疗减半等影响）。若把目标吸死且已学「溅射」，多出的吸力（你的上限−它血量）会溅射到剩余的一个敌人。','Picks 2 random targets (monsters or bosses, incl. {W}-immune; not the Overlord). Each drains the lesser of your max HP and its current HP — so up to your max HP per target, and it dies if that ≥ its HP. The total drained heals you (subject to halved healing, etc.). If a drained target dies and you have Splash, the overflow (your max HP − its HP) splashes to a remaining foe.'], cd:5, f:p=>{
+  necromancer:{n:['死灵','Necromancer'], quip:['你的魂，我借来续命。','Your soul keeps me going. Thanks.'], skill:{name:['吸魂大法','Soul Drain'], short:['随机吸 2 个目标的生命补自己','Drain 2 random targets to heal'], desc:['随机选 2 个目标（怪或 Boss，含{W}免疫的，终焉之主除外）。每个吸取「你的生命上限」与「它当前血量」中的较小值——即单个最多吸等于你生命上限的血，吸取量≥它血量就把它吸死。吸到的总量给你回血（受治疗减半等影响）。若把目标吸死且已学「溅射」，多出的吸力（你的上限−它血量）会溅射到剩余的一个敌人。','Picks 2 random targets (monsters or bosses, incl. {W}-immune; not the Overlord). Each drains the lesser of your max HP and its current HP — so up to your max HP per target, and it dies if that ≥ its HP. The total drained heals you (subject to halved healing, etc.). If a drained target dies and you have Splash, the overflow (your max HP − its HP) splashes to a remaining foe.'], cd:5, f:p=>{
     const foes=[]; for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const t=grid[r][c]; if(t&&(t.type==='enemy'||(t.type==='boss'&&!t.finale))) foes.push([r,c]); }
     if(!foes.length) return false;
     for(let i=foes.length-1;i>0;i--){ const j=Math.floor(rnd()*(i+1)); [foes[i],foes[j]]=[foes[j],foes[i]]; }
@@ -1138,7 +1141,7 @@ function shopInfoData(key){
     return { icon:'✨', title:`${L(sk.name)} · ${tr('跨界','Crossover')}`,
       desc:L(sk.short)+(t.quip?`<br><i style="color:#caa6e6">「${L(t.quip)}」</i>`:''),
       rows:[ [tr('占用槽','Slot'), key==='heal'?'💊':'💥'],
-             [tr('冷却','Cooldown'), `${Math.max(1,sk.cd+(p.skillCdMod||0))} ${tr('回合','t')}`],
+             [tr('冷却','Cooldown'), `${effSkillCd(p.skill2.id)} ${tr('回合','t')}`],
              [tr('状态','Status'), p.skill2Cd>0?`⏳${p.skill2Cd}${tr('回合','t')}`:tr('可发动','Ready')] ] };
   }
   if(key==='heal'){
@@ -1812,14 +1815,14 @@ function showPlayerInfo(){
   const t2b = p.tier2b?TIER2[p.tier2b]:null, s2 = p.skill2&&TIER1[p.skill2.id]?TIER1[p.skill2.id]:null;
   let cls=`<div style="text-align:left;font-size:12px;margin:8px 0 0;padding:8px;background:var(--panel2);border-radius:10px">`;
   if(t1){ cls+=`${tr('职业','Class')}【${L(t1.n)}】<i style="color:#caa6e6">「${L(t1.quip)}」</i><br>`;   // 俏皮话紧跟职业名
-    cls+=`${tr('主动','Active')}：${L(t1.skill.short)}（${tr('每','every')} ${t1.skill.cd} ${tr('回合','t')}）<br>`;
+    cls+=`${tr('主动','Active')}：${L(t1.skill.short)}（${tr('每','every')} ${effSkillCd(p.tier1)} ${tr('回合','t')}）<br>`;   // 有效冷却（含迷惑/回春），非基础
     if(t1.passive) cls+=`　${tr('被动','Passive')}：${L(t1.passive)}<br>`; }
   else cls+=tr('击败第 50 回合 Boss → 转职，解锁职业主动技能<br>','Beat the turn-50 boss → advance to a class, unlock its active.<br>');
   if(t2) cls+=`${tr('二阶技能','Tier-2 Skill')}【${L(t2.n)}】${tr('被动','Passive')}：${L(t2.d)}<br>`;
   else cls+=tr('继续深入 → 解锁二阶技能（被动）<br>','Delve deeper → unlock a Tier-2 Skill (passive).<br>');
   if(t2b) cls+=`${tr('本族技能','Race Skill')}【${L(t2b.n)}】${tr('被动','Passive')}：${L(t2b.d)}<br>`;
   else cls+=tr('更深处 → 获得本族技能（再一项被动）<br>','Deeper still → gain a Race Skill (another passive).<br>');
-  if(s2) cls+=`${tr('跨界技能','Crossover')}【${L(s2.skill.name)}】→ ${p.skill2.slot==='heal'?'💊':'💥'}（${tr('每','every')} ${s2.skill.cd} ${tr('回合','t')}）${s2.quip?`<br><i style="color:#caa6e6">「${L(s2.quip)}」</i>`:''}`;
+  if(s2) cls+=`${tr('跨界技能','Crossover')}【${L(s2.skill.name)}】→ ${p.skill2.slot==='heal'?'💊':'💥'}（${tr('每','every')} ${effSkillCd(p.skill2.id)} ${tr('回合','t')}）${s2.quip?`<br><i style="color:#caa6e6">「${L(s2.quip)}」</i>`:''}`;
   else cls+=tr('深渊尽头 → 跨界技能（换任意职业主动）','At the abyss’s end → a Crossover Skill (swap in any class active).');
   cls+='</div>';
   const card=document.getElementById('card');
@@ -1909,18 +1912,54 @@ function updateDanger(){
   vignetteEl.classList.toggle('pulse', danger); // 危急呼吸闪烁
   document.getElementById('hpBar').classList.toggle('low', danger); // 生命条同步闪烁
 }
-const logEl=document.getElementById('log'); let logs=[];
+const logEl=document.getElementById('log'); let logs=[], logHistory=[];
 function log(m){ logs.push(m); if(logs.length>2)logs.shift();
+  logHistory.push(m); if(logHistory.length>80)logHistory.shift();   // 完整历史（点 log 栏查看更多）
   const boss = (grid && typeof hasBoss==='function') ? hasBoss() : false;   // 场上有 Boss → 日志红字警示
   const cur = boss ? '#ff5252' : 'var(--txt)';
   logEl.innerHTML=logs.map((x,i)=>i===logs.length-1?`<span style="color:${cur}">${x}</span>`:x).join('<br>'); }
-function logClear(){ logs=[]; logEl.innerHTML=''; }
+function logClear(){ logs=[]; logHistory=[]; logEl.innerHTML=''; }
+// 点 log 栏 → 弹出完整日志历史（最新在上）。纯 UI，不进录像。
+function showLogHistory(){
+  if(busy||pendingLevels||!logHistory.length) return;
+  busy=true;
+  const rows=logHistory.slice().reverse().map(x=>`<div style="padding:5px 2px;border-bottom:1px solid #3a2d4d;font-size:12px;text-align:left">${x}</div>`).join('');
+  const card=document.getElementById('card');
+  card.innerHTML=`<h2>📜 ${tr('日志','Log')}</h2>
+    <div style="max-height:58vh;overflow-y:auto;margin:0 0 12px">${rows}</div>
+    <button class="btn" id="logClose" style="width:100%">${tr('关闭','Close')}</button>`;
+  document.getElementById('logClose').onclick=()=>{ busy=false; hideOverlay(); };
+  showOverlay();
+}
+if(logEl) logEl.onclick=showLogHistory;
+// 点版本号 → 拉 GitHub 上 CHANGELOG.md 的紧凑摘要行，展示最近更新
+let _clCache=null;
+async function showChangelog(){
+  if(busy||pendingLevels) return;
+  busy=true;
+  const card=document.getElementById('card');
+  const close=`<button class="btn" id="clClose" style="width:100%">${tr('关闭','Close')}</button>`;
+  card.innerHTML=`<h2>📝 ${tr('更新日志','Changelog')}</h2><p style="color:var(--dim)">${tr('加载中…','Loading…')}</p>${close}`;
+  document.getElementById('clClose').onclick=()=>{ busy=false; hideOverlay(); };
+  showOverlay();
+  if(!_clCache){
+    try{
+      const txt=await (await fetch('https://raw.githubusercontent.com/lcgogo/dungeon-raid/main/CHANGELOG.md')).text();
+      _clCache=txt.split('\n').map(l=>l.match(/^\[(v[\d.]+)\]:\s*(.+)/)).filter(Boolean).map(m=>`<b style="color:var(--gold)">${m[1]}</b> ${m[2]}`);
+    }catch(e){ _clCache=null; }
+  }
+  const body = (_clCache&&_clCache.length)
+    ? `<div style="max-height:58vh;overflow-y:auto;margin:0 0 12px">${_clCache.slice(0,25).map(l=>`<div style="padding:5px 2px;border-bottom:1px solid #3a2d4d;font-size:12px;text-align:left">${l}</div>`).join('')}</div>`
+    : `<p style="font-size:13px">${tr('加载失败，看完整日志：','Failed — full log:')} <a href="https://github.com/lcgogo/dungeon-raid/blob/main/CHANGELOG.md" target="_blank" style="color:var(--gold)">CHANGELOG</a></p>`;
+  card.innerHTML=`<h2>📝 ${tr('更新日志','Changelog')}</h2>${body}${close}`;
+  document.getElementById('clClose').onclick=()=>{ busy=false; hideOverlay(); };
+}
 
 //==================== 启动 ====================
 document.getElementById('langBtn').onclick=()=>setLang(lang==='en'?'zh':'en');
 document.getElementById('langBtn').textContent = lang==='en'?'中文':'EN';
 applyStaticLang();
-document.getElementById('ver').textContent=VERSION+(DEV?tr(' · 🚧 DEV 开发版',' · 🚧 DEV build'):tr(' · 正式版',' · Release'));
+{ const ve=document.getElementById('ver'); if(ve) ve.onclick=showChangelog; }
 resize(); showClassSelect(); loop();
 })();
 </script>
