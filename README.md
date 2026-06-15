@@ -99,7 +99,7 @@
 | 🧌 兽人 | 🔪 狂战士 Berserker | 狂怒 Frenzy | 生命减半并进入**不屈**（仅**本回合**：无论受多少伤都保留 1 血）；并**永久**开启残血增伤——血越少剑伤越高（最高 +60%）|
 | 🧌 兽人 | 🩸 斗士 Fighter | 嗜血 Bloodthirst | 本回合剑链每击中一只怪回 3 血，**且可用剑攻击剑免疫的 Boss（幽灵/小丑）** |
 | 🧌 兽人 | 🧪 巫医 Witch Doctor | 蛊毒 Hex | **主动**：本回合连「心」不再回血，而是把这些生命当毒灌给全场怪。**被动**：每回合棋盘摆完后，把 3 个非敌人/非心的棋子变成心 |
-| 🪦 活死人 | 🪄 死灵 Necromancer | 吸魂大法 Soul Drain | 随机吸取 2 只怪的生命补给自己，单只吸取量 = 玩家生命上限；吸取量 ≥ 怪生命则该怪死亡 |
+| 🪦 活死人 | 🪄 死灵 Necromancer | 吸魂大法 Soul Drain | 随机吸取 2 个目标（怪或 Boss，**和炸弹一样含剑免疫的 Boss**；终焉之主除外）的生命补给自己，单个吸取量 = 玩家生命上限；吸取量 ≥ 目标生命则该目标死亡 |
 | 🪦 活死人 | 💀 骷髅王 Skeleton King | 重生 Rebirth | 本回合若被击败则不死、生命回满；此后「重生」自身冷却 +2（每次真正复活递增）|
 
 > **剑圣 / 巫医** 是「主动+被动」双修职业：除主动技能外，每回合棋盘摆完后还会自动把 3 个棋子转成剑/心。
@@ -280,7 +280,7 @@ Each race has **several** classes; every skill has a **5-turn cooldown**:
 | 🧌 Orc | 🔪 Berserker | Frenzy | Halve HP and become **Undying** (**this turn only**: keep ≥1 HP no matter the damage); also **permanently** enables low-HP scaling — lower HP means higher sword damage (up to +60%) |
 | 🧌 Orc | 🩸 Fighter | Bloodthirst | Heal 3 HP per enemy your sword chain hits this turn, **and your sword can hit sword-immune bosses (Ghost/Clown)** |
 | 🧌 Orc | 🧪 Witch Doctor | Hex | **Active**: this turn, linking hearts deals that healing as poison to all foes instead of healing you. **Passive**: each turn after the board settles, turn 3 non-enemy non-heart tiles into hearts |
-| 🪦 Undead | 🪄 Necromancer | Soul Drain | Drain HP from 2 random foes to heal yourself; per-foe drain = your max HP, so any foe with HP ≤ your max HP dies |
+| 🪦 Undead | 🪄 Necromancer | Soul Drain | Drain HP from 2 random targets (monsters or bosses — **including sword-immune ones, like the bomb**; Overlord excluded) to heal yourself; per-target drain = your max HP, so any target with HP ≤ your max HP dies |
 | 🪦 Undead | 💀 Skeleton King | Rebirth | If slain this turn, cheat death and refill to full HP; afterward Rebirth's own cooldown grows +2 (each actual revive) |
 
 > **Sword Saint / Witch Doctor** are hybrid (active + passive) classes: besides the active skill, each turn after the board settles they auto-convert 3 tiles into swords/hearts.
