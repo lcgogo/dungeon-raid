@@ -6,6 +6,7 @@
 #   release             晋级正式版：同步 dev→prod + 提交 + push + 部署 + GitHub Release（提交说明读 /tmp/dr_commit_msg.txt）
 #   gh-release [vX.Y.Z] 创建/更新 GitHub Release（默认读正式版 const VERSION；可指定版本回填）
 #   integrity           核对正式版引擎 sha256 是否与 engines.json 登记一致（完整性校验）
+#   embed-changelog     把 CHANGELOG.md 摘要注入页面 CHANGELOG_LINES（deploy/release 自动调用）
 #   classify <id> <ai|human>  把某条成绩在 人类榜↔AI榜 之间改判（需 VERIFY_SECRET 环境变量）
 #   delete <id>         删除某条成绩（需 VERIFY_SECRET）
 #   prune [天数=30] [保留版本数=5]  手动清理旧版本+陈旧录像（worker 也每日自动跑；需 VERIFY_SECRET）
@@ -80,8 +81,30 @@ cmd_test(){
   return $fail
 }
 
+# ---------- 把 CHANGELOG.md 的紧凑摘要行注入页面 const CHANGELOG_LINES（嵌入，点版本号即看，无需联网） ----------
+cmd_embed_changelog(){
+  local files=("$@"); [ ${#files[@]} -eq 0 ] && files=(dungeon-raid-dev.html)
+  python3 - "${files[@]}" <<'PY'
+import re, json, sys, os
+lines=[]
+for l in open('CHANGELOG.md', encoding='utf-8'):
+    m=re.match(r'^\[(v[\d.]+)\]:\s*(.+?)\s*$', l)
+    if m: lines.append(f"{m.group(1)} — {m.group(2)}")
+lines=lines[:40]
+arr='const CHANGELOG_LINES='+json.dumps(lines, ensure_ascii=False)+';   /* auto-injected by dr.sh embed-changelog（勿手改） */'
+n=0
+for f in sys.argv[1:]:
+    if not os.path.exists(f): continue
+    s=open(f, encoding='utf-8').read()
+    s2=re.sub(r'^const CHANGELOG_LINES=.*$', lambda m: arr, s, count=1, flags=re.M)
+    if s2!=s: open(f,'w',encoding='utf-8').write(s2); n+=1
+print(f"📝 注入 {len(lines)} 条更新摘要 → {n} 个文件")
+PY
+}
+
 # ---------- 部署 Pages（从干净 public/ 部署，绝不打包仓库根目录里的 SSH 私钥等） ----------
 cmd_deploy(){
+  cmd_embed_changelog dungeon-raid-dev.html   # dev 站更新前先注入最新更新日志（只动 dev）
   rm -rf public
   mkdir -p public/functions
   cp dungeon-raid.html dungeon-raid-dev.html index.html public/
@@ -111,6 +134,8 @@ cmd_gh_release(){
 # ---------- 晋级正式版 ----------
 cmd_release(){
   [ -f /tmp/dr_commit_msg.txt ] || { echo "缺少 /tmp/dr_commit_msg.txt（提交说明）"; exit 1; }
+  # 0) 把最新 CHANGELOG 摘要注入 dev（随后同步给正式版）
+  cmd_embed_changelog dungeon-raid-dev.html
   # 1) 同步 dev → 正式版（两文件仅 const DEV 一行不同）
   cp dungeon-raid-dev.html dungeon-raid.html
   perl -i -pe 's/^const DEV=true;.*/const DEV=false;   \/\/ release build (DEV=false); dev build is dungeon-raid-dev.html (DEV=true)/' dungeon-raid.html
@@ -165,11 +190,12 @@ case "${1:-help}" in
   release)           cmd_release ;;
   gh-release)        cmd_gh_release "$2" ;;
   integrity)         cmd_integrity ;;
+  embed-changelog)   shift; cmd_embed_changelog "$@" ;;
   classify)          cmd_classify "$2" "$3" ;;
   delete)            cmd_delete "$2" ;;
   prune)             cmd_prune "$2" "$3" ;;
   wipe)              cmd_wipe ;;
   backfill-releases) cmd_backfill_releases ;;
   bind-domains)      cmd_bind_domains ;;
-  help|--help|-h|*)  sed -n '2,15p' "$0" | sed 's/^# \{0,1\}//' ;;
+  help|--help|-h|*)  sed -n '2,16p' "$0" | sed 's/^# \{0,1\}//' ;;
 esac
