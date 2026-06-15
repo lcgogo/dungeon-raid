@@ -7,6 +7,8 @@
 #   gh-release [vX.Y.Z] 创建/更新 GitHub Release（默认读正式版 const VERSION；可指定版本回填）
 #   integrity           核对正式版引擎 sha256 是否与 engines.json 登记一致（完整性校验）
 #   classify <id> <ai|human>  把某条成绩在 人类榜↔AI榜 之间改判（需 VERIFY_SECRET 环境变量）
+#   delete <id>         删除某条成绩（需 VERIFY_SECRET）
+#   wipe                清空整个榜单（删 scores 全表，需 VERIFY_SECRET；危险）
 #   backfill-releases   为 CHANGELOG 里每个版本补打 tag+release（已存在的跳过）
 #   bind-domains        把自定义域名绑定到 Pages 项目
 #   help                显示本说明
@@ -39,6 +41,24 @@ cmd_classify(){
   [ -n "$VERIFY_SECRET" ] || { echo "缺少环境变量 VERIFY_SECRET"; return 1; }
   curl -s -X POST "https://api.dungeonraid.win/classify?k=$VERIFY_SECRET" \
     -H 'Content-Type: application/json' -d "{\"id\":\"$id\",\"agent\":\"$agent\"}"; echo
+}
+
+# ---------- 删除单条成绩（需 VERIFY_SECRET）----------
+cmd_delete(){
+  local id="$1"
+  [ -n "$id" ] || { echo "用法: VERIFY_SECRET=… bash dr.sh delete <id>"; return 1; }
+  [ -n "$VERIFY_SECRET" ] || { echo "缺少环境变量 VERIFY_SECRET"; return 1; }
+  curl -s -X POST "https://api.dungeonraid.win/admin?k=$VERIFY_SECRET" \
+    -H 'Content-Type: application/json' -d "{\"op\":\"del\",\"id\":\"$id\"}"; echo
+}
+
+# ---------- 清空整个榜单（删 scores 全表，需 VERIFY_SECRET；危险）----------
+cmd_wipe(){
+  [ -n "$VERIFY_SECRET" ] || { echo "缺少环境变量 VERIFY_SECRET"; return 1; }
+  printf "⚠️  将删除 scores 表【全部】成绩（人类榜+AI榜+破关榜，不可恢复）。输入 YES 确认: "
+  read -r ans; [ "$ans" = YES ] || { echo "已取消"; return 1; }
+  curl -s -X POST "https://api.dungeonraid.win/admin?k=$VERIFY_SECRET" \
+    -H 'Content-Type: application/json' -d '{"op":"wipe","confirm":"YES"}'; echo
 }
 
 # ---------- 跑测试 ----------
@@ -137,7 +157,9 @@ case "${1:-help}" in
   gh-release)        cmd_gh_release "$2" ;;
   integrity)         cmd_integrity ;;
   classify)          cmd_classify "$2" "$3" ;;
+  delete)            cmd_delete "$2" ;;
+  wipe)              cmd_wipe ;;
   backfill-releases) cmd_backfill_releases ;;
   bind-domains)      cmd_bind_domains ;;
-  help|--help|-h|*)  sed -n '2,12p' "$0" | sed 's/^# \{0,1\}//' ;;
+  help|--help|-h|*)  sed -n '2,14p' "$0" | sed 's/^# \{0,1\}//' ;;
 esac

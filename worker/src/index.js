@@ -258,6 +258,22 @@ export default {
       return json({ ok: true, id: d.id, agent: d.agent });
     }
 
+    // POST /admin?k= —— 管理删除（仅密钥）：删单条 {op:'del',id}，或清空全部 {op:'wipe',confirm:'YES'}
+    if (req.method === 'POST' && p === '/admin') {
+      if (url.searchParams.get('k') !== env.VERIFY_SECRET) return json({ error: 'forbidden' }, 403);
+      let d; try { d = JSON.parse(await req.text()); } catch { return json({ error: 'invalid json' }, 400); }
+      if (d && d.op === 'del' && d.id) {
+        await env.DB.prepare("DELETE FROM scores WHERE id=?").bind(d.id).run();
+        try { if (env.REC) await env.REC.delete(d.id); } catch (e) {}
+        return json({ ok: true, deleted: d.id });
+      }
+      if (d && d.op === 'wipe' && d.confirm === 'YES') {
+        const r = await env.DB.prepare("DELETE FROM scores").run();
+        return json({ ok: true, wiped: (r.meta && r.meta.changes) || 0 });
+      }
+      return json({ error: "usage: {op:'del',id} 或 {op:'wipe',confirm:'YES'}" }, 400);
+    }
+
     // POST /verify?k= —— 回写验证结果
     if (req.method === 'POST' && p === '/verify') {
       if (url.searchParams.get('k') !== env.VERIFY_SECRET) return json({ error: 'forbidden' }, 403);
