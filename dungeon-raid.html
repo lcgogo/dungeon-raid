@@ -159,7 +159,7 @@
 (()=>{
 //==================== 配置 ====================
 // 版本号 v主.次.修：小改动改"修"，新Boss/职业改"次"，大版本变更需先确认。页面底部显示。
-const VERSION='v1.22.6';
+const VERSION='v1.22.8';
 const DEV=false;   // release build (DEV=false); dev build is dungeon-raid-dev.html (DEV=true)
 const REC_API='https://api.dungeonraid.win';   // 录像分享 API（Cloudflare Worker + KV）
 // 带种子随机数（mulberry32）：游戏全程用 rnd() 取代原生随机，配合录制种子可确定性重放
@@ -510,7 +510,7 @@ const TIER1={
     passive:['每回合棋盘摆完后，把 3 个非敌人/非心的棋子变成心','Each turn after the board settles, turns 3 non-enemy non-heart tiles into hearts']},
   swordsaint:{n:['剑圣','Sword Saint'], quip:['在我眼里，万物皆可开刃。','In my eyes, anything can be a blade.'], skill:{name:['化剑','Bladeshift'], short:['全场心/金币→剑','Hearts & coins → swords'], cd:5, f:p=>{ let n=0; for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const t=grid[r][c]; if(t&&(t.type==='heart'||t.type==='coin')){ t.type='sword'; n++; } } if(!n) return false; log(tr(`⚔️ 化剑：${n} 个心/金币化为剑`,`⚔️ Bladeshift: ${n} hearts/coins → swords`)); return n; }},
     passive:['每回合棋盘摆完后，把 3 个非敌人/非剑的棋子变成剑','Each turn after the board settles, turns 3 non-enemy non-sword tiles into swords']},
-  necromancer:{n:['死灵','Necromancer'], quip:['你的魂，我借来续命。','Your soul keeps me going. Thanks.'], skill:{name:['吸魂大法','Soul Drain'], short:['随机吸 2 只怪的命补自己','Drain 2 random foes to heal'], cd:5, f:p=>{
+  necromancer:{n:['死灵','Necromancer'], quip:['你的魂，我借来续命。','Your soul keeps me going. Thanks.'], skill:{name:['吸魂大法','Soul Drain'], short:['随机吸 2 个目标(含Boss，连剑免疫的)的命补自己','Drain 2 random targets (incl. bosses, even sword-immune) to heal'], cd:5, f:p=>{
     const foes=[]; for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const t=grid[r][c]; if(t&&(t.type==='enemy'||(t.type==='boss'&&!t.finale))) foes.push([r,c]); }
     if(!foes.length) return false;
     for(let i=foes.length-1;i>0;i--){ const j=Math.floor(rnd()*(i+1)); [foes[i],foes[j]]=[foes[j],foes[i]]; }
@@ -1157,9 +1157,10 @@ function shopInfoData(key){
   if(key==='skill'){
     const t1=p.tier1&&TIER1[p.tier1]; if(!t1||!t1.skill) return null; const sk=t1.skill;
     const st=(p.frozen&&p.frozen.skill>0)?`❄️${p.frozen.skill}${tr('回合','t')}`:(p.tier1==='miser'&&p.goldLock>0)?`🔒${p.goldLock}${tr('回合','t')}`:p.skillCd>0?`⏳${p.skillCd}${tr('回合','t')}`:tr('可发动','Ready');
-    let desc=`<b>${L(sk.short)}</b>`;
+    let desc='';   // 俏皮话紧跟职业名（标题），技能描述/被动另起一行
+    if(t1.quip) desc+=`<i style="color:#caa6e6">「${L(t1.quip)}」</i><br>`;
+    desc+=`<b>${L(sk.short)}</b>`;
     if(t1.passive) desc+=`<br>${tr('被动','Passive')}：${L(t1.passive)}`;
-    if(t1.quip) desc+=`<br><i style="color:#caa6e6">「${L(t1.quip)}」</i>`;
     return { icon:'✨', title:`${L(t1.n)} · ${L(sk.name)}`, desc,
       rows:[ [tr('冷却','Cooldown'), `${effSkillCd(p.tier1)} ${tr('回合','t')}`],
              [tr('状态','Status'), st] ] };
@@ -1802,9 +1803,9 @@ function showPlayerInfo(){
   const t1 = p.tier1?TIER1[p.tier1]:null, t2 = p.tier2?TIER2[p.tier2]:null;
   const t2b = p.tier2b?TIER2[p.tier2b]:null, s2 = p.skill2&&TIER1[p.skill2.id]?TIER1[p.skill2.id]:null;
   let cls=`<div style="text-align:left;font-size:12px;margin:8px 0 0;padding:8px;background:var(--panel2);border-radius:10px">`;
-  if(t1){ cls+=`${tr('职业','Class')}【${L(t1.n)}】${tr('主动','Active')}：${L(t1.skill.short)}（${tr('每','every')} ${t1.skill.cd} ${tr('回合','t')}）<br>`;
-    if(t1.passive) cls+=`　${tr('被动','Passive')}：${L(t1.passive)}<br>`;
-    cls+=`<i style="color:#caa6e6">「${L(t1.quip)}」</i><br>`; }
+  if(t1){ cls+=`${tr('职业','Class')}【${L(t1.n)}】<i style="color:#caa6e6">「${L(t1.quip)}」</i><br>`;   // 俏皮话紧跟职业名
+    cls+=`${tr('主动','Active')}：${L(t1.skill.short)}（${tr('每','every')} ${t1.skill.cd} ${tr('回合','t')}）<br>`;
+    if(t1.passive) cls+=`　${tr('被动','Passive')}：${L(t1.passive)}<br>`; }
   else cls+=tr('击败第 50 回合 Boss → 转职，解锁职业主动技能<br>','Beat the turn-50 boss → advance to a class, unlock its active.<br>');
   if(t2) cls+=`${tr('二阶技能','Tier-2 Skill')}【${L(t2.n)}】${tr('被动','Passive')}：${L(t2.d)}<br>`;
   else cls+=tr('继续深入 → 解锁二阶技能（被动）<br>','Delve deeper → unlock a Tier-2 Skill (passive).<br>');
