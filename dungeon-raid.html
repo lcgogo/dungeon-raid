@@ -158,7 +158,7 @@
 (()=>{
 //==================== 配置 ====================
 // 版本号 v主.次.修：小改动改"修"，新Boss/职业改"次"，大版本变更需先确认。页面底部显示。
-const VERSION='v1.21.5';
+const VERSION='v1.22.0';
 const DEV=false;   // release build (DEV=false); dev build is dungeon-raid-dev.html (DEV=true)
 const REC_API='https://api.dungeonraid.win';   // 录像分享 API（Cloudflare Worker + KV）
 // 带种子随机数（mulberry32）：游戏全程用 rnd() 取代原生随机，配合录制种子可确定性重放
@@ -585,7 +585,7 @@ function showRaceSelect(){
   RACES.forEach(rc=>{
     const b=document.createElement('button'); b.className='choice';
     b.innerHTML=`<b>${rc.e} ${L(rc.n)}</b><small>${L(rc.d)}</small>`;
-    b.onclick=()=>startGame(rc);
+    b.onclick=()=>freshStart(rc);
     card.appendChild(b);
   });
   const back=document.createElement('button'); back.className='btn'; back.style.marginTop='4px';
@@ -707,13 +707,23 @@ function onBossKilled(){
 
 //==================== 初始化 ====================
 let __seedCtr=0;
-function startGame(rc){
+// 开新局入口：正式版先向服务端要一个种子+token（防离线刷幸运种子）；dev 或离线失败 → 本地随机（可玩，不计排名）
+async function freshStart(rc){
+  if(DEV){ startGame(rc); return; }
+  let srv=null;
+  try{ const r=await Promise.race([ fetch(REC_API+'/seed',{method:'POST'}), new Promise((_,j)=>setTimeout(()=>j(0),4000)) ]);
+    if(r&&r.ok){ const x=await r.json(); if(typeof x.seed==='number'&&x.token) srv={seed:x.seed>>>0, token:x.token}; } }catch(e){}
+  startGame(rc, srv);
+  if(!srv) log(tr('⚠️ 离线/未取到服务端种子：本局可玩，但不计排名。','⚠️ Offline / no server seed: playable but not ranked.'));
+}
+function startGame(rc, srv){   // srv={seed,token}：服务端发的种子（正式版上榜用）；缺省则本地随机（dev / 离线，不计排名）
   let firstGame=false;
   if(replaying){ srand(replayRec.seed); firstGame=!!replayRec.tut; }   // 回放：是否新手局以录像里的 tut 标志为准（保持棋盘可复现）
   else {
     try{ firstGame = !localStorage.getItem(TUT_KEY); }catch(e){}        // 本机第一次游玩
-    const seed=((Date.now()>>>0)^(__seedCtr++*0x9E3779B9))>>>0; srand(seed);
+    const seed = (srv && typeof srv.seed==='number') ? (srv.seed>>>0) : (((Date.now()>>>0)^(__seedCtr++*0x9E3779B9))>>>0); srand(seed);
     rec={v:1,seed,ver:VERSION,race:rc.id,t0:Date.now(),acts:[]};        // ver：版本分桶；t0：开局时刻
+    if(srv && srv.token) rec.token=srv.token;                          // 服务端种子 token：提交时随录像带上、供 worker 校验
     if(firstGame){ rec.tut=1; try{ localStorage.setItem(TUT_KEY,'1'); }catch(e){} }
     saveRec();
   }
@@ -1426,6 +1436,7 @@ function wireEndButtons(finished){
 // 正式版上报破关，回填破关榜（按最低破关等级）名次
 async function submitClear(r, level){
   const box=document.getElementById('rankBox'); if(!box) return;
+  if(!r.token){ box.innerHTML=`<div style="text-align:center;color:var(--dim);font-size:12px">${tr('🔌 本局未用服务端种子（离线），未计破关榜','🔌 Offline run (no server seed) — not on clear board')}</div>`; return; }
   box.innerHTML=`<div style="text-align:center;color:var(--dim);font-size:12px">🏆 ${tr('破关榜上传中…','Submitting clear…')}</div>`;
   try{
     const res=await fetch(REC_API+'/clear',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({level,rec:r,agent:'human',name:getName()})});   // 真人破关上报人类榜
@@ -1489,6 +1500,7 @@ async function renderLeaderboard(){
 }
 async function submitScore(r, level, gold){
   const box=document.getElementById('rankBox'); if(!box) return;
+  if(!r.token){ box.innerHTML=`<div style="text-align:center;color:var(--dim);font-size:12px">${tr('🔌 本局未用服务端种子（离线），未计排名','🔌 Offline run (no server seed) — not ranked')}</div>`; return; }   // 无 token：不计排名
   box.innerHTML=`<div style="text-align:center;color:var(--dim);font-size:12px">🏆 ${tr('排名上传中…','Submitting score…')}</div>`;
   try{
     const res=await fetch(REC_API+'/score',{method:'POST',headers:{'Content-Type':'application/json'},
