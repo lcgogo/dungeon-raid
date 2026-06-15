@@ -158,7 +158,7 @@
 (()=>{
 //==================== 配置 ====================
 // 版本号 v主.次.修：小改动改"修"，新Boss/职业改"次"，大版本变更需先确认。页面底部显示。
-const VERSION='v1.21.3';
+const VERSION='v1.21.4';
 const DEV=true;    // 开发版：指向最新开发版本；独立存档 + DEV 标识。正式版在 dungeon-raid.html（DEV=false）
 const REC_API='https://api.dungeonraid.win';   // 录像分享 API（Cloudflare Worker + KV）
 // 带种子随机数（mulberry32）：游戏全程用 rnd() 取代原生随机，配合录制种子可确定性重放
@@ -324,12 +324,12 @@ const BOSSES=[
     desc:['{WC}对它无效，只能用 💥炸弹 炸。只要它在场，棋盘上所有的心都变成毒心（绿心 💚）——连毒心不再回血，反而按等量【扣血】（无视护甲）！炸掉它，心就恢复正常。倒计时归零它也会重击你。','Immune to {WC} — only the 💥 Bomb works. While it is on the board, ALL hearts become poison (green 💚) — linking them DRAINS that much HP instead of healing (ignoring armor)! Bomb it and hearts return to normal. It also strikes you when its timer hits 0.'] },
   { id:'snowman', emoji:'⛄', name:['雪人','Snowman'], quip:['冻住，不许走——技能也别想用。','Freeze! No moves, and no skills either.'], monster:true, noTierScale:true,
     special:['现身冰封你 1~3 个主动（按档位）','Freezes 1–3 of your actives on arrival (by tier)'],
-    desc:['{WC}对它无效，只能用 💥炸弹 炸。它一现身就【随机冰封你的主动能力】——一阶冻 1 个、二阶冻 2 个、三阶冻 3 个（在「一阶主动 / 💊治疗 / 💥炸弹」里随机），数回合内不可用。趁早炸掉它（若炸弹被冻，等解冻再炸）。倒计时归零也会重击你。','Immune to {WC} — only the 💥 Bomb works. On arrival it【freezes random active abilities】: 1 at Lv1, 2 at Lv2, 3 at Lv3 (among your class active / 💊Heal / 💥Bomb), unusable for a few turns. Bomb it down (wait out the thaw if your bomb got frozen). It also strikes you at 0.'],
+    desc:['{WC}对它无效，只能用 💥炸弹 炸。它一现身就【随机冰封你的主动能力】——按 Boss 档位冻 1~3 个（在「职业主动 / 💊治疗 / 💥炸弹」里随机），数回合内不可用。趁早炸掉它（若炸弹被冻，等解冻再炸）。倒计时归零也会重击你。','Immune to {WC} — only the 💥 Bomb works. On arrival it【freezes random active abilities】: 1 at Lv1, 2 at Lv2, 3 at Lv3 (among your class active / 💊Heal / 💥Bomb), unusable for a few turns. Bomb it down (wait out the thaw if your bomb got frozen). It also strikes you at 0.'],
     onSpawn(t){ const keys=[]; if(player.tier1) keys.push('skill'); keys.push('heal','bomb');
       for(let i=keys.length-1;i>0;i--){ const j=Math.floor(rnd()*(i+1)); [keys[i],keys[j]]=[keys[j],keys[i]]; }
       const m=Math.min(t.tier||1, keys.length), K=4; const froz=keys.slice(0,m);
       player.frozen=player.frozen||{}; froz.forEach(k=>{ player.frozen[k]=K; });
-      const nm={skill:tr('一阶主动','skill'),heal:'💊',bomb:'💥'};
+      const nm={skill:tr('职业主动','skill'),heal:'💊',bomb:'💥'};
       log(tr(`⛄ 雪人冰封了你 ${m} 个主动（${froz.map(k=>nm[k]).join('、')}），${K} 回合内不可用！`,`⛄ Snowman freezes ${m} of your actives (${froz.map(k=>nm[k]).join(',')}) for ${K} turns!`)); } },
   { id:'birdman', emoji:'🦅', name:['鸟人','Birdman'], quip:['抓不住我，我会飞（还会瞬移）。','Catch me? I fly — and teleport.'], monster:true, swordable:true, perTurn:true,
     special:['每回合啄你一下并瞬移换位','Pecks you and teleports each turn'],
@@ -581,7 +581,7 @@ function showRaceSelect(){
   const best=getBest();
   const bestLine = best ? `<p>${tr('🏆 最佳纪录：等级','🏆 Best: Level')} ${best.level} · 💰${best.gold}</p>` : '';
   card.innerHTML=`<h2>${tr('选择种族','Choose your race')}</h2>${bestLine}
-    <p style="font-size:12px;color:var(--dim);line-height:1.6">${tr('里程碑 Boss：第50回合转一阶（主动）· 100 转二阶（被动）· 200 第二被动 · 350 换装主动 · 500 终焉之主破关','Milestone bosses — 50: tier-1 active · 100: tier-2 passive · 200: 2nd passive · 350: swap an active · 500: final Overlord clear')}</p>`;
+    <p style="font-size:12px;color:var(--dim);line-height:1.6">${tr('击败第 50 回合的 Boss 即可转职，解锁职业的主动技能；之后随着探险深入，还会解锁更强大的技能……','Beat the turn-50 boss to advance to a class and unlock its active skill; delve deeper to unlock ever more powerful skills…')}</p>`;
   RACES.forEach(rc=>{
     const b=document.createElement('button'); b.className='choice';
     b.innerHTML=`<b>${rc.e} ${L(rc.n)}</b><small>${L(rc.d)}</small>`;
@@ -626,12 +626,12 @@ function showTierSelect(tier){
   const path=RACE_PATHS[player.race];
   const ids = tier===1 ? path.t1 : tier===3 ? path.t2.filter(id=>id!==player.tier2) : path.t2;   // 第二被动：排除已拥有的
   const pool = tier===1 ? TIER1 : TIER2;
-  const head = tier===1 ? tr('⚔️ 转职：一阶职业','⚔️ Advance: Tier-1 Class')
-             : tier===3 ? tr('🌟 第二被动：本种族另一项','🌟 Second passive: your race’s other')
-             : tr('🌟 转职：二阶职业','🌟 Advance: Tier-2 Class');
+  const head = tier===1 ? tr('⚔️ 转职','⚔️ Advance: Class')
+             : tier===3 ? tr('🌟 本族技能','🌟 Race Skill')
+             : tr('🌟 二阶技能','🌟 Tier-2 Skill');
   const sub  = tier===1 ? tr('击败强敌！选择一个职业，解锁主动技能','Boss slain! Pick a class to unlock an active skill')
-             : tier===3 ? tr('第200回合 Boss 被斩！再获得一项本种族被动','Turn-200 boss slain! Gain another passive of your race')
-             : tr('再次证明自己！选择一个二阶职业，获得被动','Proven again! Pick a tier-2 class for a passive');
+             : tier===3 ? tr('再获得一项本族技能（本种族的另一项被动）','Gain another Race Skill (your race’s other passive)')
+             : tr('再次证明自己！选择一项二阶技能（被动）','Proven again! Pick a Tier-2 Skill (passive)');
   const card=document.getElementById('card');
   card.innerHTML=`<h2>${head}</h2><p>${sub}</p><p style="color:#caa6e6;font-style:italic;font-size:13px;margin:-4px 0 10px">${L(TRANSFORM_BLESS[tier])}</p>`;
   ids.forEach(id=>{
@@ -661,9 +661,9 @@ function showSkillSwap(){
   if(replaying) return;
   busy=true; player.awaitingTier=4;
   const card=document.getElementById('card');
-  card.innerHTML=`<h2 style="margin-bottom:4px">🔁 ${tr('换装主动','Equip an active')}</h2>
+  card.innerHTML=`<h2 style="margin-bottom:4px">🌐 ${tr('跨界技能','Crossover Skill')}</h2>
     <p style="color:#caa6e6;font-style:italic;font-size:13px;margin:2px 0 6px">${L(TRANSFORM_BLESS[4])}</p>
-    <p style="margin-bottom:8px;font-size:12px">${tr('任选一个职业主动，替换 💊治疗 或 💥炸弹 槽（带该技能冷却）','Pick any class active to replace your 💊Heal or 💥Bomb slot (uses its cooldown)')}</p>`;
+    <p style="margin-bottom:8px;font-size:12px">${tr('从所有职业的主动里任选一个（可跨种族），替换 💊治疗 或 💥炸弹 槽（带该技能冷却）','Pick any class’s active (any race) to replace your 💊Heal or 💥Bomb slot (uses its cooldown)')}</p>`;
   Object.keys(TIER1).forEach(id=>{
     const def=TIER1[id], sk=def.skill;
     const b=document.createElement('button'); b.className='choice'; b.style.cssText='padding:8px 12px;margin:0 0 6px';
@@ -1682,16 +1682,16 @@ function showPlayerInfo(){
   const t1 = p.tier1?TIER1[p.tier1]:null, t2 = p.tier2?TIER2[p.tier2]:null;
   const t2b = p.tier2b?TIER2[p.tier2b]:null, s2 = p.skill2&&TIER1[p.skill2.id]?TIER1[p.skill2.id]:null;
   let cls=`<div style="text-align:left;font-size:12px;margin:8px 0 0;padding:8px;background:var(--panel2);border-radius:10px">`;
-  if(t1){ cls+=`${tr('一阶','T1')}【${L(t1.n)}】${tr('主动','Active')}：${L(t1.skill.short)}（${tr('每','every')} ${t1.skill.cd} ${tr('回合','t')}）<br>`;
+  if(t1){ cls+=`${tr('职业','Class')}【${L(t1.n)}】${tr('主动','Active')}：${L(t1.skill.short)}（${tr('每','every')} ${t1.skill.cd} ${tr('回合','t')}）<br>`;
     if(t1.passive) cls+=`　${tr('被动','Passive')}：${L(t1.passive)}<br>`;
     cls+=`<i style="color:#caa6e6">「${L(t1.quip)}」</i><br>`; }
-  else cls+=tr('击败第50回合 Boss 解锁一阶职业（主动技能）<br>','Beat the turn-50 boss to unlock a tier-1 class (active).<br>');
-  if(t2) cls+=`${tr('二阶','T2')}【${L(t2.n)}】${tr('被动','Passive')}：${L(t2.d)}<br>`;
-  else cls+=tr('击败第100回合 Boss 解锁二阶职业（被动）<br>','Beat the turn-100 boss to unlock a tier-2 class (passive).<br>');
-  if(t2b) cls+=`${tr('被动②','P2')}【${L(t2b.n)}】${tr('被动','Passive')}：${L(t2b.d)}<br>`;
-  else cls+=tr('击败第200回合 Boss 获得第二被动<br>','Beat the turn-200 boss for a second passive.<br>');
-  if(s2) cls+=`${tr('换装','Swap')}【${L(s2.skill.name)}】→ ${p.skill2.slot==='heal'?'💊':'💥'}（${tr('每','every')} ${s2.skill.cd} ${tr('回合','t')}）${s2.quip?`<br><i style="color:#caa6e6">「${L(s2.quip)}」</i>`:''}`;
-  else cls+=tr('击败第350回合 Boss 用任意主动替换治疗/炸弹','Beat the turn-350 boss to swap an active into Heal/Bomb.');
+  else cls+=tr('击败第 50 回合 Boss → 转职，解锁职业主动技能<br>','Beat the turn-50 boss → advance to a class, unlock its active.<br>');
+  if(t2) cls+=`${tr('二阶技能','Tier-2 Skill')}【${L(t2.n)}】${tr('被动','Passive')}：${L(t2.d)}<br>`;
+  else cls+=tr('继续深入 → 解锁二阶技能（被动）<br>','Delve deeper → unlock a Tier-2 Skill (passive).<br>');
+  if(t2b) cls+=`${tr('本族技能','Race Skill')}【${L(t2b.n)}】${tr('被动','Passive')}：${L(t2b.d)}<br>`;
+  else cls+=tr('更深处 → 获得本族技能（再一项被动）<br>','Deeper still → gain a Race Skill (another passive).<br>');
+  if(s2) cls+=`${tr('跨界技能','Crossover')}【${L(s2.skill.name)}】→ ${p.skill2.slot==='heal'?'💊':'💥'}（${tr('每','every')} ${s2.skill.cd} ${tr('回合','t')}）${s2.quip?`<br><i style="color:#caa6e6">「${L(s2.quip)}」</i>`:''}`;
+  else cls+=tr('深渊尽头 → 跨界技能（换任意职业主动）','At the abyss’s end → a Crossover Skill (swap in any class active).');
   cls+='</div>';
   const card=document.getElementById('card');
   card.innerHTML=`<h2>${rc?`${rc.e} ${L(rc.n)}`:tr('冒险者','Adventurer')}</h2>
