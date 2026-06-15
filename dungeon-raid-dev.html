@@ -158,7 +158,7 @@
 (()=>{
 //==================== 配置 ====================
 // 版本号 v主.次.修：小改动改"修"，新Boss/职业改"次"，大版本变更需先确认。页面底部显示。
-const VERSION='v1.21.4';
+const VERSION='v1.21.5';
 const DEV=true;    // 开发版：指向最新开发版本；独立存档 + DEV 标识。正式版在 dungeon-raid.html（DEV=false）
 const REC_API='https://api.dungeonraid.win';   // 录像分享 API（Cloudflare Worker + KV）
 // 带种子随机数（mulberry32）：游戏全程用 rnd() 取代原生随机，配合录制种子可确定性重放
@@ -756,6 +756,14 @@ const REC_KEY=DEV?'dr_rec_dev':'dr_rec', REC_LAST_KEY=DEV?'dr_rec_last_dev':'dr_
 // 录制一个玩家动作（回放中不录）。动作：['m',cells,baseType] 连线 / ['b',key] 购买 / ['k'] 技能 / ['u',idx] 升级选择 / ['t',tier,id] 转职选择
 // 每个动作末尾追加一个时间戳（epoch ms，相对开局可算操作间隔）——仅供离线分析（后续黑盒判定是否 AI 录像），回放/校验按固定下标取值，忽略该尾元素，旧录像无此字段也能正常回放。
 function recAct(a){ if(rec && !replaying){ a.push(Date.now()-(rec.t0||0)); rec.acts.push(a); saveRec(); } }
+// 本局游玩时长（毫秒）：实时对局取 now−t0；回放取录像最后一步的时间戳（相对开局 ms）
+function playMs(){
+  if(!replaying && rec && rec.t0) return Math.max(0, Date.now()-rec.t0);
+  const src = replayRec || rec;
+  if(src && Array.isArray(src.acts) && src.acts.length){ const la=src.acts[src.acts.length-1]; const t=la[la.length-1]; if(typeof t==='number') return t; }
+  return 0;
+}
+function fmtDur(ms){ const s=Math.round(ms/1000); if(s<60) return tr(`${s} 秒`,`${s}s`); const m=Math.floor(s/60); return tr(`${m} 分 ${s%60} 秒`,`${m}m ${s%60}s`); }
 function saveRec(){ try{ if(rec) localStorage.setItem(REC_KEY, JSON.stringify(rec)); }catch(e){} }
 function loadRec(){ try{ return JSON.parse(localStorage.getItem(REC_KEY)||'null'); }catch(e){ return null; } }
 function getLastRec(){ try{ return JSON.parse(localStorage.getItem(REC_LAST_KEY)||'null'); }catch(e){ return null; } }
@@ -780,6 +788,7 @@ function loadGame(){
     pendingLevels=data.pendingLevels||0;
     grid=data.grid.map(row=>row.map(t=> t?{...t}:null));
     rec=loadRec();   // 恢复进行中的录像，继续游戏时录制不断
+    if(rec && rec.acts && rec.acts.length){ const la=rec.acts[rec.acts.length-1]; const last=la[la.length-1]; if(typeof last==='number') rec.t0=Date.now()-last; }   // 重设 t0：游玩时长排除「关掉游戏的间隔」（不影响重放，时间戳仅供分析）
     selection=[]; dragging=false; busy=false;
     syncPositions(true); hideOverlay(); logClear();
     log(tr('继续上次的探险…','Continuing your last run…'));
@@ -1335,6 +1344,7 @@ function showLevelUp(){
 function gameOver(){
   if(jumping) return;   // 跳回合快进中：不弹结束画面（循环靠 hp>0 自行停下）
   busy=true;
+  const durMs=playMs();   // 游玩时长（须在 stopReplay 清空 replayRec 之前取）
   const wasReplay=replaying;
   if(wasReplay){ stopReplay(); }                 // 回放播到死亡：停止回放，照常显示死亡报告
   else { saveBest(); clearSave();
@@ -1357,6 +1367,7 @@ function gameOver(){
   card.innerHTML=`<h2 style="color:var(--hp);margin-bottom:4px">${tr('💀 你倒下了','💀 You fell')}</h2>
     <p style="margin-bottom:8px">${tr('地牢吞噬了又一位冒险者…','The dungeon claims another adventurer…')}</p>
     <div style="font-size:14px;margin-bottom:8px">${tr('等级','Lv')} <b style="color:var(--gold)">${player.level}</b> · 💰<b style="color:var(--gold)">${player.gold}</b> · <b style="color:var(--gold)">${player.turns}</b> ${tr('回合','turns')}</div>
+    <div style="font-size:12px;color:var(--dim);margin:-4px 0 8px">⏱ ${tr('用时','Played')} ${fmtDur(durMs)}</div>
     ${report}
     ${DEV?'':`<div id="rankBox" style="text-align:left;margin:4px 0 12px;background:var(--panel2);border-radius:10px;padding:6px 4px;min-height:20px"></div>`}
     <div style="display:flex;gap:6px;justify-content:center;margin-bottom:8px;flex-wrap:wrap">
@@ -1377,6 +1388,7 @@ function gameOver(){
 function onClear(){
   if(jumping){ player.cleared=true; return; }   // 跳回合快进中：标记破关但不弹结束画面
   busy=true; player.cleared=true;
+  const durMs=playMs();   // 游玩时长（须在 stopReplay 前取）
   const wasReplay=replaying;
   for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const t=grid[r][c]; if(t&&t.bossId==='finale') grid[r][c]=null; }  // 移除终焉之主
   if(wasReplay){ stopReplay(); }
@@ -1385,6 +1397,7 @@ function onClear(){
   card.innerHTML=`<h2 style="color:var(--gold);margin-bottom:4px">🏆 ${tr('破关！','CLEARED!')}</h2>
     <p style="line-height:1.6;margin-bottom:8px">${tr('🎉 终焉之主的浪潮退去，你撑过全部 10 波，成为第一个活着走出地牢的冒险者——「再无人生还」的传说终于有了结局。','🎉 The Overlord’s waves recede; you survived all 10 and became the first to walk out of the dungeon alive — the legend that “none returned” finally has its ending.')} <span style="color:var(--dim)">${tr('感谢游玩这份致敬之作 🙏','Thanks for playing this tribute 🙏')}</span></p>
     <div style="font-size:14px;margin-bottom:8px">${tr('破关等级','Clear Lv')} <b style="color:var(--gold)">${player.level}</b> <span style="color:var(--dim);font-size:11px">${tr('越低越强','lower=better')}</span> · 💰<b style="color:var(--gold)">${player.gold}</b> · <b style="color:var(--gold)">${player.turns}</b> ${tr('回合','t')}</div>
+    <div style="font-size:12px;color:var(--dim);margin:-4px 0 8px">⏱ ${tr('用时','Played')} ${fmtDur(durMs)}</div>
     ${DEV?'':`<div id="rankBox" style="text-align:left;margin:4px 0 12px;background:var(--panel2);border-radius:10px;padding:6px 4px;min-height:20px"></div>`}
     <div style="display:flex;gap:6px;justify-content:center;margin-bottom:8px;flex-wrap:wrap">
       <button class="choice" id="goReplay" style="width:auto;margin:0;padding:7px 12px">🎬 ${tr('回放本局','Replay')}</button>
