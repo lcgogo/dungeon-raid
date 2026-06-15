@@ -158,7 +158,7 @@
 (()=>{
 //==================== 配置 ====================
 // 版本号 v主.次.修：小改动改"修"，新Boss/职业改"次"，大版本变更需先确认。页面底部显示。
-const VERSION='v1.21.1';
+const VERSION='v1.21.2';
 const DEV=true;    // 开发版：指向最新开发版本；独立存档 + DEV 标识。正式版在 dungeon-raid.html（DEV=false）
 const REC_API='https://api.dungeonraid.win';   // 录像分享 API（Cloudflare Worker + KV）
 // 带种子随机数（mulberry32）：游戏全程用 rnd() 取代原生随机，配合录制种子可确定性重放
@@ -1331,6 +1331,7 @@ function showLevelUp(){
 }
 
 function gameOver(){
+  if(jumping) return;   // 跳回合快进中：不弹结束画面（循环靠 hp>0 自行停下）
   busy=true;
   const wasReplay=replaying;
   if(wasReplay){ stopReplay(); }                 // 回放播到死亡：停止回放，照常显示死亡报告
@@ -1372,6 +1373,7 @@ function gameOver(){
 }
 // 破关：撑过终焉 10 波。胜利结算 + 破关榜（按最低等级排名）
 function onClear(){
+  if(jumping){ player.cleared=true; return; }   // 跳回合快进中：标记破关但不弹结束画面
   busy=true; player.cleared=true;
   const wasReplay=replaying;
   for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const t=grid[r][c]; if(t&&t.bossId==='finale') grid[r][c]=null; }  // 移除终焉之主
@@ -1508,6 +1510,7 @@ function exportRec(r){
 
 //==================== 录像回放 ====================
 let replayRec=null, replayIdx=0, replayTimer=null, replaySpeed=1, replayPaused=false, replayTotalTurns=0, replayAutoPaused=false;
+let jumping=false;   // 跳回合快进期间：抑制 gameOver/onClear，避免（录像若不一致而提前死亡时）直接弹出结束画面
 const REPLAY_BASE=620;   // 每步基础间隔 ms（按倍速缩短）
 function startReplay(recObj){
   if(!recObj||!Array.isArray(recObj.acts)){ alert(tr('录像无效','Invalid recording')); return; }
@@ -1560,15 +1563,22 @@ function stopReplay(){ clearTimeout(replayTimer); replayTimer=null; replaying=fa
 // 跳到指定回合：从种子重头快进（确定性、瞬间），到目标回合后暂停
 function jumpToTurn(target){
   if(!replaying||!replayRec) return;
+  const rec0=replayRec, acts=rec0.acts;            // 本地持有：防止快进中误触 stopReplay 把 replayRec 置空
   clearTimeout(replayTimer); replayTimer=null;
   replayAutoPaused = target>=replayTotalTurns-10;   // 跳到接近终点就别再自动暂停
-  replayIdx=0; busy=false;
-  startGame(raceById(replayRec.race));              // replaying=true → 用 replayRec.seed 重新播种
-  while(replayIdx<replayRec.acts.length && player.hp>0 && player.turns<target){
-    try{ dispatchReplayAct(replayRec.acts[replayIdx++]); }catch(e){ break; }
-  }
+  replayIdx=0; busy=false; jumping=true;            // 快进期间抑制 gameOver/onClear
+  try{
+    startGame(raceById(rec0.race));                 // replaying=true → 用 rec0.seed 重新播种
+    while(replayIdx<acts.length && player.hp>0 && player.turns<target){
+      try{ dispatchReplayAct(acts[replayIdx++]); }catch(e){ break; }
+    }
+  } finally { jumping=false; }
+  replaying=true; replayRec=rec0;                   // 恢复回放状态（以防快进里被改动）
   replayPaused=true; updateReplayBar();
-  log(tr(`⏭ 跳到第 ${player.turns} 回合（已暂停，点 ▶ 继续）`,`⏭ Jumped to turn ${player.turns} (paused, ▶ to play)`));
+  if(player.turns<target && (player.hp<=0||player.cleared))
+    log(tr(`⏭ 该录像在第 ${player.turns} 回合就结束了（无法再往后跳）`,`⏭ This recording ends at turn ${player.turns} (cannot jump further)`));
+  else
+    log(tr(`⏭ 跳到第 ${player.turns} 回合（已暂停，点 ▶ 继续）`,`⏭ Jumped to turn ${player.turns} (paused, ▶ to play)`));
 }
 function renderJumps(){
   const box=document.getElementById('rbJumps'); if(!box) return; box.innerHTML='';
