@@ -159,7 +159,7 @@
 (()=>{
 //==================== 配置 ====================
 // 版本号 v主.次.修：小改动改"修"，新Boss/职业改"次"，大版本变更需先确认。页面底部显示。
-const VERSION='v1.22.8';
+const VERSION='v1.23.0';
 const DEV=false;   // release build (DEV=false); dev build is dungeon-raid-dev.html (DEV=true)
 const REC_API='https://api.dungeonraid.win';   // 录像分享 API（Cloudflare Worker + KV）
 // 带种子随机数（mulberry32）：游戏全程用 rnd() 取代原生随机，配合录制种子可确定性重放
@@ -514,11 +514,14 @@ const TIER1={
     const foes=[]; for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const t=grid[r][c]; if(t&&(t.type==='enemy'||(t.type==='boss'&&!t.finale))) foes.push([r,c]); }
     if(!foes.length) return false;
     for(let i=foes.length-1;i>0;i--){ const j=Math.floor(rnd()*(i+1)); [foes[i],foes[j]]=[foes[j],foes[i]]; }
-    let healed=0, kills=0; const pick=foes.slice(0,2);
-    for(const [r,c] of pick){ const t=grid[r][c]; const drain=Math.min(p.maxHp, t.hp); t.hp-=drain; healed+=drain; statueReflect(t, drain);   // 石像：吸魂的伤害也会反弹
-      if(t.hp<=0){ const isB=t.type==='boss'; grid[r][c]=null; kills++; if(isB){thiefRecover(t);p.xp+=15;p.gold+=20;onBossKilled();} else {p.xp+=3+(p.killXp||0);p.gold+=1;} } }
+    let healed=0, kills=0; const pick=foes.slice(0,2); const splashes=[];
+    for(const [r,c] of pick){ const t=grid[r][c]; const before=t.hp; const drain=Math.min(p.maxHp, before); t.hp-=drain; healed+=drain; statueReflect(t, drain);   // 石像：吸魂的伤害也会反弹
+      if(t.hp<=0){ const isB=t.type==='boss'; grid[r][c]=null; kills++; if(isB){thiefRecover(t);p.xp+=15;p.gold+=20;onBossKilled();} else {p.xp+=3+(p.killXp||0);p.gold+=1;}
+        if(p.splash && p.maxHp>before) splashes.push(p.maxHp-before); } }   // 溅射：吸魂的溢出（吸力上限−目标血量）也砸向剩余敌人
+    let splashK=0; for(const over of splashes){ splashK+=splashHit(over).kills; }   // 溅射独立结算（含剑免疫 Boss，排除终焉）
+    kills+=splashK;
     const h=gainHeal(healed); applyGravity(); syncPositions(false);
-    log(tr(`🪄 吸魂大法：吸取 ${pick.length} 只怪 ${healed} 生命，回血 ${h}`+(kills?`，吸死 ${kills} 只`:''),`🪄 Soul Drain: drained ${healed} from ${pick.length} foes, +${h} HP`+(kills?`, ${kills} killed`:''))); return true; }}},
+    log(tr(`🪄 吸魂大法：吸取 ${pick.length} 个目标 ${healed} 生命，回血 ${h}`+(kills?`，击杀 ${kills} 只`:'')+(splashes.length?`，溅射 ${splashes.length} 次`:''),`🪄 Soul Drain: drained ${healed} from ${pick.length}, +${h} HP`+(kills?`, ${kills} killed`:'')+(splashes.length?`, ${splashes.length} splash`:''))); return true; }}},
   skeletonking:{n:['骷髅王','Skeleton King'], quip:['死过一次，再死一次又何妨。','Died once already — what is one more?'], skill:{name:['重生','Rebirth'], short:['本回合致死则满血复活(此后冷却+2)','Cheat death this turn, full heal'], cd:5, f:p=>{ p.rebirthTurn=true; log(tr('💀 重生待命：本回合若被击败，将满血复活！','💀 Rebirth armed: if slain this turn, revive at full HP!')); return true; }}},
 };
 // 二阶职业：被动
