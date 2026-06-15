@@ -158,7 +158,7 @@
 (()=>{
 //==================== 配置 ====================
 // 版本号 v主.次.修：小改动改"修"，新Boss/职业改"次"，大版本变更需先确认。页面底部显示。
-const VERSION='v1.22.2';
+const VERSION='v1.22.3';
 const DEV=false;   // release build (DEV=false); dev build is dungeon-raid-dev.html (DEV=true)
 const REC_API='https://api.dungeonraid.win';   // 录像分享 API（Cloudflare Worker + KV）
 // 带种子随机数（mulberry32）：游戏全程用 rnd() 取代原生随机，配合录制种子可确定性重放
@@ -399,14 +399,38 @@ function bossStats(){
 }
 function bossTier(){ return 1 + Math.floor(player.turns/50); }  // 每 50 回合 Boss 强度档位 +1
 function hasBoss(){ for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++) if(grid[r][c]&&grid[r][c].type==='boss') return true; return false; }
-// 是否还有可行连线（同类连接型 ×2，或 剑+相邻可攻击目标）。终局棋盘被Boss填满时用来判负。
+// 是否还有可行连线（同类连接型 ×2，或 「剑」格紧邻可攻击目标 = 真能成剑链）。棋盘塞满怪时用来判负。
 function hasAnyMove(){
   for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const t=grid[r][c]; if(!t) continue;
     for(const [dr,dc] of [[0,1],[1,0],[1,1],[1,-1]]){ const nr=r+dr,nc=c+dc; if(nr<0||nr>=ROWS||nc<0||nc>=COLS) continue; const u=grid[nr][nc]; if(!u) continue;
       if(t.type===u.type && CONNECTABLE.includes(t.type)) return true;                 // 同类连接
-      if(isSwordTarget(t) && isSwordTarget(u)) return true;  // 相邻两个剑目标即可起手成剑链（无需棋盘上有"剑"格）
+      // 真正可打的剑链必须含一把「剑」格（怪-怪连线无剑会被判空挥取消，见 endDrag）：需「剑」紧邻可攻击目标
+      if((t.type==='sword' && isSwordTarget(u)) || (u.type==='sword' && isSwordTarget(t))) return true;
     } }
   return false;
+}
+// 这些一阶/换装主动会「清/转」棋子，发动后可能打破死局（清掉小怪或造出可连的局）
+const ESCAPE_ACTIVES=['priest','ranger','rogue','blacksmith','guildmaster','swordsaint','necromancer'];
+// 是否还有「就绪且能改盘」的动作可打破死局——判负前的逃生检查，避免错杀还能救的局
+function hasEscapeAction(){
+  const fz=player.frozen||{};
+  if(player.tier1 && ESCAPE_ACTIVES.includes(player.tier1) && player.skillCd<=0 && !(fz.skill>0)) return true;  // 一阶主动就绪
+  if(player.skill2 && player.skill2Cd<=0 && !(fz[player.skill2.slot]>0) && ESCAPE_ACTIVES.includes(player.skill2.id)) return true;  // 换装主动就绪
+  if(!(player.skill2 && player.skill2.slot==='bomb')){   // 炸弹槽未被换装占用时：就绪+未囤金+未冰封+买得起 → 可清怪
+    const cd=(player.shopCd&&player.shopCd.bomb)||0;
+    if(cd<=0 && !(player.goldLock>0) && !(fz.bomb>0) && player.gold>=shopCost('bomb')) return true;
+  }
+  return false;
+}
+// 死局判负：无棋可连且无就绪改盘动作 → 直接判负（不再卡死）。有任一弹层待处理时不调用。返回是否已判负。
+function checkDeadlock(){
+  if(player.cleared || player.hp<=0) return false;
+  if(hasAnyMove() || hasEscapeAction()) return false;
+  log(player.finaleStarted
+    ? tr('👑 棋盘被 Boss 淹没，无路可走…','👑 Overrun by bosses — no moves left…')
+    : tr('🪦 棋盘塞满了怪，无棋可连、无技可施，困死于此。','🪦 Board jammed with monsters — no moves, no skills left. You are trapped.'));
+  gameOver();
+  return true;
 }
 // 感染：场上存在僵尸 Boss 时血条变绿（僵尸死即解除感染）
 function isInfected(){ for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const t=grid[r][c]; if(t&&t.type==='boss'&&t.bossId==='zombie') return true; } return false; }
@@ -1065,7 +1089,8 @@ function buyItem(key){
   if(player.t2Pending){ player.t2Pending=false; showTierSelect(2); return; }
   if(player.t3Pending){ player.t3Pending=false; showTierSelect(3); return; }
   if(player.t4Pending){ player.t4Pending=false; showSkillSwap(); return; }
-  if(pendingLevels) showLevelUp();
+  if(pendingLevels){ showLevelUp(); return; }
+  checkDeadlock();   // 用掉炸弹后若仍无棋可连且无就绪动作 → 判负，不卡死
 }
 // 施放换装主动（占用 治疗/炸弹 槽）。走独立冷却 skill2Cd；录像用占用的槽位 key，回放经 buyItem 复现。
 function castSkill2(key){
@@ -1079,7 +1104,8 @@ function castSkill2(key){
   checkLevel(); updateHUD();
   if(player.t3Pending){ player.t3Pending=false; showTierSelect(3); return; }
   if(player.t4Pending){ player.t4Pending=false; showSkillSwap(); return; }
-  if(pendingLevels) showLevelUp();
+  if(pendingLevels){ showLevelUp(); return; }
+  checkDeadlock();   // 用掉换装主动后若仍无棋可连 → 判负，不卡死
 }
 document.querySelectorAll('.shopBtn[data-buy]').forEach(b=>{
   b.onclick=()=>buyItem(b.dataset.buy);
@@ -1104,7 +1130,8 @@ function activateSkill(){
   recAct(['k']);   // 录制技能发动
   if(r===undefined) log(tr(`✨ 【${L(sk.name)}】发动！`,`✨ ${L(sk.name)} activated!`)); // 技能没自带日志才用通用日志
   checkLevel(); updateHUD();
-  if(pendingLevels) showLevelUp();
+  if(pendingLevels){ showLevelUp(); return; }
+  checkDeadlock();   // 用掉最后的改盘动作后若仍无棋可连 → 判负，不卡死
 }
 document.getElementById('skillBtn').onclick=activateSkill;
 
@@ -1187,14 +1214,12 @@ function resolve(){
   checkLevel();
   updateHUD();
   if(player.hp<=0){ gameOver(); return; }
-  if(player.finaleStarted && !player.cleared && !hasAnyMove()){   // 终局：棋盘被Boss淹没、无路可走 → 判负
-    log(tr('👑 棋盘被 Boss 淹没，无路可走…','👑 Overrun by bosses — no moves left…')); gameOver(); return;
-  }
   if(player.t1Pending){ player.t1Pending=false; showTierSelect(1); return; }   // 击败50回合Boss → 选一阶
   if(player.t2Pending){ player.t2Pending=false; showTierSelect(2); return; }   // 击败100回合Boss → 选二阶
   if(player.t3Pending){ player.t3Pending=false; showTierSelect(3); return; }   // 击败200回合Boss → 第二被动
   if(player.t4Pending){ player.t4Pending=false; showSkillSwap(); return; }     // 击败350回合Boss → 主动换装
-  if(pendingLevels) showLevelUp();
+  if(pendingLevels){ showLevelUp(); return; }
+  checkDeadlock();   // 无弹层待处理时：棋盘塞满怪、无棋可连且无就绪改盘动作 → 判负（含终局被Boss淹没）
 }
 
 // 治疗：返回实际回复的生命（超出上限的部分丢弃）
