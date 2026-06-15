@@ -19,8 +19,8 @@ const MIN_TURNS = 30;       // 分享门槛：少于 30 回合不接收
 const SHARE_VERIFY_FACTOR = 1.5;  // 分享回合数 > 榜首×1.5（且≥榜首+30）→ 标记待验证
 const SEED_TTL = 7200;      // 服务端发放的种子 token 有效期（秒）：一局必须在此窗口内完成
 // 反作弊·服务端发种子：上榜成绩必须用服务端发的种子（防离线刷幸运种子）。
-// 过渡期 false（接受无 token 的旧客户端，不破坏现网榜单）；新客户端全量后改 true 才真正强制。
-const REQUIRE_TOKEN = false;
+// true = 强制：无 token 的提交一律拒收（v1.22.0 带 token 的正式版上线后开启）。
+const REQUIRE_TOKEN = true;
 
 // 校验并消费一次性种子 token：present 且有效 → 标记已用、返回 {ok:true}；否则 {ok:false,reason}
 async function consumeToken(env, token, seed) {
