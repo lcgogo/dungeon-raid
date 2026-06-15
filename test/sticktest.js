@@ -1,5 +1,5 @@
 // 回归：击杀 50 回合 Boss 同回合升级时，转职后不能卡死（必须接着弹升级，而非 busy=false+待升级卡住不能划）。
-// 运行：node worker/sticktest.js
+// 运行：node test/sticktest.js
 const fs = require('fs');
 const path = require('path');
 const file = fs.existsSync('dungeon-raid-dev.html') ? 'dungeon-raid-dev.html' : path.join('..', 'dungeon-raid-dev.html');

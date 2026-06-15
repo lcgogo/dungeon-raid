@@ -1,5 +1,5 @@
 // 存档版本兼容性烟测：正式版换版本→存档判不兼容、从头开始；dev 版不受影响。
-// 运行：node worker/savetest.js
+// 运行：node test/savetest.js
 const fs = require('fs');
 const path = require('path');
 const file = fs.existsSync('dungeon-raid-dev.html') ? 'dungeon-raid-dev.html' : path.join('..', 'dungeon-raid-dev.html');

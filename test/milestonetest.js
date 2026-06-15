@@ -1,5 +1,5 @@
 // 里程碑烟测：50/100/200/350 回合击败 Boss 的转职链 + 350回合换装主动替换商店槽 + 确定性重放一致。
-// 运行：node worker/milestonetest.js
+// 运行：node test/milestonetest.js
 const fs = require('fs');
 const path = require('path');
 const file = fs.existsSync('dungeon-raid-dev.html') ? 'dungeon-raid-dev.html' : path.join('..', 'dungeon-raid-dev.html');

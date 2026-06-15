@@ -1,5 +1,5 @@
 // 终局 Boss / 破关 烟测：强制跑到第 500 回合（无限血），验证终焉降临、10 波递增、最终 onClear 破关。
-// 运行：node worker/finaletest.js   （从仓库根或 worker 目录都行）
+// 运行：node test/finaletest.js   （从仓库根或 worker 目录都行）
 const fs = require('fs');
 const path = require('path');
 const file = fs.existsSync('dungeon-raid-dev.html') ? 'dungeon-raid-dev.html' : path.join('..', 'dungeon-raid-dev.html');
