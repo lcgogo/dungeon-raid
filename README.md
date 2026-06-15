@@ -148,7 +148,7 @@
 到 **第 500 回合**，终局 Boss **终焉之主 👑** 降临。它**本身无血、无攻击、打不掉**，但**每回合**会把若干非怪/非 Boss 棋子变成随机 Boss——**第 1 波 1 个、第 2 波 2 个……第 10 波 10 个**（浪潮 Boss 为基础档、可清）。
 
 - 撑满 **10 波**还活着 → **破关！** 🏆（约第 511 回合）
-- 棋盘被 Boss 淹没、再无可行连线 → **判负**
+- 棋盘塞满怪、再无可连且无就绪技能/炸弹可解 → **判负**（任意对局皆判，不只终局；如召唤师刷满棋盘）
 
 破关后有故事化祝贺页；正式版会把破关上报**破关榜**（按**最低破关等级**排名，越低越强）。
 
@@ -329,7 +329,7 @@ About every **10 turns** a random boss appears; beating one rewards 💰+20 and 
 At **turn 500**, the final boss — the **Overlord 👑** — descends. It has **no HP, no attack, and cannot be killed**, but **every turn** it turns several non-enemy tiles into random bosses — **1 on wave 1, 2 on wave 2 … 10 on wave 10** (wave bosses are base-tier and killable).
 
 - Survive all **10 waves** → **CLEARED!** 🏆 (around turn 511)
-- Overrun by bosses with no legal move left → **defeat**
+- Board jammed with monsters, no legal move and no ready skill/bomb to break it → **defeat** (any game, not just the finale — e.g. a Summoner flooding the board)
 
 Clearing shows a story-flavored congratulations screen; the Release build reports clears to the **clear board**, ranked by **lowest clear level** (lower = stronger).
 
