@@ -120,7 +120,7 @@
 | 🧌 兽人 | 巨力 Titan | 最大生命越高，剑链固定伤害越高（每 12 点最大生命 +1，与兽人 HP×2 特性联动）|
 | 🧌 兽人 | 荆棘 Thorns | 受到伤害的一半反弹给攻击者 |
 | 🪦 活死人 | 回春 Rejuvenation | 所有主动技能冷却 −1（正好抵消「迷惑」的 +1）|
-| 🪦 活死人 | 溅射 Splash | 攻击的溢出伤害随机砸到棋盘上剩余的一个敌人（**含不可被剑攻击的 Boss**）|
+| 🪦 活死人 | 溅射 Splash | 攻击的溢出伤害随机砸到棋盘上剩余的一个敌人（**含不可被剑攻击的 Boss**）；剑链、箭雨、**吸魂大法**的溢出都会触发 |
 
 ### 👹 Boss 图鉴
 
@@ -301,7 +301,7 @@ Each race has **several** passives, applied permanently once chosen: the turn-10
 | 🧌 Orc | Titan | Higher max HP means higher flat sword damage (+1 per 12 max HP; synergizes with the Orc's HP×2 trait) |
 | 🧌 Orc | Thorns | Reflect half of damage taken back to the attacker |
 | 🪦 Undead | Rejuvenation | All active-skill cooldowns −1 (exactly offsets Confusion's +1) |
-| 🪦 Undead | Splash | Overflow damage from your attacks splashes to a random remaining foe (**including sword-immune bosses**) |
+| 🪦 Undead | Splash | Overflow damage from your attacks splashes to a random remaining foe (**including sword-immune bosses**); triggers from sword chains, Arrow Rain, and **Soul Drain** overflow |
 
 ### 👹 Bestiary
 
