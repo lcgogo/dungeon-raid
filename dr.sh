@@ -8,6 +8,7 @@
 #   integrity           核对正式版引擎 sha256 是否与 engines.json 登记一致（完整性校验）
 #   classify <id> <ai|human>  把某条成绩在 人类榜↔AI榜 之间改判（需 VERIFY_SECRET 环境变量）
 #   delete <id>         删除某条成绩（需 VERIFY_SECRET）
+#   prune [天数=30] [保留版本数=5]  手动清理旧版本+陈旧录像（worker 也每日自动跑；需 VERIFY_SECRET）
 #   wipe                清空整个榜单（删 scores 全表，需 VERIFY_SECRET；危险）
 #   backfill-releases   为 CHANGELOG 里每个版本补打 tag+release（已存在的跳过）
 #   bind-domains        把自定义域名绑定到 Pages 项目
@@ -50,6 +51,14 @@ cmd_delete(){
   [ -n "$VERIFY_SECRET" ] || { echo "缺少环境变量 VERIFY_SECRET"; return 1; }
   curl -s -X POST "https://api.dungeonraid.win/admin?k=$VERIFY_SECRET" \
     -H 'Content-Type: application/json' -d "{\"op\":\"del\",\"id\":\"$id\"}"; echo
+}
+
+# ---------- 手动清理旧版本+陈旧录像（需 VERIFY_SECRET）。用法: prune [天数=30] [保留版本数=5] ----------
+cmd_prune(){
+  [ -n "$VERIFY_SECRET" ] || { echo "缺少环境变量 VERIFY_SECRET"; return 1; }
+  local days="${1:-30}" keep="${2:-5}"
+  curl -s -X POST "https://api.dungeonraid.win/admin?k=$VERIFY_SECRET" \
+    -H 'Content-Type: application/json' -d "{\"op\":\"prune\",\"days\":$days,\"keep\":$keep}"; echo
 }
 
 # ---------- 清空整个榜单（删 scores 全表，需 VERIFY_SECRET；危险）----------
@@ -158,8 +167,9 @@ case "${1:-help}" in
   integrity)         cmd_integrity ;;
   classify)          cmd_classify "$2" "$3" ;;
   delete)            cmd_delete "$2" ;;
+  prune)             cmd_prune "$2" "$3" ;;
   wipe)              cmd_wipe ;;
   backfill-releases) cmd_backfill_releases ;;
   bind-domains)      cmd_bind_domains ;;
-  help|--help|-h|*)  sed -n '2,14p' "$0" | sed 's/^# \{0,1\}//' ;;
+  help|--help|-h|*)  sed -n '2,15p' "$0" | sed 's/^# \{0,1\}//' ;;
 esac

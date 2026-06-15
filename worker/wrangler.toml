@@ -7,6 +7,10 @@ compatibility_date = "2026-06-01"
 pattern = "api.dungeonraid.win"
 custom_domain = true
 
+# 定时任务：每日 18:13 UTC 自动清理旧版本+陈旧录像（scheduled() → pruneOld）
+[triggers]
+crons = ["13 18 * * *"]
+
 # KV：存录像
 [[kv_namespaces]]
 binding = "REC"

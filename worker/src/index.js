@@ -102,6 +102,25 @@ async function recentVersions(env, n) {
   });
   return vers.slice(0, n);
 }
+// 定期清理：删除「不在最近 keepVers 个版本」且「created 早于 days 天」的录像（KV）+ 其 scores 行。
+// 每条 KV 录像都有对应 scores 行（/rec、/score、/clear 都同时写两边），故按 D1 驱动即可删全。
+// 每次最多删 max 条（留余量给 KV 免费版每日删除配额），多了下次接着删。
+async function pruneOld(env, { days = 30, keepVers = 5, max = 400 } = {}) {
+  const keep = await recentVersions(env, keepVers);
+  const cutoff = Date.now() - days * 86400000;
+  const notIn = keep.length ? ` AND version NOT IN (${keep.map(() => '?').join(',')})` : '';
+  const { results } = await env.DB.prepare(
+    `SELECT id FROM scores WHERE created < ?${notIn} LIMIT ?`
+  ).bind(cutoff, ...keep, max).all();
+  const ids = (results || []).map(r => r.id);
+  let deleted = 0;
+  for (const id of ids) {
+    try { if (env.REC) await env.REC.delete(id); } catch (e) {}
+    await env.DB.prepare("DELETE FROM scores WHERE id=?").bind(id).run();
+    deleted++;
+  }
+  return { deleted, keptVersions: keep, cutoffDays: days, more: ids.length === max };
+}
 // 把 version / recent 参数翻译成 where 片段（version IN (...) 或 单版本）；返回 {sql, binds, versions}
 async function versionFilter(env, url) {
   const recent = url.searchParams.get('recent');
@@ -271,7 +290,11 @@ export default {
         const r = await env.DB.prepare("DELETE FROM scores").run();
         return json({ ok: true, wiped: (r.meta && r.meta.changes) || 0 });
       }
-      return json({ error: "usage: {op:'del',id} 或 {op:'wipe',confirm:'YES'}" }, 400);
+      if (d && d.op === 'prune') {
+        const r = await pruneOld(env, { days: d.days | 0 || 30, keepVers: d.keep | 0 || 5, max: d.max | 0 || 400 });
+        return json({ ok: true, ...r });
+      }
+      return json({ error: "usage: {op:'del',id} | {op:'wipe',confirm:'YES'} | {op:'prune',days?,keep?,max?}" }, 400);
     }
 
     // POST /verify?k= —— 回写验证结果
@@ -291,5 +314,10 @@ export default {
 
     if (req.method === 'GET' && p === '/') return json({ ok: true, service: 'dungeon-raid-api' });
     return json({ error: 'not found' }, 404);
+  },
+
+  // 每日 Cron：自动清理旧版本+陈旧录像（默认保留最近 5 版、删 30 天前的，单次≤400 条）
+  async scheduled(event, env, ctx) {
+    ctx.waitUntil(pruneOld(env, {}).then(r => console.log('prune', JSON.stringify(r))));
   },
 };
