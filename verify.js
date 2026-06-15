@@ -10,7 +10,7 @@ if (!SECRET) { console.error('缺少 VERIFY_SECRET 环境变量'); process.exit(
 // ---- 加载游戏确定性引擎（与 playtest.js 同法：DOM 桩件 + 注入导出）----
 function loadEngine(file) {
   const script = fs.readFileSync(__dirname + '/' + file, 'utf8').match(/<script>([\s\S]*?)<\/script>/)[1];
-  const EXPORT = `globalThis.__E={startGame,raceById,dispatchReplayAct,
+  const EXPORT = `globalThis.__E={VERSION,startGame,raceById,dispatchReplayAct,
     get player(){return player}, set replaying(v){replaying=v}, set replayRec(v){replayRec=v}};`;
   if (!script.includes('resize(); showClassSelect(); loop();')) throw new Error('startup line not found in ' + file);
   const src = script.replace('resize(); showClassSelect(); loop();', EXPORT);
@@ -44,13 +44,12 @@ function replay(G, rec) {
 }
 
 async function main() {
-  // 先读当前 prod 引擎版本，只向 /pending 要这个版本的待验证项（旧版本录像无对应引擎可重放，跳过也只会空转）
-  const html = fs.readFileSync(__dirname + '/dungeon-raid.html', 'utf8');
-  const ENGINE_VER = (html.match(/const VERSION='([^']+)'/) || [])[1] || '';
+  // 先加载引擎、直接读它运行时的 VERSION（不靠正则抽源码，因此 minify 也不影响），只向 /pending 要这个版本的待验证项
+  const G = loadEngine('dungeon-raid.html');
+  const ENGINE_VER = G.VERSION || '';
   const purl = `${API}/pending?k=${encodeURIComponent(SECRET)}` + (ENGINE_VER ? `&version=${encodeURIComponent(ENGINE_VER)}` : '');
   const pend = (await (await fetch(purl)).json()).pending || [];
   if (!pend.length) { console.log(`没有待验证项（引擎版本 ${ENGINE_VER}）`); return; }
-  const G = loadEngine('dungeon-raid.html');
   let pass = 0, fail = 0, skip = 0;
   for (const e of pend) {
     // 录像只能在自己那个版本的引擎上正确重放；版本不符则跳过（不同版本本就不混排）
