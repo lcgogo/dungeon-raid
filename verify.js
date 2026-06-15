@@ -2,6 +2,7 @@
 // 排行榜防作弊验证：拉取 API 的待验证录像 → 用游戏确定性引擎重放 → 比对声称结局 → 回写。
 // 由 GitHub Actions 每小时跑（也可本地 `API_BASE=… VERIFY_SECRET=… node verify.js`）。
 const fs = require('fs');
+const crypto = require('crypto');
 
 const API = process.env.API_BASE || 'https://api.dungeonraid.win';
 const SECRET = process.env.VERIFY_SECRET;
@@ -47,6 +48,14 @@ async function main() {
   // 先加载引擎、直接读它运行时的 VERSION（不靠正则抽源码，因此 minify 也不影响），只向 /pending 要这个版本的待验证项
   const G = loadEngine('dungeon-raid.html');
   const ENGINE_VER = G.VERSION || '';
+  // 完整性校验：版本号是人类标签，sha256 用来核对「这份文件确实是该版本」
+  try {
+    const want = (JSON.parse(fs.readFileSync(__dirname + '/engines.json', 'utf8')) || {})[ENGINE_VER];
+    if (want) {
+      const got = crypto.createHash('sha256').update(fs.readFileSync(__dirname + '/dungeon-raid.html')).digest('hex');
+      console.log(got === want ? `🔏 完整性校验通过（${ENGINE_VER}）` : `⚠️ 完整性告警：sha256 ${got} ≠ engines.json 登记 ${want}（文件可能被改动）`);
+    }
+  } catch (e) {}
   const purl = `${API}/pending?k=${encodeURIComponent(SECRET)}` + (ENGINE_VER ? `&version=${encodeURIComponent(ENGINE_VER)}` : '');
   const pend = (await (await fetch(purl)).json()).pending || [];
   if (!pend.length) { console.log(`没有待验证项（引擎版本 ${ENGINE_VER}）`); return; }
