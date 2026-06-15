@@ -158,7 +158,7 @@
 (()=>{
 //==================== 配置 ====================
 // 版本号 v主.次.修：小改动改"修"，新Boss/职业改"次"，大版本变更需先确认。页面底部显示。
-const VERSION='v1.21.1';
+const VERSION='v1.21.5';
 const DEV=false;   // release build (DEV=false); dev build is dungeon-raid-dev.html (DEV=true)
 const REC_API='https://api.dungeonraid.win';   // 录像分享 API（Cloudflare Worker + KV）
 // 带种子随机数（mulberry32）：游戏全程用 rnd() 取代原生随机，配合录制种子可确定性重放
@@ -324,12 +324,12 @@ const BOSSES=[
     desc:['{WC}对它无效，只能用 💥炸弹 炸。只要它在场，棋盘上所有的心都变成毒心（绿心 💚）——连毒心不再回血，反而按等量【扣血】（无视护甲）！炸掉它，心就恢复正常。倒计时归零它也会重击你。','Immune to {WC} — only the 💥 Bomb works. While it is on the board, ALL hearts become poison (green 💚) — linking them DRAINS that much HP instead of healing (ignoring armor)! Bomb it and hearts return to normal. It also strikes you when its timer hits 0.'] },
   { id:'snowman', emoji:'⛄', name:['雪人','Snowman'], quip:['冻住，不许走——技能也别想用。','Freeze! No moves, and no skills either.'], monster:true, noTierScale:true,
     special:['现身冰封你 1~3 个主动（按档位）','Freezes 1–3 of your actives on arrival (by tier)'],
-    desc:['{WC}对它无效，只能用 💥炸弹 炸。它一现身就【随机冰封你的主动能力】——一阶冻 1 个、二阶冻 2 个、三阶冻 3 个（在「一阶主动 / 💊治疗 / 💥炸弹」里随机），数回合内不可用。趁早炸掉它（若炸弹被冻，等解冻再炸）。倒计时归零也会重击你。','Immune to {WC} — only the 💥 Bomb works. On arrival it【freezes random active abilities】: 1 at Lv1, 2 at Lv2, 3 at Lv3 (among your class active / 💊Heal / 💥Bomb), unusable for a few turns. Bomb it down (wait out the thaw if your bomb got frozen). It also strikes you at 0.'],
+    desc:['{WC}对它无效，只能用 💥炸弹 炸。它一现身就【随机冰封你的主动能力】——按 Boss 档位冻 1~3 个（在「职业主动 / 💊治疗 / 💥炸弹」里随机），数回合内不可用。趁早炸掉它（若炸弹被冻，等解冻再炸）。倒计时归零也会重击你。','Immune to {WC} — only the 💥 Bomb works. On arrival it【freezes random active abilities】: 1 at Lv1, 2 at Lv2, 3 at Lv3 (among your class active / 💊Heal / 💥Bomb), unusable for a few turns. Bomb it down (wait out the thaw if your bomb got frozen). It also strikes you at 0.'],
     onSpawn(t){ const keys=[]; if(player.tier1) keys.push('skill'); keys.push('heal','bomb');
       for(let i=keys.length-1;i>0;i--){ const j=Math.floor(rnd()*(i+1)); [keys[i],keys[j]]=[keys[j],keys[i]]; }
       const m=Math.min(t.tier||1, keys.length), K=4; const froz=keys.slice(0,m);
       player.frozen=player.frozen||{}; froz.forEach(k=>{ player.frozen[k]=K; });
-      const nm={skill:tr('一阶主动','skill'),heal:'💊',bomb:'💥'};
+      const nm={skill:tr('职业主动','skill'),heal:'💊',bomb:'💥'};
       log(tr(`⛄ 雪人冰封了你 ${m} 个主动（${froz.map(k=>nm[k]).join('、')}），${K} 回合内不可用！`,`⛄ Snowman freezes ${m} of your actives (${froz.map(k=>nm[k]).join(',')}) for ${K} turns!`)); } },
   { id:'birdman', emoji:'🦅', name:['鸟人','Birdman'], quip:['抓不住我，我会飞（还会瞬移）。','Catch me? I fly — and teleport.'], monster:true, swordable:true, perTurn:true,
     special:['每回合啄你一下并瞬移换位','Pecks you and teleports each turn'],
@@ -528,9 +528,11 @@ function showClassSelect(){
   }
   busy=true;
   const card=document.getElementById('card');
-  const buildBadge = DEV
-    ? `<div style="display:inline-block;background:#7d3cad;color:#fff;font-size:12px;font-weight:700;padding:3px 12px;border-radius:12px;margin-bottom:8px;letter-spacing:1px">🚧 DEV ${tr('开发版·最新','build · latest')}</div>`
-    : `<div style="display:inline-block;background:#2e7d46;color:#fff;font-size:12px;font-weight:700;padding:3px 12px;border-radius:12px;margin-bottom:8px;letter-spacing:1px">✅ ${tr('正式版','Release')}</div>`;
+  const verBadge = DEV
+    ? `<span style="background:#7d3cad;color:#fff;font-size:12px;font-weight:700;padding:3px 12px;border-radius:12px;letter-spacing:1px">🚧 DEV ${tr('开发版·最新','build · latest')}</span>`
+    : `<span style="background:#2e7d46;color:#fff;font-size:12px;font-weight:700;padding:3px 12px;border-radius:12px;letter-spacing:1px">✅ ${tr('正式版','Release')}</span>`;
+  // 版本徽标旁放一个「🏠 首页」按钮，回到版本选择页（index.html）
+  const buildBadge = `<div style="display:flex;justify-content:center;align-items:center;gap:8px;margin-bottom:8px">${verBadge}<a href="index.html" style="font-size:12px;color:var(--dim);text-decoration:none;border:1px solid #4a3a63;border-radius:12px;padding:3px 11px">🏠 ${tr('首页','Home')}</a></div>`;
   card.innerHTML=`${buildBadge}
     <h2 style="margin:2px 0 6px">⚔️ ${tr('地牢突袭','Dungeon Raid')}</h2>
     <div style="text-align:left;font-size:11.5px;line-height:1.6;background:var(--panel2);border-radius:10px;padding:9px 11px;margin-bottom:10px">
@@ -579,7 +581,7 @@ function showRaceSelect(){
   const best=getBest();
   const bestLine = best ? `<p>${tr('🏆 最佳纪录：等级','🏆 Best: Level')} ${best.level} · 💰${best.gold}</p>` : '';
   card.innerHTML=`<h2>${tr('选择种族','Choose your race')}</h2>${bestLine}
-    <p style="font-size:12px;color:var(--dim);line-height:1.6">${tr('里程碑 Boss：第50回合转一阶（主动）· 100 转二阶（被动）· 200 第二被动 · 350 换装主动 · 500 终焉之主破关','Milestone bosses — 50: tier-1 active · 100: tier-2 passive · 200: 2nd passive · 350: swap an active · 500: final Overlord clear')}</p>`;
+    <p style="font-size:12px;color:var(--dim);line-height:1.6">${tr('击败第 50 回合的 Boss 即可转职，解锁职业的主动技能；之后随着探险深入，还会解锁更强大的技能……','Beat the turn-50 boss to advance to a class and unlock its active skill; delve deeper to unlock ever more powerful skills…')}</p>`;
   RACES.forEach(rc=>{
     const b=document.createElement('button'); b.className='choice';
     b.innerHTML=`<b>${rc.e} ${L(rc.n)}</b><small>${L(rc.d)}</small>`;
@@ -624,12 +626,12 @@ function showTierSelect(tier){
   const path=RACE_PATHS[player.race];
   const ids = tier===1 ? path.t1 : tier===3 ? path.t2.filter(id=>id!==player.tier2) : path.t2;   // 第二被动：排除已拥有的
   const pool = tier===1 ? TIER1 : TIER2;
-  const head = tier===1 ? tr('⚔️ 转职：一阶职业','⚔️ Advance: Tier-1 Class')
-             : tier===3 ? tr('🌟 第二被动：本种族另一项','🌟 Second passive: your race’s other')
-             : tr('🌟 转职：二阶职业','🌟 Advance: Tier-2 Class');
+  const head = tier===1 ? tr('⚔️ 转职','⚔️ Advance: Class')
+             : tier===3 ? tr('🌟 本族技能','🌟 Race Skill')
+             : tr('🌟 二阶技能','🌟 Tier-2 Skill');
   const sub  = tier===1 ? tr('击败强敌！选择一个职业，解锁主动技能','Boss slain! Pick a class to unlock an active skill')
-             : tier===3 ? tr('第200回合 Boss 被斩！再获得一项本种族被动','Turn-200 boss slain! Gain another passive of your race')
-             : tr('再次证明自己！选择一个二阶职业，获得被动','Proven again! Pick a tier-2 class for a passive');
+             : tier===3 ? tr('再获得一项本族技能（本种族的另一项被动）','Gain another Race Skill (your race’s other passive)')
+             : tr('再次证明自己！选择一项二阶技能（被动）','Proven again! Pick a Tier-2 Skill (passive)');
   const card=document.getElementById('card');
   card.innerHTML=`<h2>${head}</h2><p>${sub}</p><p style="color:#caa6e6;font-style:italic;font-size:13px;margin:-4px 0 10px">${L(TRANSFORM_BLESS[tier])}</p>`;
   ids.forEach(id=>{
@@ -659,9 +661,9 @@ function showSkillSwap(){
   if(replaying) return;
   busy=true; player.awaitingTier=4;
   const card=document.getElementById('card');
-  card.innerHTML=`<h2 style="margin-bottom:4px">🔁 ${tr('换装主动','Equip an active')}</h2>
+  card.innerHTML=`<h2 style="margin-bottom:4px">🌐 ${tr('跨界技能','Crossover Skill')}</h2>
     <p style="color:#caa6e6;font-style:italic;font-size:13px;margin:2px 0 6px">${L(TRANSFORM_BLESS[4])}</p>
-    <p style="margin-bottom:8px;font-size:12px">${tr('任选一个职业主动，替换 💊治疗 或 💥炸弹 槽（带该技能冷却）','Pick any class active to replace your 💊Heal or 💥Bomb slot (uses its cooldown)')}</p>`;
+    <p style="margin-bottom:8px;font-size:12px">${tr('从所有职业的主动里任选一个（可跨种族），替换 💊治疗 或 💥炸弹 槽（带该技能冷却）','Pick any class’s active (any race) to replace your 💊Heal or 💥Bomb slot (uses its cooldown)')}</p>`;
   Object.keys(TIER1).forEach(id=>{
     const def=TIER1[id], sk=def.skill;
     const b=document.createElement('button'); b.className='choice'; b.style.cssText='padding:8px 12px;margin:0 0 6px';
@@ -754,6 +756,14 @@ const REC_KEY=DEV?'dr_rec_dev':'dr_rec', REC_LAST_KEY=DEV?'dr_rec_last_dev':'dr_
 // 录制一个玩家动作（回放中不录）。动作：['m',cells,baseType] 连线 / ['b',key] 购买 / ['k'] 技能 / ['u',idx] 升级选择 / ['t',tier,id] 转职选择
 // 每个动作末尾追加一个时间戳（epoch ms，相对开局可算操作间隔）——仅供离线分析（后续黑盒判定是否 AI 录像），回放/校验按固定下标取值，忽略该尾元素，旧录像无此字段也能正常回放。
 function recAct(a){ if(rec && !replaying){ a.push(Date.now()-(rec.t0||0)); rec.acts.push(a); saveRec(); } }
+// 本局游玩时长（毫秒）：实时对局取 now−t0；回放取录像最后一步的时间戳（相对开局 ms）
+function playMs(){
+  if(!replaying && rec && rec.t0) return Math.max(0, Date.now()-rec.t0);
+  const src = replayRec || rec;
+  if(src && Array.isArray(src.acts) && src.acts.length){ const la=src.acts[src.acts.length-1]; const t=la[la.length-1]; if(typeof t==='number') return t; }
+  return 0;
+}
+function fmtDur(ms){ const s=Math.round(ms/1000); if(s<60) return tr(`${s} 秒`,`${s}s`); const m=Math.floor(s/60); return tr(`${m} 分 ${s%60} 秒`,`${m}m ${s%60}s`); }
 function saveRec(){ try{ if(rec) localStorage.setItem(REC_KEY, JSON.stringify(rec)); }catch(e){} }
 function loadRec(){ try{ return JSON.parse(localStorage.getItem(REC_KEY)||'null'); }catch(e){ return null; } }
 function getLastRec(){ try{ return JSON.parse(localStorage.getItem(REC_LAST_KEY)||'null'); }catch(e){ return null; } }
@@ -778,6 +788,7 @@ function loadGame(){
     pendingLevels=data.pendingLevels||0;
     grid=data.grid.map(row=>row.map(t=> t?{...t}:null));
     rec=loadRec();   // 恢复进行中的录像，继续游戏时录制不断
+    if(rec && rec.acts && rec.acts.length){ const la=rec.acts[rec.acts.length-1]; const last=la[la.length-1]; if(typeof last==='number') rec.t0=Date.now()-last; }   // 重设 t0：游玩时长排除「关掉游戏的间隔」（不影响重放，时间戳仅供分析）
     selection=[]; dragging=false; busy=false;
     syncPositions(true); hideOverlay(); logClear();
     log(tr('继续上次的探险…','Continuing your last run…'));
@@ -1331,7 +1342,9 @@ function showLevelUp(){
 }
 
 function gameOver(){
+  if(jumping) return;   // 跳回合快进中：不弹结束画面（循环靠 hp>0 自行停下）
   busy=true;
+  const durMs=playMs();   // 游玩时长（须在 stopReplay 清空 replayRec 之前取）
   const wasReplay=replaying;
   if(wasReplay){ stopReplay(); }                 // 回放播到死亡：停止回放，照常显示死亡报告
   else { saveBest(); clearSave();
@@ -1354,6 +1367,7 @@ function gameOver(){
   card.innerHTML=`<h2 style="color:var(--hp);margin-bottom:4px">${tr('💀 你倒下了','💀 You fell')}</h2>
     <p style="margin-bottom:8px">${tr('地牢吞噬了又一位冒险者…','The dungeon claims another adventurer…')}</p>
     <div style="font-size:14px;margin-bottom:8px">${tr('等级','Lv')} <b style="color:var(--gold)">${player.level}</b> · 💰<b style="color:var(--gold)">${player.gold}</b> · <b style="color:var(--gold)">${player.turns}</b> ${tr('回合','turns')}</div>
+    <div style="font-size:12px;color:var(--dim);margin:-4px 0 8px">⏱ ${tr('用时','Played')} ${fmtDur(durMs)}</div>
     ${report}
     ${DEV?'':`<div id="rankBox" style="text-align:left;margin:4px 0 12px;background:var(--panel2);border-radius:10px;padding:6px 4px;min-height:20px"></div>`}
     <div style="display:flex;gap:6px;justify-content:center;margin-bottom:8px;flex-wrap:wrap">
@@ -1372,7 +1386,9 @@ function gameOver(){
 }
 // 破关：撑过终焉 10 波。胜利结算 + 破关榜（按最低等级排名）
 function onClear(){
+  if(jumping){ player.cleared=true; return; }   // 跳回合快进中：标记破关但不弹结束画面
   busy=true; player.cleared=true;
+  const durMs=playMs();   // 游玩时长（须在 stopReplay 前取）
   const wasReplay=replaying;
   for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const t=grid[r][c]; if(t&&t.bossId==='finale') grid[r][c]=null; }  // 移除终焉之主
   if(wasReplay){ stopReplay(); }
@@ -1381,6 +1397,7 @@ function onClear(){
   card.innerHTML=`<h2 style="color:var(--gold);margin-bottom:4px">🏆 ${tr('破关！','CLEARED!')}</h2>
     <p style="line-height:1.6;margin-bottom:8px">${tr('🎉 终焉之主的浪潮退去，你撑过全部 10 波，成为第一个活着走出地牢的冒险者——「再无人生还」的传说终于有了结局。','🎉 The Overlord’s waves recede; you survived all 10 and became the first to walk out of the dungeon alive — the legend that “none returned” finally has its ending.')} <span style="color:var(--dim)">${tr('感谢游玩这份致敬之作 🙏','Thanks for playing this tribute 🙏')}</span></p>
     <div style="font-size:14px;margin-bottom:8px">${tr('破关等级','Clear Lv')} <b style="color:var(--gold)">${player.level}</b> <span style="color:var(--dim);font-size:11px">${tr('越低越强','lower=better')}</span> · 💰<b style="color:var(--gold)">${player.gold}</b> · <b style="color:var(--gold)">${player.turns}</b> ${tr('回合','t')}</div>
+    <div style="font-size:12px;color:var(--dim);margin:-4px 0 8px">⏱ ${tr('用时','Played')} ${fmtDur(durMs)}</div>
     ${DEV?'':`<div id="rankBox" style="text-align:left;margin:4px 0 12px;background:var(--panel2);border-radius:10px;padding:6px 4px;min-height:20px"></div>`}
     <div style="display:flex;gap:6px;justify-content:center;margin-bottom:8px;flex-wrap:wrap">
       <button class="choice" id="goReplay" style="width:auto;margin:0;padding:7px 12px">🎬 ${tr('回放本局','Replay')}</button>
@@ -1508,6 +1525,7 @@ function exportRec(r){
 
 //==================== 录像回放 ====================
 let replayRec=null, replayIdx=0, replayTimer=null, replaySpeed=1, replayPaused=false, replayTotalTurns=0, replayAutoPaused=false;
+let jumping=false;   // 跳回合快进期间：抑制 gameOver/onClear，避免（录像若不一致而提前死亡时）直接弹出结束画面
 const REPLAY_BASE=620;   // 每步基础间隔 ms（按倍速缩短）
 function startReplay(recObj){
   if(!recObj||!Array.isArray(recObj.acts)){ alert(tr('录像无效','Invalid recording')); return; }
@@ -1560,15 +1578,22 @@ function stopReplay(){ clearTimeout(replayTimer); replayTimer=null; replaying=fa
 // 跳到指定回合：从种子重头快进（确定性、瞬间），到目标回合后暂停
 function jumpToTurn(target){
   if(!replaying||!replayRec) return;
+  const rec0=replayRec, acts=rec0.acts;            // 本地持有：防止快进中误触 stopReplay 把 replayRec 置空
   clearTimeout(replayTimer); replayTimer=null;
   replayAutoPaused = target>=replayTotalTurns-10;   // 跳到接近终点就别再自动暂停
-  replayIdx=0; busy=false;
-  startGame(raceById(replayRec.race));              // replaying=true → 用 replayRec.seed 重新播种
-  while(replayIdx<replayRec.acts.length && player.hp>0 && player.turns<target){
-    try{ dispatchReplayAct(replayRec.acts[replayIdx++]); }catch(e){ break; }
-  }
+  replayIdx=0; busy=false; jumping=true;            // 快进期间抑制 gameOver/onClear
+  try{
+    startGame(raceById(rec0.race));                 // replaying=true → 用 rec0.seed 重新播种
+    while(replayIdx<acts.length && player.hp>0 && player.turns<target){
+      try{ dispatchReplayAct(acts[replayIdx++]); }catch(e){ break; }
+    }
+  } finally { jumping=false; }
+  replaying=true; replayRec=rec0;                   // 恢复回放状态（以防快进里被改动）
   replayPaused=true; updateReplayBar();
-  log(tr(`⏭ 跳到第 ${player.turns} 回合（已暂停，点 ▶ 继续）`,`⏭ Jumped to turn ${player.turns} (paused, ▶ to play)`));
+  if(player.turns<target && (player.hp<=0||player.cleared))
+    log(tr(`⏭ 该录像在第 ${player.turns} 回合就结束了（无法再往后跳）`,`⏭ This recording ends at turn ${player.turns} (cannot jump further)`));
+  else
+    log(tr(`⏭ 跳到第 ${player.turns} 回合（已暂停，点 ▶ 继续）`,`⏭ Jumped to turn ${player.turns} (paused, ▶ to play)`));
 }
 function renderJumps(){
   const box=document.getElementById('rbJumps'); if(!box) return; box.innerHTML='';
@@ -1670,16 +1695,16 @@ function showPlayerInfo(){
   const t1 = p.tier1?TIER1[p.tier1]:null, t2 = p.tier2?TIER2[p.tier2]:null;
   const t2b = p.tier2b?TIER2[p.tier2b]:null, s2 = p.skill2&&TIER1[p.skill2.id]?TIER1[p.skill2.id]:null;
   let cls=`<div style="text-align:left;font-size:12px;margin:8px 0 0;padding:8px;background:var(--panel2);border-radius:10px">`;
-  if(t1){ cls+=`${tr('一阶','T1')}【${L(t1.n)}】${tr('主动','Active')}：${L(t1.skill.short)}（${tr('每','every')} ${t1.skill.cd} ${tr('回合','t')}）<br>`;
+  if(t1){ cls+=`${tr('职业','Class')}【${L(t1.n)}】${tr('主动','Active')}：${L(t1.skill.short)}（${tr('每','every')} ${t1.skill.cd} ${tr('回合','t')}）<br>`;
     if(t1.passive) cls+=`　${tr('被动','Passive')}：${L(t1.passive)}<br>`;
     cls+=`<i style="color:#caa6e6">「${L(t1.quip)}」</i><br>`; }
-  else cls+=tr('击败第50回合 Boss 解锁一阶职业（主动技能）<br>','Beat the turn-50 boss to unlock a tier-1 class (active).<br>');
-  if(t2) cls+=`${tr('二阶','T2')}【${L(t2.n)}】${tr('被动','Passive')}：${L(t2.d)}<br>`;
-  else cls+=tr('击败第100回合 Boss 解锁二阶职业（被动）<br>','Beat the turn-100 boss to unlock a tier-2 class (passive).<br>');
-  if(t2b) cls+=`${tr('被动②','P2')}【${L(t2b.n)}】${tr('被动','Passive')}：${L(t2b.d)}<br>`;
-  else cls+=tr('击败第200回合 Boss 获得第二被动<br>','Beat the turn-200 boss for a second passive.<br>');
-  if(s2) cls+=`${tr('换装','Swap')}【${L(s2.skill.name)}】→ ${p.skill2.slot==='heal'?'💊':'💥'}（${tr('每','every')} ${s2.skill.cd} ${tr('回合','t')}）${s2.quip?`<br><i style="color:#caa6e6">「${L(s2.quip)}」</i>`:''}`;
-  else cls+=tr('击败第350回合 Boss 用任意主动替换治疗/炸弹','Beat the turn-350 boss to swap an active into Heal/Bomb.');
+  else cls+=tr('击败第 50 回合 Boss → 转职，解锁职业主动技能<br>','Beat the turn-50 boss → advance to a class, unlock its active.<br>');
+  if(t2) cls+=`${tr('二阶技能','Tier-2 Skill')}【${L(t2.n)}】${tr('被动','Passive')}：${L(t2.d)}<br>`;
+  else cls+=tr('继续深入 → 解锁二阶技能（被动）<br>','Delve deeper → unlock a Tier-2 Skill (passive).<br>');
+  if(t2b) cls+=`${tr('本族技能','Race Skill')}【${L(t2b.n)}】${tr('被动','Passive')}：${L(t2b.d)}<br>`;
+  else cls+=tr('更深处 → 获得本族技能（再一项被动）<br>','Deeper still → gain a Race Skill (another passive).<br>');
+  if(s2) cls+=`${tr('跨界技能','Crossover')}【${L(s2.skill.name)}】→ ${p.skill2.slot==='heal'?'💊':'💥'}（${tr('每','every')} ${s2.skill.cd} ${tr('回合','t')}）${s2.quip?`<br><i style="color:#caa6e6">「${L(s2.quip)}」</i>`:''}`;
+  else cls+=tr('深渊尽头 → 跨界技能（换任意职业主动）','At the abyss’s end → a Crossover Skill (swap in any class active).');
   cls+='</div>';
   const card=document.getElementById('card');
   card.innerHTML=`<h2>${rc?`${rc.e} ${L(rc.n)}`:tr('冒险者','Adventurer')}</h2>
