@@ -159,7 +159,7 @@
 (()=>{
 //==================== 配置 ====================
 // 版本号 v主.次.修：小改动改"修"，新Boss/职业改"次"，大版本变更需先确认。页面底部显示。
-const VERSION='v1.22.4';
+const VERSION='v1.22.5';
 const DEV=false;   // release build (DEV=false); dev build is dungeon-raid-dev.html (DEV=true)
 const REC_API='https://api.dungeonraid.win';   // 录像分享 API（Cloudflare Worker + KV）
 // 带种子随机数（mulberry32）：游戏全程用 rnd() 取代原生随机，配合录制种子可确定性重放
@@ -1412,7 +1412,7 @@ function checkLevel(){
 
 //==================== 升级（技能三选一）====================
 const UPGRADES=[
-  {n:['强化体魄','Fortify Body'],  d:p=>{const v=Math.round(6*(p.maxHpUpMult||1)); return [`最大生命 +${v}，并立即回满`,`+${v} max HP, fully heal now`];}, f:p=>{p.maxHp+=Math.round(6*(p.maxHpUpMult||1)); p.hp=p.maxHp;}}, // 兽人×2=+12，精灵×0.5=+3
+  {n:['强化体魄','Fortify Body'],  d:p=>{const v=Math.round(6*(p.maxHpUpMult||1)), h=Math.round(v*(p.healMult||1)); return [`最大生命 +${v}，回血 ${h}`,`+${v} max HP, heal ${h}`];}, f:p=>{const v=Math.round(6*(p.maxHpUpMult||1)); p.maxHp+=v; p.hp=Math.min(p.maxHp, p.hp+Math.round(v*(p.healMult||1)));}}, // 兽人×2上限/回12，精灵×0.5上限/回3，活死人治疗减半→回3；不再回满
   {n:['磨利刀刃','Sharpen Blade'], d:['{W}伤 +50%（连越长收益越大）','+50% {W} power (longer chains gain more)'], f:p=>{p.weaponPower+=0.5;}},
   {n:['淬炼锋芒','Temper Edge'],   d:['每次{WC}额外 +3 固定伤害','+3 flat damage per {WC}'], f:p=>{p.swordFlat+=3;}},
   {n:['加固护甲','Reinforce Armor'], d:['立即 +1 护甲（永久减伤）','+1 armor now (permanent damage cut)'], f:p=>{ if(!p.noArmor) p.armor+=1; }}, // 兽人无甲：无效
