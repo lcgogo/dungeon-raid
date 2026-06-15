@@ -74,8 +74,8 @@
 
 1. **开局**：选一个种族。
 2. **第 50 回合 Boss**：击败它可转职，获得**职业**（主动技能），从本种族专属的职业里挑一个。
-3. **第 100 回合 Boss**：击败它解锁**二阶技能**（被动），从本种族的被动里挑一个。
-4. **第 200 回合 Boss**：击败它再得一项**本族技能**（本种族剩下的另一项被动；至此集齐两项被动）。
+3. **第 100 回合 Boss**：击败它自动获得**该职业锁定的专属二阶技能**（被动，**不再自由选**——由你 50 级选的职业唯一决定，见下表）。
+4. **第 200 回合 Boss**：击败它再得一项**本族技能**——从本种族**其余**被动里**选一个**（三职业种族二选一，两职业种族即那唯一一个）。
 5. **第 350 回合 Boss**：击败它解锁**跨界技能**——从**全种族全职业的主动技能**里任选一个，**替换掉商店的 💊治疗 或 💥炸弹 槽**（带该技能冷却，可跨种族搭配）。
 6. **第 500 回合 · 终焉之主 👑**：终局降临，是否破关在此一举（见下）。
 
@@ -90,7 +90,7 @@
 |---|---|---|---|
 | 🧑 人族 | 🛡️ 骑士 Knight | 圣盾 Aegis | 本回合免疫所有伤害 |
 | 🧑 人族 | 💗 牧师 Priest | 祝福 Blessing | 清掉全场的心，每颗转 3 点经验 |
-| 🧑 人族 | ⚔️ 剑圣 Sword Saint | 化剑 Bladeshift | **主动**：把全场的心和金币都变成剑。**被动**：每回合棋盘摆完后，把 3 个非敌人/非剑的棋子变成剑 |
+| 🧑 人族 | ⚔️ 剑圣 Sword Saint | 化剑 Bladeshift | 把全场的心和金币都变成剑（其专属被动「皆可为剑」在 100 级解锁，见下）|
 | 🧝 精灵 | 🏹 游侠 Ranger | 箭雨 Arrow Rain | 对全场怪造成「剑威力 ×2」的伤害 |
 | 🧝 精灵 | 💰 盗贼 Rogue | 点金 Gold Touch | 把场上所有的剑变成金币 |
 | 🎅 矮人 | 🔰 锻造师 Blacksmith | 锻甲 Forge Armor | 吞下全场的盾，全部转为护甲进度 |
@@ -98,29 +98,29 @@
 | 🎅 矮人 | 💼 会长 Guild Master | 收买 Buyout | 当**金币 > 棋盘上所有怪的总血量**时方可发动：把全部怪物**变成金币**（有钱能使鬼推磨；对 Boss 无效）|
 | 🧌 兽人 | 🔪 狂战士 Berserker | 狂怒 Frenzy | 生命减半并进入**不屈**（仅**本回合**：无论受多少伤都保留 1 血）；并**永久**开启残血增伤——血越少剑伤越高（最高 +60%）|
 | 🧌 兽人 | 🩸 斗士 Fighter | 嗜血 Bloodthirst | 本回合剑链每击中一只怪回 3 血，**且可用剑攻击剑免疫的 Boss（幽灵/小丑）** |
-| 🧌 兽人 | 🧪 巫医 Witch Doctor | 蛊毒 Hex | **主动**：本回合连「心」不再回血，而是把这些生命当毒灌给全场怪。**被动**：每回合棋盘摆完后，把 3 个非敌人/非心的棋子变成心 |
+| 🧌 兽人 | 🧪 巫医 Witch Doctor | 蛊毒 Hex | 本回合连「心」不再回血，而是把这些生命当毒灌给全场怪（其专属被动「万物皆毒」在 100 级解锁，见下）|
 | 🪦 活死人 | 🪄 死灵 Necromancer | 吸魂大法 Soul Drain | 随机吸取 2 个目标（怪或 Boss，**和炸弹一样含剑免疫的 Boss**；终焉之主除外）的生命补给自己，单个吸取量 = 玩家生命上限；吸取量 ≥ 目标生命则该目标死亡 |
 | 🪦 活死人 | 💀 骷髅王 Skeleton King | 重生 Rebirth | 本回合若被击败则不死、生命回满；此后「重生」自身冷却 +2（每次真正复活递增）|
 
-> **剑圣 / 巫医** 是「主动+被动」双修职业：除主动技能外，每回合棋盘摆完后还会自动把 3 个棋子转成剑/心。
+### 🎖️ 二阶技能 / 本族技能 · 被动（锁定职业）
 
-### 🎖️ 二阶技能 / 本族技能 · 被动
+**100 级（二阶技能）自动获得该职业锁定的被动**（下表「职业 → 锁定被动」即对应关系，不自由选）；**200 级（本族技能）**再从同族其余被动里**选一个**：
 
-各种族对应**多个**被动技能，转职后永久生效：第 100 回合 Boss 解锁第一项（**二阶技能**），第 200 回合 Boss 再解锁一项（**本族技能**）：
-
-| 种族 | 职业 | 效果 |
+| 种族 | 职业 → 锁定被动 | 效果 |
 |---|---|---|
-| 🧑 人族 | 不朽 Immortal | 治疗溢出的部分转为永久生命上限 |
-| 🧑 人族 | 将军 General | 升级时改为**四选一** |
-| 🧝 精灵 | 神射手 Sharpshooter | 剑链每击杀一只怪额外 +2 经验 |
-| 🧝 精灵 | 影袭 Shadow | 炸弹冷却永久缩为 2 回合 |
-| 🎅 矮人 | 爆破手 Demolitionist | 炸弹伤害更高，但花费金币更多 |
-| 🎅 矮人 | 财阀 Tycoon | 获得金币时额外按一半转为经验 |
-| 🎅 矮人 | 小气鬼 Cheapskate | 消耗金币的主动（商店 💊治疗 / 💥炸弹）花费减半 |
-| 🧌 兽人 | 巨力 Titan | 最大生命越高，剑链固定伤害越高（每 12 点最大生命 +1，与兽人 HP×2 特性联动）|
-| 🧌 兽人 | 荆棘 Thorns | 受到伤害的一半反弹给攻击者 |
-| 🪦 活死人 | 回春 Rejuvenation | 所有主动技能冷却 −1（正好抵消「迷惑」的 +1）|
-| 🪦 活死人 | 溅射 Splash | 攻击的溢出伤害随机砸到棋盘上剩余的一个敌人（**含不可被剑攻击的 Boss**）；剑链、箭雨、**吸魂大法**的溢出都会触发 |
+| 🧑 人族 | 骑士 → 将军 General | 升级时改为**四选一** |
+| 🧑 人族 | 牧师 → 不朽 Immortal | 治疗溢出的部分转为永久生命上限 |
+| 🧑 人族 | 剑圣 → 皆可为剑 Anything a Blade | 每回合棋盘摆完后，把 3 个非敌/非剑棋子变成剑 |
+| 🧝 精灵 | 游侠 → 神射手 Sharpshooter | 剑链每击杀一只怪额外 +2 经验 |
+| 🧝 精灵 | 盗贼 → 影袭 Shadow | 炸弹冷却永久缩为 2 回合 |
+| 🎅 矮人 | 锻造师 → 爆破手 Demolitionist | 炸弹伤害更高，但花费金币更多 |
+| 🎅 矮人 | 守财奴 → 财阀 Tycoon | 获得金币时额外按一半转为经验 |
+| 🎅 矮人 | 会长 → 小气鬼 Cheapskate | 消耗金币的主动（商店 💊治疗 / 💥炸弹）花费减半 |
+| 🧌 兽人 | 狂战士 → 巨力 Titan | 最大生命越高，剑链固定伤害越高（每 12 点最大生命 +1）|
+| 🧌 兽人 | 斗士 → 荆棘 Thorns | 受到伤害的一半反弹给攻击者 |
+| 🧌 兽人 | 巫医 → 万物皆毒 All is Poison | 每回合（污染怪变化后）把 3 个非敌/非心棋子**燃成 🖤 黑毒心**；连黑毒心**只放毒灌全场怪、不回血**（红心照常回血，自取舍）|
+| 🪦 活死人 | 死灵 → 回春 Rejuvenation | 所有主动技能冷却 −1（正好抵消「迷惑」的 +1）|
+| 🪦 活死人 | 骷髅王 → 溅射 Splash | 攻击溢出伤害随机砸剩余一个敌人（**含剑免疫 Boss**）；剑链/箭雨/吸魂溢出都触发 |
 
 ### 👹 Boss 图鉴
 
@@ -255,8 +255,8 @@ Pick a race at the start. Each has a unique **trait** and a matching **weakness*
 
 1. **Start**: choose a race.
 2. **Turn-50 boss**: beat it to take a **Class** (active skill), picking one of your race's classes.
-3. **Turn-100 boss**: beat it to unlock a **Tier-2 Skill** (passive), one of your race's passives.
-4. **Turn-200 boss**: beat it to gain a **Race Skill** (your race's other passive — now you have both).
+3. **Turn-100 boss**: beat it to automatically gain your **class's locked Tier-2 Skill** (passive — **no longer a free pick**; determined by the class you chose at 50, see table below).
+4. **Turn-200 boss**: beat it to gain a **Race Skill** — **pick one** of your race's other passives (3-class races choose 1 of 2; 2-class races get the single remaining one).
 5. **Turn-350 boss**: beat it to unlock a **Crossover Skill** — pick **any class's active (any race)** and **replace your 💊Heal or 💥Bomb shop slot** (with the skill's cooldown; cross-race builds allowed).
 6. **Turn-500 · the Overlord 👑**: the final trial — clear or fall (see below).
 
@@ -271,7 +271,7 @@ Each race has **several** classes; every skill has a **5-turn cooldown**:
 |---|---|---|---|
 | 🧑 Human | 🛡️ Knight | Aegis | Immune to all damage this turn |
 | 🧑 Human | 💗 Priest | Blessing | Clear all hearts on the board; each becomes 3 XP |
-| 🧑 Human | ⚔️ Sword Saint | Bladeshift | **Active**: turn every heart and coin into swords. **Passive**: each turn after the board settles, turn 3 non-enemy non-sword tiles into swords |
+| 🧑 Human | ⚔️ Sword Saint | Bladeshift | Turn every heart and coin into swords (its signature passive "Anything a Blade" unlocks at level 100, see below) |
 | 🧝 Elf | 🏹 Ranger | Arrow Rain | Deal "sword power ×2" damage to all enemies |
 | 🧝 Elf | 💰 Rogue | Gold Touch | Turn every sword on the board into a coin |
 | 🎅 Dwarf | 🔰 Blacksmith | Forge Armor | Absorb all shields on the board into armor progress |
@@ -279,29 +279,29 @@ Each race has **several** classes; every skill has a **5-turn cooldown**:
 | 🎅 Dwarf | 💼 Guild Master | Buyout | Only usable when **gold > total HP of all enemies**: turn every enemy **into coins** (money talks; bosses unaffected) |
 | 🧌 Orc | 🔪 Berserker | Frenzy | Halve HP and become **Undying** (**this turn only**: keep ≥1 HP no matter the damage); also **permanently** enables low-HP scaling — lower HP means higher sword damage (up to +60%) |
 | 🧌 Orc | 🩸 Fighter | Bloodthirst | Heal 3 HP per enemy your sword chain hits this turn, **and your sword can hit sword-immune bosses (Ghost/Clown)** |
-| 🧌 Orc | 🧪 Witch Doctor | Hex | **Active**: this turn, linking hearts deals that healing as poison to all foes instead of healing you. **Passive**: each turn after the board settles, turn 3 non-enemy non-heart tiles into hearts |
+| 🧌 Orc | 🧪 Witch Doctor | Hex | This turn, linking hearts deals that healing as poison to all foes instead of healing you (its signature passive "All is Poison" unlocks at level 100, see below) |
 | 🪦 Undead | 🪄 Necromancer | Soul Drain | Drain HP from 2 random targets (monsters or bosses — **including sword-immune ones, like the bomb**; Overlord excluded) to heal yourself; per-target drain = your max HP, so any target with HP ≤ your max HP dies |
 | 🪦 Undead | 💀 Skeleton King | Rebirth | If slain this turn, cheat death and refill to full HP; afterward Rebirth's own cooldown grows +2 (each actual revive) |
 
-> **Sword Saint / Witch Doctor** are hybrid (active + passive) classes: besides the active skill, each turn after the board settles they auto-convert 3 tiles into swords/hearts.
+### 🎖️ Tier-2 Skill / Race Skill · Passives (locked to class)
 
-### 🎖️ Tier-2 Skill / Race Skill · Passives
+At **level 100 (Tier-2 Skill)** you automatically get the passive **locked to your class** (the "Class → Passive" mapping below — not a free pick); at **level 200 (Race Skill)** you **pick one** of your race's remaining passives:
 
-Each race has **several** passives, applied permanently once chosen: the turn-100 boss unlocks the first (**Tier-2 Skill**), the turn-200 boss unlocks another (**Race Skill**):
-
-| Race | Class | Effect |
+| Race | Class → Locked passive | Effect |
 |---|---|---|
-| 🧑 Human | Immortal | Overheal raises your max HP permanently |
-| 🧑 Human | General | Level-up offers 4 choices instead of 3 |
-| 🧝 Elf | Sharpshooter | +2 extra XP per enemy killed by a sword chain |
-| 🧝 Elf | Shadow | Bomb cooldown becomes 2 turns permanently |
-| 🎅 Dwarf | Demolitionist | Bomb hits harder but costs more gold |
-| 🎅 Dwarf | Tycoon | Gold gained also grants half as much XP |
-| 🎅 Dwarf | Cheapskate | Gold-spending actives (shop 💊Heal / 💥Bomb) cost half |
-| 🧌 Orc | Titan | Higher max HP means higher flat sword damage (+1 per 12 max HP; synergizes with the Orc's HP×2 trait) |
-| 🧌 Orc | Thorns | Reflect half of damage taken back to the attacker |
-| 🪦 Undead | Rejuvenation | All active-skill cooldowns −1 (exactly offsets Confusion's +1) |
-| 🪦 Undead | Splash | Overflow damage from your attacks splashes to a random remaining foe (**including sword-immune bosses**); triggers from sword chains, Arrow Rain, and **Soul Drain** overflow |
+| 🧑 Human | Knight → General | Level-up offers 4 choices instead of 3 |
+| 🧑 Human | Priest → Immortal | Overheal raises your max HP permanently |
+| 🧑 Human | Sword Saint → Anything a Blade | Each turn after the board settles, turn 3 non-enemy non-sword tiles into swords |
+| 🧝 Elf | Ranger → Sharpshooter | +2 extra XP per enemy killed by a sword chain |
+| 🧝 Elf | Rogue → Shadow | Bomb cooldown becomes 2 turns permanently |
+| 🎅 Dwarf | Blacksmith → Demolitionist | Bomb hits harder but costs more gold |
+| 🎅 Dwarf | Miser → Tycoon | Gold gained also grants half as much XP |
+| 🎅 Dwarf | Guild Master → Cheapskate | Gold-spending actives (shop 💊Heal / 💥Bomb) cost half |
+| 🧌 Orc | Berserker → Titan | Higher max HP means higher flat sword damage (+1 per 12 max HP) |
+| 🧌 Orc | Fighter → Thorns | Reflect half of damage taken back to the attacker |
+| 🧌 Orc | Witch Doctor → All is Poison | Each turn (after the Corruptor) burns 3 non-enemy non-heart tiles into 🖤 **black poison hearts**; linking them **only poisons all foes (no heal)** — red hearts still heal, your choice |
+| 🪦 Undead | Necromancer → Rejuvenation | All active-skill cooldowns −1 (exactly offsets Confusion's +1) |
+| 🪦 Undead | Skeleton King → Splash | Overflow damage splashes to a random remaining foe (**including sword-immune bosses**); triggers from sword chains, Arrow Rain, and Soul Drain overflow |
 
 ### 👹 Bestiary
 

@@ -7,7 +7,7 @@ const HTML_FILE = process.argv.includes('--dev') ? 'dungeon-raid-dev.html' : 'du
 const html = fs.readFileSync(__dirname + '/' + HTML_FILE, 'utf8');
 let script = html.match(/<script>([\s\S]*?)<\/script>/)[1];
 
-const EXPORT = `globalThis.__G={RACES,RACE_PATHS,TIER1,TIER2,UPGRADES,BOSSES,startGame,resolve,buyItem,shopCost,SHOP,activateSkill,isSwordTarget,
+const EXPORT = `globalThis.__G={RACES,RACE_PATHS,TIER1,TIER2,CLASS_T2,UPGRADES,BOSSES,startGame,resolve,buyItem,shopCost,SHOP,activateSkill,isSwordTarget,
   raceById, dispatchReplayAct, dmgSourceLabel, rollUpgradePool, applyUpgrade, recAct,
   get grid(){return grid}, set grid(v){grid=v},
   get player(){return player}, get rec(){return rec},
@@ -200,8 +200,8 @@ function botTransform(){
   const p=P(); if(!p.awaitingTier) return;
   const t=p.awaitingTier;
   if(t===1){ const ids=G.RACE_PATHS[p.race].t1; const f=ARG.t1; const id=(f&&ids.includes(f))?f:ids[0]; G.recAct(['t',1,id]); p.tier1=id; }
-  else if(t===2){ const ids=G.RACE_PATHS[p.race].t2; const f=ARG.t2; const id=(f&&ids.includes(f))?f:ids[0]; G.recAct(['t',2,id]); p.tier2=id; G.TIER2[id].f(p); p.hp=Math.min(p.hp,p.maxHp); }
-  else if(t===3){ const id=G.RACE_PATHS[p.race].t2.find(x=>x!==p.tier2); if(id){ G.recAct(['t',3,id]); p.tier2b=id; G.TIER2[id].f(p); p.hp=Math.min(p.hp,p.maxHp); } }   // 200回合：本种族剩余被动
+  else if(t===2){ const id=G.CLASS_T2[p.tier1]; G.recAct(['t',2,id]); p.tier2=id; G.TIER2[id].f(p); p.hp=Math.min(p.hp,p.maxHp); }   // 100回合：锁定职业专属被动
+  else if(t===3){ const f=ARG.t2; const pool=G.RACE_PATHS[p.race].t2.filter(x=>x!==p.tier2); const id=(f&&pool.includes(f))?f:pool[0]; if(id){ G.recAct(['t',3,id]); p.tier2b=id; G.TIER2[id].f(p); p.hp=Math.min(p.hp,p.maxHp); } }   // 200回合：同族其余被动（--t2 选）
   else if(t===4){ const id2=p.tier1||Object.keys(G.TIER1)[0]; G.recAct(['t',4,id2,'bomb']); p.skill2={id:id2, slot:'bomb'}; p.skill2Cd=0; }   // 350回合：用自己的一阶主动替换炸弹槽
   p.awaitingTier=0; G.busy=false;
 }
@@ -366,7 +366,8 @@ else if(FOCUS){
     const r1=ok.filter(r=>r.t1).length, r2=ok.filter(r=>r.t2).length;
     const deaths={}; ok.forEach(r=>{ if(r.deathSrc)deaths[r.deathSrc]=(deaths[r.deathSrc]||0)+1; });
     const topD=Object.entries(deaths).sort((a,b)=>b[1]-a[1]).slice(0,2).map(([k,v])=>`${srcName(k)} ${Math.round(v/ok.length*100)}%`).join(' · ')||'—';
-    const path=`${ARG.t1||G.RACE_PATHS[rc.id].t1[0]}/${ARG.t2||G.RACE_PATHS[rc.id].t2[0]}`;
+    const t1id=ARG.t1||G.RACE_PATHS[rc.id].t1[0];
+    const path=`${t1id}/${G.CLASS_T2[t1id]}`;   // 二阶被动锁定职业
     const err=res.length-ok.length;
     console.log(
       rc.n[0].padEnd(5)+'  '+path.padEnd(18)+' | '+
