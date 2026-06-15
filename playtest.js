@@ -207,9 +207,9 @@ function botTransform(){
 }
 
 // ---------- 4) 单局 ----------
-function playGame(rc){
+function playGame(rc, srv){   // srv={seed,token}：用服务端种子开局（--submit-ai 上榜需要），缺省则本地随机
   G.headless=true;   // 抑制升级弹窗在 resolve 里抽池，避免与机器人 resolveLevels 重复消耗 RNG（保证录像可重放）
-  G.startGame(rc);
+  G.startGame(rc, srv);
   let turn=0;
   for(; turn<4000; turn++){
     const p=P();
@@ -306,8 +306,13 @@ else if('submit-ai' in ARG){
   (async()=>{
     const runs=[];
     for(const rc of races){ for(let i=0;i<N;i++){
-      let out; try{ out=playGame(rc); }catch(e){ console.log('✗ 跑局出错', rc.id, e.message); continue; }
-      runs.push({race:rc.id, out, rec:JSON.parse(JSON.stringify(G.rec))});   // 深拷贝本局录像（下局 startGame 会覆盖 rec）
+      // 上榜需服务端种子：每局先取一次性 /seed（与真人客户端同路径），用它的种子开局、录像带 token
+      let srv=null;
+      try{ const r=await fetch(API+'/seed',{method:'POST'}); if(r.ok){ const x=await r.json(); if(typeof x.seed==='number'&&x.token) srv={seed:x.seed>>>0, token:x.token}; } }catch(e){}
+      if(!srv){ console.log('✗ 取服务端种子失败，跳过', rc.id); continue; }
+      let out; try{ out=playGame(rc, srv); }catch(e){ console.log('✗ 跑局出错', rc.id, e.message); continue; }
+      runs.push({race:rc.id, out, rec:JSON.parse(JSON.stringify(G.rec))});   // 深拷贝本局录像（含 token；下局 startGame 会覆盖 rec）
+      await new Promise(r=>setTimeout(r, +ARG.gap||4200));   // /seed 也走写入限流(20次/60s)，与提交共用 --gap 间隔
     }}
     // 本地重放校验：与服务端 verify 同一引擎，本地过即服务端可验证
     const replayCheck=rec=>{ try{ G.replaying=true; G.replayRec=rec; G.startGame(G.raceById(rec.race));
