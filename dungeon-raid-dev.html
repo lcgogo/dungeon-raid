@@ -159,7 +159,7 @@
 (()=>{
 //==================== 配置 ====================
 // 版本号 v主.次.修：小改动改"修"，新Boss/职业改"次"，大版本变更需先确认。页面底部显示。
-const VERSION='v1.23.0';
+const VERSION='v1.23.1';
 const DEV=true;    // 开发版：指向最新开发版本；独立存档 + DEV 标识。正式版在 dungeon-raid.html（DEV=false）
 const REC_API='https://api.dungeonraid.win';   // 录像分享 API（Cloudflare Worker + KV）
 // 带种子随机数（mulberry32）：游戏全程用 rnd() 取代原生随机，配合录制种子可确定性重放
@@ -510,7 +510,7 @@ const TIER1={
     passive:['每回合棋盘摆完后，把 3 个非敌人/非心的棋子变成心','Each turn after the board settles, turns 3 non-enemy non-heart tiles into hearts']},
   swordsaint:{n:['剑圣','Sword Saint'], quip:['在我眼里，万物皆可开刃。','In my eyes, anything can be a blade.'], skill:{name:['化剑','Bladeshift'], short:['全场心/金币→剑','Hearts & coins → swords'], cd:5, f:p=>{ let n=0; for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const t=grid[r][c]; if(t&&(t.type==='heart'||t.type==='coin')){ t.type='sword'; n++; } } if(!n) return false; log(tr(`⚔️ 化剑：${n} 个心/金币化为剑`,`⚔️ Bladeshift: ${n} hearts/coins → swords`)); return n; }},
     passive:['每回合棋盘摆完后，把 3 个非敌人/非剑的棋子变成剑','Each turn after the board settles, turns 3 non-enemy non-sword tiles into swords']},
-  necromancer:{n:['死灵','Necromancer'], quip:['你的魂，我借来续命。','Your soul keeps me going. Thanks.'], skill:{name:['吸魂大法','Soul Drain'], short:['随机吸 2 个目标(含Boss，连剑免疫的)的命补自己','Drain 2 random targets (incl. bosses, even sword-immune) to heal'], cd:5, f:p=>{
+  necromancer:{n:['死灵','Necromancer'], quip:['你的魂，我借来续命。','Your soul keeps me going. Thanks.'], skill:{name:['吸魂大法','Soul Drain'], short:['随机吸 2 个目标补自己，每个最多吸你的生命上限（含{W}免疫 Boss）','Drain 2 random targets to heal — each up to your max HP (incl. {W}-immune bosses)'], desc:['随机选 2 个目标（怪或 Boss，含{W}免疫的，终焉之主除外）。每个吸取「你的生命上限」与「它当前血量」中的较小值——即单个最多吸等于你生命上限的血，吸取量≥它血量就把它吸死。吸到的总量给你回血（受治疗减半等影响）。若把目标吸死且已学「溅射」，多出的吸力（你的上限−它血量）会溅射到剩余的一个敌人。','Picks 2 random targets (monsters or bosses, incl. {W}-immune; not the Overlord). Each drains the lesser of your max HP and its current HP — so up to your max HP per target, and it dies if that ≥ its HP. The total drained heals you (subject to halved healing, etc.). If a drained target dies and you have Splash, the overflow (your max HP − its HP) splashes to a remaining foe.'], cd:5, f:p=>{
     const foes=[]; for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const t=grid[r][c]; if(t&&(t.type==='enemy'||(t.type==='boss'&&!t.finale))) foes.push([r,c]); }
     if(!foes.length) return false;
     for(let i=foes.length-1;i>0;i--){ const j=Math.floor(rnd()*(i+1)); [foes[i],foes[j]]=[foes[j],foes[i]]; }
@@ -1151,8 +1151,8 @@ function shopInfoData(key){
   if(key==='bomb'){
     const D=p.bombBoost?8:6, cd=p.bombCd||3;
     return { icon:'💥', title:tr('炸弹','Bomb'),
-      desc:tr('投掷炸弹，对全场怪与 Boss 造成固定伤害（无视档位倍率）。能炸剑免疫的 Boss（幽灵/小丑/污染怪/雪人）；终焉之主无效；石像会把伤害反弹给你。',
-              'Throw a bomb for fixed damage to all monsters & bosses (ignores tier scaling). Hits sword-immune bosses (Ghost/Clown/Corruptor/Snowman); no effect on the Overlord; the Statue reflects it back.'),
+      desc:tr('投掷炸弹，对全场怪与 Boss 造成固定伤害（无视档位倍率）。能炸{W}免疫的 Boss（幽灵/小丑/污染怪/雪人）；终焉之主无效；石像会把伤害反弹给你。',
+              'Throw a bomb for fixed damage to all monsters & bosses (ignores tier scaling). Hits {W}-immune bosses (Ghost/Clown/Corruptor/Snowman); no effect on the Overlord; the Statue reflects it back.'),
       rows:[ [tr('当前伤害','Damage'), `−${D}`+(p.bombBoost?tr('（爆破手）','(Demo)'):'')],
              [tr('花费','Cost'), `${shopCost('bomb')} 💰`+(p.cheapskate?tr('（小气鬼半价）',' (½)'):'')+(p.bombBoost?tr('（爆破手×2）',' (×2)'):'')],
              [tr('冷却','Cooldown'), `${cd} ${tr('回合','t')}`+(p.bombCd?tr('（影袭）',' (Shadow)'):'')] ] };
@@ -1163,6 +1163,7 @@ function shopInfoData(key){
     let desc='';   // 俏皮话紧跟职业名（标题），技能描述/被动另起一行
     if(t1.quip) desc+=`<i style="color:#caa6e6">「${L(t1.quip)}」</i><br>`;
     desc+=`<b>${L(sk.short)}</b>`;
+    if(sk.desc) desc+=`<br>${L(sk.desc)}`;   // 技能完整规则（如吸魂的吸取量/规则）
     if(t1.passive) desc+=`<br>${tr('被动','Passive')}：${L(t1.passive)}`;
     return { icon:'✨', title:`${L(t1.n)} · ${L(sk.name)}`, desc,
       rows:[ [tr('冷却','Cooldown'), `${effSkillCd(p.tier1)} ${tr('回合','t')}`],
