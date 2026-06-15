@@ -17,6 +17,24 @@ const CORS = {
 const MAX_BYTES = 200000;   // 单份录像上限
 const MIN_TURNS = 30;       // 分享门槛：少于 30 回合不接收
 const SHARE_VERIFY_FACTOR = 1.5;  // 分享回合数 > 榜首×1.5（且≥榜首+30）→ 标记待验证
+const SEED_TTL = 7200;      // 服务端发放的种子 token 有效期（秒）：一局必须在此窗口内完成
+// 反作弊·服务端发种子：上榜成绩必须用服务端发的种子（防离线刷幸运种子）。
+// 过渡期 false（接受无 token 的旧客户端，不破坏现网榜单）；新客户端全量后改 true 才真正强制。
+const REQUIRE_TOKEN = false;
+
+// 校验并消费一次性种子 token：present 且有效 → 标记已用、返回 {ok:true}；否则 {ok:false,reason}
+async function consumeToken(env, token, seed) {
+  if (!token) return { ok: false, reason: 'no-token' };
+  if (!env.REC) return { ok: false, reason: 'no-kv' };
+  const k = 'seed:' + token;
+  const raw = await env.REC.get(k);
+  if (!raw) return { ok: false, reason: 'unknown-or-expired' };
+  let t; try { t = JSON.parse(raw); } catch { return { ok: false, reason: 'corrupt' }; }
+  if (t.u) return { ok: false, reason: 'used' };
+  if ((t.s >>> 0) !== (seed >>> 0)) return { ok: false, reason: 'seed-mismatch' };
+  await env.REC.put(k, JSON.stringify({ s: t.s, u: 1 }), { expirationTtl: 600 });  // 标记已用，短 TTL 防复用
+  return { ok: true };
+}
 
 const json = (o, s = 200) => new Response(JSON.stringify(o), { status: s, headers: { 'Content-Type': 'application/json', ...CORS } });
 function shortId(n = 8) {
@@ -103,10 +121,18 @@ export default {
     const url = new URL(req.url), p = url.pathname;
 
     // 写入类端点按来源 IP 限流（每 IP 20 次/60s），挡刷榜/批量伪造。绑定缺失时（本地/未配）跳过。
-    if (req.method === 'POST' && (p === '/rec' || p === '/score' || p === '/clear') && env.WRITE_LIMITER) {
+    if (req.method === 'POST' && (p === '/rec' || p === '/score' || p === '/clear' || p === '/seed') && env.WRITE_LIMITER) {
       const ip = req.headers.get('cf-connecting-ip') || 'unknown';
       const { success } = await env.WRITE_LIMITER.limit({ key: ip });
       if (!success) return json({ error: 'too many requests, slow down' }, 429);
+    }
+
+    // POST /seed —— 发放一次性服务端种子 + token（上榜成绩须用它，防离线刷种子）。已被上方按 IP 限流。
+    if (req.method === 'POST' && p === '/seed') {
+      const seed = crypto.getRandomValues(new Uint32Array(1))[0] >>> 0;
+      const token = shortId(16);
+      if (env.REC) await env.REC.put('seed:' + token, JSON.stringify({ s: seed, u: 0 }), { expirationTtl: SEED_TTL });
+      return json({ seed, token });
     }
 
     // GET /rec/:id
@@ -144,6 +170,9 @@ export default {
       if (body.length > MAX_BYTES) return json({ error: 'too large' }, 413);
       let d; try { d = JSON.parse(body); } catch { return json({ error: 'invalid json' }, 400); }
       if (!d || !validRec(d.rec)) return json({ error: 'invalid' }, 400);
+      const tkn = d.token || (d.rec && d.rec.token); const tok = await consumeToken(env, tkn, d.rec.seed);   // 服务端种子 token 校验
+      if (tkn && !tok.ok) return json({ error: 'invalid seed token: ' + tok.reason }, 422);
+      if (!tkn && REQUIRE_TOKEN) return json({ error: 'ranked play requires a server seed' }, 422);
       const turns = turnCount(d.rec);                 // 回合以录像动作数为准，防止伪报
       const level = d.level | 0, gold = d.gold | 0, race = d.rec.race, version = d.rec.ver || '';
       const agent = d.agent === 'ai' ? 'ai' : 'human';   // 自报，非 'ai' 一律按人类
@@ -162,6 +191,9 @@ export default {
       if (body.length > MAX_BYTES) return json({ error: 'too large' }, 413);
       let d; try { d = JSON.parse(body); } catch { return json({ error: 'invalid json' }, 400); }
       if (!d || !validRec(d.rec)) return json({ error: 'invalid' }, 400);
+      const tkn = d.token || (d.rec && d.rec.token); const tok = await consumeToken(env, tkn, d.rec.seed);   // 服务端种子 token 校验
+      if (tkn && !tok.ok) return json({ error: 'invalid seed token: ' + tok.reason }, 422);
+      if (!tkn && REQUIRE_TOKEN) return json({ error: 'ranked play requires a server seed' }, 422);
       const turns = turnCount(d.rec);
       if (turns < 510) return json({ error: 'not a clear (need >=510 turns)' }, 422);
       const level = d.level | 0, race = d.rec.race, version = d.rec.ver || '';
