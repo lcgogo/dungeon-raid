@@ -6,6 +6,7 @@
 #   release             晋级正式版：同步 dev→prod + 提交 + push + 部署 + GitHub Release（提交说明读 /tmp/dr_commit_msg.txt）
 #   gh-release [vX.Y.Z] 创建/更新 GitHub Release（默认读正式版 const VERSION；可指定版本回填）
 #   integrity           核对正式版引擎 sha256 是否与 engines.json 登记一致（完整性校验）
+#   classify <id> <ai|human>  把某条成绩在 人类榜↔AI榜 之间改判（需 VERIFY_SECRET 环境变量）
 #   backfill-releases   为 CHANGELOG 里每个版本补打 tag+release（已存在的跳过）
 #   bind-domains        把自定义域名绑定到 Pages 项目
 #   help                显示本说明
@@ -29,6 +30,15 @@ cmd_integrity(){
   echo "  登记 sha256: ${want:-（engines.json 无此版本）}"
   if [ -z "$want" ]; then echo "  ⚠️ 未登记（新版本？发版时会自动写入）"; return 0; fi
   if [ "$hash" = "$want" ]; then echo "  ✅ 一致，文件未被改动"; else echo "  ❌ 不一致！文件与登记版本不符"; return 1; fi
+}
+
+# ---------- 黑盒改判：把某条成绩在 人类榜↔AI榜 之间挪（需环境变量 VERIFY_SECRET）----------
+cmd_classify(){
+  local id="$1" agent="$2"
+  [ -n "$id" ] && { [ "$agent" = ai ] || [ "$agent" = human ]; } || { echo "用法: VERIFY_SECRET=… bash dr.sh classify <id> <ai|human>"; return 1; }
+  [ -n "$VERIFY_SECRET" ] || { echo "缺少环境变量 VERIFY_SECRET"; return 1; }
+  curl -s -X POST "https://api.dungeonraid.win/classify?k=$VERIFY_SECRET" \
+    -H 'Content-Type: application/json' -d "{\"id\":\"$id\",\"agent\":\"$agent\"}"; echo
 }
 
 # ---------- 跑测试 ----------
@@ -126,7 +136,8 @@ case "${1:-help}" in
   release)           cmd_release ;;
   gh-release)        cmd_gh_release "$2" ;;
   integrity)         cmd_integrity ;;
+  classify)          cmd_classify "$2" "$3" ;;
   backfill-releases) cmd_backfill_releases ;;
   bind-domains)      cmd_bind_domains ;;
-  help|--help|-h|*)  sed -n '2,11p' "$0" | sed 's/^# \{0,1\}//' ;;
+  help|--help|-h|*)  sed -n '2,12p' "$0" | sed 's/^# \{0,1\}//' ;;
 esac
