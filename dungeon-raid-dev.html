@@ -96,13 +96,14 @@
   #rbJumps{display:flex; flex-wrap:wrap; gap:5px; align-items:center;}
   #rbJumps:empty{display:none;}
   #rbJumps .rbLbl{color:var(--dim); font-size:11px;}
-  #replayBar .rbProg{flex:1; min-width:0;}
-  #replayBar .rbBar{height:6px; border-radius:4px; background:#15101e; overflow:hidden; margin-top:3px;}
+  #replayBar .rbProg{flex:1; min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  #replayBar .rbBar{height:6px; border-radius:4px; background:#15101e; overflow:hidden;}   /* 独占一行，永不被按钮挤压 */
   #replayBar .rbBar > i{display:block; height:100%; background:#7d3cad; width:0;}
   #replayBar button{background:#2f2440; color:#d9ccff; border:1px solid #6a4fa3; border-radius:8px;
-    padding:4px 9px; font-size:12px; cursor:pointer;}
+    padding:4px 9px; font-size:12px; cursor:pointer; flex:none;}
   #replayBar button.on{background:#7d3cad; color:#fff; border-color:#c08bff;}
   #replayBar button.dim{opacity:.3; cursor:not-allowed;}   /* 步进键到边界变灰 */
+  #replayBar button.hide{visibility:hidden;}   /* 步进键非暂停时隐藏但保留占位，避免挤动其它按钮 */
   #replayBar button:hover{border-color:#c08bff;}
 </style>
 </head>
@@ -149,7 +150,7 @@
 
 <div id="replayBar">
   <div class="rbRow">
-    <div class="rbProg"><span id="rbTxt">🎬 回放</span><div class="rbBar"><i id="rbFill"></i></div></div>
+    <span id="rbTxt" class="rbProg">🎬 回放</span>
     <button id="rbPrev" title="上一回合">◀</button>
     <button id="rbNext" title="下一回合">▶</button>
     <button class="rbSpd" data-spd="1">1×</button>
@@ -157,6 +158,7 @@
     <button class="rbSpd" data-spd="4">4×</button>
     <button id="rbExit">⏹</button>
   </div>
+  <div class="rbBar"><i id="rbFill"></i></div>
   <div id="rbJumps"></div>
 </div>
 
@@ -164,7 +166,7 @@
 (()=>{
 //==================== 配置 ====================
 // 版本号 v主.次.修：小改动改"修"，新Boss/职业改"次"，大版本变更需先确认。页面底部显示。
-const VERSION='v1.25.11';
+const VERSION='v1.25.12';
 const CHANGELOG_LINES=["v1.25.11 — 修复主栏红字与展开栏不一致（主栏也逐行按各自 red 标记上色，共用 logColor）", "v1.25.10 — 修复回放完全不显示连线（保留连线、只在暂停/跳转/结束清）+ 日志框左右与棋盘对齐", "v1.25.9 — 修复完整日志里红字丢失（历史记录带 red 标记）+ 主界面日志加框", "v1.25.8 — 修复吸魂红线闪 2 次（动画加 fill:forwards + 初始隐藏，去掉结束回弹）", "v1.25.7 — 炸弹爆炸特效（每个命中怪/Boss 格爆橙色闪光+扩散环；纯 UI）", "v1.25.6 — 修复回放/跳转后残留旧连线（画在重排棋盘上像“连了没连的”）+ 快进时不放吸魂特效", "v1.25.5 — 吸魂大法吸血特效（从被吸目标格画红线指向血条；纯 UI）", "v1.25.4 — 矮人↔兽人武器对调（兽人🪓斧、矮人🔨锤，纯显示）+ README 加在线试玩链接", "v1.25.3 — 会长「收买」改为真花「全怪血量」金币买通 + 移除冷却；饕餮显示动态攻击角标（=血量50%）", "v1.25.2 — 修复回放中可操作棋盘致回放与真实不符；回放控制改版（点棋盘暂停 + ◀▶单回合步进，边界变灰）", "v1.25.1 — 修复转职后技能/商店按钮停留在禁用态（老问题）——updateHUD 移到 busy 复位之后", "v1.25.0 — 职业进阶链重构（50主动→100锁定专属被动→200同族另一被动）+ 拆出皆可为剑/万物皆毒(黑毒心)", "v1.24.3 — 调高怪物/Boss 攻击力（怪 lv×0.7→1.1、Boss lv×1.2→1.8），避免后期护甲碾压攻击只吃 1 点", "v1.24.2 — 修复点版本号一直「加载中」（更新日志改为嵌入页面、零网络，dr.sh 自动从 CHANGELOG 注入）", "v1.24.1 — 日志栏可点开看历史 + 点版本号看更新日志 + 底部方块提示 + 修角色面板技能冷却显示（用有效冷却）", "v1.24.0 — 雪人重做（移除攻击→倒计时归零再次冰封，留可炸窗口）+ 每回合行动 Boss 标注倒计时", "v1.23.1 — 吸魂大法描述按种族渲染武器免疫（骨/剑）+ 写清吸取规则（每个最多吸你的生命上限）", "v1.23.0 — 吸魂大法的溢出也触发「溅射」（吸死目标后多出的吸力砸向剩余敌人，含剑免疫）", "v1.22.8 — 吸魂大法描述写明对 Boss 有效（和炸弹一样含剑免疫的；终焉除外）", "v1.22.7 — 角色详情面板 + 长按技能块弹窗的俏皮话也紧跟职业名（与转职选择页一致）", "v1.22.6 — 转职选择页俏皮话紧跟职业名、技能描述另起一行（原顺序反了）", "v1.22.5 — 升级「强化体魄」不再回满血，改为回等量血（去掉升级白嫖满血；人族+6/回6）", "v1.22.4 — 长按商店/技能块（治疗/炸弹/职业主动）弹出详细说明（含当前数值；置灰也能看；纯 UI）", "v1.22.3 — 修复召唤师塞满棋盘后卡死不判负（hasAnyMove 只认真剑链 + 判负扩展到全对局 + 逃生判定）", "v1.22.2 — 修复小偷高档位（≥第5档/100%）把金币偷成负数（偷取量封顶为当前金币）+ 攻击日志加高到完整 2 行", "v1.22.1 — 修复无头机器人在正式版引擎上自动以人类上报、抢用种子 token（AI 榜上传 422）", "v1.22.0 — 反作弊·服务端发种子（一次性种子+token，防离线刷幸运种子；离线可玩不计排名）", "v1.21.5 — 死亡/破关报告显示游玩时长（⏱ 用时；继续上局排除关游戏的间隔）", "v1.21.4 — 职业进阶文案改版（职业→二阶技能→本族技能→跨界技能，只剧透50回合、保持神秘）", "v1.21.3 — 开始页版本徽标旁加「🏠 首页」按钮（回到 index.html 切换版本）", "v1.21.2 — 修复回放「跳回合」一跳就到结束画面（快进期间抑制 gameOver、防崩溃）", "v1.21.1 — 各种族专属武器图标（精灵箭/矮人斧/兽人狼牙棒/活死人骨）+ 核心文案随之改名", "v1.21.0 — 矮人新职业 会长(收买)/小气鬼(主动花费减半) + 转职祝福语 + 修复箭雨对僵尸无效", "v1.20.0 — 新 Boss 雪人（只能炸弹；现身随机冰封 1/2/3 个主动 4 回合，按档位）", "v1.19.0 — 新 Boss 污染怪（在场时全场心变毒心，连之扣血；只能炸弹清掉）", "v1.18.0 — 新 Boss 石像（受到的伤害真实反弹给玩家，攻击它=伤害自己）", "v1.17.3 — 商店治疗改为随使用递增（每次恢复 +2、耗金 +1），后期不再鸡肋", "v1.17.2 — 守财奴囤金缩短为固定 4 回合、返还 ×2→×2.5（去掉越有钱锁越久）", "v1.17.1 — 活死人削弱（治疗 −50% 硬削弱；回测回落到全场顶档持平、不再霸榜）", "v1.17.0 — 新种族 活死人（迷惑天赋 + 死灵/骷髅王 + 回春/溅射），第 5 个种族"];   /* auto-injected by dr.sh embed-changelog（勿手改） */
 const DEV=true;    // 开发版：指向最新开发版本；独立存档 + DEV 标识。正式版在 dungeon-raid.html（DEV=false）
 const REC_API='https://api.dungeonraid.win';   // 录像分享 API（Cloudflare Worker + KV）
@@ -1715,30 +1717,44 @@ function exportRec(r){
 }
 
 //==================== 录像回放 ====================
-let replayRec=null, replayIdx=0, replayTimer=null, replaySpeed=1, replayPaused=false, replayTotalTurns=0, replayAutoPaused=false;
+let replayRec=null, replayIdx=0, replayTimer=null, replaySpeed=1, replayPaused=false, replayTotalTurns=0, replayAutoPaused=false, replayPending=null;
 let jumping=false;   // 跳回合快进期间：抑制 gameOver/onClear，避免（录像若不一致而提前死亡时）直接弹出结束画面
 const REPLAY_BASE=620;   // 每步基础间隔 ms（按倍速缩短）
 function startReplay(recObj){
   if(!recObj||!Array.isArray(recObj.acts)){ alert(tr('录像无效','Invalid recording')); return; }
-  replaying=true; replayRec=recObj; replayIdx=0; replaySpeed=1; replayPaused=false; replayAutoPaused=false; rec=null;
+  replaying=true; replayRec=recObj; replayIdx=0; replaySpeed=1; replayPaused=false; replayAutoPaused=false; replayPending=null; rec=null;
   replayTotalTurns=recObj.acts.filter(a=>a[0]==='m').length;   // 总回合数（=连线动作数）
   hideOverlay(); busy=false;
   startGame(raceById(recObj.race));    // replaying=true → 用 recObj.seed 播种、不新建录像
   document.getElementById('replayBar').classList.add('show');
   renderJumps(); updateReplayBar(); scheduleReplay();
 }
-function scheduleReplay(){ clearTimeout(replayTimer); if(replayPaused||!replaying) return; replayTimer=setTimeout(replayStep, REPLAY_BASE/replaySpeed); }
+function scheduleReplay(delay){ clearTimeout(replayTimer); if(replayPaused||!replaying) return; replayTimer=setTimeout(replayStep, delay==null?REPLAY_BASE/replaySpeed:delay); }
 function replayStep(){
   if(!replaying) return;
-  if(replayIdx>=replayRec.acts.length){ replayDone(); return; }
-  const a=replayRec.acts[replayIdx++];
-  try{ dispatchReplayAct(a); }catch(e){ log('回放出错: '+e.message); replayDone(); return; }
-  if(!replaying) return;   // resolve 可能已触发 gameOver→stopReplay
-  // 倒数 10 回合自动暂停一次，方便看清怎么死的
-  if(!replayAutoPaused && replayTotalTurns>10 && player && player.hp>0 && player.turns>=replayTotalTurns-10){
-    replayAutoPaused=true; replayPaused=true; selection=[];   // 静止帧清掉连线
-    log(tr('⏸ 接近尾声，已自动暂停。点 ▶ 继续看结局。','⏸ Auto-paused near the ending. Press ▶ to watch how it ends.'));
+  if(replayPending){   // 第二拍：结算上一拍已预显示连线的那步
+    const a=replayPending; replayPending=null; replayIdx++;
+    try{ dispatchReplayAct(a); }catch(e){ log('回放出错: '+e.message); replayDone(); return; }
+    if(!replaying) return;   // resolve 可能已触发 gameOver→stopReplay
+    // 倒数 10 回合自动暂停一次，方便看清怎么死的
+    if(!replayAutoPaused && replayTotalTurns>10 && player && player.hp>0 && player.turns>=replayTotalTurns-10){
+      replayAutoPaused=true; replayPaused=true; selection=[];   // 静止帧清掉连线
+      log(tr('⏸ 接近尾声，已自动暂停。点 ▶ 继续看结局。','⏸ Auto-paused near the ending. Press ▶ to watch how it ends.'));
+    }
+    updateReplayBar(); scheduleReplay(); return;
   }
+  if(replayIdx>=replayRec.acts.length){ replayDone(); return; }
+  const a=replayRec.acts[replayIdx];
+  if(a[0]==='m'){   // 第一拍：在「结算前」的棋盘上先把本步连线画出来，半拍后再结算（连线才对得上棋子）
+    selection=a[1].map(([r,c],i)=>({r,c,type:i===0?a[2]:(grid[r][c]?grid[r][c].type:a[2])}));
+    replayPending=a; updateReplayBar();
+    scheduleReplay(Math.max(110, REPLAY_BASE/replaySpeed*0.5));
+    return;
+  }
+  // 非连线动作（买道具/技能/升级/转职）：直接执行
+  replayIdx++;
+  try{ dispatchReplayAct(a); }catch(e){ log('回放出错: '+e.message); replayDone(); return; }
+  if(!replaying) return;
   updateReplayBar(); scheduleReplay();
 }
 function dispatchReplayAct(a){
@@ -1746,8 +1762,7 @@ function dispatchReplayAct(a){
   if(k==='m'){ const cells=a[1], base=a[2];
     selection=cells.map(([r,c],i)=>({r,c,type:i===0?base:(grid[r][c]?grid[r][c].type:base)}));
     resolve();
-    // 不在此清空：保留 selection 让两步之间的帧能画出本步连线（回放才看得到连线）。
-    // 暂停/跳转/结束时再清（见 togglePauseReplay/jumpToTurn/replayDone），避免静止帧上残留旧连线画在重排后的棋盘上。
+    selection=[];   // 结算后立即清：连线由 replayStep 在「结算前」的棋盘上预显示（见两拍逻辑），绝不画在已重排的棋盘上
   } else if(k==='b'){ buyItem(a[1]); }
   else if(k==='k'){ activateSkill(); }
   else if(k==='u'){ rollUpgradePool(); applyUpgrade(UPGRADES[a[1]]); updateHUD(); }   // 洗牌消耗等量 RNG（丢弃结果），按录像索引应用
@@ -1760,23 +1775,23 @@ function dispatchReplayAct(a){
   }
 }
 function updateReplayBar(){
-  const n=replayRec?replayRec.acts.length:0;
+  const tt=replayTotalTurns||0;
   const turn=player?player.turns:0;
-  document.getElementById('rbTxt').textContent=`🎬 ${tr('回放','Replay')}${replayPaused?' ⏸':''} · ${tr('回合','turn')} ${turn} · ${replayIdx}/${n}`;
-  document.getElementById('rbFill').style.width=(n?Math.min(100,replayIdx/n*100):0)+'%';
-  // 步进键：仅暂停时显示；到首/末回合相应变灰
+  document.getElementById('rbTxt').textContent=`🎬 ${tr('回放','Replay')}${replayPaused?' ⏸':''} · ${tr('回合','turn')} ${turn}/${tt}`;
+  document.getElementById('rbFill').style.width=(tt?Math.min(100,turn/tt*100):0)+'%';
+  // 步进键：仅暂停时可见（用 .hide 隐藏但保留占位，避免挤动其它按钮/进度条）；到首/末回合相应变灰
   const prev=document.getElementById('rbPrev'), next=document.getElementById('rbNext');
-  if(prev&&next){ const show=replayPaused?'':'none'; prev.style.display=next.style.display=show;
-    prev.classList.toggle('dim', turn<=1); next.classList.toggle('dim', turn>=replayTotalTurns); }
+  if(prev&&next){ prev.classList.toggle('hide', !replayPaused); next.classList.toggle('hide', !replayPaused);
+    prev.classList.toggle('dim', turn<=1); next.classList.toggle('dim', turn>=tt); }
   document.querySelectorAll('#replayBar .rbSpd').forEach(b=>b.classList.toggle('on', +b.dataset.spd===replaySpeed));
 }
-function replayDone(){ clearTimeout(replayTimer); replayTimer=null; replayPaused=true; selection=[]; updateReplayBar(); log(tr('🎬 回放结束（点 ⏹ 退出）','🎬 Replay finished (⏹ to exit)')); }
-function stopReplay(){ clearTimeout(replayTimer); replayTimer=null; replaying=false; replayRec=null; document.getElementById('replayBar').classList.remove('show'); }
+function replayDone(){ clearTimeout(replayTimer); replayTimer=null; replayPaused=true; replayPending=null; selection=[]; updateReplayBar(); log(tr('🎬 回放结束（点 ⏹ 退出）','🎬 Replay finished (⏹ to exit)')); }
+function stopReplay(){ clearTimeout(replayTimer); replayTimer=null; replaying=false; replayRec=null; replayPending=null; document.getElementById('replayBar').classList.remove('show'); }
 // 跳到指定回合：从种子重头快进（确定性、瞬间），到目标回合后暂停
 function jumpToTurn(target){
   if(!replaying||!replayRec) return;
   const rec0=replayRec, acts=rec0.acts;            // 本地持有：防止快进中误触 stopReplay 把 replayRec 置空
-  clearTimeout(replayTimer); replayTimer=null;
+  clearTimeout(replayTimer); replayTimer=null; replayPending=null;
   replayAutoPaused = target>=replayTotalTurns-10;   // 跳到接近终点就别再自动暂停
   replayIdx=0; busy=false; jumping=true;            // 快进期间抑制 gameOver/onClear
   try{
@@ -1800,7 +1815,7 @@ function renderJumps(){
   for(let t=50;t<replayTotalTurns;t+=50){ const b=document.createElement('button'); b.textContent=t; b.onclick=()=>jumpToTurn(t); box.appendChild(b); }
 }
 // 暂停/继续（点棋盘触发，见 startDrag）
-function togglePauseReplay(){ if(!replaying) return; if(replayIdx>=(replayRec?replayRec.acts.length:0)) return; replayPaused=!replayPaused; if(replayPaused) selection=[]; updateReplayBar(); scheduleReplay(); }
+function togglePauseReplay(){ if(!replaying) return; if(replayIdx>=(replayRec?replayRec.acts.length:0)) return; replayPaused=!replayPaused; if(replayPaused){ selection=[]; replayPending=null; } updateReplayBar(); scheduleReplay(); }
 // 步进一回合（确定性从种子重跑到目标回合，内部会暂停）
 function stepReplay(dir){ if(!replaying||!replayRec) return; const cur=player?player.turns:0; const target=Math.max(1, Math.min(replayTotalTurns, cur+dir)); if(target!==cur) jumpToTurn(target); }
 document.getElementById('rbPrev').onclick=()=>stepReplay(-1);
