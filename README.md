@@ -8,6 +8,12 @@
 >
 > 🙏 **A tribute**: This is a fan-made web remake inspired by the classic iOS game **Dungeon Raid** by Fireflame Games (2011). It is an unofficial homage, not affiliated with the original author — made just for learning and fun.
 
+### 🎮 在线试玩 · Play Online
+
+**▶ 正式版 / Release: <https://dungeonraid.win>** ｜ 开发版 / Dev: <https://dungeonraid.win/dungeon-raid-dev.html>
+
+手机/桌面浏览器直接打开即玩，无需安装。
+
 [中文](#中文) · [English](#english)
 
 ---
@@ -16,7 +22,7 @@
 
 ### 🎮 开始游戏
 
-直接用浏览器打开 `dungeon-raid.html` 即可。游戏自动适配屏幕宽度，支持触摸和鼠标。
+在线直接玩：**<https://dungeonraid.win>**（开发版 <https://dungeonraid.win/dungeon-raid-dev.html>）。也可下载仓库后用浏览器打开 `dungeon-raid.html`。游戏自动适配屏幕宽度，支持触摸和鼠标。
 
 **两个版本**（首页 `index.html` 可选择，按大小区分）：
 
@@ -197,7 +203,7 @@ node playtest.js --submit-ai --games=3   # 跑机器人 → 本地重放校验 �
 
 ### 🎮 Getting Started
 
-Just open `dungeon-raid.html` in a browser. The game auto-fits the screen width and supports both touch and mouse.
+Play online: **<https://dungeonraid.win>** (Dev build: <https://dungeonraid.win/dungeon-raid-dev.html>). Or clone the repo and open `dungeon-raid.html` in a browser. The game auto-fits the screen width and supports both touch and mouse.
 
 **Two builds** (pick on the `index.html` home page, sized to tell them apart):
 
