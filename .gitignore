@@ -11,3 +11,9 @@ node_modules/
 
 # Pages 部署用的临时干净目录（由 deploy-pages.sh 生成）
 public/
+
+# 编辑器/系统临时文件
+*.swp
+*.swo
+*~
+.DS_Store
