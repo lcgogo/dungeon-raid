@@ -376,6 +376,22 @@ See [`TEST_REPORT.md`](TEST_REPORT.md) for baseline data (versioned, for regress
 
 ---
 
-## 📄 License
+## 📄 License · 许可证
 
-MIT
+**双授权 / Dual-licensed.** Copyright © 2026 lcgogo.
+
+本项目采用**双授权**，二选一（详见 [`LICENSE`](LICENSE)）：
+
+- **开源 · AGPL-3.0**：可免费使用、修改、自建。但**一旦分发，或以网络服务（含网页）形式提供给他人，必须按 AGPL-3.0 把你那一版的完整源码也公开**给用户。
+- **商业授权**：若想在**闭源 / 商业产品**中使用、且不受上述 AGPL 义务约束，须**另向版权人取得商业授权**。联系：在 <https://github.com/lcgogo/dungeon-raid> 开 issue。
+
+This project is **dual-licensed** (see [`LICENSE`](LICENSE)):
+
+- **Open source — AGPL-3.0**: free to use, modify, and self-host; but if you distribute it or make it available to users over a network (including as a web app), you **must release the complete corresponding source of your version** to those users under AGPL-3.0.
+- **Commercial**: to use it in a **closed-source and/or commercial** product without the AGPL obligations, obtain a **commercial license** — open an issue at <https://github.com/lcgogo/dungeon-raid>.
+
+> ℹ️ 历史上以 MIT 发布的旧版本仍可按 MIT 使用；本双授权自 2026-06-16 起对新版本生效。
+> Versions previously released under MIT remain available under MIT; this dual license applies to releases from 2026-06-16 onward.
+
+> ⚠️ 本作是向 Fireflame Games《Dungeon Raid》(2011) 致敬的非官方网页复刻，与原作者无关。本许可证仅覆盖**本仓库的原创代码与内容**，不授予原作的任何权利。
+> This is an unofficial web tribute to *Dungeon Raid* by Fireflame Games (2011), unaffiliated with the original. This license covers **only the original code and content in this repository** and grants no rights to the original work.
