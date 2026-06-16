@@ -160,8 +160,8 @@
 (()=>{
 //==================== 配置 ====================
 // 版本号 v主.次.修：小改动改"修"，新Boss/职业改"次"，大版本变更需先确认。页面底部显示。
-const VERSION='v1.24.3';
-const CHANGELOG_LINES=["v1.24.3 — 调高怪物/Boss 攻击力（怪 lv×0.7→1.1、Boss lv×1.2→1.8），避免后期护甲碾压攻击只吃 1 点", "v1.24.2 — 修复点版本号一直「加载中」（更新日志改为嵌入页面、零网络，dr.sh 自动从 CHANGELOG 注入）", "v1.24.1 — 日志栏可点开看历史 + 点版本号看更新日志 + 底部方块提示 + 修角色面板技能冷却显示（用有效冷却）", "v1.24.0 — 雪人重做（移除攻击→倒计时归零再次冰封，留可炸窗口）+ 每回合行动 Boss 标注倒计时", "v1.23.1 — 吸魂大法描述按种族渲染武器免疫（骨/剑）+ 写清吸取规则（每个最多吸你的生命上限）", "v1.23.0 — 吸魂大法的溢出也触发「溅射」（吸死目标后多出的吸力砸向剩余敌人，含剑免疫）", "v1.22.8 — 吸魂大法描述写明对 Boss 有效（和炸弹一样含剑免疫的；终焉除外）", "v1.22.7 — 角色详情面板 + 长按技能块弹窗的俏皮话也紧跟职业名（与转职选择页一致）", "v1.22.6 — 转职选择页俏皮话紧跟职业名、技能描述另起一行（原顺序反了）", "v1.22.5 — 升级「强化体魄」不再回满血，改为回等量血（去掉升级白嫖满血；人族+6/回6）", "v1.22.4 — 长按商店/技能块（治疗/炸弹/职业主动）弹出详细说明（含当前数值；置灰也能看；纯 UI）", "v1.22.3 — 修复召唤师塞满棋盘后卡死不判负（hasAnyMove 只认真剑链 + 判负扩展到全对局 + 逃生判定）", "v1.22.2 — 修复小偷高档位（≥第5档/100%）把金币偷成负数（偷取量封顶为当前金币）+ 攻击日志加高到完整 2 行", "v1.22.1 — 修复无头机器人在正式版引擎上自动以人类上报、抢用种子 token（AI 榜上传 422）", "v1.22.0 — 反作弊·服务端发种子（一次性种子+token，防离线刷幸运种子；离线可玩不计排名）", "v1.21.5 — 死亡/破关报告显示游玩时长（⏱ 用时；继续上局排除关游戏的间隔）", "v1.21.4 — 职业进阶文案改版（职业→二阶技能→本族技能→跨界技能，只剧透50回合、保持神秘）", "v1.21.3 — 开始页版本徽标旁加「🏠 首页」按钮（回到 index.html 切换版本）", "v1.21.2 — 修复回放「跳回合」一跳就到结束画面（快进期间抑制 gameOver、防崩溃）", "v1.21.1 — 各种族专属武器图标（精灵箭/矮人斧/兽人狼牙棒/活死人骨）+ 核心文案随之改名", "v1.21.0 — 矮人新职业 会长(收买)/小气鬼(主动花费减半) + 转职祝福语 + 修复箭雨对僵尸无效", "v1.20.0 — 新 Boss 雪人（只能炸弹；现身随机冰封 1/2/3 个主动 4 回合，按档位）", "v1.19.0 — 新 Boss 污染怪（在场时全场心变毒心，连之扣血；只能炸弹清掉）", "v1.18.0 — 新 Boss 石像（受到的伤害真实反弹给玩家，攻击它=伤害自己）", "v1.17.3 — 商店治疗改为随使用递增（每次恢复 +2、耗金 +1），后期不再鸡肋", "v1.17.2 — 守财奴囤金缩短为固定 4 回合、返还 ×2→×2.5（去掉越有钱锁越久）", "v1.17.1 — 活死人削弱（治疗 −50% 硬削弱；回测回落到全场顶档持平、不再霸榜）", "v1.17.0 — 新种族 活死人（迷惑天赋 + 死灵/骷髅王 + 回春/溅射），第 5 个种族", "v1.16.2 — 修复鸟人与终焉之主换位导致浪潮停滞、破关被拖到 511 回合之后", "v1.16.1 — 爆破手削弱（增伤炸弹 10→8、成本 ×1.6→×2.0；回测拉回与财阀持平、低于箭雨）", "v1.16.0 — 新职业 巫医(兽人)/剑圣(人族)（主动+被动）+ 新 Boss 鸟人(瞬移) + 技能/Boss 俏皮话", "v1.15.2 — 修复棋盘空白（clampName 正则混入原始 NUL 控制字节破坏内联脚本）", "v1.15.1 — 修复棋盘不渲染隐患 + 僵尸尸毒改为潜伏一回合后发作、单回合≤30%（不再秒杀）", "v1.15.0 — 排行榜展示名（玩家可输入/🎲随机，最长12汉字，AI自动起名）", "v1.14.6 — 日志条移到状态栏与棋盘间 + 排行榜合并最近 3 个版本", "v1.14.5 — 修复兽人无甲仍被给护甲升级 + 机器人可验证录像（--submit-ai 提交 AI 榜）", "v1.14.4 — 修复无剑连线显示骷髅 + 矮人削弱改为总伤×0.85（含固伤，与精灵口径一致）", "v1.14.3 — 升级能力改名（动词+名词；吸血鬼→汲取生命，避免与 Boss 重名）", "v1.14.2 — 矮人头像 🧔 → 🎅（与人族 🧑 区分）", "v1.14.1 — 修复转职与升级同回合导致游戏卡死（不能划）"];   /* auto-injected by dr.sh embed-changelog（勿手改） */
+const VERSION='v1.25.0';
+const CHANGELOG_LINES=["v1.25.0 — 职业进阶链重构（50主动→100锁定专属被动→200同族另一被动）+ 拆出皆可为剑/万物皆毒(黑毒心)", "v1.24.3 — 调高怪物/Boss 攻击力（怪 lv×0.7→1.1、Boss lv×1.2→1.8），避免后期护甲碾压攻击只吃 1 点", "v1.24.2 — 修复点版本号一直「加载中」（更新日志改为嵌入页面、零网络，dr.sh 自动从 CHANGELOG 注入）", "v1.24.1 — 日志栏可点开看历史 + 点版本号看更新日志 + 底部方块提示 + 修角色面板技能冷却显示（用有效冷却）", "v1.24.0 — 雪人重做（移除攻击→倒计时归零再次冰封，留可炸窗口）+ 每回合行动 Boss 标注倒计时", "v1.23.1 — 吸魂大法描述按种族渲染武器免疫（骨/剑）+ 写清吸取规则（每个最多吸你的生命上限）", "v1.23.0 — 吸魂大法的溢出也触发「溅射」（吸死目标后多出的吸力砸向剩余敌人，含剑免疫）", "v1.22.8 — 吸魂大法描述写明对 Boss 有效（和炸弹一样含剑免疫的；终焉除外）", "v1.22.7 — 角色详情面板 + 长按技能块弹窗的俏皮话也紧跟职业名（与转职选择页一致）", "v1.22.6 — 转职选择页俏皮话紧跟职业名、技能描述另起一行（原顺序反了）", "v1.22.5 — 升级「强化体魄」不再回满血，改为回等量血（去掉升级白嫖满血；人族+6/回6）", "v1.22.4 — 长按商店/技能块（治疗/炸弹/职业主动）弹出详细说明（含当前数值；置灰也能看；纯 UI）", "v1.22.3 — 修复召唤师塞满棋盘后卡死不判负（hasAnyMove 只认真剑链 + 判负扩展到全对局 + 逃生判定）", "v1.22.2 — 修复小偷高档位（≥第5档/100%）把金币偷成负数（偷取量封顶为当前金币）+ 攻击日志加高到完整 2 行", "v1.22.1 — 修复无头机器人在正式版引擎上自动以人类上报、抢用种子 token（AI 榜上传 422）", "v1.22.0 — 反作弊·服务端发种子（一次性种子+token，防离线刷幸运种子；离线可玩不计排名）", "v1.21.5 — 死亡/破关报告显示游玩时长（⏱ 用时；继续上局排除关游戏的间隔）", "v1.21.4 — 职业进阶文案改版（职业→二阶技能→本族技能→跨界技能，只剧透50回合、保持神秘）", "v1.21.3 — 开始页版本徽标旁加「🏠 首页」按钮（回到 index.html 切换版本）", "v1.21.2 — 修复回放「跳回合」一跳就到结束画面（快进期间抑制 gameOver、防崩溃）", "v1.21.1 — 各种族专属武器图标（精灵箭/矮人斧/兽人狼牙棒/活死人骨）+ 核心文案随之改名", "v1.21.0 — 矮人新职业 会长(收买)/小气鬼(主动花费减半) + 转职祝福语 + 修复箭雨对僵尸无效", "v1.20.0 — 新 Boss 雪人（只能炸弹；现身随机冰封 1/2/3 个主动 4 回合，按档位）", "v1.19.0 — 新 Boss 污染怪（在场时全场心变毒心，连之扣血；只能炸弹清掉）", "v1.18.0 — 新 Boss 石像（受到的伤害真实反弹给玩家，攻击它=伤害自己）", "v1.17.3 — 商店治疗改为随使用递增（每次恢复 +2、耗金 +1），后期不再鸡肋", "v1.17.2 — 守财奴囤金缩短为固定 4 回合、返还 ×2→×2.5（去掉越有钱锁越久）", "v1.17.1 — 活死人削弱（治疗 −50% 硬削弱；回测回落到全场顶档持平、不再霸榜）", "v1.17.0 — 新种族 活死人（迷惑天赋 + 死灵/骷髅王 + 回春/溅射），第 5 个种族", "v1.16.2 — 修复鸟人与终焉之主换位导致浪潮停滞、破关被拖到 511 回合之后", "v1.16.1 — 爆破手削弱（增伤炸弹 10→8、成本 ×1.6→×2.0；回测拉回与财阀持平、低于箭雨）", "v1.16.0 — 新职业 巫医(兽人)/剑圣(人族)（主动+被动）+ 新 Boss 鸟人(瞬移) + 技能/Boss 俏皮话", "v1.15.2 — 修复棋盘空白（clampName 正则混入原始 NUL 控制字节破坏内联脚本）", "v1.15.1 — 修复棋盘不渲染隐患 + 僵尸尸毒改为潜伏一回合后发作、单回合≤30%（不再秒杀）", "v1.15.0 — 排行榜展示名（玩家可输入/🎲随机，最长12汉字，AI自动起名）", "v1.14.6 — 日志条移到状态栏与棋盘间 + 排行榜合并最近 3 个版本", "v1.14.5 — 修复兽人无甲仍被给护甲升级 + 机器人可验证录像（--submit-ai 提交 AI 榜）", "v1.14.4 — 修复无剑连线显示骷髅 + 矮人削弱改为总伤×0.85（含固伤，与精灵口径一致）", "v1.14.3 — 升级能力改名（动词+名词；吸血鬼→汲取生命，避免与 Boss 重名）", "v1.14.2 — 矮人头像 🧔 → 🎅（与人族 🧑 区分）"];   /* auto-injected by dr.sh embed-changelog（勿手改） */
 const DEV=false;   // release build (DEV=false); dev build is dungeon-raid-dev.html (DEV=true)
 const REC_API='https://api.dungeonraid.win';   // 录像分享 API（Cloudflare Worker + KV）
 // 带种子随机数（mulberry32）：游戏全程用 rnd() 取代原生随机，配合录制种子可确定性重放
@@ -454,12 +454,12 @@ function scrambleTiles(n){
   return k;
 }
 // 新职业被动：每回合摆盘后，把至多 n 个 fromTypes 棋子转成 toType（巫医→心、剑圣→剑）。用 rnd 确定性洗牌，回放可复现。
-function convertTiles(n, toType, fromTypes){
+function convertTiles(n, toType, fromTypes, mark){
   const cells=[];
   for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const t=grid[r][c]; if(t && fromTypes.includes(t.type)) cells.push([r,c]); }
   for(let i=cells.length-1;i>0;i--){ const j=Math.floor(rnd()*(i+1)); [cells[i],cells[j]]=[cells[j],cells[i]]; }
   const k=Math.min(n,cells.length);
-  for(let i=0;i<k;i++){ const [r,c]=cells[i]; const nt=makeTile(toType); nt.curY=cellY(r); grid[r][c]=nt; }
+  for(let i=0;i<k;i++){ const [r,c]=cells[i]; const nt=makeTile(toType); nt.curY=cellY(r); if(mark) mark(nt); grid[r][c]=nt; }
   return k;
 }
 function spawnBoss(){
@@ -512,10 +512,8 @@ const TIER1={
   guildmaster:{n:['会长','Guild Master'], quip:['有钱能使鬼推磨。','Money makes the world go round.'], skill:{name:['收买','Buyout'], short:['金币>全怪血时，怪全转金币','If gold > all enemy HP, enemies→coins'], cd:5, f:p=>{ let hp=0; const cells=[]; for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const t=grid[r][c]; if(t&&t.type==='enemy'){ hp+=t.hp; cells.push([r,c]); } } if(!cells.length || p.gold<=hp) return false; for(const [r,c] of cells){ const nt=makeTile('coin'); nt.curY=cellY(r); grid[r][c]=nt; } syncPositions(false); log(tr(`💰 收买：${cells.length} 只怪被买通，化为金币！`,`💰 Buyout: ${cells.length} enemies bribed into coins!`)); return cells.length; }}},
   berserker:{n:['狂战士','Berserker'], quip:['疼？疼说明这刀还能更快。','Pain just means I can swing faster.'], skill:{name:['狂怒','Frenzy'], short:['本回合不死+残血增伤','Undying this turn + low-HP dmg'], cd:5, f:p=>{ p.hp=Math.max(1,Math.floor(p.hp/2)); p.lowHpDmg=true; p.undyingTurn=true; log(tr(`${wE()} 狂怒！生命减半并进入不屈（本回合无论受多少伤都保留 1 血），血越少${wN()}伤越高`,`${wE()} Frenzy! HP halved and Undying this turn (keep ≥1 HP no matter the damage); lower HP, higher ${wN()} damage`)); return true; }}},
   fighter:{n:['斗士','Fighter'], quip:['越打越精神，血是我的能量饮料。','The more I fight, the better I feel.'], skill:{name:['嗜血','Bloodthirst'], short:['回血+本回合可攻击{W}免疫怪','Heal + pierce {W}-immunity'], cd:5, f:p=>{ p.bloodthirst=1; p.pierceTurn=true; log(tr(`🩸 嗜血：本回合${wChain()}每击中一只怪回 3 血，且可用${wN()}攻击${wN()}免疫的 Boss（幽灵/小丑）`,`🩸 Bloodthirst: heal 3 per enemy hit this turn, and your ${wN()} can hit ${wN()}-immune bosses (Ghost/Clown)`)); return true; }}},
-  witchdoctor:{n:['巫医','Witch Doctor'], quip:['你的心意我收下，怪替你喝。','Your love? The monsters drink it for you.'], skill:{name:['蛊毒','Hex'], short:['本回合连心改为毒全场怪','Hearts poison all foes this turn'], cd:5, f:p=>{ p.heartPoison=true; log(tr('🧪 蛊毒：本回合连「心」不再回血，而是把这些生命当毒，灌给全场怪！','🧪 Hex: this turn, linking hearts deals that healing as poison to all foes instead!')); return true; }},
-    passive:['每回合棋盘摆完后，把 3 个非敌人/非心的棋子变成心','Each turn after the board settles, turns 3 non-enemy non-heart tiles into hearts']},
-  swordsaint:{n:['剑圣','Sword Saint'], quip:['在我眼里，万物皆可开刃。','In my eyes, anything can be a blade.'], skill:{name:['化剑','Bladeshift'], short:['全场心/金币→剑','Hearts & coins → swords'], cd:5, f:p=>{ let n=0; for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const t=grid[r][c]; if(t&&(t.type==='heart'||t.type==='coin')){ t.type='sword'; n++; } } if(!n) return false; log(tr(`⚔️ 化剑：${n} 个心/金币化为剑`,`⚔️ Bladeshift: ${n} hearts/coins → swords`)); return n; }},
-    passive:['每回合棋盘摆完后，把 3 个非敌人/非剑的棋子变成剑','Each turn after the board settles, turns 3 non-enemy non-sword tiles into swords']},
+  witchdoctor:{n:['巫医','Witch Doctor'], quip:['你的心意我收下，怪替你喝。','Your love? The monsters drink it for you.'], skill:{name:['蛊毒','Hex'], short:['本回合连心改为毒全场怪','Hearts poison all foes this turn'], cd:5, f:p=>{ p.heartPoison=true; log(tr('🧪 蛊毒：本回合连「心」不再回血，而是把这些生命当毒，灌给全场怪！','🧪 Hex: this turn, linking hearts deals that healing as poison to all foes instead!')); return true; }}},
+  swordsaint:{n:['剑圣','Sword Saint'], quip:['在我眼里，万物皆可开刃。','In my eyes, anything can be a blade.'], skill:{name:['化剑','Bladeshift'], short:['全场心/金币→剑','Hearts & coins → swords'], cd:5, f:p=>{ let n=0; for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const t=grid[r][c]; if(t&&(t.type==='heart'||t.type==='coin')){ t.type='sword'; n++; } } if(!n) return false; log(tr(`⚔️ 化剑：${n} 个心/金币化为剑`,`⚔️ Bladeshift: ${n} hearts/coins → swords`)); return n; }}},
   necromancer:{n:['死灵','Necromancer'], quip:['你的魂，我借来续命。','Your soul keeps me going. Thanks.'], skill:{name:['吸魂大法','Soul Drain'], short:['随机吸 2 个目标的生命补自己','Drain 2 random targets to heal'], desc:['随机选 2 个目标（怪或 Boss，含{W}免疫的，终焉之主除外）。每个吸取「你的生命上限」与「它当前血量」中的较小值——即单个最多吸等于你生命上限的血，吸取量≥它血量就把它吸死。吸到的总量给你回血（受治疗减半等影响）。若把目标吸死且已学「溅射」，多出的吸力（你的上限−它血量）会溅射到剩余的一个敌人。','Picks 2 random targets (monsters or bosses, incl. {W}-immune; not the Overlord). Each drains the lesser of your max HP and its current HP — so up to your max HP per target, and it dies if that ≥ its HP. The total drained heals you (subject to halved healing, etc.). If a drained target dies and you have Splash, the overflow (your max HP − its HP) splashes to a remaining foe.'], cd:5, f:p=>{
     const foes=[]; for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const t=grid[r][c]; if(t&&(t.type==='enemy'||(t.type==='boss'&&!t.finale))) foes.push([r,c]); }
     if(!foes.length) return false;
@@ -543,13 +541,23 @@ const TIER2={
   cheapskate:{n:['小气鬼','Cheapskate'], d:['消耗金币的主动（商店治疗/炸弹）花费减半','Gold-spending actives (shop Heal/Bomb) cost half'], f:p=>{ p.cheapskate=true; }},
   rejuvenation:{n:['回春','Rejuvenation'], d:['所有主动技能冷却 -1','All active-skill cooldowns -1'], f:p=>{ p.skillCdMod=(p.skillCdMod||0)-1; }},
   splash:{n:['溅射','Splash'], d:['攻击溢出伤害随机溅到剩余敌人（含{W}免疫 Boss）','Overflow damage splashes to a random remaining foe (incl. {W}-immune bosses)'], f:p=>{ p.splash=true; }},
+  bladeall:{n:['皆可为剑','Anything a Blade'], d:['每回合棋盘摆完后，把 3 个非敌/非剑棋子变成剑','Each turn after the board settles, turns 3 non-enemy non-sword tiles into swords'], f:p=>{ p.swordConvert=true; }},
+  allpoison:{n:['万物皆毒','All is Poison'], d:['每回合（污染怪变化之后）把 3 个非敌/非心棋子燃成黑毒心；连黑毒心只放毒灌全场怪、不回血','Each turn (after the Corruptor) burns 3 non-enemy non-heart tiles into BLACK poison hearts; linking them poisons all foes (no heal)'], f:p=>{ p.poisonConvert=true; }},
+};
+// 二阶被动锁定到一阶职业（100 回合按此直接授予；200 回合再从同族其余被动里选另一个）
+const CLASS_T2={
+  knight:'general', priest:'immortal', swordsaint:'bladeall',
+  ranger:'sharpshooter', rogue:'shadow',
+  blacksmith:'demolitionist', miser:'tycoon', guildmaster:'cheapskate',
+  necromancer:'rejuvenation', skeletonking:'splash',
+  berserker:'warlord', fighter:'thorns', witchdoctor:'allpoison',
 };
 const RACE_PATHS={
-  human:{t1:['knight','priest','swordsaint'], t2:['immortal','general']},
+  human:{t1:['knight','priest','swordsaint'], t2:['general','immortal','bladeall']},
   elf:  {t1:['ranger','rogue'],      t2:['sharpshooter','shadow']},
   dwarf:{t1:['blacksmith','miser','guildmaster'], t2:['demolitionist','tycoon','cheapskate']},
   undead:{t1:['necromancer','skeletonking'], t2:['rejuvenation','splash']},
-  orc:  {t1:['berserker','fighter','witchdoctor'], t2:['warlord','thorns']},
+  orc:  {t1:['berserker','fighter','witchdoctor'], t2:['warlord','thorns','allpoison']},
 };
 function raceById(id){ return RACES.find(r=>r.id===id)||RACES[0]; }
 let __bootHandled=false;
@@ -652,20 +660,21 @@ const TRANSFORM_BLESS={
   1:['🌱 初出茅庐，刀锋初开——好戏才刚开场。','🌱 Fresh off the boat, blade just honed — the show only begins.'],
   2:['🔥 再上一阶，地牢开始记住你的名字。','🔥 One tier higher — the dungeon starts learning your name.'],
   3:['⚡ 三度淬炼，连 Boss 都得掂量掂量。','⚡ Thrice tempered — even bosses think twice now.'],
-  4:['👑 四转加身，你已是传说的草稿。','👑 Four times reforged — you are a legend in the making.'],
+  4:['🌌 经过漫长的修炼，你已经突破种族的极限！','🌌 Through long training, you have broken past your race’s limits!'],
 };
 function showTierSelect(tier){
   if(replaying) return;   // 回放：转职由动作序列驱动，不弹窗
   busy=true; player.awaitingTier=tier;
   const path=RACE_PATHS[player.race];
-  const ids = tier===1 ? path.t1 : tier===3 ? path.t2.filter(id=>id!==player.tier2) : path.t2;   // 第二被动：排除已拥有的
+  // 二阶（100回合）锁定到职业的专属被动（不自由选）；本族技能（200回合）再从同族其余被动里选一个
+  const ids = tier===1 ? path.t1 : tier===2 ? [CLASS_T2[player.tier1]] : path.t2.filter(id=>id!==player.tier2);
   const pool = tier===1 ? TIER1 : TIER2;
   const head = tier===1 ? tr('⚔️ 转职','⚔️ Advance: Class')
              : tier===3 ? tr('🌟 本族技能','🌟 Race Skill')
              : tr('🌟 二阶技能','🌟 Tier-2 Skill');
   const sub  = tier===1 ? tr('击败强敌！选择一个职业，解锁主动技能','Boss slain! Pick a class to unlock an active skill')
              : tier===3 ? tr('再获得一项本族技能（本种族的另一项被动）','Gain another Race Skill (your race’s other passive)')
-             : tr('再次证明自己！选择一项二阶技能（被动）','Proven again! Pick a Tier-2 Skill (passive)');
+             : tr('你的职业觉醒了专属二阶技能（被动）','Your class awakens its signature Tier-2 Skill (passive)');
   const card=document.getElementById('card');
   card.innerHTML=`<h2>${head}</h2><p>${sub}</p><p style="color:#caa6e6;font-style:italic;font-size:13px;margin:-4px 0 10px">${L(TRANSFORM_BLESS[tier])}</p>`;
   ids.forEach(id=>{
@@ -818,7 +827,7 @@ function saveGame(){
       ver: VERSION,   // 存档版本：正式版换版本即判不兼容、从头开始（dev 不受影响）
       pendingLevels,
       player:{...player},
-      grid: grid.map(row=>row.map(t=> t?{type:t.type,hp:t.hp,maxHp:t.maxHp,atk:t.atk,cd:t.cd,baseCd:t.baseCd,bossId:t.bossId,tier:t.tier,stolen:t.stolen,finale:t.finale,incub:t.incub}:null)),
+      grid: grid.map(row=>row.map(t=> t?{type:t.type,hp:t.hp,maxHp:t.maxHp,atk:t.atk,cd:t.cd,baseCd:t.baseCd,bossId:t.bossId,tier:t.tier,stolen:t.stolen,finale:t.finale,incub:t.incub,poison:t.poison}:null)),
     }));
   }catch(e){}
 }
@@ -907,13 +916,14 @@ function draw(){
   for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){
     const t=grid[r][c]; if(!t) continue;
     const isPoisonHeart = t.type==='heart' && poisoned;
+    const isBlackHeart = t.type==='heart' && !poisoned && t.poison;   // 万物皆毒：黑毒心（污染绿心优先）
     const x=cellX(c), y=(t.curY!==undefined?t.curY:cellY(r));
     const d=DEF[t.type], g=TILE-8;
     const picked=sel.has(t.r+','+t.c);
     // 能被剑攻击的（怪 / 可剑连的Boss，以及剑本身）统一红底，一眼看出可攻击
-    const baseCol = (isSwordTarget(t) || t.type==='sword') ? DEF.sword.color : (isPoisonHeart ? '#27ae60' : d.color);   // 毒心：绿底
+    const baseCol = (isSwordTarget(t) || t.type==='sword') ? DEF.sword.color : (isPoisonHeart ? '#27ae60' : isBlackHeart ? '#4a2f5a' : d.color);   // 毒心绿底；黑毒心暗紫底
     // 被剑链穿过的怪/可攻击Boss → 红色高亮（表示正被攻击）
-    const gl = (picked && chainType==='sword' && isSwordTarget(t)) ? DEF.sword.glow : (isPoisonHeart ? '#2ecc71' : d.glow);
+    const gl = (picked && chainType==='sword' && isSwordTarget(t)) ? DEF.sword.glow : (isPoisonHeart ? '#2ecc71' : isBlackHeart ? '#8e44ad' : d.glow);
     // 背景
     ctx.save();
     roundRect(x+4,y+4,g,g,12);
@@ -959,7 +969,7 @@ function draw(){
     } else {
       ctx.font=Math.floor(TILE*0.46)+'px '+EMOJI_FONT;
       ctx.textAlign='center'; ctx.textBaseline='middle';
-      ctx.fillText(t.type==='sword'?wE():(isPoisonHeart?'💚':d.emoji), cx, cy);   // 攻击格按种族武器；毒心显示绿心
+      ctx.fillText(t.type==='sword'?wE():(isPoisonHeart?'💚':isBlackHeart?'🖤':d.emoji), cx, cy);   // 攻击格按种族武器；绿毒心/黑毒心
     }
   }
   drawBossFx();   // Boss 入场冲击环（叠在棋子之上）
@@ -1245,6 +1255,7 @@ function resolve(){
   } else {
     const count=selection.length;
     const poisonHeart = type==='heart' && pollutionActive();   // 污染怪在场：心是毒心，连之扣血
+    const blackN = type==='heart' ? selection.filter(s=>{ const t=grid[s.r][s.c]; return t&&t.poison; }).length : 0;   // 黑毒心数量（万物皆毒）
     selection.forEach(s=>{ grid[s.r][s.c]=null; });
     const combo=1+Math.max(0,count-2)*0.15;            // 多连奖励：每超出2个 +15%
     const comboTxt=combo>1?tr(` 连击×${combo.toFixed(2)}`,` combo×${combo.toFixed(2)}`):'';
@@ -1255,14 +1266,17 @@ function resolve(){
         let gained=0; while(player.shieldXp>=armorNeeded(player.armor)){ player.shieldXp-=armorNeeded(player.armor); player.armor++; gained++; }
         msg=`${d.emoji}×${count}${comboTxt} → `+tr(`护甲进度 ${player.shieldXp}/${armorNeeded(player.armor)}`,`armor ${player.shieldXp}/${armorNeeded(player.armor)}`)+(gained?tr(`，护甲 +${gained}！（减伤 ${player.armor}）`,`, armor +${gained}! (reduce ${player.armor})`):''); } }
     else if(type==='heart'){
-      const amt=Math.round(count*player.healPerHeart*combo);
-      if(poisonHeart){ const dd=hurtPlayer(amt,'pollution',true);   // 污染怪毒心：连之不回血，反而按等量扣血（无视护甲）
+      const per=player.healPerHeart*combo;
+      if(poisonHeart){ const dd=hurtPlayer(Math.round(count*per),'pollution',true);   // 污染怪毒心：连之不回血，反而按等量扣血（无视护甲），黑毒心也被污染光环盖过
         msg=`💚×${count}${comboTxt} → `+tr(`毒心反噬 −${dd} 生命！`,`poison hearts: −${dd} HP!`); }
-      else if(player.heartPoison){ player.heartPoison=false;   // 巫医蛊毒：本回合连心不回血，把这些生命当毒灌给全场怪
-        const r=dealDamage(amt, null); applyGravity(); syncPositions(false);
-        msg=`${d.emoji}×${count}${comboTxt} → `+tr(`🧪 蛊毒全场 ${r.dmg} 伤害`+(r.kills?`，击杀 ${r.kills}`:''),`🧪 Hex: ${r.dmg} dmg to all`+(r.kills?`, ${r.kills} killed`:'')); }
-      else { const h=gainHeal(amt);
-        msg=`${d.emoji}×${count}${comboTxt} → `+tr(`回复 ${h} 生命`,`+${h} HP`); } }
+      else {
+        const hex=player.heartPoison; player.heartPoison=false;   // 蛊毒：本回合红心也算毒
+        const redN=count-blackN, poisonN=blackN+(hex?redN:0), healN=hex?0:redN;   // 黑毒心 + 蛊毒下的红心 → 放毒；其余红心 → 回血
+        const parts=[];
+        if(poisonN>0){ const r=dealDamage(Math.round(poisonN*per), null); applyGravity(); syncPositions(false);
+          parts.push(tr(`🧪 毒全场 ${r.dmg}`+(r.kills?`、击杀 ${r.kills}`:''),`🧪 ${r.dmg} poison to all`+(r.kills?`, ${r.kills} killed`:''))); }
+        if(healN>0){ const h=gainHeal(Math.round(healN*per)); parts.push(tr(`回复 ${h} 生命`,`+${h} HP`)); }
+        msg=`${blackN?'🖤':d.emoji}×${count}${comboTxt} → `+(parts.join(tr('，',', '))||tr('（无效果）','(no effect)')); } }
     else if(type==='coin'){ const g=Math.round(count*player.goldPerCoin*combo);
       if(player.goldLock>0){ player.goldFrozen+=g; msg=`${d.emoji}×${count}${comboTxt} → `+tr(`囤金中，冻结 +${g}`,`hoarding, frozen +${g}`); }
       else { player.gold+=g; if(player.goldXp) player.xp+=Math.floor(g/2);
@@ -1290,9 +1304,9 @@ function resolve(){
 
   applyGravity();
   syncPositions(false);
-  // 新职业被动：每回合棋盘摆完后，转 3 个棋子（巫医→心、剑圣→剑）
-  if(player.tier1==='witchdoctor'){ if(convertTiles(3,'heart',['sword','shield','coin'])) syncPositions(false); }
-  else if(player.tier1==='swordsaint'){ if(convertTiles(3,'sword',['shield','heart','coin'])) syncPositions(false); }
+  // 二阶被动：每回合棋盘摆完后转 3 个棋子（万物皆毒→黑毒心，污染怪变化之后；皆可为剑→剑）
+  if(player.poisonConvert){ if(convertTiles(3,'heart',['sword','shield','coin'], t=>{t.poison=true;})) syncPositions(false); }
+  if(player.swordConvert){ if(convertTiles(3,'sword',['shield','heart','coin'])) syncPositions(false); }
   checkLevel();
   updateHUD();
   if(player.hp<=0){ gameOver(); return; }
@@ -1743,6 +1757,10 @@ function tileInfo(t){
     desc:tr('被污染怪 🦠 染绿的心。连接它不再回血，反而按等量【扣血】（无视护甲）！炸掉污染怪即可不再产生新毒心。','A heart corrupted by the Corruptor 🦠. Linking it DRAINS that much HP instead of healing (ignores armor)! Bomb the Corruptor to stop new ones.'),
     rows:[ [tr('连接后果','If linked'), tr('扣血（=本会回复的量）','HP loss (= would-be heal)')],
       [tr('解法','Fix'), tr('炸掉污染怪 / 别碰','Bomb Corruptor / avoid')] ]};
+  if(t.type==='heart'&&t.poison) return {icon:'🖤', title:tr('黑毒心 · 万物皆毒','Black Poison Heart'),
+    desc:tr('巫医「万物皆毒」把棋子燃成的黑毒心。连接它不回血，而是把这些生命当毒灌给全场怪（同蛊毒口径）。红心照常回血——按需取舍连红还是连黑。','Burned into being by the Witch Doctor’s “All is Poison”. Linking it heals nothing — it poisons all foes instead (like Hex). Red hearts still heal; choose which to link.'),
+    rows:[ [tr('连接后果','If linked'), tr('毒全场怪（=本会回复的量）','Poison all foes (= would-be heal)')],
+      [tr('每颗毒量','Poison each'), `${p.healPerHeart}`] ]};
   if(t.type==='heart') return {icon:'💗', title:tr('心 · 治疗','Heart · Heal'),
     desc:tr('连接 2 颗及以上的心回复生命。','Link 2+ hearts to restore HP.'),
     rows:[ [tr('每颗心回复','Heal per heart'), `+${p.healPerHeart}`],
