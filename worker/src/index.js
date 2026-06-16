@@ -134,8 +134,31 @@ async function versionFilter(env, url) {
   return { sql: '', binds: [], versions: null };
 }
 
+// 该成绩是否进入「顶尖」（前 1%，且至少前 10 名）→ 值得即时验证
+function isTopTier(rk) { const o = rk && rk.overall; return !!o && o.rank <= Math.max(10, Math.ceil(o.total * 0.01)); }
+// 顶尖成绩即时验证：触发 GitHub Actions 的 verify 工作流（workflow_dispatch）。去抖：90s 内不重复触发。需 secret GH_DISPATCH_TOKEN（细粒度 PAT，对本仓库 Actions: write）。
+const GH_REPO = 'lcgogo/dungeon-raid';
+async function triggerVerify(env) {
+  if (!env.GH_DISPATCH_TOKEN || !env.REC) return;
+  try {
+    if (await env.REC.get('vdispatch')) return;                     // 去抖：上次触发 90s 内不再发
+    await env.REC.put('vdispatch', '1', { expirationTtl: 90 });
+    await fetch(`https://api.github.com/repos/${GH_REPO}/actions/workflows/verify.yml/dispatches`, {
+      method: 'POST',
+      headers: {
+        'Authorization': 'Bearer ' + env.GH_DISPATCH_TOKEN,
+        'Accept': 'application/vnd.github+json',
+        'X-GitHub-Api-Version': '2022-11-28',
+        'User-Agent': 'dungeon-raid-worker',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ ref: 'main' }),
+    });
+  } catch (e) { /* 触发失败不影响成绩提交，下次每半小时批量兜底 */ }
+}
+
 export default {
-  async fetch(req, env) {
+  async fetch(req, env, ctx) {
     if (req.method === 'OPTIONS') return new Response(null, { headers: CORS });
     const url = new URL(req.url), p = url.pathname;
 
@@ -201,6 +224,7 @@ export default {
       await env.DB.prepare("INSERT INTO scores(id,version,race,turns,level,gold,source,agent,name,verified,created) VALUES(?,?,?,?,?,?,'play',?,?,0,?)")
         .bind(id, version, race, turns, level, gold, agent, name, Date.now()).run();
       const rk = await ranking(env, version, race, turns, agent);
+      if (isTopTier(rk) && ctx) ctx.waitUntil(triggerVerify(env));   // 顶尖成绩 → 立刻触发验证（~1 分钟内上榜），不阻塞响应
       return json({ id, turns, agent, name, ...rk });
     }
 
@@ -223,6 +247,7 @@ export default {
       await env.DB.prepare("INSERT INTO scores(id,version,race,turns,level,gold,source,cleared,agent,name,verified,created) VALUES(?,?,?,?,?,0,'play',1,?,?,0,?)")
         .bind(id, version, race, turns, level, agent, name, Date.now()).run();
       const rk = await clearRanking(env, version, race, level, agent);
+      if (isTopTier(rk) && ctx) ctx.waitUntil(triggerVerify(env));   // 顶尖破关 → 立刻触发验证，不阻塞响应
       return json({ id, level, agent, name, ...rk });
     }
 
