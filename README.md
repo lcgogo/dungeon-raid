@@ -84,7 +84,7 @@
 
 ### ⚔️ 职业 · 主动技能
 
-每个种族对应**多个**职业，技能冷却均为 **5 回合**：
+每个种族对应**多个**职业，技能冷却均为 **5 回合**（会长「收买」例外：**无冷却**，靠花金币自限）：
 
 | 种族 | 职业 | 技能 | 效果 |
 |---|---|---|---|
@@ -95,7 +95,7 @@
 | 🧝 精灵 | 💰 盗贼 Rogue | 点金 Gold Touch | 把场上所有的剑变成金币 |
 | 🎅 矮人 | 🔰 锻造师 Blacksmith | 锻甲 Forge Armor | 吞下全场的盾，全部转为护甲进度 |
 | 🎅 矮人 | 🔒 守财奴 Miser | 囤金 Hoard | 锁金 **4 回合**（期间不产/不花金币，到期返还 **2.5 倍**）|
-| 🎅 矮人 | 💼 会长 Guild Master | 收买 Buyout | 当**金币 > 棋盘上所有怪的总血量**时方可发动：把全部怪物**变成金币**（有钱能使鬼推磨；对 Boss 无效）|
+| 🎅 矮人 | 💼 会长 Guild Master | 收买 Buyout | **花掉「全场怪总血量」那么多金币**把它们全部买通**变成金币**（付得起才可发动；**无冷却**，有钱就能反复用；对 Boss 无效）|
 | 🧌 兽人 | 🔪 狂战士 Berserker | 狂怒 Frenzy | 生命减半并进入**不屈**（仅**本回合**：无论受多少伤都保留 1 血）；并**永久**开启残血增伤——血越少剑伤越高（最高 +60%）|
 | 🧌 兽人 | 🩸 斗士 Fighter | 嗜血 Bloodthirst | 本回合剑链每击中一只怪回 3 血，**且可用剑攻击剑免疫的 Boss（幽灵/小丑）** |
 | 🧌 兽人 | 🧪 巫医 Witch Doctor | 蛊毒 Hex | 本回合连「心」不再回血，而是把这些生命当毒灌给全场怪（其专属被动「万物皆毒」在 100 级解锁，见下）|
@@ -265,7 +265,7 @@ Pick a race at the start. Each has a unique **trait** and a matching **weakness*
 
 ### ⚔️ Classes · Active Skills
 
-Each race has **several** classes; every skill has a **5-turn cooldown**:
+Each race has **several** classes; every skill has a **5-turn cooldown** (except Guild Master's Buyout: **no cooldown**, self-limited by its gold cost):
 
 | Race | Class | Skill | Effect |
 |---|---|---|---|
@@ -276,7 +276,7 @@ Each race has **several** classes; every skill has a **5-turn cooldown**:
 | 🧝 Elf | 💰 Rogue | Gold Touch | Turn every sword on the board into a coin |
 | 🎅 Dwarf | 🔰 Blacksmith | Forge Armor | Absorb all shields on the board into armor progress |
 | 🎅 Dwarf | 🔒 Miser | Hoard | Lock gold for **4 turns** (no gold in/out; **2.5×** payout at the end) |
-| 🎅 Dwarf | 💼 Guild Master | Buyout | Only usable when **gold > total HP of all enemies**: turn every enemy **into coins** (money talks; bosses unaffected) |
+| 🎅 Dwarf | 💼 Guild Master | Buyout | **Pay gold equal to the total HP of all enemies** to bribe them all **into coins** (only if you can afford it; **no cooldown** — reuse it as long as you have gold; bosses unaffected) |
 | 🧌 Orc | 🔪 Berserker | Frenzy | Halve HP and become **Undying** (**this turn only**: keep ≥1 HP no matter the damage); also **permanently** enables low-HP scaling — lower HP means higher sword damage (up to +60%) |
 | 🧌 Orc | 🩸 Fighter | Bloodthirst | Heal 3 HP per enemy your sword chain hits this turn, **and your sword can hit sword-immune bosses (Ghost/Clown)** |
 | 🧌 Orc | 🧪 Witch Doctor | Hex | This turn, linking hearts deals that healing as poison to all foes instead of healing you (its signature passive "All is Poison" unlocks at level 100, see below) |

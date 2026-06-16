@@ -162,7 +162,7 @@
 (()=>{
 //==================== 配置 ====================
 // 版本号 v主.次.修：小改动改"修"，新Boss/职业改"次"，大版本变更需先确认。页面底部显示。
-const VERSION='v1.25.2';
+const VERSION='v1.25.3';
 const CHANGELOG_LINES=["v1.25.2 — 修复回放中可操作棋盘致回放与真实不符；回放控制改版（点棋盘暂停 + ◀▶单回合步进，边界变灰）", "v1.25.1 — 修复转职后技能/商店按钮停留在禁用态（老问题）——updateHUD 移到 busy 复位之后", "v1.25.0 — 职业进阶链重构（50主动→100锁定专属被动→200同族另一被动）+ 拆出皆可为剑/万物皆毒(黑毒心)", "v1.24.3 — 调高怪物/Boss 攻击力（怪 lv×0.7→1.1、Boss lv×1.2→1.8），避免后期护甲碾压攻击只吃 1 点", "v1.24.2 — 修复点版本号一直「加载中」（更新日志改为嵌入页面、零网络，dr.sh 自动从 CHANGELOG 注入）", "v1.24.1 — 日志栏可点开看历史 + 点版本号看更新日志 + 底部方块提示 + 修角色面板技能冷却显示（用有效冷却）", "v1.24.0 — 雪人重做（移除攻击→倒计时归零再次冰封，留可炸窗口）+ 每回合行动 Boss 标注倒计时", "v1.23.1 — 吸魂大法描述按种族渲染武器免疫（骨/剑）+ 写清吸取规则（每个最多吸你的生命上限）", "v1.23.0 — 吸魂大法的溢出也触发「溅射」（吸死目标后多出的吸力砸向剩余敌人，含剑免疫）", "v1.22.8 — 吸魂大法描述写明对 Boss 有效（和炸弹一样含剑免疫的；终焉除外）", "v1.22.7 — 角色详情面板 + 长按技能块弹窗的俏皮话也紧跟职业名（与转职选择页一致）", "v1.22.6 — 转职选择页俏皮话紧跟职业名、技能描述另起一行（原顺序反了）", "v1.22.5 — 升级「强化体魄」不再回满血，改为回等量血（去掉升级白嫖满血；人族+6/回6）", "v1.22.4 — 长按商店/技能块（治疗/炸弹/职业主动）弹出详细说明（含当前数值；置灰也能看；纯 UI）", "v1.22.3 — 修复召唤师塞满棋盘后卡死不判负（hasAnyMove 只认真剑链 + 判负扩展到全对局 + 逃生判定）", "v1.22.2 — 修复小偷高档位（≥第5档/100%）把金币偷成负数（偷取量封顶为当前金币）+ 攻击日志加高到完整 2 行", "v1.22.1 — 修复无头机器人在正式版引擎上自动以人类上报、抢用种子 token（AI 榜上传 422）", "v1.22.0 — 反作弊·服务端发种子（一次性种子+token，防离线刷幸运种子；离线可玩不计排名）", "v1.21.5 — 死亡/破关报告显示游玩时长（⏱ 用时；继续上局排除关游戏的间隔）", "v1.21.4 — 职业进阶文案改版（职业→二阶技能→本族技能→跨界技能，只剧透50回合、保持神秘）", "v1.21.3 — 开始页版本徽标旁加「🏠 首页」按钮（回到 index.html 切换版本）", "v1.21.2 — 修复回放「跳回合」一跳就到结束画面（快进期间抑制 gameOver、防崩溃）", "v1.21.1 — 各种族专属武器图标（精灵箭/矮人斧/兽人狼牙棒/活死人骨）+ 核心文案随之改名", "v1.21.0 — 矮人新职业 会长(收买)/小气鬼(主动花费减半) + 转职祝福语 + 修复箭雨对僵尸无效", "v1.20.0 — 新 Boss 雪人（只能炸弹；现身随机冰封 1/2/3 个主动 4 回合，按档位）", "v1.19.0 — 新 Boss 污染怪（在场时全场心变毒心，连之扣血；只能炸弹清掉）", "v1.18.0 — 新 Boss 石像（受到的伤害真实反弹给玩家，攻击它=伤害自己）", "v1.17.3 — 商店治疗改为随使用递增（每次恢复 +2、耗金 +1），后期不再鸡肋", "v1.17.2 — 守财奴囤金缩短为固定 4 回合、返还 ×2→×2.5（去掉越有钱锁越久）", "v1.17.1 — 活死人削弱（治疗 −50% 硬削弱；回测回落到全场顶档持平、不再霸榜）", "v1.17.0 — 新种族 活死人（迷惑天赋 + 死灵/骷髅王 + 回春/溅射），第 5 个种族", "v1.16.2 — 修复鸟人与终焉之主换位导致浪潮停滞、破关被拖到 511 回合之后", "v1.16.1 — 爆破手削弱（增伤炸弹 10→8、成本 ×1.6→×2.0；回测拉回与财阀持平、低于箭雨）", "v1.16.0 — 新职业 巫医(兽人)/剑圣(人族)（主动+被动）+ 新 Boss 鸟人(瞬移) + 技能/Boss 俏皮话", "v1.15.2 — 修复棋盘空白（clampName 正则混入原始 NUL 控制字节破坏内联脚本）", "v1.15.1 — 修复棋盘不渲染隐患 + 僵尸尸毒改为潜伏一回合后发作、单回合≤30%（不再秒杀）", "v1.15.0 — 排行榜展示名（玩家可输入/🎲随机，最长12汉字，AI自动起名）", "v1.14.6 — 日志条移到状态栏与棋盘间 + 排行榜合并最近 3 个版本", "v1.14.5 — 修复兽人无甲仍被给护甲升级 + 机器人可验证录像（--submit-ai 提交 AI 榜）", "v1.14.4 — 修复无剑连线显示骷髅 + 矮人削弱改为总伤×0.85（含固伤，与精灵口径一致）"];   /* auto-injected by dr.sh embed-changelog（勿手改） */
 const DEV=true;    // 开发版：指向最新开发版本；独立存档 + DEV 标识。正式版在 dungeon-raid.html（DEV=false）
 const REC_API='https://api.dungeonraid.win';   // 录像分享 API（Cloudflare Worker + KV）
@@ -291,6 +291,7 @@ const BOSSES=[
   { id:'assassin', emoji:'🥷', name:['刺客','Assassin'], quip:['护甲？那只是好看的装饰。','Armor? Cute. Purely decorative.'], monster:true, swordable:true, trueDmg:true, noTierScale:true,
     desc:['属性和普通怪差不多，但它的攻击是【真实伤害】——无视护甲和额外减伤，直接掉血！可以用{W}攻击它，趁早解决。','Stats like a normal enemy, but its hits are TRUE damage — they ignore armor and any reduction, straight to your HP! You can take it down with a {WC}, so kill it fast.'] },
   { id:'devourer', emoji:'🦖', name:['饕餮','Devourer'], quip:['先吃你的怪，再吃你。','I eat your monsters first, then you.'], monster:true, swordable:true,
+    dynAtk:t=>Math.floor(t.hp*0.5),   // 攻击力动态 = 当前血量 50%（倒计时归零放大招），棋盘角标按此显示
     special:['吞噬怪物壮大，倒计时放大招','Devours to grow; nukes at 0'],
     desc:['每回合吸取场上每个怪一半的生命来壮大自己；倒计时归零时，释放等于它当前血量 50% 的强力一击！趁它还小赶紧用{W}解决掉。','Each turn it drains half the HP from every enemy to grow; at 0 it unleashes a hit worth 50% of its current HP! Take it down with a {WC} while it is still small.'],
     everyTurn(t){ const cap=(12+player.level*3)*(t.tier||1); if(t.hp>=cap) return;   // 自身血量封顶（随档位提升），防止无限爆涨
@@ -511,7 +512,8 @@ const TIER1={
   rogue:{n:['盗贼','Rogue'], quip:['剑能砍人，但金币能买命。','Swords kill. Coins buy your life back.'], skill:{name:['点金','Gold Touch'], short:['{W}变金币','{W}→Coins'], cd:5, f:p=>{ let n=0; for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){const t=grid[r][c]; if(t&&t.type==='sword'){t.type='coin';n++;}} if(!n)return false; log(tr(`💰 点金：${n} 个${wN()}化为金币`,`💰 Gold Touch: ${n} ${wN()} → coins`)); return n; }}},
   blacksmith:{n:['锻造师','Blacksmith'], quip:['盾别拿手里，焊身上才香。','Do not hold shields — wear them.'], skill:{name:['锻甲','Forge Armor'], short:['收全场盾→护甲','Absorb all shields'], cd:5, f:p=>{ if(p.noArmor) return false; let n=0; for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){const t=grid[r][c]; if(t&&t.type==='shield'){grid[r][c]=null;n++;}} if(!n)return false; p.shieldXp+=n*p.armorPerShield; while(p.shieldXp>=armorNeeded(p.armor)){p.shieldXp-=armorNeeded(p.armor);p.armor++;} applyGravity(); syncPositions(false); log(tr(`🔰 锻甲：吞下 ${n} 盾（减伤 ${p.armor}）`,`🔰 Forge: ${n} shields (armor ${p.armor})`)); return n; }}},
   miser:{n:['守财奴','Miser'], quip:['钱躺一会儿，利滚利。','Let the gold nap — it wakes up doubled.'], skill:{name:['囤金','Hoard'], short:['锁金生利','Lock gold for interest'], cd:5, f:p=>{ if(p.goldLock>0) return false; const n=4; p.goldLock=n; p.goldFrozen=0; log(tr(`🔒 囤金：锁定 ${n} 回合（期间不产/不花金币，到期返还 2.5 倍）`,`🔒 Hoard: locked ${n} turns (no gold in/out; 2.5× payout at end)`)); return true; }}},
-  guildmaster:{n:['会长','Guild Master'], quip:['有钱能使鬼推磨。','Money makes the world go round.'], skill:{name:['收买','Buyout'], short:['金币>全怪血时，怪全转金币','If gold > all enemy HP, enemies→coins'], cd:5, f:p=>{ let hp=0; const cells=[]; for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const t=grid[r][c]; if(t&&t.type==='enemy'){ hp+=t.hp; cells.push([r,c]); } } if(!cells.length || p.gold<=hp) return false; for(const [r,c] of cells){ const nt=makeTile('coin'); nt.curY=cellY(r); grid[r][c]=nt; } syncPositions(false); log(tr(`💰 收买：${cells.length} 只怪被买通，化为金币！`,`💰 Buyout: ${cells.length} enemies bribed into coins!`)); return cells.length; }}},
+  guildmaster:{n:['会长','Guild Master'], quip:['有钱能使鬼推磨。','Money makes the world go round.'], skill:{name:['收买','Buyout'], short:['花「全怪血量」的金币把全场怪买通成金币（无冷却）','Pay gold = total enemy HP to bribe all enemies into coins (no cooldown)'], cd:5, noCd:true, f:p=>{ let hp=0; const cells=[]; for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const t=grid[r][c]; if(t&&t.type==='enemy'){ hp+=t.hp; cells.push([r,c]); } } if(!cells.length || p.gold<hp) return false; p.gold-=hp;   // 真正花钱：付「全怪血量」的金币买通
+    for(const [r,c] of cells){ const nt=makeTile('coin'); nt.curY=cellY(r); grid[r][c]=nt; } syncPositions(false); log(tr(`💰 收买：花 ${hp} 金币买通 ${cells.length} 只怪，化为金币！`,`💰 Buyout: paid ${hp} gold to bribe ${cells.length} enemies into coins!`)); return cells.length; }}},
   berserker:{n:['狂战士','Berserker'], quip:['疼？疼说明这刀还能更快。','Pain just means I can swing faster.'], skill:{name:['狂怒','Frenzy'], short:['本回合不死+残血增伤','Undying this turn + low-HP dmg'], cd:5, f:p=>{ p.hp=Math.max(1,Math.floor(p.hp/2)); p.lowHpDmg=true; p.undyingTurn=true; log(tr(`${wE()} 狂怒！生命减半并进入不屈（本回合无论受多少伤都保留 1 血），血越少${wN()}伤越高`,`${wE()} Frenzy! HP halved and Undying this turn (keep ≥1 HP no matter the damage); lower HP, higher ${wN()} damage`)); return true; }}},
   fighter:{n:['斗士','Fighter'], quip:['越打越精神，血是我的能量饮料。','The more I fight, the better I feel.'], skill:{name:['嗜血','Bloodthirst'], short:['回血+本回合可攻击{W}免疫怪','Heal + pierce {W}-immunity'], cd:5, f:p=>{ p.bloodthirst=1; p.pierceTurn=true; log(tr(`🩸 嗜血：本回合${wChain()}每击中一只怪回 3 血，且可用${wN()}攻击${wN()}免疫的 Boss（幽灵/小丑）`,`🩸 Bloodthirst: heal 3 per enemy hit this turn, and your ${wN()} can hit ${wN()}-immune bosses (Ghost/Clown)`)); return true; }}},
   witchdoctor:{n:['巫医','Witch Doctor'], quip:['你的心意我收下，怪替你喝。','Your love? The monsters drink it for you.'], skill:{name:['蛊毒','Hex'], short:['本回合连心改为毒全场怪','Hearts poison all foes this turn'], cd:5, f:p=>{ p.heartPoison=true; log(tr('🧪 蛊毒：本回合连「心」不再回血，而是把这些生命当毒，灌给全场怪！','🧪 Hex: this turn, linking hearts deals that healing as poison to all foes instead!')); return true; }}},
@@ -952,13 +954,14 @@ function draw(){
       ctx.fillStyle='#fff'; ctx.font='700 '+Math.floor(TILE*0.34)+'px system-ui';
       if(!t.finale) ctx.fillText(t.hp, cx, cy+TILE*0.10);
       else { ctx.fillStyle='#ffd54a'; ctx.fillText('∞', cx, cy+TILE*0.10); }
-      // 攻击力角标（左上）——特效/大招型 Boss（攻击力无意义）不显示
-      if(!isBoss || (!bdef.act && !bdef.cdAttack)){
+      // 攻击力角标（左上）——特效/大招型 Boss（攻击力无意义）不显示；但有动态攻击的（饕餮）按 dynAtk 显示，避免漏看
+      if(!isBoss || (!bdef.act && !bdef.cdAttack) || bdef.dynAtk){
+        const av=(isBoss && bdef.dynAtk) ? bdef.dynAtk(t) : t.atk;
         const ax=x+10, ay=y+10, ar=TILE*0.16;
         ctx.beginPath(); ctx.arc(ax,ay,ar,0,7);
         ctx.fillStyle=(isBoss&&bdef.trueDmg)?'#8e44ad':'#c0392b'; ctx.fill(); ctx.strokeStyle='#000'; ctx.lineWidth=1; ctx.stroke();
         ctx.fillStyle='#fff'; ctx.font='700 '+Math.floor(TILE*0.20)+'px system-ui';
-        ctx.fillText(t.atk, ax, ay+1);
+        ctx.fillText(av, ax, ay+1);
       }
       // 倒计时角标（右上）：普通 Boss=倒计时；每回合行动型=恒「1」（每回合都出手）；终焉之主不显示
       if(!isBoss || !bdef.finale){
@@ -1124,7 +1127,7 @@ function castSkill2(key){
   const def=TIER1[player.skill2.id], sk=def&&def.skill; if(!sk) return;
   const r=sk.f(player);
   if(r===false) return;        // 技能无效（如对无甲用锻甲）：不进冷却、不刷日志
-  player.skill2Cd=effSkillCd(player.skill2.id);
+  if(!sk.noCd) player.skill2Cd=effSkillCd(player.skill2.id);   // 无冷却技能（收买）不进冷却
   recAct(['b',key]);   // 录制（占用槽位 key）；回放 dispatchReplayAct('b',key)→buyItem→castSkill2
   if(r===undefined) log(tr(`✨ 【${L(sk.name)}】发动！`,`✨ ${L(sk.name)} activated!`));
   checkLevel(); updateHUD();
@@ -1188,7 +1191,7 @@ function shopInfoData(key){
     if(sk.desc) desc+=`<br>${L(sk.desc)}`;   // 技能完整规则（如吸魂的吸取量/规则）
     if(t1.passive) desc+=`<br>${tr('被动','Passive')}：${L(t1.passive)}`;
     return { icon:'✨', title:`${L(t1.n)} · ${L(sk.name)}`, desc,
-      rows:[ [tr('冷却','Cooldown'), `${effSkillCd(p.tier1)} ${tr('回合','t')}`],
+      rows:[ [tr('冷却','Cooldown'), sk.noCd?tr('无（有钱即可用）','None (gold-gated)'):`${effSkillCd(p.tier1)} ${tr('回合','t')}`],
              [tr('状态','Status'), st] ] };
   }
   return null;
@@ -1222,7 +1225,7 @@ function activateSkill(){
   if(player.skillCd>0) return;
   const r=sk.f(player);
   if(r===false) return;        // 技能判定无效（如锻甲场上没护甲）：不进冷却、不刷日志
-  player.skillCd=effSkillCd(player.tier1);
+  if(!sk.noCd) player.skillCd=effSkillCd(player.tier1);   // 无冷却技能（收买）不进冷却，有钱即可反复用
   recAct(['k']);   // 录制技能发动
   if(r===undefined) log(tr(`✨ 【${L(sk.name)}】发动！`,`✨ ${L(sk.name)} activated!`)); // 技能没自带日志才用通用日志
   checkLevel(); updateHUD();
@@ -1790,6 +1793,7 @@ function tileInfo(t){
     const rows=[ [tr('血量','HP'), `${t.hp} / ${t.maxHp}`] ];
     if(def.special) rows.push([tr('特殊','Special'), L(def.special)]);
     else rows.push([def.trueDmg?tr('攻击力（真实·无视护甲）','Attack (TRUE, ignores armor)'):tr('攻击力','Attack'), `${t.atk}`]);
+    if(def.dynAtk) rows.push([tr('当前攻击','Attack now'), `${def.dynAtk(t)} ${tr('（=血量50%）','(=50% HP)')}`]);   // 饕餮：动态攻击
     if(!def.perTurn) rows.push([tr(def.flee?'逃走倒计时':'倒计时',def.flee?'Escape timer':'Timer'), `${t.cd} / ${t.baseCd}`]);
     else if(!def.finale) rows.push([tr('倒计时','Timer'), tr('每回合出手','Every turn')]);
     if(def.id==='thief'&&t.stolen) rows.push([tr('已偷金币','Stolen gold'), tr(`${t.stolen}（击败夺回）`,`${t.stolen} (recover on kill)`)]);
@@ -1848,7 +1852,7 @@ function showPlayerInfo(){
   const t2b = p.tier2b?TIER2[p.tier2b]:null, s2 = p.skill2&&TIER1[p.skill2.id]?TIER1[p.skill2.id]:null;
   let cls=`<div style="text-align:left;font-size:12px;margin:8px 0 0;padding:8px;background:var(--panel2);border-radius:10px">`;
   if(t1){ cls+=`${tr('职业','Class')}【${L(t1.n)}】<i style="color:#caa6e6">「${L(t1.quip)}」</i><br>`;   // 俏皮话紧跟职业名
-    cls+=`${tr('主动','Active')}：${L(t1.skill.short)}（${tr('每','every')} ${effSkillCd(p.tier1)} ${tr('回合','t')}）<br>`;   // 有效冷却（含迷惑/回春），非基础
+    cls+=`${tr('主动','Active')}：${L(t1.skill.short)}（${t1.skill.noCd?tr('无冷却','no CD'):`${tr('每','every')} ${effSkillCd(p.tier1)} ${tr('回合','t')}`}）<br>`;   // 有效冷却（含迷惑/回春），收买无冷却
     if(t1.passive) cls+=`　${tr('被动','Passive')}：${L(t1.passive)}<br>`; }
   else cls+=tr('击败第 50 回合 Boss → 转职，解锁职业主动技能<br>','Beat the turn-50 boss → advance to a class, unlock its active.<br>');
   if(t2) cls+=`${tr('二阶技能','Tier-2 Skill')}【${L(t2.n)}】${tr('被动','Passive')}：${L(t2.d)}<br>`;
