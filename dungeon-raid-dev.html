@@ -162,7 +162,7 @@
 (()=>{
 //==================== 配置 ====================
 // 版本号 v主.次.修：小改动改"修"，新Boss/职业改"次"，大版本变更需先确认。页面底部显示。
-const VERSION='v1.25.6';
+const VERSION='v1.25.7';
 const CHANGELOG_LINES=["v1.25.6 — 修复回放/跳转后残留旧连线（画在重排棋盘上像“连了没连的”）+ 快进时不放吸魂特效", "v1.25.5 — 吸魂大法吸血特效（从被吸目标格画红线指向血条；纯 UI）", "v1.25.4 — 矮人↔兽人武器对调（兽人🪓斧、矮人🔨锤，纯显示）+ README 加在线试玩链接", "v1.25.3 — 会长「收买」改为真花「全怪血量」金币买通 + 移除冷却；饕餮显示动态攻击角标（=血量50%）", "v1.25.2 — 修复回放中可操作棋盘致回放与真实不符；回放控制改版（点棋盘暂停 + ◀▶单回合步进，边界变灰）", "v1.25.1 — 修复转职后技能/商店按钮停留在禁用态（老问题）——updateHUD 移到 busy 复位之后", "v1.25.0 — 职业进阶链重构（50主动→100锁定专属被动→200同族另一被动）+ 拆出皆可为剑/万物皆毒(黑毒心)", "v1.24.3 — 调高怪物/Boss 攻击力（怪 lv×0.7→1.1、Boss lv×1.2→1.8），避免后期护甲碾压攻击只吃 1 点", "v1.24.2 — 修复点版本号一直「加载中」（更新日志改为嵌入页面、零网络，dr.sh 自动从 CHANGELOG 注入）", "v1.24.1 — 日志栏可点开看历史 + 点版本号看更新日志 + 底部方块提示 + 修角色面板技能冷却显示（用有效冷却）", "v1.24.0 — 雪人重做（移除攻击→倒计时归零再次冰封，留可炸窗口）+ 每回合行动 Boss 标注倒计时", "v1.23.1 — 吸魂大法描述按种族渲染武器免疫（骨/剑）+ 写清吸取规则（每个最多吸你的生命上限）", "v1.23.0 — 吸魂大法的溢出也触发「溅射」（吸死目标后多出的吸力砸向剩余敌人，含剑免疫）", "v1.22.8 — 吸魂大法描述写明对 Boss 有效（和炸弹一样含剑免疫的；终焉除外）", "v1.22.7 — 角色详情面板 + 长按技能块弹窗的俏皮话也紧跟职业名（与转职选择页一致）", "v1.22.6 — 转职选择页俏皮话紧跟职业名、技能描述另起一行（原顺序反了）", "v1.22.5 — 升级「强化体魄」不再回满血，改为回等量血（去掉升级白嫖满血；人族+6/回6）", "v1.22.4 — 长按商店/技能块（治疗/炸弹/职业主动）弹出详细说明（含当前数值；置灰也能看；纯 UI）", "v1.22.3 — 修复召唤师塞满棋盘后卡死不判负（hasAnyMove 只认真剑链 + 判负扩展到全对局 + 逃生判定）", "v1.22.2 — 修复小偷高档位（≥第5档/100%）把金币偷成负数（偷取量封顶为当前金币）+ 攻击日志加高到完整 2 行", "v1.22.1 — 修复无头机器人在正式版引擎上自动以人类上报、抢用种子 token（AI 榜上传 422）", "v1.22.0 — 反作弊·服务端发种子（一次性种子+token，防离线刷幸运种子；离线可玩不计排名）", "v1.21.5 — 死亡/破关报告显示游玩时长（⏱ 用时；继续上局排除关游戏的间隔）", "v1.21.4 — 职业进阶文案改版（职业→二阶技能→本族技能→跨界技能，只剧透50回合、保持神秘）", "v1.21.3 — 开始页版本徽标旁加「🏠 首页」按钮（回到 index.html 切换版本）", "v1.21.2 — 修复回放「跳回合」一跳就到结束画面（快进期间抑制 gameOver、防崩溃）", "v1.21.1 — 各种族专属武器图标（精灵箭/矮人斧/兽人狼牙棒/活死人骨）+ 核心文案随之改名", "v1.21.0 — 矮人新职业 会长(收买)/小气鬼(主动花费减半) + 转职祝福语 + 修复箭雨对僵尸无效", "v1.20.0 — 新 Boss 雪人（只能炸弹；现身随机冰封 1/2/3 个主动 4 回合，按档位）", "v1.19.0 — 新 Boss 污染怪（在场时全场心变毒心，连之扣血；只能炸弹清掉）", "v1.18.0 — 新 Boss 石像（受到的伤害真实反弹给玩家，攻击它=伤害自己）", "v1.17.3 — 商店治疗改为随使用递增（每次恢复 +2、耗金 +1），后期不再鸡肋", "v1.17.2 — 守财奴囤金缩短为固定 4 回合、返还 ×2→×2.5（去掉越有钱锁越久）", "v1.17.1 — 活死人削弱（治疗 −50% 硬削弱；回测回落到全场顶档持平、不再霸榜）", "v1.17.0 — 新种族 活死人（迷惑天赋 + 死灵/骷髅王 + 回春/溅射），第 5 个种族", "v1.16.2 — 修复鸟人与终焉之主换位导致浪潮停滞、破关被拖到 511 回合之后", "v1.16.1 — 爆破手削弱（增伤炸弹 10→8、成本 ×1.6→×2.0；回测拉回与财阀持平、低于箭雨）", "v1.16.0 — 新职业 巫医(兽人)/剑圣(人族)（主动+被动）+ 新 Boss 鸟人(瞬移) + 技能/Boss 俏皮话", "v1.15.2 — 修复棋盘空白（clampName 正则混入原始 NUL 控制字节破坏内联脚本）", "v1.15.1 — 修复棋盘不渲染隐患 + 僵尸尸毒改为潜伏一回合后发作、单回合≤30%（不再秒杀）"];   /* auto-injected by dr.sh embed-changelog（勿手改） */
 const DEV=true;    // 开发版：指向最新开发版本；独立存档 + DEV 标识。正式版在 dungeon-raid.html（DEV=false）
 const REC_API='https://api.dungeonraid.win';   // 录像分享 API（Cloudflare Worker + KV）
@@ -981,6 +981,7 @@ function draw(){
     }
   }
   drawBossFx();   // Boss 入场冲击环（叠在棋子之上）
+  drawBombFx();   // 炸弹爆炸特效
   // 连接线
   if(selection.length){
     const d=DEF[selection[0].type];
@@ -1015,6 +1016,23 @@ function drawBossFx(){
       ctx.beginPath(); ctx.arc(cx,cy,TILE*(0.18+pp*(f.gold?1.3:1.0)),0,7);
       ctx.lineWidth=TILE*0.13*(1-pp); ctx.strokeStyle=hexA(col,0.75*(1-pp));
       ctx.shadowColor=col; ctx.shadowBlur=16*(1-pp); ctx.stroke(); }
+    ctx.restore();
+  }
+  ctx.shadowBlur=0;
+}
+//==================== 炸弹爆炸特效 ====================
+// 炸弹命中的每个怪/Boss 格爆一下：橙色闪光 + 扩散环。锚定到格子（命中后棋子常被移除，不跟随重力）。纯帧驱动、可重放无关。
+const bombFx=[]; const BOMB_FX_LIFE=26;   // ~0.43s @60fps
+function addBombFx(r,c){ if(headless||jumping) return; bombFx.push({r,c,life:BOMB_FX_LIFE,max:BOMB_FX_LIFE}); }   // 无头/快进不放
+function drawBombFx(){
+  for(const f of bombFx){
+    const p=1-f.life/f.max;
+    const cx=cellX(f.c)+TILE/2, cy=cellY(f.r)+TILE/2;
+    ctx.save();
+    if(p<0.4){ ctx.beginPath(); ctx.arc(cx,cy,TILE*0.5*(1-p/0.4),0,7); ctx.fillStyle=hexA('#ffc23a',0.6*(1-p/0.4)); ctx.fill(); }   // 爆闪
+    ctx.beginPath(); ctx.arc(cx,cy,TILE*(0.14+p*0.5),0,7);
+    ctx.lineWidth=TILE*0.12*(1-p); ctx.strokeStyle=hexA('#ff7a18',0.85*(1-p));
+    ctx.shadowColor='#ff7a18'; ctx.shadowBlur=14*(1-p); ctx.stroke();
     ctx.restore();
   }
   ctx.shadowBlur=0;
@@ -1055,6 +1073,7 @@ function loop(){
     const ty=cellY(r); if(t.curY===undefined)t.curY=ty;
     t.curY += (ty-t.curY)*0.3; if(Math.abs(ty-t.curY)<0.5)t.curY=ty; }
   for(let i=bossFx.length-1;i>=0;i--){ if(--bossFx[i].life<=0) bossFx.splice(i,1); }   // 推进/回收入场特效
+  for(let i=bombFx.length-1;i>=0;i--){ if(--bombFx[i].life<=0) bombFx.splice(i,1); }   // 推进/回收炸弹特效
   draw(); requestAnimationFrame(loop);
 }
 
@@ -1123,7 +1142,7 @@ const SHOP={
   heal: {cost:15, f(){ const base=10+2*(player.healUses||0); const h=gainHeal(base); player.healUses=(player.healUses||0)+1; log(tr(`💊 喝下药水，回复 ${h} 生命`,`💊 Potion: +${h} HP`)); }},   // 每使用一次：恢复量 +2、耗金 +1（后期不再鸡肋）
   bomb: {cost:25, f(){ let kills=0, boss=0; const D=player.bombBoost?8:6;   // 爆破手：伤害更高（8，原10偏强）
     for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const t=grid[r][c];
-      if(t&&(t.type==='enemy'||t.type==='boss')){ if(t.finale) continue; const dd=Math.min(D,t.hp); t.hp-=D; statueReflect(t, dd);   // 终焉之主打不掉；石像反弹
+      if(t&&(t.type==='enemy'||t.type==='boss')){ if(t.finale) continue; addBombFx(r,c); const dd=Math.min(D,t.hp); t.hp-=D; statueReflect(t, dd);   // 终焉之主打不掉；石像反弹；每个命中格爆一下特效
         if(t.hp<=0){ const isBoss=t.type==='boss'; grid[r][c]=null;
           if(isBoss){ thiefRecover(t); boss++; player.xp+=15; player.gold+=20; onBossKilled(); } else { kills++; player.xp+=3+(player.killXp||0); } } } }
     log(tr(`💥 投掷炸弹，全场 −${D}`,`💥 Bomb: all foes −${D}`) + (kills?tr(`，击杀 ${kills} 只👹`,`, ${kills} killed`):'') + (boss?tr(`，击败 Boss！厚赏 💰+20、经验+15`,`, Boss down! 💰+20, XP+15`):''));
