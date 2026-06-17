@@ -162,7 +162,14 @@ function toSelection(path, baseType){
 }
 
 // 升级：模拟"三选一"，按优先级挑
-const UP_PRIORITY=['强化体魄','加固护甲','磨利刀刃','强化盾术','精研医术','淬炼锋芒','汲取生命','凝聚生机'];
+// 升级取向：不同的「三选一」优先级，遍历它们=覆盖所有升级分支（未列出的→最低优先，如搜刮财富）
+const UP_PROFILES={
+  balanced:['强化体魄','加固护甲','磨利刀刃','强化盾术','精研医术','淬炼锋芒','汲取生命','凝聚生机'],   // 均衡（历史默认）
+  offense: ['磨利刀刃','淬炼锋芒','强化体魄','加固护甲','汲取生命','强化盾术','精研医术','凝聚生机'],   // 纯攻：先堆{W}伤害
+  tank:    ['强化体魄','加固护甲','强化盾术','精研医术','凝聚生机','汲取生命','磨利刀刃','淬炼锋芒'],   // 纯肉：上限/护甲/续航
+  sustain: ['汲取生命','凝聚生机','精研医术','强化体魄','加固护甲','磨利刀刃','强化盾术','淬炼锋芒'],   // 续航：吸血/回血/医术
+};
+let UP_PRIORITY=UP_PROFILES.balanced;   // 当前取向（默认均衡，与历史一致）；--upsweep 时逐套切换
 const upRank=n=>{const i=UP_PRIORITY.indexOf(n);return i<0?99:i;};
 function resolveLevels(){
   while(G.pendingLevels>0){
@@ -279,7 +286,44 @@ const CANDIDATES=[
   { name:'D atk0.8/cd3-4', v:{ hp:'3 + Math.floor(Math.random()*3) + Math.floor(lv*0.8)', atk:'2 + Math.floor(lv*0.8)', cd:'3 + Math.floor(Math.random()*2)', chance:'Math.min(0.32, 0.11 + player.level*0.015)' } },
   { name:'D2 atk0.85/cd3-4',v:{ hp:'3 + Math.floor(Math.random()*3) + Math.floor(lv*0.82)', atk:'2 + Math.floor(lv*0.85)', cd:'3 + Math.floor(Math.random()*2)', chance:'Math.min(0.33, 0.115 + player.level*0.015)' } },
 ];
-if('survivors' in ARG){
+if('clearsweep' in ARG){
+  // ---- 全分支破关扫描：所有 种族 × 一阶职业 × 200级第二被动（含锁定的二阶），每个 build 跑 N 局，看有没有能破关(≥511回合)的 ----
+  //      加 --upsweep：再叠加「升级取向」维度（均衡/纯攻/纯肉/续航），覆盖所有升级分支。
+  G = loadGame(); applyBossFilter(G);
+  const N = ARG.games?+ARG.games:60;
+  const profiles = 'upsweep' in ARG ? Object.keys(UP_PROFILES) : ['balanced'];
+  const nm=(pool,id)=> id&&pool[id]?pool[id].n[0]:(id||'—');
+  console.log(`全分支破关扫描（每个组合 ${N} 局，实时文件值，全 Boss 池${profiles.length>1?`；升级取向 ×${profiles.length}`:''}）  破关线=511 回合\n`);
+  console.log('种族   一阶/锁定二阶          +200级被动    升级取向 | 局数 | 回合中位 最高 | 破关');
+  console.log('-------|----------------------|------------|---------|------|---------------|-----');
+  let combos=0, totalClears=0, best={turns:0};
+  const clearedBuilds=[];
+  for(const rc of G.RACES){
+    for(const t1 of G.RACE_PATHS[rc.id].t1){
+      const locked=G.CLASS_T2[t1];
+      for(const t2b of G.RACE_PATHS[rc.id].t2.filter(x=>x!==locked)){
+        for(const prof of profiles){
+          UP_PRIORITY=UP_PROFILES[prof];
+          ARG.t1=t1; ARG.t2=t2b; combos++;
+          const turns=[]; let clears=0, errs=0;
+          for(let i=0;i<N;i++){ let o; try{ o=playGame(rc); }catch(e){ errs++; continue; } turns.push(o.turns); if(o.turns>=511) clears++; }
+          const mx=Math.max(0,...turns), md=med(turns);
+          if(clears>0){ totalClears+=clears; clearedBuilds.push({rc:rc.n[0], t1:nm(G.TIER1,t1), t2b:nm(G.TIER2,t2b), prof, clears, N, mx}); }
+          if(mx>best.turns) best={turns:mx, rc:rc.n[0], t1:nm(G.TIER1,t1), locked:nm(G.TIER2,locked), t2b:nm(G.TIER2,t2b), prof};
+          console.log(
+            rc.n[0].padEnd(5)+'  '+(`${nm(G.TIER1,t1)}/${nm(G.TIER2,locked)}`).padEnd(20)+' +'+nm(G.TIER2,t2b).padEnd(10)+' '+prof.padEnd(8)+' | '+
+            String(turns.length).padStart(4)+' | '+String(md).padStart(6)+String(mx).padStart(6)+' | '+
+            (clears?('🏆'+clears):'0')+(errs?` ⚠️${errs}`:''));
+        }
+      }
+    }
+  }
+  UP_PRIORITY=UP_PROFILES.balanced;   // 复位
+  console.log(`\n扫描 ${combos} 个组合 × ${N} 局。破关(≥511回合)总计 ${totalClears} 局。`);
+  if(clearedBuilds.length){ console.log('能破关的组合：'); clearedBuilds.forEach(b=>console.log(`  ${b.rc} ${b.t1}+${b.t2b} [${b.prof}]：${b.clears}/${b.N} 局破关（最高 ${b.mx} 回合）`)); }
+  else console.log(`❌ 没有任何组合破关。最长记录：${best.rc} ${best.t1}/${best.locked}+${best.t2b} [${best.prof}] → ${best.turns} 回合。`);
+}
+else if('survivors' in ARG){
   // ---- 分析模式：列出撑到 >=阈值 回合的每一局及其完整 build（种族/一阶/二阶/第二被动/换装主动）----
   G = loadGame(); applyBossFilter(G);
   const TH = +ARG.survivors || 500, N = ARG.games?+ARG.games:80;
