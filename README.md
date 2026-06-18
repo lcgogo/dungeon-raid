@@ -62,7 +62,7 @@
 - **经验**只来自**击杀怪物**（每杀一只 +3），升级时**技能三选一**。
 - **连击加成**：一次连得越多收益越高，整体收益 `× (1 + (个数−2) × 15%)`（连 5 ≈ ×1.45，连 7 ≈ ×1.75）。
 - **护甲累积**：盾不直接给护甲，而是累积「护甲进度」，攒满 +1 护甲（越往后越贵）。受击时护甲先减伤，剩下的才掉血。
-- **金币商店**：💊 治疗（回复 10 生命，**每用一次 +2 恢复、+1 金**）/ 💥 炸弹（全场怪 −6 血）。每件商品有独立冷却。
+- **金币商店**：💊 治疗（回复 10 生命，**每用一次 +2 恢复、+1 金**；**满血时不可用**，避免浪费）/ 💥 炸弹（全场怪 −6 血）。每件商品有独立冷却。
 
 ### 🧬 种族（开局选择）
 
@@ -104,7 +104,7 @@
 | 🎅 矮人 | 💼 会长 Guild Master | 收买 Buyout | **花掉「全场怪总血量」那么多金币**把它们全部买通**变成金币**（付得起才可发动；**无冷却**，有钱就能反复用；对 Boss 无效）|
 | 🧌 兽人 | 🔪 狂战士 Berserker | 狂怒 Frenzy | 生命减半并进入**不屈**（仅**本回合**：无论受多少伤都保留 1 血）；并**永久**开启残血增伤——血越少剑伤越高（最高 +60%）|
 | 🧌 兽人 | 🩸 斗士 Fighter | 嗜血 Bloodthirst | 本回合剑链每击中一只怪回 3 血，**且可用剑攻击剑免疫的 Boss（幽灵/小丑）** |
-| 🧌 兽人 | 🧪 巫医 Witch Doctor | 蛊毒 Hex | 本回合连「心」不再回血，而是把这些生命当毒灌给全场怪（其专属被动「万物皆毒」在 100 级解锁，见下）|
+| 🧌 兽人 | 🧪 巫医 Witch Doctor | 蛊毒 Hex | 把全场红心**当场燃成黑毒心 🖤**；连黑毒心不回血、而是把这些生命当毒灌给**全场怪（含剑免疫，终焉除外）**（其专属被动「万物皆毒」在 100 级解锁，见下）|
 | 🪦 活死人 | 🪄 死灵 Necromancer | 吸魂大法 Soul Drain | 随机吸取 2 个目标（怪或 Boss，**和炸弹一样含剑免疫的 Boss**；终焉之主除外）的生命补给自己，单个吸取量 = 玩家生命上限；吸取量 ≥ 目标生命则该目标死亡 |
 | 🪦 活死人 | 💀 骷髅王 Skeleton King | 重生 Rebirth | 本回合若被击败则不死、生命回满；此后「重生」自身冷却 +2（每次真正复活递增）|
 
@@ -123,20 +123,20 @@
 | 🎅 矮人 | 守财奴 → 财阀 Tycoon | 获得金币时额外按一半转为经验 |
 | 🎅 矮人 | 会长 → 小气鬼 Cheapskate | 消耗金币的主动（商店 💊治疗 / 💥炸弹）花费减半 |
 | 🧌 兽人 | 狂战士 → 巨力 Titan | 最大生命越高，剑链固定伤害越高（每 12 点最大生命 +1）|
-| 🧌 兽人 | 斗士 → 荆棘 Thorns | 受到伤害的一半反弹给攻击者 |
+| 🧌 兽人 | 斗士 → 荆棘 Thorns | 受到「真·攻击」伤害的一半反弹给**攻击者本人**（尸毒/毒心反噬/石像反弹等非直接攻击不触发）|
 | 🧌 兽人 | 巫医 → 万物皆毒 All is Poison | 每回合（污染怪变化后）把 3 个非敌/非心棋子**燃成 🖤 黑毒心**；连黑毒心**只放毒灌全场怪、不回血**（红心照常回血，自取舍）|
 | 🪦 活死人 | 死灵 → 回春 Rejuvenation | 所有主动技能冷却 −1（正好抵消「迷惑」的 +1）|
 | 🪦 活死人 | 骷髅王 → 溅射 Splash | 攻击溢出伤害随机砸剩余一个敌人（**含剑免疫 Boss**）；剑链/箭雨/吸魂溢出都触发 |
 
 ### 👹 Boss 图鉴
 
-每约 **10 回合**会随机出现一个 Boss，击败奖励 💰+20、经验 +15。Boss 强度每 **50 回合**提升一档（Lv2、Lv3…）。其中 **幽灵、小丑只能用 💥 炸弹** 打，其余都可以用剑链攻击（也能炸）。
+每约 **10 回合**会随机出现一个 Boss，**任何方式击败都厚赏 💰+20、经验 +15**（日志会提示）。Boss 强度每 **50 回合**提升一档（Lv2、Lv3…）。其中 **幽灵 / 小丑 / 污染怪 / 雪人只能用 💥 炸弹**（及与炸弹同类的毒/吸魂等非武器手段）打，其余都可以用剑链攻击（也能炸）。
 
 | Boss | 攻击方式 | 招数 |
 |---|---|---|
 | 👻 幽灵 Ghost | 仅炸弹 | 剑链对它无效；倒计时归零会对你重击 |
 | 🤡 小丑 Clown | 仅炸弹 | 每回合随机打乱棋盘上若干棋子，制造持续混乱 |
-| 🧛 吸血鬼 Vampire | 剑 / 炸弹 | 每回合吸取场上所有的心来回血——别把心留在场上 |
+| 🧛 吸血鬼 Vampire | 剑 / 炸弹 | 每回合吸取场上所有的心来回血——别把心留在场上；但**吸到毒心（污染绿心 / 巫医黑毒心）会反被毒、掉血甚至毒死**（可用巫医蛊毒反制）|
 | 🥷 刺客 Assassin | 剑 / 炸弹 | 属性同普通怪，但攻击是**真实伤害**，无视护甲直接掉血 |
 | 🦖 饕餮 Devourer | 剑 / 炸弹 | 每回合吸取场上每只怪一半生命壮大；倒计时归零放出等于自身 50% 血量的强击 |
 | 🧙 召唤师 Summoner | 剑 / 炸弹 | 每回合把一个非怪棋子变成一只怪，拖得越久怪越多 |
@@ -161,12 +161,12 @@
 ### ✨ 其他特性
 
 - 📖 **开篇引言 / 玩法演示 / 破关祝贺**：开始界面有虚构背景 + 玩法速览（含穿怪剑链小图，体现横竖斜 8 向都能连）与致敬原作的说明；**新手第一局**棋盘必有「剑-怪-剑」可连组合，便于立刻上手；撑过终焉之主 10 波破关后，有故事化的祝贺结算页。
-- 🔴 **Boss 红字日志**：游戏日志位于状态栏与棋盘正下方；**场上有 Boss 时日志变红**警示。
+- 🌈 **彩色日志**：游戏日志位于状态栏与棋盘正下方，外加边框框起。**按事件类型上色**——回血=绿、增益(护甲/金币/经验/职业主动)=蓝、攻击敌人=白、被攻击/Boss 出场=红、负面效果(冰封/中毒/偷金/打乱等)=黄。**点日志条**看本局完整历史。
 - 💾 **本地存档**：自动保存进度与最佳纪录，可「继续上局」。
 - 💡 **轻点任意方块**：查看说明与当前实时数值（如剑的当前威力与固定剑伤）；轻点 HUD 查看角色全部属性与职业详情。**长按商店/技能块**（治疗/炸弹/职业主动）弹出详细说明（含当前数值；置灰冷却时也能看）。**点日志条**看本局完整日志；**点底部版本号**看最近更新日志（嵌入页面、秒开，无需联网）。
 - 🩸 **低血预警**：生命越低，屏幕边缘越红；危急时呼吸闪烁，生命条同步闪烁。
 - ☠️ **死亡报告**：倒下时列出致命回合各伤害来源的占比。
-- 🎬 **操作录制 / 回放**：自动记录每一局（种子 + 操作序列，确定性重放，一局约 2–4 KB）。死亡后可 **回放本局 / 复制 / 导出 / 🔗分享链接**；开始界面可 **回放上一局** 或 **粘贴导入** 别人的录像。回放中**点棋盘任意位置暂停/继续**，暂停后用 **◀ ▶ 单回合步进**（到首/末回合相应变灰），另有 1×/2×/4× 调速、跳回合、⏹ 退出。回放中棋盘不可操作（严格按录像还原）。
+- 🎬 **操作录制 / 回放**：自动记录每一局（种子 + 操作序列，确定性重放，一局约 2–4 KB）。死亡后可 **回放本局 / 复制 / 导出 / 🔗分享链接**；开始界面可 **回放上一局** 或 **粘贴导入** 别人的录像。回放中**点棋盘任意位置暂停/继续**，暂停后用 **◀ ▶ 单回合步进**（停在该回合连线「结算前」、把这一步连的线画出来便于看清；到首/末回合变灰），另有 1×/2×/4× 调速、**跳到回合 50/100/200/350 与「−10」（倒数第 10 回合看结局）**、⏹ 退出。回放中棋盘不可操作（严格按录像还原）。
 - 🏆 **云排行榜 + 百分位（仅正式版 `dungeonraid.win`）**：死亡后显示你在**总榜**和**本种族榜**的名次与百分位。按**坚持回合**排名；榜单**合并最近 3 个版本**展示（避免频繁补丁把榜单切碎），**只展示已重放验证的成绩**，前列每小时自动重放校验防作弊。开发版不参与排名。可在开始页设置**排行榜名字**（最长 12 汉字，🎲 随机起名，本机记住），榜单每行显示「种族头像 + 名字」。
 - 🏅 **人类榜 / AI 榜**：成绩按 `agent`(human / ai)分流、互不混排。游戏内「🏆 排行榜」面板可在 **人类 / AI**、**闯关榜 / 破关榜** 间切换，并**按种族筛选**（全部 / 人族 / 精灵 / 矮人 / 兽人 / 活死人）查看 Top 10。真人对局上报人类榜，AI/机器人自报 `ai` 进 AI 榜（后端 `/top?agent=&race=`、`/clearboard?agent=&race=`，私有改判接口 `/classify`）。写入端点按 IP 限流防刷。
 
@@ -243,7 +243,7 @@ Each enemy tile shows three numbers:
 - **XP comes only from kills** (+3 per enemy). On level-up, **pick 1 of 3** upgrades.
 - **Combo bonus**: longer chains pay more — total reward `× (1 + (N − 2) × 15%)` (5-chain ≈ ×1.45, 7-chain ≈ ×1.75).
 - **Armor accumulates**: shields do not grant armor directly; they fill "armor progress," and filling it gives +1 armor (costs more each time). Armor soaks each hit, then the rest comes off your HP.
-- **Gold shop**: 💊 Heal (restore 10 HP, **+2 healing and +1 gold cost per use**) / 💥 Bomb (all foes −6 HP). Each item has its own cooldown.
+- **Gold shop**: 💊 Heal (restore 10 HP, **+2 healing and +1 gold cost per use**; **unavailable at full HP** to avoid waste) / 💥 Bomb (all foes −6 HP). Each item has its own cooldown.
 
 ### 🧬 Races (chosen at start)
 
@@ -285,7 +285,7 @@ Each race has **several** classes; every skill has a **5-turn cooldown** (except
 | 🎅 Dwarf | 💼 Guild Master | Buyout | **Pay gold equal to the total HP of all enemies** to bribe them all **into coins** (only if you can afford it; **no cooldown** — reuse it as long as you have gold; bosses unaffected) |
 | 🧌 Orc | 🔪 Berserker | Frenzy | Halve HP and become **Undying** (**this turn only**: keep ≥1 HP no matter the damage); also **permanently** enables low-HP scaling — lower HP means higher sword damage (up to +60%) |
 | 🧌 Orc | 🩸 Fighter | Bloodthirst | Heal 3 HP per enemy your sword chain hits this turn, **and your sword can hit sword-immune bosses (Ghost/Clown)** |
-| 🧌 Orc | 🧪 Witch Doctor | Hex | This turn, linking hearts deals that healing as poison to all foes instead of healing you (its signature passive "All is Poison" unlocks at level 100, see below) |
+| 🧌 Orc | 🧪 Witch Doctor | Hex | **Burns every red heart on the board into a black poison heart 🖤**; linking them heals nothing and poisons **all foes (incl. sword-immune; Overlord excluded)** instead (its signature passive "All is Poison" unlocks at level 100, see below) |
 | 🪦 Undead | 🪄 Necromancer | Soul Drain | Drain HP from 2 random targets (monsters or bosses — **including sword-immune ones, like the bomb**; Overlord excluded) to heal yourself; per-target drain = your max HP, so any target with HP ≤ your max HP dies |
 | 🪦 Undead | 💀 Skeleton King | Rebirth | If slain this turn, cheat death and refill to full HP; afterward Rebirth's own cooldown grows +2 (each actual revive) |
 
@@ -304,20 +304,20 @@ At **level 100 (Tier-2 Skill)** you automatically get the passive **locked to yo
 | 🎅 Dwarf | Miser → Tycoon | Gold gained also grants half as much XP |
 | 🎅 Dwarf | Guild Master → Cheapskate | Gold-spending actives (shop 💊Heal / 💥Bomb) cost half |
 | 🧌 Orc | Berserker → Titan | Higher max HP means higher flat sword damage (+1 per 12 max HP) |
-| 🧌 Orc | Fighter → Thorns | Reflect half of damage taken back to the attacker |
+| 🧌 Orc | Fighter → Thorns | Reflect half of damage from a **real attack** back to the **attacker itself** (DoT like plague, poison-heart backlash, and Statue reflection do NOT trigger it) |
 | 🧌 Orc | Witch Doctor → All is Poison | Each turn (after the Corruptor) burns 3 non-enemy non-heart tiles into 🖤 **black poison hearts**; linking them **only poisons all foes (no heal)** — red hearts still heal, your choice |
 | 🪦 Undead | Necromancer → Rejuvenation | All active-skill cooldowns −1 (exactly offsets Confusion's +1) |
 | 🪦 Undead | Skeleton King → Splash | Overflow damage splashes to a random remaining foe (**including sword-immune bosses**); triggers from sword chains, Arrow Rain, and Soul Drain overflow |
 
 ### 👹 Bestiary
 
-About every **10 turns** a random boss appears; beating one rewards 💰+20 and +15 XP. Boss strength steps up one tier every **50 turns** (Lv2, Lv3…). **Ghost and Clown can only be hit with the 💥 Bomb**; all others can be attacked with sword chains too (bombs also work).
+About every **10 turns** a random boss appears; **beating one by any means rewards 💰+20 and +15 XP** (announced in the log). Boss strength steps up one tier every **50 turns** (Lv2, Lv3…). **Ghost / Clown / Corruptor / Snowman can only be hit with the 💥 Bomb** (or bomb-like non-weapon damage such as poison/drain); all others can be attacked with sword chains too.
 
 | Boss | How to hit | Gimmick |
 |---|---|---|
 | 👻 Ghost | Bomb only | Immune to sword chains; strikes you hard when its timer hits 0 |
 | 🤡 Clown | Bomb only | Scrambles several random tiles every turn, causing constant chaos |
-| 🧛 Vampire | Sword / Bomb | Drains every heart on the board each turn to heal — do not leave hearts out |
+| 🧛 Vampire | Sword / Bomb | Drains every heart on the board each turn to heal — do not leave hearts out; but **drinking poison hearts (Corruptor green / Witch Doctor black) poisons it instead — it loses HP and can even die** (counter it with Hex) |
 | 🥷 Assassin | Sword / Bomb | Stats like a normal enemy, but its hits are **true damage** — ignore armor, straight to HP |
 | 🦖 Devourer | Sword / Bomb | Drains half the HP from every enemy each turn to grow; at 0 unleashes a hit worth 50% of its HP |
 | 🧙 Summoner | Sword / Bomb | Turns a non-enemy tile into an enemy each turn — the longer it lives, the more enemies |
@@ -342,12 +342,12 @@ Clearing shows a story-flavored congratulations screen; the Release build report
 ### ✨ Other Features
 
 - 📖 **Opening intro / gameplay demo / clear celebration**: the start screen has a fictional backstory + gameplay primer (with a chain-through-monster demo showing all 8 directions, diagonals included) and a tribute note; your **first-ever run** is guaranteed a “sword–monster–sword” combo to learn the core move immediately; surviving all 10 Overlord waves shows a story-flavored congratulations screen.
-- 🔴 **Red log for bosses**: the game log sits right under the status bar and board; **it turns red while a boss is on the board** as a warning.
+- 🌈 **Color-coded log**: the boxed game log sits right under the status bar and board, **colored by event type** — heal = green, buff (armor/gold/XP/class actives) = blue, attacking enemies = white, getting hit / a boss appearing = red, debuffs (freeze/poison/theft/scramble) = yellow. **Tap the log** for the full run history.
 - 💾 **Local save**: progress and best record are saved automatically; resume your last run anytime.
 - 💡 **Tap any tile**: see its description and current live stats (e.g. your current sword power and flat bonus); tap the HUD to view all your stats and class details. **Long-press a shop/skill block** (Heal/Bomb/class active) for a detailed popup (with current values; works even while greyed-out on cooldown).
 - 🩸 **Low-HP warning**: the screen edges redden as health drops, pulsing when critical, with the HP bar blinking too.
 - ☠️ **Death report**: when you fall, it lists each damage source's share of the killing turn.
-- 🎬 **Record / replay**: every run is recorded (seed + input sequence — deterministic replay, ~2–4 KB per run). After death you can **replay / copy / export / 🔗 share-link** the recording; the start screen offers **replay last run** or **paste-import** someone else's. During replay, **tap anywhere on the board to pause/resume**; once paused, use **◀ ▶ to step one turn** (greyed at the first/last turn), plus 1×/2×/4× speed, jump-to-turn, and ⏹ exit. The board is non-interactive during replay (strict playback).
+- 🎬 **Record / replay**: every run is recorded (seed + input sequence — deterministic replay, ~2–4 KB per run). After death you can **replay / copy / export / 🔗 share-link** the recording; the start screen offers **replay last run** or **paste-import** someone else's. During replay, **tap anywhere on the board to pause/resume**; once paused, use **◀ ▶ to step one turn** (stops just **before** that turn's link resolves and draws the link so you can read it; greyed at the first/last turn), plus 1×/2×/4× speed, **jump-to-turn 50/100/200/350 and "−10" (10 turns from the end, to watch the finish)**, and ⏹ exit. The board is non-interactive during replay (strict playback).
 - 🏆 **Cloud leaderboard + percentile (Release build `dungeonraid.win` only)**: after death, see your rank and percentile on the **overall** and **per-race** boards. Ranked by **turns survived**; the board **merges the latest 3 builds** (so frequent patches don't fragment it), **shows verified scores only**, and the top is re-verified hourly to block cheats. The Dev build does not participate in ranking. Set a **leaderboard name** on the start screen (≤12 CJK, 🎲 to randomize, remembered locally); each row shows "race avatar + name".
 - 🏅 **Human / AI boards**: scores are split by `agent` (human / ai) and never mixed. The in-game "🏆 Leaderboard" panel toggles between **Human / AI** and **Survival / Clears**, and **filters by race** (All / Human / Elf / Dwarf / Orc / Undead), showing the Top 10. Real play reports to the human board; AI/bots self-report `ai` (backend `/top?agent=&race=`, `/clearboard?agent=&race=`, private reclassify endpoint `/classify`). Write endpoints are IP-rate-limited.
 
