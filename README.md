@@ -125,7 +125,7 @@
 | 🎅 矮人 | 守财奴 → 财阀 Tycoon | 获得金币时额外按一半转为经验 |
 | 🎅 矮人 | 会长 → 小气鬼 Cheapskate | 消耗金币的主动（商店 💊治疗 / 💥炸弹）花费减半 |
 | 🧌 兽人 | 狂战士 → 巨力 Titan | 最大生命越高，剑链固定伤害越高（每 12 点最大生命 +1）|
-| 🧌 兽人 | 斗士 → 血狂 Blood Frenzy | 吸血/嗜血回血超出生命上限时，把溢出的一半增为永久生命上限 |
+| 🧌 兽人 | 斗士 → 血狂 Blood Frenzy | 吸血/嗜血回血超出生命上限时，把溢出的部分全部增为永久生命上限 |
 | 🧌 兽人 | 巫医 → 万物皆毒 All is Poison | 每回合把 3 个非敌/非心棋子**燃成 🖤 黑毒心**；连黑毒心**只放毒灌全场怪、不回血**（红心照常回血，自取舍）|
 | 🪦 活死人 | 死灵 → 回春 Rejuvenation | 所有主动技能冷却 −1（正好抵消「迷惑」的 +1）|
 | 🪦 活死人 | 骷髅王 → 溅射 Splash | 攻击溢出伤害随机砸剩余一个敌人（**含剑免疫 Boss**）；剑链/箭雨/吸魂溢出都触发 |
@@ -308,7 +308,7 @@ At **level 100 (Tier-2 Skill)** you automatically get the passive **locked to yo
 | 🎅 Dwarf | Miser → Tycoon | Gold gained also grants half as much XP |
 | 🎅 Dwarf | Guild Master → Cheapskate | Gold-spending actives (shop 💊Heal / 💥Bomb) cost half |
 | 🧌 Orc | Berserker → Titan | Higher max HP means higher flat sword damage (+1 per 12 max HP) |
-| 🧌 Orc | Fighter → Blood Frenzy | When Lifesteal/Bloodthirst healing exceeds max HP, half the overflow becomes permanent max HP |
+| 🧌 Orc | Fighter → Blood Frenzy | When Lifesteal/Bloodthirst healing exceeds max HP, the full overflow becomes permanent max HP |
 | 🧌 Orc | Witch Doctor → All is Poison | Each turn burns 3 non-enemy non-heart tiles into 🖤 **black poison hearts**; linking them **only poisons all foes (no heal)** — red hearts still heal, your choice |
 | 🪦 Undead | Necromancer → Rejuvenation | All active-skill cooldowns −1 (exactly offsets Confusion's +1) |
 | 🪦 Undead | Skeleton King → Splash | Overflow damage splashes to a random remaining foe (**including sword-immune bosses**); triggers from sword chains, Arrow Rain, and Soul Drain overflow |
