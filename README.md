@@ -99,7 +99,7 @@
 | 🧑 人族 | ⚔️ 剑圣 Sword Saint | 化剑 Bladeshift | 把全场的心和金币都变成剑（其专属被动「皆可为剑」在 100 级解锁，见下）|
 | 🧝 精灵 | 🏹 游侠 Ranger | 箭雨 Arrow Rain | 对全场怪造成「剑威力 ×2」的伤害 |
 | 🧝 精灵 | 💰 盗贼 Rogue | 点金 Gold Touch | 把场上所有的剑变成金币 |
-| 🧝 精灵 | 🌿 长老 Elder | 死亡缠绕 Death Coil | 之后 5 回合，每回合让全场怪/Boss（含剑免疫，终焉除外）损失「你最大生命的 10%」；被缠绕期间敌人格变绿 |
+| 🧝 精灵 | 🌿 森林长老 Forest Elder | 蔓藤缠绕 Vine Coil | 之后 5 回合，每回合让全场怪/Boss（含剑免疫，终焉除外）损失「你最大生命的 10%」；被缠绕期间敌人格变绿 |
 | 🎅 矮人 | 🔰 锻造师 Blacksmith | 锻甲 Forge Armor | 吞下全场的盾，全部转为护甲进度 |
 | 🎅 矮人 | 🔒 守财奴 Miser | 囤金 Hoard | 锁金 **4 回合**（期间不产/不花金币，到期返还 **2.5 倍**）|
 | 🎅 矮人 | 💼 会长 Guild Master | 收买 Buyout | **花掉「全场怪总血量」那么多金币**把它们全部买通**变成金币**（付得起才可发动；**无冷却**，有钱就能反复用；对 Boss 无效）|
@@ -120,7 +120,7 @@
 | 🧑 人族 | 剑圣 → 皆可为剑 Anything a Blade | 每回合棋盘摆完后，把 3 个非敌/非剑棋子变成剑 |
 | 🧝 精灵 | 游侠 → 神射手 Sharpshooter | 剑链每击杀一只怪额外 +2 经验 |
 | 🧝 精灵 | 盗贼 → 影袭 Shadow | 炸弹冷却永久缩为 2 回合 |
-| 🧝 精灵 | 长老 → 荆棘 Thorns | 受到攻击时，把「当前护甲减伤量」反弹给攻击者本人（护甲越高反弹越多；尸毒/毒心反噬/石像反弹等非直接攻击不触发）|
+| 🧝 精灵 | 森林长老 → 荆棘 Thorns | 受到攻击时，把「当前护甲减伤量」反弹给攻击者本人（护甲越高反弹越多；尸毒/毒心反噬/石像反弹等非直接攻击不触发）|
 | 🎅 矮人 | 锻造师 → 爆破手 Demolitionist | 炸弹伤害更高，但花费金币更多 |
 | 🎅 矮人 | 守财奴 → 财阀 Tycoon | 获得金币时额外按一半转为经验 |
 | 🎅 矮人 | 会长 → 小气鬼 Cheapskate | 消耗金币的主动（商店 💊治疗 / 💥炸弹）花费减半 |
@@ -282,7 +282,7 @@ Each race has **several** classes; every skill has a **5-turn cooldown** (except
 | 🧑 Human | ⚔️ Sword Saint | Bladeshift | Turn every heart and coin into swords (its signature passive "Anything a Blade" unlocks at level 100, see below) |
 | 🧝 Elf | 🏹 Ranger | Arrow Rain | Deal "sword power ×2" damage to all enemies |
 | 🧝 Elf | 💰 Rogue | Gold Touch | Turn every sword on the board into a coin |
-| 🧝 Elf | 🌿 Elder | Death Coil | For the next 5 turns, all enemies/bosses (incl. sword-immune; Overlord excluded) lose 10% of your max HP each turn; cursed foes glow green |
+| 🧝 Elf | 🌿 Forest Elder | Vine Coil | For the next 5 turns, all enemies/bosses (incl. sword-immune; Overlord excluded) lose 10% of your max HP each turn; cursed foes glow green |
 | 🎅 Dwarf | 🔰 Blacksmith | Forge Armor | Absorb all shields on the board into armor progress |
 | 🎅 Dwarf | 🔒 Miser | Hoard | Lock gold for **4 turns** (no gold in/out; **2.5×** payout at the end) |
 | 🎅 Dwarf | 💼 Guild Master | Buyout | **Pay gold equal to the total HP of all enemies** to bribe them all **into coins** (only if you can afford it; **no cooldown** — reuse it as long as you have gold; bosses unaffected) |
@@ -303,7 +303,7 @@ At **level 100 (Tier-2 Skill)** you automatically get the passive **locked to yo
 | 🧑 Human | Sword Saint → Anything a Blade | Each turn after the board settles, turn 3 non-enemy non-sword tiles into swords |
 | 🧝 Elf | Ranger → Sharpshooter | +2 extra XP per enemy killed by a sword chain |
 | 🧝 Elf | Rogue → Shadow | Bomb cooldown becomes 2 turns permanently |
-| 🧝 Elf | Elder → Thorns | When hit, reflect your current armor (damage-reduction) back to the attacker (more armor → more reflect; DoT/poison-backlash/Statue reflection do NOT trigger it) |
+| 🧝 Elf | Forest Elder → Thorns | When hit, reflect your current armor (damage-reduction) back to the attacker (more armor → more reflect; DoT/poison-backlash/Statue reflection do NOT trigger it) |
 | 🎅 Dwarf | Blacksmith → Demolitionist | Bomb hits harder but costs more gold |
 | 🎅 Dwarf | Miser → Tycoon | Gold gained also grants half as much XP |
 | 🎅 Dwarf | Guild Master → Cheapskate | Gold-spending actives (shop 💊Heal / 💥Bomb) cost half |
