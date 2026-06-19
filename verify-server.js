@@ -8,7 +8,8 @@
 const http = require('http');
 const { loadEngine, verifyPending, integrityNote, API } = require('./verify.js');
 
-if (!process.env.VERIFY_SECRET) { console.error('缺少 VERIFY_SECRET 环境变量，拒绝启动'); process.exit(1); }
+const SECRET = process.env.VERIFY_SECRET;
+if (!SECRET) { console.error('缺少 VERIFY_SECRET 环境变量，拒绝启动'); process.exit(1); }
 const PORT = +process.env.PORT || 10000;
 const POLL_MS = Math.max(2000, +process.env.POLL_MS || 7000);   // 最小 2s，避免打爆 API 写入限流
 
@@ -21,22 +22,31 @@ let last = { at: null, pass: 0, fail: 0, skip: 0, total: 0 };
 let lastErr = null;
 let busy = false;
 
-// 健康/状态端点（也供免费档外部保活 ping，以及肉眼查看进度）
+// 立即验一轮（带忙碌保护，避免重叠）。轮询和 /verify-now 共用。
+async function runVerify() {
+  if (busy) return;
+  busy = true;
+  try {
+    const r = await verifyPending(G, VER);
+    if (r.total) { last = { at: new Date().toISOString(), ...r }; }
+    lastErr = null;
+  } catch (e) { lastErr = e.message; console.error('verify 出错：', e.message); }
+  busy = false;
+}
+
 http.createServer((req, res) => {
+  const u = new URL(req.url, 'http://x');
+  // 推送入口：Worker 收到顶尖成绩后打这里 → 立刻验一轮（密钥保护）
+  if (u.pathname === '/verify-now') {
+    if (u.searchParams.get('k') !== SECRET) { res.writeHead(403, { 'Content-Type': 'application/json' }); res.end('{"error":"forbidden"}'); return; }
+    res.writeHead(202, { 'Content-Type': 'application/json' }); res.end('{"triggered":true}');
+    runVerify();   // 不 await：立刻返回，后台验
+    return;
+  }
+  // 健康/状态端点（也供免费档外部保活 ping、肉眼查看进度）
   res.writeHead(200, { 'Content-Type': 'application/json' });
   res.end(JSON.stringify({ service: 'dungeon-raid-verify', engineVersion: VER, pollMs: POLL_MS, last, lastErr }));
-}).listen(PORT, () => console.log(`🌐 健康端点 :${PORT}`));
+}).listen(PORT, () => console.log(`🌐 健康端点 + /verify-now :${PORT}`));
 
-async function tick() {
-  if (!busy) {
-    busy = true;
-    try {
-      const r = await verifyPending(G, VER);
-      if (r.total) { last = { at: new Date().toISOString(), ...r }; }
-      lastErr = null;
-    } catch (e) { lastErr = e.message; console.error('verify 出错：', e.message); }
-    busy = false;
-  }
-  setTimeout(tick, POLL_MS);
-}
-tick();
+// 轮询兜底（即便没人推送，也每 POLL_MS 自己捡一遍）
+(function tick() { runVerify().finally(() => setTimeout(tick, POLL_MS)); })();

@@ -136,25 +136,17 @@ async function versionFilter(env, url) {
 
 // 该成绩是否进入「顶尖」（前 1%，且至少前 10 名）→ 值得即时验证
 function isTopTier(rk) { const o = rk && rk.overall; return !!o && o.rank <= Math.max(10, Math.ceil(o.total * 0.01)); }
-// 顶尖成绩即时验证：触发 GitHub Actions 的 verify 工作流（workflow_dispatch）。去抖：90s 内不重复触发。需 secret GH_DISPATCH_TOKEN（细粒度 PAT，对本仓库 Actions: write）。
-const GH_REPO = 'lcgogo/dungeon-raid';
+// 顶尖成绩即时验证：直接 ping 常驻验证服务（render 的 verify-server）的 /verify-now，让它立刻重放校验。
+// 去抖：90s 内不重复推。URL 可用 env.VERIFY_PUSH_URL 覆盖；推送失败有 render 轮询 + GitHub cron 兜底。
+const VERIFY_PUSH_URL = 'https://dungeon-raid-nel5.onrender.com';
 async function triggerVerify(env) {
-  if (!env.GH_DISPATCH_TOKEN || !env.REC) return;
+  if (!env.REC || !env.VERIFY_SECRET) return;
   try {
     if (await env.REC.get('vdispatch')) return;                     // 去抖：上次触发 90s 内不再发
     await env.REC.put('vdispatch', '1', { expirationTtl: 90 });
-    await fetch(`https://api.github.com/repos/${GH_REPO}/actions/workflows/verify.yml/dispatches`, {
-      method: 'POST',
-      headers: {
-        'Authorization': 'Bearer ' + env.GH_DISPATCH_TOKEN,
-        'Accept': 'application/vnd.github+json',
-        'X-GitHub-Api-Version': '2022-11-28',
-        'User-Agent': 'dungeon-raid-worker',
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ ref: 'main' }),
-    });
-  } catch (e) { /* 触发失败不影响成绩提交，下次每半小时批量兜底 */ }
+    const base = (env.VERIFY_PUSH_URL || VERIFY_PUSH_URL).replace(/\/$/, '');
+    await fetch(`${base}/verify-now?k=${encodeURIComponent(env.VERIFY_SECRET)}`, { headers: { 'User-Agent': 'dungeon-raid-worker' } });
+  } catch (e) { /* 推送失败不影响成绩提交：render 每 ~7s 轮询 + GitHub cron 兜底 */ }
 }
 
 export default {
