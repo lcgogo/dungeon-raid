@@ -31,7 +31,7 @@ killBossAt(50);  ok(p.t1Pending,'50回合→t1Pending'); p.t1Pending=false;
 G.dispatchReplayAct(['t',1,'knight']);  ok(p.tier1==='knight','一阶=骑士');
 
 killBossAt(100); ok(p.t2Pending,'100回合→t2Pending'); p.t2Pending=false;
-G.dispatchReplayAct(['t',2,'immortal']); ok(p.tier2==='immortal' && p.overheal===true,'二阶=不朽(被动生效)');
+G.dispatchReplayAct(['t',2,'holystrike']); ok(p.tier2==='holystrike' && p.holyStrike===true,'二阶=神圣打击(被动生效)');
 
 killBossAt(200); ok(p.t3Pending,'200回合→t3Pending'); p.t3Pending=false;
 const remain=G.RACE_PATHS.human.t2.find(x=>x!==p.tier2);   // 人类剩余被动=general

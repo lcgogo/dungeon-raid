@@ -95,7 +95,7 @@
 | 种族 | 职业 | 技能 | 效果 |
 |---|---|---|---|
 | 🧑 人族 | 🛡️ 骑士 Knight | 圣盾 Aegis | 本回合免疫所有伤害 |
-| 🧑 人族 | 💗 牧师 Priest | 祝福 Blessing | 清掉全场的心，每颗转 3 点经验 |
+| 🧑 人族 | 💗 牧师 Priest | 祝福 Blessing | 清掉全场的心，每颗转 3 点经验，**同时按每颗心的回复量回血** |
 | 🧑 人族 | ⚔️ 剑圣 Sword Saint | 化剑 Bladeshift | 把全场的心和金币都变成剑（其专属被动「皆可为剑」在 100 级解锁，见下）|
 | 🧝 精灵 | 🏹 游侠 Ranger | 箭雨 Arrow Rain | 对全场怪造成「剑威力 ×2」的伤害 |
 | 🧝 精灵 | 💰 盗贼 Rogue | 点金 Gold Touch | 把场上所有的剑变成金币 |
@@ -115,7 +115,7 @@
 | 种族 | 职业 → 锁定被动 | 效果 |
 |---|---|---|
 | 🧑 人族 | 骑士 → 将军 General | 升级时改为**四选一** |
-| 🧑 人族 | 牧师 → 不朽 Immortal | 治疗溢出的部分转为永久生命上限 |
+| 🧑 人族 | 牧师 → 神圣打击 Holy Strike | 治疗溢出的部分随机攻击一个敌人/Boss（终焉之主除外）|
 | 🧑 人族 | 剑圣 → 皆可为剑 Anything a Blade | 每回合棋盘摆完后，把 3 个非敌/非剑棋子变成剑 |
 | 🧝 精灵 | 游侠 → 神射手 Sharpshooter | 剑链每击杀一只怪额外 +2 经验 |
 | 🧝 精灵 | 盗贼 → 影袭 Shadow | 炸弹冷却永久缩为 2 回合 |
@@ -276,7 +276,7 @@ Each race has **several** classes; every skill has a **5-turn cooldown** (except
 | Race | Class | Skill | Effect |
 |---|---|---|---|
 | 🧑 Human | 🛡️ Knight | Aegis | Immune to all damage this turn |
-| 🧑 Human | 💗 Priest | Blessing | Clear all hearts on the board; each becomes 3 XP |
+| 🧑 Human | 💗 Priest | Blessing | Clear all hearts on the board; each becomes 3 XP **and also heals you (by your heal-per-heart)** |
 | 🧑 Human | ⚔️ Sword Saint | Bladeshift | Turn every heart and coin into swords (its signature passive "Anything a Blade" unlocks at level 100, see below) |
 | 🧝 Elf | 🏹 Ranger | Arrow Rain | Deal "sword power ×2" damage to all enemies |
 | 🧝 Elf | 💰 Rogue | Gold Touch | Turn every sword on the board into a coin |
@@ -296,7 +296,7 @@ At **level 100 (Tier-2 Skill)** you automatically get the passive **locked to yo
 | Race | Class → Locked passive | Effect |
 |---|---|---|
 | 🧑 Human | Knight → General | Level-up offers 4 choices instead of 3 |
-| 🧑 Human | Priest → Immortal | Overheal raises your max HP permanently |
+| 🧑 Human | Priest → Holy Strike | Healing overflow strikes a random enemy/boss (Overlord excluded) |
 | 🧑 Human | Sword Saint → Anything a Blade | Each turn after the board settles, turn 3 non-enemy non-sword tiles into swords |
 | 🧝 Elf | Ranger → Sharpshooter | +2 extra XP per enemy killed by a sword chain |
 | 🧝 Elf | Rogue → Shadow | Bomb cooldown becomes 2 turns permanently |
