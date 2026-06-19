@@ -1,0 +1,22 @@
+name: keepalive-verify-render
+# 给 render 免费档的常驻验证服务保活：免费档闲置 15 分钟没入站就休眠，定时 ping 健康端点顶醒它。
+# 公开仓库的 Actions 分钟数免费；每次只是一条 curl。若服务正巧在睡，这一下也会把它唤醒（最多等冷启动 ~60s）。
+on:
+  schedule:
+    - cron: '5,15,25,35,45,55 * * * *'   # 每 10 分钟（偏 5 分，避开整点；GitHub cron 有延迟，间隔实际略大于 10 分）
+  workflow_dispatch:                      # 也可手动触发
+
+# 若日后 render 地址变了，改这里
+env:
+  PING_URL: https://dungeon-raid-nel5.onrender.com/
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping render health endpoint
+        run: |
+          code=$(curl -fsS -m 120 -o /tmp/body -w '%{http_code}' "$PING_URL") || code=000
+          echo "HTTP $code"
+          head -c 300 /tmp/body || true
+          test "$code" = "200"
