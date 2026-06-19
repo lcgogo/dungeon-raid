@@ -2,7 +2,7 @@ name: verify-leaderboard
 # 每半小时验证排行榜上未验证的高分录像（确定性重放比对，挡作弊）
 on:
   schedule:
-    - cron: '17,47 * * * *'     # 每半小时（:17 与 :47，避开整点高峰）
+    - cron: '3-59/5 * * * *'    # 每 5 分钟（从 :03 起，避开整点拥堵）；公开仓库 Actions 免费。作为 render 秒级验证的兜底，render 没了也每 5 分钟兜一次
   workflow_dispatch:            # 也可手动触发
 
 jobs:
