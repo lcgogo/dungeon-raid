@@ -170,7 +170,7 @@
 (()=>{
 //==================== 配置 ====================
 // 版本号 v主.次.修：小改动改"修"，新Boss/职业改"次"，大版本变更需先确认。页面底部显示。
-const VERSION='v1.26.1';
+const VERSION='v1.27.0';
 const CHANGELOG_LINES=["v1.26.1 — 黑毒心/绿毒心底色改回与普通心一致（只靠 emoji 区分；普通心保留 💗，❤️ 在 iOS canvas 会偏移）", "v1.26.0 — 牧师二阶被动「不朽」改为「神圣打击」（治疗溢出随机攻击敌人，去超模）+ 主动「祝福」改为转经验同时回血", "v1.25.30 — 汲取生命吸血覆盖所有击杀手段（剑/炸弹/毒/箭雨/溅射/吸魂/荆棘反杀，统一 lifestealHeal + 日志显示）", "v1.25.29 — 修复汲取生命吸血像没效果（炸弹击杀也吸血 + 日志显示「吸血 +N」，原来只剑杀且无日志）", "v1.25.28 — 去掉万物皆毒描述里的「污染怪变化之后」交互说明（行为不变，文案精简；README 中英同步）", "v1.25.27 — 修复回放步进没连线/冒一堆炸弹特效（跳转清残留 bombFx + 停在连线结算前预显示该连线）", "v1.25.26 — 满血时治疗不可用（按钮置灰显示「已满血」、点击不购买）+ 更新描述", "v1.25.25 — 修复击败 Boss 没有奖励日志（奖励提示统一进 onBossKilled，剑/炸弹/荆棘/吸魂等都报「🏆击败Boss 💰+20 经验+15」）", "v1.25.24 — 修复荆棘反弹打成随机目标（说明是「反弹给攻击者」）——改为优先反弹给攻击者本人，攻击者离场才退回随机", "v1.25.23 — 吸血鬼吸到黑毒心会中毒/被毒死（正常心回血、毒心反害，净效果结算）——巫医蛊毒可反制吸血鬼", "v1.25.22 — 日志按事件类型上色（回血绿/增益蓝/攻击白/受击·Boss出场红/负面黄）+ 回放跳转固定 50/100/200/350 加「−10」看结局", "v1.25.21 — 修复巫医蛊毒发动后心不变黑（改为当场把全场红心燃成黑毒心 poison=true，立显🖤、连之毒全场）", "v1.25.20 — 修复炸弹说明里 {W} 未解析（tr→L，按种族渲染武器名）", "v1.25.19 — 英文文案——减伤 Cut→DR，护甲进度统一为 Armor XP（仅英文，中文不变）", "v1.25.18 — 13 个职业主动技能全部补上详细说明 desc（嗜血/蛊毒/箭雨/圣盾/囤金/收买/狂怒/重生等点开都有完整规则）", "v1.25.17 — 修复回放期间误写存档（退出后「继续上局」会接着玩回放残局；连带修复回放跳转按钮回合数错乱）——saveGame 回放中跳过", "v1.25.16 — 修复巫医蛊毒/黑毒心对剑免疫 Boss 没效果（毒伤改为命中全场怪含剑免疫，排除终焉，与炸弹/吸魂一致）", "v1.25.15 — 新增网页图标 favicon（内联 SVG 金色城堡+小旗，零外部文件）+ theme-color；游戏页与首页都加", "v1.25.14 — 修复炸弹炸怪同回合升级时升级框盖住爆炸特效（实玩等特效播完~0.43s再弹框；回放不受影响）", "v1.25.13 — 精简落地页玩法说明（去掉每50回合Boss强档/500回合破关剧透，保留神秘感，中英压缩一屏内）", "v1.25.12 — 修复回放「连线不对」（改两拍：结算前先画线再结算）+ 进度条独占一行/步进键保留占位/顶栏文字简化为「回合 X/总」", "v1.25.11 — 修复主栏红字与展开栏不一致（主栏也逐行按各自 red 标记上色，共用 logColor）", "v1.25.10 — 修复回放完全不显示连线（保留连线、只在暂停/跳转/结束清）+ 日志框左右与棋盘对齐", "v1.25.9 — 修复完整日志里红字丢失（历史记录带 red 标记）+ 主界面日志加框", "v1.25.8 — 修复吸魂红线闪 2 次（动画加 fill:forwards + 初始隐藏，去掉结束回弹）", "v1.25.7 — 炸弹爆炸特效（每个命中怪/Boss 格爆橙色闪光+扩散环；纯 UI）", "v1.25.6 — 修复回放/跳转后残留旧连线（画在重排棋盘上像“连了没连的”）+ 快进时不放吸魂特效", "v1.25.5 — 吸魂大法吸血特效（从被吸目标格画红线指向血条；纯 UI）", "v1.25.4 — 矮人↔兽人武器对调（兽人🪓斧、矮人🔨锤，纯显示）+ README 加在线试玩链接", "v1.25.3 — 会长「收买」改为真花「全怪血量」金币买通 + 移除冷却；饕餮显示动态攻击角标（=血量50%）", "v1.25.2 — 修复回放中可操作棋盘致回放与真实不符；回放控制改版（点棋盘暂停 + ◀▶单回合步进，边界变灰）", "v1.25.1 — 修复转职后技能/商店按钮停留在禁用态（老问题）——updateHUD 移到 busy 复位之后", "v1.25.0 — 职业进阶链重构（50主动→100锁定专属被动→200同族另一被动）+ 拆出皆可为剑/万物皆毒(黑毒心)", "v1.24.3 — 调高怪物/Boss 攻击力（怪 lv×0.7→1.1、Boss lv×1.2→1.8），避免后期护甲碾压攻击只吃 1 点", "v1.24.2 — 修复点版本号一直「加载中」（更新日志改为嵌入页面、零网络，dr.sh 自动从 CHANGELOG 注入）", "v1.24.1 — 日志栏可点开看历史 + 点版本号看更新日志 + 底部方块提示 + 修角色面板技能冷却显示（用有效冷却）", "v1.24.0 — 雪人重做（移除攻击→倒计时归零再次冰封，留可炸窗口）+ 每回合行动 Boss 标注倒计时", "v1.23.1 — 吸魂大法描述按种族渲染武器免疫（骨/剑）+ 写清吸取规则（每个最多吸你的生命上限）", "v1.23.0 — 吸魂大法的溢出也触发「溅射」（吸死目标后多出的吸力砸向剩余敌人，含剑免疫）", "v1.22.8 — 吸魂大法描述写明对 Boss 有效（和炸弹一样含剑免疫的；终焉除外）"];   /* auto-injected by dr.sh embed-changelog（勿手改） */
 const DEV=true;    // 开发版：指向最新开发版本；独立存档 + DEV 标识。正式版在 dungeon-raid.html（DEV=false）
 const REC_API='https://api.dungeonraid.win';   // 录像分享 API（Cloudflare Worker + KV）
@@ -520,6 +520,7 @@ const TIER1={
   priest:{n:['牧师','Priest'], quip:['心给我，经验你拿，公平交易。','Hearts to me, XP to you. Fair deal.'], skill:{name:['祝福','Blessing'], short:['全场❤️转经验+回血','Hearts→XP & heal'], desc:['立即清空棋盘上所有的「心」：每颗转成 3 点经验，同时按每颗心的回复量给你回血。场上没有心时无效、不进冷却。','Instantly clears every heart on the board: each becomes 3 XP and also heals you (by your heal-per-heart). No effect — and no cooldown — if there are no hearts.'], cd:5, f:p=>{ let n=0; for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){const t=grid[r][c]; if(t&&t.type==='heart'){grid[r][c]=null;n++;}} if(!n)return false; player.xp+=n*3; const h=gainHeal(n*player.healPerHeart); applyGravity(); syncPositions(false); checkLevel(); log(tr(`💗 祝福：${n} 颗心 → ${n*3} 经验，回血 ${h}`,`💗 Blessing: ${n} hearts → ${n*3} XP, +${h} HP`), 'buff'); return n; }}},
   ranger:{n:['游侠','Ranger'], quip:['抬头——那不是雨，是箭。','Heads up — those are not raindrops.'], skill:{name:['箭雨','Arrow Rain'], short:['全场怪受{W}威力×2','×2 {W} power to all'], desc:['对场上每一只可{W}攻击的怪/Boss 各打一发「{W}威力×2」的伤害（每只独立全额，不分摊）。{W}免疫的 Boss（幽灵/小丑等）不受影响——箭属武器攻击。','Hits every {W}-targetable foe for ×2 {W} power (full damage to each, not shared). {W}-immune bosses (Ghost/Clown…) are unaffected — arrows are a weapon attack.'], cd:5, f:p=>{ const titanFlat=p.titan?Math.floor(p.maxHp/12):0; const pool=Math.floor((p.weaponPower*2 + p.swordFlat + titanFlat)*(p.swordMult||1)); const r=dealDamage(pool,null); const lh=lifestealHeal(r.kills); applyGravity(); syncPositions(false); log(tr(`🏹 箭雨：全场 ${r.dmg} 伤害`+(r.kills?`，击杀 ${r.kills}`:'')+(lh?`，吸血 +${lh}`:''),`🏹 Arrow Rain: ${r.dmg} dmg`+(r.kills?`, ${r.kills} killed`:'')+(lh?`, +${lh} lifesteal`:''))); return true; }}},
   rogue:{n:['盗贼','Rogue'], quip:['剑能砍人，但金币能买命。','Swords kill. Coins buy your life back.'], skill:{name:['点金','Gold Touch'], short:['{W}变金币','{W}→Coins'], desc:['把棋盘上所有的{W}变成金币（随后连金币换钱）。场上没有{W}时无效、不进冷却。','Turns every {W} on the board into coins (link them for gold). No effect — and no cooldown — if there are no {W}s.'], cd:5, f:p=>{ let n=0; for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){const t=grid[r][c]; if(t&&t.type==='sword'){t.type='coin';n++;}} if(!n)return false; log(tr(`💰 点金：${n} 个${wN()}化为金币`,`💰 Gold Touch: ${n} ${wN()} → coins`), 'buff'); return n; }}},
+  elder:{n:['长老','Elder'], quip:['生命有借有还——敌人先还。','Life is a loan; your enemies pay first.'], skill:{name:['死亡缠绕','Death Coil'], short:['5回合内每回合全场怪 −10%你最大生命','5 turns: all foes −10% your max HP/turn'], desc:['发动后接下来 5 个回合，每回合让场上所有怪/Boss（含剑免疫，终焉之主除外）损失「你最大生命的 10%」。被缠绕期间敌人格变绿。','For the next 5 turns, every turn all enemies/bosses (incl. sword-immune; Overlord excluded) lose 10% of your max HP. Cursed foes glow green.'], cd:5, f:p=>{ p.deathCoil=5; log(tr('🟢 死亡缠绕：未来 5 回合，全场怪每回合流失你 10% 最大生命！','🟢 Death Coil: for 5 turns, all foes lose 10% of your max HP each turn!'), 'buff'); return true; }}},
   blacksmith:{n:['锻造师','Blacksmith'], quip:['盾别拿手里，焊身上才香。','Do not hold shields — wear them.'], skill:{name:['锻甲','Forge Armor'], short:['收全场盾→护甲','Absorb all shields'], desc:['吞下棋盘上所有的盾，按「每盾护甲进度」一次性转成护甲进度并立刻结算升甲。兽人无甲→无效；场上没盾→无效、不进冷却。','Devours every shield on the board, converting each into Armor XP at your per-shield rate and leveling armor at once. No effect for the armor-less Orc, or when there are no shields (no cooldown then).'], cd:5, f:p=>{ if(p.noArmor) return false; let n=0; for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){const t=grid[r][c]; if(t&&t.type==='shield'){grid[r][c]=null;n++;}} if(!n)return false; p.shieldXp+=n*p.armorPerShield; while(p.shieldXp>=armorNeeded(p.armor)){p.shieldXp-=armorNeeded(p.armor);p.armor++;} applyGravity(); syncPositions(false); log(tr(`🔰 锻甲：吞下 ${n} 盾（减伤 ${p.armor}）`,`🔰 Forge: ${n} shields (armor ${p.armor})`), 'buff'); return n; }}},
   miser:{n:['守财奴','Miser'], quip:['钱躺一会儿，利滚利。','Let the gold nap — it wakes up doubled.'], skill:{name:['囤金','Hoard'], short:['锁金生利','Lock gold for interest'], desc:['锁金 4 回合：期间金币不直接进账、也不能用商店/技能，而是先囤起来；4 回合后一次性按 2.5 倍返还囤积的金币。','Locks gold for 4 turns: coins are stockpiled (not banked or spent) and shop/skills are disabled; after 4 turns the stockpile is paid back at 2.5×.'], cd:5, f:p=>{ if(p.goldLock>0) return false; const n=4; p.goldLock=n; p.goldFrozen=0; log(tr(`🔒 囤金：锁定 ${n} 回合（期间不产/不花金币，到期返还 2.5 倍）`,`🔒 Hoard: locked ${n} turns (no gold in/out; 2.5× payout at end)`), 'buff'); return true; }}},
   guildmaster:{n:['会长','Guild Master'], quip:['有钱能使鬼推磨。','Money makes the world go round.'], skill:{name:['收买','Buyout'], short:['花「全怪血量」的金币把全场怪买通成金币（无冷却）','Pay gold = total enemy HP to bribe all enemies into coins (no cooldown)'], desc:['花费「场上所有普通怪当前血量之和」那么多金币，把它们全部买通、原地变成金币（不影响 Boss）。金币不够则发动不了。无冷却，钱够就能反复用。','Spend gold equal to the total current HP of all regular monsters to bribe them all into coins on the spot (bosses unaffected). Fails if you cannot afford it. No cooldown — reusable while you have the gold.'], cd:5, noCd:true, f:p=>{ let hp=0; const cells=[]; for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const t=grid[r][c]; if(t&&t.type==='enemy'){ hp+=t.hp; cells.push([r,c]); } } if(!cells.length || p.gold<hp) return false; p.gold-=hp;   // 真正花钱：付「全怪血量」的金币买通
@@ -552,7 +553,8 @@ const TIER2={
   demolitionist:{n:['爆破手','Demolitionist'], d:['炸弹伤害更高，但花费金币更多','Bomb hits harder but costs more gold'], f:p=>{ p.bombBoost=true; }},
   tycoon:{n:['财阀','Tycoon'], d:['获得金币时额外按一半转为经验','Gold gained also grants half as XP'], f:p=>{ p.goldXp=true; }},
   warlord:{n:['巨力','Titan'], d:['最大生命越高，{WC}固定伤害越高（每 12 点最大生命 +1）','Higher max HP = higher flat {W} damage (+1 per 12 max HP)'], f:p=>{ p.titan=true; }},
-  thorns:{n:['荆棘','Thorns'], d:['受到伤害的一半反弹给攻击者','Reflect half of damage taken back to the attacker'], f:p=>{ p.thorns=0.5; }},
+  thorns:{n:['荆棘','Thorns'], d:['受到攻击时，把「当前护甲减伤量」反弹给攻击者（护甲越高反弹越多）','When hit, reflect your current armor (damage-reduction) back to the attacker — more armor, more reflect'], f:p=>{ p.thorns=true; }},
+  bloodfrenzy:{n:['血狂','Blood Frenzy'], d:['吸血/嗜血回血超出生命上限时，把溢出的一半增为永久生命上限','Lifesteal/Bloodthirst healing past max HP: half the overflow becomes permanent max HP'], f:p=>{ p.bloodFrenzy=true; }},
   cheapskate:{n:['小气鬼','Cheapskate'], d:['消耗金币的主动（商店治疗/炸弹）花费减半','Gold-spending actives (shop Heal/Bomb) cost half'], f:p=>{ p.cheapskate=true; }},
   rejuvenation:{n:['回春','Rejuvenation'], d:['所有主动技能冷却 -1','All active-skill cooldowns -1'], f:p=>{ p.skillCdMod=(p.skillCdMod||0)-1; }},
   splash:{n:['溅射','Splash'], d:['攻击溢出伤害随机溅到剩余敌人（含{W}免疫 Boss）','Overflow damage splashes to a random remaining foe (incl. {W}-immune bosses)'], f:p=>{ p.splash=true; }},
@@ -562,17 +564,17 @@ const TIER2={
 // 二阶被动锁定到一阶职业（100 回合按此直接授予；200 回合再从同族其余被动里选另一个）
 const CLASS_T2={
   knight:'general', priest:'holystrike', swordsaint:'bladeall',
-  ranger:'sharpshooter', rogue:'shadow',
+  ranger:'sharpshooter', rogue:'shadow', elder:'thorns',
   blacksmith:'demolitionist', miser:'tycoon', guildmaster:'cheapskate',
   necromancer:'rejuvenation', skeletonking:'splash',
-  berserker:'warlord', fighter:'thorns', witchdoctor:'allpoison',
+  berserker:'warlord', fighter:'bloodfrenzy', witchdoctor:'allpoison',
 };
 const RACE_PATHS={
   human:{t1:['knight','priest','swordsaint'], t2:['general','holystrike','bladeall']},
-  elf:  {t1:['ranger','rogue'],      t2:['sharpshooter','shadow']},
+  elf:  {t1:['ranger','rogue','elder'], t2:['sharpshooter','shadow','thorns']},
   dwarf:{t1:['blacksmith','miser','guildmaster'], t2:['demolitionist','tycoon','cheapskate']},
   undead:{t1:['necromancer','skeletonking'], t2:['rejuvenation','splash']},
-  orc:  {t1:['berserker','fighter','witchdoctor'], t2:['warlord','thorns','allpoison']},
+  orc:  {t1:['berserker','fighter','witchdoctor'], t2:['warlord','bloodfrenzy','allpoison']},
 };
 function raceById(id){ return RACES.find(r=>r.id===id)||RACES[0]; }
 let __bootHandled=false;
@@ -939,10 +941,11 @@ function draw(){
     const x=cellX(c), y=(t.curY!==undefined?t.curY:cellY(r));
     const d=DEF[t.type], g=TILE-8;
     const picked=sel.has(t.r+','+t.c);
-    // 能被剑攻击的（怪 / 可剑连的Boss，以及剑本身）统一红底，一眼看出可攻击
-    const baseCol = (isSwordTarget(t) || t.type==='sword') ? DEF.sword.color : d.color;   // 黑毒心/绿毒心底色与普通心一致，只换 emoji（💚/🖤）
+    const coiled = player && player.deathCoil>0 && (t.type==='enemy'||(t.type==='boss'&&!t.finale));   // 死亡缠绕中：敌人格变绿
+    // 能被剑攻击的（怪 / 可剑连的Boss，以及剑本身）统一红底，一眼看出可攻击；死亡缠绕中的怪改绿底
+    const baseCol = coiled ? '#27ae60' : (isSwordTarget(t) || t.type==='sword') ? DEF.sword.color : d.color;   // 黑毒心/绿毒心底色与普通心一致，只换 emoji（💚/🖤）
     // 被剑链穿过的怪/可攻击Boss → 红色高亮（表示正被攻击）
-    const gl = (picked && chainType==='sword' && isSwordTarget(t)) ? DEF.sword.glow : d.glow;
+    const gl = (picked && chainType==='sword' && isSwordTarget(t)) ? DEF.sword.glow : coiled ? '#2ecc71' : d.glow;
     // 背景
     ctx.save();
     roundRect(x+4,y+4,g,g,12);
@@ -1325,7 +1328,7 @@ function resolve(){
     if(targets.length){ ({dmg,kills}=dealDamage(pool, targets)); }
     const lifeHeal=lifestealHeal(kills);   // 汲取生命：每杀一只回血（含溅射击杀，kills 已含）
     let blood=0;
-    if(player.bloodthirst && targets.length){ blood=gainHeal(targets.length*3); player.bloodthirst=0; } // 斗士嗜血
+    if(player.bloodthirst && targets.length){ blood=vampGain(targets.length*3); player.bloodthirst=0; } // 斗士嗜血（血狂时溢出转上限）
     const comboTxt=combo>1?tr(` 连击×${combo.toFixed(2)}`,` combo×${combo.toFixed(2)}`):'';
     msg=`${wE()}×${nS}${comboTxt}` + (targets.length
       ? tr(` 直击 ${targets.length} 只怪 → ${dmg} 伤害`,` hit ${targets.length} → ${dmg} dmg`) + (kills?tr(`，击杀 ${kills} 只👹`,`, ${kills} killed`):'') + (lifeHeal?tr(`，吸血 +${lifeHeal}`,`, +${lifeHeal} lifesteal`):'') + (blood?tr(`，回血 ${blood}`,`, +${blood} HP`):'')
@@ -1372,6 +1375,7 @@ function resolve(){
   if(player.skill2Cd>0) player.skill2Cd--; // 换装主动冷却递减
   if(player.frozen) for(const k in player.frozen){ if(player.frozen[k]>0) player.frozen[k]--; }   // 雪人冰封倒数解冻
   if(player.goldLock>0){ player.goldLock--; if(player.goldLock===0){ const pay=Math.round(player.goldFrozen*2.5); player.gold+=pay; player.goldFrozen=0; log(tr(`🔓 囤金到期：返还 ${pay} 金币`,`🔓 Hoard matured: +${pay} gold`), 'buff'); } } // 守财奴囤金到期（2.5 倍）
+  if(player.deathCoil>0){ deathCoilTick(); player.deathCoil--; }   // 死亡缠绕：未来 5 回合每回合全场怪流失 10% 最大生命
   advanceEnemies();
   if(player.cleared) return;   // 终焉第10波撑过 → onClear 已结算，停止后续处理
   if(player.regen) gainHeal(player.regen);
@@ -1496,13 +1500,31 @@ function hurtPlayer(atk, sourceKey, ignoreArmor, attacker){
   if(player.rebirthTurn && player.hp<=0){ player.hp=player.maxHp; player.rebirthTurn=false; player.rebirthSaves=(player.rebirthSaves||0)+1; // 骷髅王重生：本回合致死则满血复活，此后重生冷却 +2
     log(tr('💀 骷髅王重生！生命恢复至满（重生冷却 +2）','💀 Skeleton King reborn! Full HP (Rebirth cooldown +2)'), 'heal'); }
   addDmg(sourceKey, dmg);
-  if(player.thorns && dmg>0 && attacker) reflectThorns(Math.ceil(dmg*player.thorns), attacker);   // 荆棘：仅「真·攻击」反弹给攻击者；尸毒/毒心反噬/石像反弹这类非攻击不传 attacker→不反弹
+  if(player.thorns && dmg>0 && attacker){ const refl=Math.round(player.armor*(player.armorMult||1)+(player.toughness||0)); if(refl>0) reflectThorns(refl, attacker); }   // 荆棘：受到「真·攻击」时把当前护甲减伤量反弹给攻击者（非攻击不传 attacker→不反弹）
   return dmg;
 }
 // 石像：你对它造成多少伤害，就把等量伤害当作真实伤害（无视护甲）反弹给你。在每个对 Boss 造成伤害的点调用。
 function statueReflect(t, hit){ if(t && t.bossId==='statue' && hit>0){ const d=hurtPlayer(hit, 'statue', true); if(d>0) log(tr(`🗿 石像反弹 ${d} 真实伤害！`,`🗿 Statue reflects ${d} TRUE damage!`), 'bad'); } }
 // 汲取生命：每击杀 n 只怪回血（受上限封顶），返回实际回血量。供剑/炸弹/毒/箭雨/吸魂/荆棘等所有击杀路径共用。
-function lifestealHeal(n){ if(!player.lifesteal||n<=0) return 0; const b=player.hp; player.hp=Math.min(player.maxHp, player.hp+n*player.lifesteal); return player.hp-b; }
+function lifestealHeal(n){ if(!player.lifesteal||n<=0) return 0; return vampGain(n*player.lifesteal); }
+// 吸血类回血（吸血/嗜血）：回到上限封顶；若有「血狂」，溢出的一半增为永久生命上限。返回本次实际+的生命。
+function vampGain(amount){
+  if(amount<=0) return 0; const b=player.hp, space=player.maxHp-player.hp;
+  if(amount<=space){ player.hp+=amount; return player.hp-b; }
+  player.hp=player.maxHp; const over=amount-space;
+  if(player.bloodFrenzy && over>0){ const up=Math.floor(over*0.5); player.maxHp+=up; player.hp+=up; }   // 血狂：溢出的一半→永久生命上限
+  return player.hp-b;
+}
+// 死亡缠绕（长老主动）：当回合让全场怪/Boss（排除终焉）流失 10% 玩家最大生命；可击杀（给奖励+吸血）
+function deathCoilTick(){
+  const dmg=Math.max(1, Math.floor(player.maxHp*0.1)); let kills=0, hit=0;
+  for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const t=grid[r][c];
+    if(t&&(t.type==='enemy'||(t.type==='boss'&&!t.finale))){ t.hp-=dmg; hit++;
+      if(t.hp<=0){ const isB=t.type==='boss'; grid[r][c]=null; kills++; if(isB){thiefRecover(t);player.xp+=15;player.gold+=20;onBossKilled();} else {player.xp+=3+(player.killXp||0);player.gold+=1;} } } }
+  if(!hit) return;
+  const lh=lifestealHeal(kills);
+  log(tr(`🟢 死亡缠绕：全场怪 −${dmg}`+(kills?`，击杀 ${kills}`:'')+(lh?`，吸血 +${lh}`:''),`🟢 Death Coil: all foes −${dmg}`+(kills?`, ${kills} killed`:'')+(lh?`, +${lh} lifesteal`:'')));
+}
 function reflectThorns(amt, atkr){
   let r=-1,c=-1,t=null;
   if(atkr && (atkr.type==='enemy'||(atkr.type==='boss'&&!atkr.finale))){   // 优先反弹给「攻击者本人」：按身份在棋盘上找它
@@ -1959,7 +1981,8 @@ function showPlayerInfo(){
   const perks=[];
   if(p.lowHpDmg) perks.push(tr(`狂怒：越缺血${wN()}伤越高`,'Frenzy: low HP, high dmg'));
   if(p.titan) perks.push(tr(`巨力：固定${wN()}伤 +${Math.floor(p.maxHp/12)}`,`Titan: +${Math.floor(p.maxHp/12)} flat ${wN()} dmg`));
-  if(p.thorns) perks.push(tr('荆棘反弹','Thorns'));
+  if(p.thorns) perks.push(tr('荆棘（反弹护甲）','Thorns (reflect armor)'));
+  if(p.bloodFrenzy) perks.push(tr('血狂（吸血溢出升上限）','Blood Frenzy'));
   if(p.lifesteal) perks.push(tr(`吸血 +${p.lifesteal}/杀`,`Lifesteal +${p.lifesteal}`));
   if(p.regen) perks.push(tr(`每回合回复 +${p.regen}`,`Regen +${p.regen}`));
   if(p.holyStrike) perks.push(tr('神圣打击（溢出攻击）','Holy Strike'));
@@ -2023,6 +2046,7 @@ function updateHUD(){
   b.push(`💗${player.healPerHeart}`);
   b.push(`💰${player.goldPerCoin}`);
   if(player.goldLock>0) b.push(tr(`🔒囤金${player.goldLock}`,`🔒${player.goldLock}`));
+  if(player.deathCoil>0) b.push(tr(`🟢缠绕${player.deathCoil}`,`🟢Coil ${player.deathCoil}`));
   if(player.lifesteal)b.push(tr(`吸血 ${player.lifesteal}`,`Lifesteal ${player.lifesteal}`));
   if(player.regen)b.push(tr(`恢复 ${player.regen}`,`Regen ${player.regen}`));
   document.getElementById('bonusTxt').textContent=b.join('　');
