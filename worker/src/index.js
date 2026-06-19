@@ -136,17 +136,17 @@ async function versionFilter(env, url) {
 
 // 该成绩是否进入「顶尖」（前 1%，且至少前 10 名）→ 值得即时验证
 function isTopTier(rk) { const o = rk && rk.overall; return !!o && o.rank <= Math.max(10, Math.ceil(o.total * 0.01)); }
-// 顶尖成绩即时验证：直接 ping 常驻验证服务（render 的 verify-server）的 /verify-now，让它立刻重放校验。
-// 去抖：90s 内不重复推。URL 可用 env.VERIFY_PUSH_URL 覆盖；推送失败有 render 轮询 + GitHub cron 兜底。
-const VERIFY_PUSH_URL = 'https://dungeon-raid-nel5.onrender.com';
+// 顶尖成绩即时验证：直接 ping 常驻验证服务的 /verify-now，让它立刻重放校验。去抖：90s 内不重复推。
+// 验证服务地址走 secret env.VERIFY_PUSH_URL（不写进仓库；可填 render 原址或 Cloudflare 代理子域）。
+// 未设置时跳过推送——仍由 render 每 ~7s 轮询 + GitHub cron 兜底。
 async function triggerVerify(env) {
-  if (!env.REC || !env.VERIFY_SECRET) return;
+  if (!env.REC || !env.VERIFY_SECRET || !env.VERIFY_PUSH_URL) return;
   try {
     if (await env.REC.get('vdispatch')) return;                     // 去抖：上次触发 90s 内不再发
     await env.REC.put('vdispatch', '1', { expirationTtl: 90 });
-    const base = (env.VERIFY_PUSH_URL || VERIFY_PUSH_URL).replace(/\/$/, '');
+    const base = env.VERIFY_PUSH_URL.replace(/\/$/, '');
     await fetch(`${base}/verify-now?k=${encodeURIComponent(env.VERIFY_SECRET)}`, { headers: { 'User-Agent': 'dungeon-raid-worker' } });
-  } catch (e) { /* 推送失败不影响成绩提交：render 每 ~7s 轮询 + GitHub cron 兜底 */ }
+  } catch (e) { /* 推送失败不影响成绩提交：render 轮询 + GitHub cron 兜底 */ }
 }
 
 export default {
