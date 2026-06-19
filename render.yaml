@@ -1,0 +1,19 @@
+# render.com 蓝图：常驻验证服务（榜单成绩秒级校验上榜）。
+# 在 render 上「New → Blueprint」指向本仓库即可创建；VERIFY_SECRET 在控制台手填（不进仓库）。
+# 注意：free 计划闲置会休眠（冷启动 30–60s 不即时）；要真·即时请用 starter 付费常驻，或对 /（健康端点）做外部保活 ping。
+services:
+  - type: web
+    name: dungeon-raid-verify
+    runtime: node
+    plan: starter            # 常驻不休眠；想省钱可改 free + 外部保活
+    buildCommand: ""         # 纯 Node 标准库，无需安装依赖
+    startCommand: node verify-server.js
+    healthCheckPath: /
+    autoDeploy: true         # 推主分支自动重部署（引擎跟随当前正式版）
+    envVars:
+      - key: API_BASE
+        value: https://api.dungeonraid.win
+      - key: POLL_MS
+        value: "7000"
+      - key: VERIFY_SECRET
+        sync: false          # 在 render 控制台手填，必须与 Cloudflare Worker 的 VERIFY_SECRET 一致

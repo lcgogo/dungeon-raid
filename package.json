@@ -1,0 +1,14 @@
+{
+  "name": "dungeon-raid-verify",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Leaderboard anti-cheat replay verifier for Dungeon Raid (deterministic replay; cloud-agnostic Node service).",
+  "main": "verify-server.js",
+  "scripts": {
+    "start": "node verify-server.js",
+    "verify-once": "node verify.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

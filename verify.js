@@ -1,14 +1,15 @@
 'use strict';
 // 排行榜防作弊验证：拉取 API 的待验证录像 → 用游戏确定性引擎重放 → 比对声称结局 → 回写。
-// 由 GitHub Actions 每小时跑（也可本地 `API_BASE=… VERIFY_SECRET=… node verify.js`）。
+// 用法：
+//   一次性（GitHub Actions / 本地）： API_BASE=… VERIFY_SECRET=… node verify.js
+//   常驻轮询（render/railway/fly/任意 Node 主机）：见 verify-server.js（require 本文件的导出函数）。
 const fs = require('fs');
 const crypto = require('crypto');
 
 const API = process.env.API_BASE || 'https://api.dungeonraid.win';
 const SECRET = process.env.VERIFY_SECRET;
-if (!SECRET) { console.error('缺少 VERIFY_SECRET 环境变量'); process.exit(1); }
 
-// ---- 加载游戏确定性引擎（与 playtest.js 同法：DOM 桩件 + 注入导出）----
+// ---- 加载游戏确定性引擎（与 playtest.js 同法：DOM 桩件 + 注入导出）。一次加载可反复 startGame 重放多份录像 ----
 function loadEngine(file) {
   const script = fs.readFileSync(__dirname + '/' + file, 'utf8').match(/<script>([\s\S]*?)<\/script>/)[1];
   const EXPORT = `globalThis.__E={VERSION,startGame,raceById,dispatchReplayAct,
@@ -44,11 +45,8 @@ function replay(G, rec) {
   return { turns: p.turns, level: p.level, gold: p.gold, cleared: !!p.cleared };
 }
 
-async function main() {
-  // 先加载引擎、直接读它运行时的 VERSION（不靠正则抽源码，因此 minify 也不影响），只向 /pending 要这个版本的待验证项
-  const G = loadEngine('dungeon-raid.html');
-  const ENGINE_VER = G.VERSION || '';
-  // 完整性校验：版本号是人类标签，sha256 用来核对「这份文件确实是该版本」
+// 完整性校验：版本号是人类标签，sha256 核对「这份文件确实是该版本」（仅打印告警，不阻断）
+function integrityNote(ENGINE_VER) {
   try {
     const want = (JSON.parse(fs.readFileSync(__dirname + '/engines.json', 'utf8')) || {})[ENGINE_VER];
     if (want) {
@@ -56,9 +54,14 @@ async function main() {
       console.log(got === want ? `🔏 完整性校验通过（${ENGINE_VER}）` : `⚠️ 完整性告警：sha256 ${got} ≠ engines.json 登记 ${want}（文件可能被改动）`);
     }
   } catch (e) {}
+}
+
+// 拉取并验证当前引擎版本的全部待验证项，回写结果。返回 {pass,fail,skip,total}。可被常驻服务反复调用。
+async function verifyPending(G, ENGINE_VER) {
+  if (!SECRET) throw new Error('缺少 VERIFY_SECRET 环境变量');
   const purl = `${API}/pending?k=${encodeURIComponent(SECRET)}` + (ENGINE_VER ? `&version=${encodeURIComponent(ENGINE_VER)}` : '');
   const pend = (await (await fetch(purl)).json()).pending || [];
-  if (!pend.length) { console.log(`没有待验证项（引擎版本 ${ENGINE_VER}）`); return; }
+  if (!pend.length) return { pass: 0, fail: 0, skip: 0, total: 0 };
   let pass = 0, fail = 0, skip = 0;
   for (const e of pend) {
     // 录像只能在自己那个版本的引擎上正确重放；版本不符则跳过（不同版本本就不混排）
@@ -80,6 +83,19 @@ async function main() {
     ok ? pass++ : fail++;
     console.log(`${ok ? '✅' : '❌'} ${e.id} [${e.source}] claim ${e.turns}/${e.level}/${e.gold} → actual ${actual ? `${actual.turns}/${actual.level}/${actual.gold}` : 'ERR'}`);
   }
-  console.log(`完成：${pass} 通过 / ${fail} 失败 / ${skip} 跳过（共 ${pend.length}），引擎版本 ${ENGINE_VER}`);
+  return { pass, fail, skip, total: pend.length };
 }
-main().catch(e => { console.error(e); process.exit(1); });
+
+// 一次性入口（GitHub Actions / 本地手跑）
+async function main() {
+  if (!SECRET) { console.error('缺少 VERIFY_SECRET 环境变量'); process.exit(1); }
+  const G = loadEngine('dungeon-raid.html');
+  const ENGINE_VER = G.VERSION || '';
+  integrityNote(ENGINE_VER);
+  const r = await verifyPending(G, ENGINE_VER);
+  if (!r.total) console.log(`没有待验证项（引擎版本 ${ENGINE_VER}）`);
+  else console.log(`完成：${r.pass} 通过 / ${r.fail} 失败 / ${r.skip} 跳过（共 ${r.total}），引擎版本 ${ENGINE_VER}`);
+}
+
+module.exports = { loadEngine, replay, verifyPending, integrityNote, API };
+if (require.main === module) main().catch(e => { console.error(e); process.exit(1); });
