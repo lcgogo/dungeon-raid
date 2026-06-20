@@ -13,7 +13,9 @@ const SECRET = process.env.VERIFY_SECRET;
 function loadEngine(file) {
   const script = fs.readFileSync(__dirname + '/' + file, 'utf8').match(/<script>([\s\S]*?)<\/script>/)[1];
   const EXPORT = `globalThis.__E={VERSION,startGame,raceById,dispatchReplayAct,
-    get player(){return player}, set replaying(v){replaying=v}, set replayRec(v){replayRec=v}};`;
+    get player(){return player}, get replaying(){return replaying}, set replaying(v){replaying=v},
+    get replayRec(){return replayRec}, set replayRec(v){replayRec=v},
+    srand, rnd};`;
   if (!script.includes('resize(); showClassSelect(); loop();')) throw new Error('startup line not found in ' + file);
   const src = script.replace('resize(); showClassSelect(); loop();', EXPORT);
   const elH = { get(t, p) {
@@ -36,12 +38,25 @@ function loadEngine(file) {
   return globalThis.__E;
 }
 
-// 确定性重放一份录像，返回真实结局（含是否破关）
-function replay(G, rec) {
+function replay(G, rec, forceFirstGame) {
+  // 旧版本录像可能没有 tut 字段，需要强制指定 firstGame 状态
+  if (forceFirstGame !== undefined && rec.tut === undefined) {
+    rec = { ...rec, tut: forceFirstGame ? 1 : 0 };
+  }
   G.replayRec = rec; G.replaying = true;
   G.startGame(G.raceById(rec.race));
   const p = G.player;
-  for (const a of rec.acts) { if (p.hp <= 0 || p.cleared) break; G.dispatchReplayAct(a); }
+  let lastTurn = 0;
+  for (let i=0; i<rec.acts.length; i++) {
+    if (p.hp <= 0 || p.cleared) break;
+    const a = rec.acts[i];
+    G.dispatchReplayAct(a);
+    if (p.turns !== lastTurn) {
+      // 新回合开始，打印状态
+      console.log(`回合 ${p.turns}: hp=${p.hp} level=${p.level} gold=${p.gold} actIdx=${i}`);
+      lastTurn = p.turns;
+    }
+  }
   return { turns: p.turns, level: p.level, gold: p.gold, cleared: !!p.cleared };
 }
 
@@ -70,6 +85,15 @@ async function verifyPending(G, ENGINE_VER) {
     try {
       const rec = await (await fetch(`${API}/rec/${e.id}`)).json();
       actual = replay(G, rec);
+      // 旧版本录像可能没有 tut 字段，导致 firstGame 判断错误
+      // 尝试两种可能，选与声称回合更接近的结果
+      if (rec.tut === undefined) {
+        const r1 = replay(G, rec, true);
+        const r2 = replay(G, rec, false);
+        const d0 = actual ? Math.abs(actual.turns - e.turns) : 9999;
+        if (r1 && Math.abs(r1.turns - e.turns) < d0) actual = r1;
+        if (r2 && Math.abs(r2.turns - e.turns) < Math.abs((actual||{turns:0}).turns - e.turns)) actual = r2;
+      }
     } catch (err) { actual = null; }
     let ok;
     if (!actual) ok = false;
