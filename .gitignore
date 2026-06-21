@@ -4,6 +4,8 @@ github-dungeon-raid_ed25519.pub
 
 # 本地工具/配置
 .claude/
+.env
+.wrangler/
 
 # wrangler 本地缓存
 worker/.wrangler/

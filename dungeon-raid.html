@@ -259,6 +259,7 @@ function newPlayer(){
     tier2b:null, t3Pending:false,                                          // 200回合：本种族第二个被动
     skill2:null, skill2Cd:0, t4Pending:false,                              // 350回合：任选主动替换治疗/炸弹槽
     comboMult:1, swordMult:1, armorMult:1, maxHpUpMult:1, noArmor:false,    // 种族特性修正
+    chosenPerks:[],                                                      // 本局已选技能名（按选择顺序，供录像/展示用）
     heartPoison:false,                                                      // 巫医蛊毒：本回合连心改为毒怪
     foeCdBonus:0, skillCdMod:0, splash:false, rebirthTurn:false, rebirthSaves:0, healMult:1,  // 活死人：迷惑/技能冷却修正/溅射/重生/治疗减半
     upgradeChoices:3, bombCd:3, goldLock:0, goldFrozen:0, healUses:0, frozen:{},  // 转职被动相关；healUses：治疗递增；frozen：雪人冰封的主动剩余回合（skill/heal/bomb）
@@ -556,7 +557,7 @@ const TIER2={
   tycoon:{n:['财阀','Tycoon'], d:['获得金币时额外按一半转为经验','Gold gained also grants half as XP'], f:p=>{ p.goldXp=true; }},
   warlord:{n:['巨力','Titan'], d:['最大生命越高，{WC}固定伤害越高（每 12 点最大生命 +1）','Higher max HP = higher flat {W} damage (+1 per 12 max HP)'], f:p=>{ p.titan=true; }},
   thorns:{n:['荆棘','Thorns'], d:['受到攻击时，把「当前护甲减伤量」反弹给攻击者（护甲越高反弹越多）','When hit, reflect your current armor (damage-reduction) back to the attacker — more armor, more reflect'], f:p=>{ p.thorns=true; }},
-  bloodfrenzy:{n:['血狂','Blood Frenzy'], d:['吸血/嗜血回血超出生命上限时，把溢出的部分全部增为永久生命上限','Lifesteal/Bloodthirst healing past max HP: the full overflow becomes permanent max HP'], f:p=>{ p.bloodFrenzy=true; }},
+  bloodfrenzy:{n:['血狂','Blood Frenzy'], d:['吸血/嗜血回血超出生命上限时，溢出的 30% 增为永久生命上限（其余溢出浪费）','Lifesteal/Bloodthirst healing past max HP: 30% of overflow becomes permanent max HP (rest is wasted)'], f:p=>{ p.bloodFrenzy=true; }},
   cheapskate:{n:['小气鬼','Cheapskate'], d:['消耗金币的主动（商店治疗/炸弹）花费减半','Gold-spending actives (shop Heal/Bomb) cost half'], f:p=>{ p.cheapskate=true; }},
   rejuvenation:{n:['回春','Rejuvenation'], d:['所有主动技能冷却 -1','All active-skill cooldowns -1'], f:p=>{ p.skillCdMod=(p.skillCdMod||0)-1; }},
   splash:{n:['溅射','Splash'], d:['攻击溢出伤害随机溅到剩余敌人（含{W}免疫 Boss）','Overflow damage splashes to a random remaining foe (incl. {W}-immune bosses)'], f:p=>{ p.splash=true; }},
@@ -1516,7 +1517,7 @@ function vampGain(amount){
   if(amount<=0) return 0; const b=player.hp, space=player.maxHp-player.hp;
   if(amount<=space){ player.hp+=amount; return player.hp-b; }
   player.hp=player.maxHp; const over=amount-space;
-  if(player.bloodFrenzy && over>0){ player.maxHp+=over; player.hp+=over; }   // 血狂：溢出全部→永久生命上限（100%）
+  if(player.bloodFrenzy && over>0){ const add=Math.max(1,Math.floor(over*0.3)); player.maxHp+=add; player.hp+=add; }   // 血狂：溢出30%→永久生命上限
   return player.hp-b;
 }
 // 蔓藤缠绕（森林长老主动）：当回合让全场怪/Boss（排除终焉）流失 10% 玩家最大生命；可击杀（给奖励+吸血）
@@ -1585,7 +1586,7 @@ function showLevelUp(){
   pool.forEach(u=>{
     const b=document.createElement('button'); b.className='choice';
     b.innerHTML=`<b>${L(u.n)}</b><small>${L(typeof u.d==='function'?u.d(player):u.d)}</small>`;
-    b.onclick=()=>{ recAct(['u', UPGRADES.indexOf(u)]); applyUpgrade(u);   // 录制升级选择（按 UPGRADES 索引）
+    b.onclick=()=>{ recAct(['u', UPGRADES.indexOf(u)]); player.chosenPerks.push(u.id); applyUpgrade(u);   // 录制升级选择（按 UPGRADES 索引）
       if(pendingLevels>0){ showLevelUp(); } else { busy=false; hideOverlay(); }
       updateHUD(); };   // 必须在 busy 置回 false 之后刷新，否则技能/商店按钮一直禁用到下一回合
     card.appendChild(b);
@@ -1615,12 +1616,16 @@ function gameOver(){
     report=`<div style="text-align:left;margin:4px 0 10px;background:var(--panel2);border-radius:10px;padding:5px 4px">
       <div style="text-align:center;color:var(--dim);font-size:11px;margin-bottom:1px">${tr('☠️ 致命回合伤害来源','☠️ Killing blow — damage this turn')}</div>${rows}</div>`;
   }
+  // 技能列表（中文名）
+  const perkNames = player.chosenPerks.map(id => { const u=UPGRADES[id]; return u ? L(u.n) : id; }).join('、');
+  const perkLine = player.chosenPerks.length ? `<div style="text-align:left;font-size:12px;color:var(--gold);margin:4px 0 8px">✦ ${tr('技能：','Perks: ')}${perkNames}</div>` : '';
   const card=document.getElementById('card');
   card.innerHTML=`<h2 style="color:var(--hp);margin-bottom:4px">${tr('💀 你倒下了','💀 You fell')}</h2>
     <p style="margin-bottom:8px">${tr('地牢吞噬了又一位冒险者…','The dungeon claims another adventurer…')}</p>
     <div style="font-size:14px;margin-bottom:8px">${tr('等级','Lv')} <b style="color:var(--gold)">${player.level}</b> · 💰<b style="color:var(--gold)">${player.gold}</b> · <b style="color:var(--gold)">${player.turns}</b> ${tr('回合','turns')}</div>
     <div style="font-size:12px;color:var(--dim);margin:-4px 0 8px">⏱ ${tr('用时','Played')} ${fmtDur(durMs)}</div>
     ${report}
+    ${perkLine}
     ${DEV?'':`<div id="rankBox" style="text-align:left;margin:4px 0 12px;background:var(--panel2);border-radius:10px;padding:6px 4px;min-height:20px"></div>`}
     <div style="display:flex;gap:6px;justify-content:center;margin-bottom:8px;flex-wrap:wrap">
       <button class="choice" id="goReplay" style="width:auto;margin:0;padding:7px 12px">🎬 ${tr('回放本局','Replay')}</button>
@@ -1631,6 +1636,8 @@ function gameOver(){
     </div>
     <button class="btn" id="again">${tr('换个职业再来','Play again')}</button>`;
   document.getElementById('again').onclick=showRaceSelect;   // 重开直接到选种族（落地页仅 boot 看）
+  // 保存最终玩家状态到录像（供验证和展示使用）
+  if(rec){ rec.maxHp=player.maxHp; rec.level=player.level; rec.gold=player.gold; rec.turns=player.turns; rec.cleared=!!player.cleared; rec.token=player.token||''; rec.perks=player.chosenPerks.slice(); }
   const finished=getLastRec();
   wireEndButtons(finished);
   showOverlay();
@@ -1645,11 +1652,15 @@ function onClear(){
   for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const t=grid[r][c]; if(t&&t.bossId==='finale') grid[r][c]=null; }  // 移除终焉之主
   if(wasReplay){ stopReplay(); }
   else { saveBest(); clearSave(); try{ if(rec) localStorage.setItem(REC_LAST_KEY, JSON.stringify(rec)); }catch(e){} }
+  // 技能列表（中文名）
+  const perkNames = player.chosenPerks.map(id => { const u=UPGRADES[id]; return u ? L(u.n) : id; }).join('、');
+  const perkLine = player.chosenPerks.length ? `<div style="text-align:left;font-size:12px;color:var(--gold);margin:4px 0 8px">✦ ${tr('技能：','Perks: ')}${perkNames}</div>` : '';
   const card=document.getElementById('card');
   card.innerHTML=`<h2 style="color:var(--gold);margin-bottom:4px">🏆 ${tr('破关！','CLEARED!')}</h2>
     <p style="line-height:1.6;margin-bottom:8px">${tr('🎉 终焉之主的浪潮退去，你撑过全部 10 波，成为第一个活着走出地牢的冒险者——「再无人生还」的传说终于有了结局。','🎉 The Overlord’s waves recede; you survived all 10 and became the first to walk out of the dungeon alive — the legend that “none returned” finally has its ending.')} <span style="color:var(--dim)">${tr('感谢游玩这份致敬之作 🙏','Thanks for playing this tribute 🙏')}</span></p>
     <div style="font-size:14px;margin-bottom:8px">${tr('破关等级','Clear Lv')} <b style="color:var(--gold)">${player.level}</b> <span style="color:var(--dim);font-size:11px">${tr('越低越强','lower=better')}</span> · 💰<b style="color:var(--gold)">${player.gold}</b> · <b style="color:var(--gold)">${player.turns}</b> ${tr('回合','t')}</div>
     <div style="font-size:12px;color:var(--dim);margin:-4px 0 8px">⏱ ${tr('用时','Played')} ${fmtDur(durMs)}</div>
+    ${perkLine}
     ${DEV?'':`<div id="rankBox" style="text-align:left;margin:4px 0 12px;background:var(--panel2);border-radius:10px;padding:6px 4px;min-height:20px"></div>`}
     <div style="display:flex;gap:6px;justify-content:center;margin-bottom:8px;flex-wrap:wrap">
       <button class="choice" id="goReplay" style="width:auto;margin:0;padding:7px 12px">🎬 ${tr('回放本局','Replay')}</button>
@@ -1660,6 +1671,8 @@ function onClear(){
     </div>
     <button class="btn" id="again">${tr('再来一局','Play again')}</button>`;
   document.getElementById('again').onclick=showRaceSelect;   // 重开直接到选种族（落地页仅 boot 看）
+  // 保存最终玩家状态到录像（供验证和展示使用）
+  if(rec){ rec.maxHp=player.maxHp; rec.level=player.level; rec.gold=player.gold; rec.turns=player.turns; rec.cleared=!!player.cleared; rec.perks=player.chosenPerks.slice(); }
   const finished=getLastRec();
   wireEndButtons(finished);
   showOverlay();
@@ -1730,15 +1743,47 @@ async function renderLeaderboard(){
     const rows = lbBoard==='clear' ? (j.clears||[]) : (j.top||[]);
     if(!rows.length){ list.innerHTML=`<div style="text-align:center;color:var(--dim);padding:20px 0">${tr('暂无记录','No entries yet')}</div>`; return; }
     list.innerHTML=rows.map((e,i)=>{
-      const rc=raceById(e.race); const rn=`${rc?rc.e:'❓'} ${e.name||tr('无名','Anon')}`;   // 种族头像 + 玩家名
-      const ver=e.version&&e.version!==VERSION?` <span style="color:var(--dim);font-size:10px">${e.version}</span>`:'';   // 非本版的标出版本号
+      const rc=raceById(e.race); const rn=`${rc?rc.e:'❓'} ${e.name||tr('无名','Anon')}`;
+      const ver=e.version&&e.version!==VERSION?` <span style="color:var(--dim);font-size:10px">${e.version}</span>`:'';
       const metric = lbBoard==='clear'
         ? `${tr('等级','Lv')} <b style="color:var(--gold)">${e.level}</b> · ${e.turns}${tr('回合','t')}`
         : `<b style="color:var(--gold)">${e.turns}</b>${tr('回合','t')} · Lv${e.level} · 💰${e.gold}`;
-      return `<div style="display:flex;justify-content:space-between;gap:8px;padding:4px 8px;font-size:13px;${i%2?'background:rgba(255,255,255,.03)':''}">
-        <span>${medal(i)} ${rn}${ver}</span><span>${metric}</span></div>`;
+      return `<div style="cursor:pointer" onclick="toggleRecDetail('${e.id}',this)">
+        <div style="display:flex;justify-content:space-between;gap:8px;padding:4px 8px;font-size:13px;${i%2?'background:rgba(255,255,255,.03)':''}">
+          <span>${medal(i)} ${rn}${ver}</span><span>${metric}</span></div>
+        <div id="detail_${e.id}" style="display:none;padding:4px 8px 6px;font-size:12px;color:var(--dim);border-left:2px solid var(--gold);margin:2px 0 2px 12px"></div></div>`;
     }).join('');
   }catch(e){ list.innerHTML=`<div style="text-align:center;color:var(--dim);padding:20px 0">${tr('榜单加载失败','Leaderboard unavailable')}</div>`; }
+}
+// 点击排行榜某条记录：展开/收起详情（技能列表、最终状态）
+const _recDetailCache = {};
+async function toggleRecDetail(id, wrapper){
+  const box = document.getElementById('detail_'+id);
+  if(box.style.display!=='none'){ box.style.display='none'; return; }
+  // 关闭其他已展开的详情
+  document.querySelectorAll('#lbList [id^="detail_"]').forEach(d=>{ if(d.id!=='detail_'+id) d.style.display='none'; });
+  if(_recDetailCache[id]){ renderRecDetail(_recDetailCache[id], box); box.style.display='block'; return; }
+  box.style.display='block'; box.innerHTML=`<span style="color:var(--dim)">${tr('加载中…','Loading…')}</span>`;
+  try{
+    const res = await fetch(REC_API+'/rec/'+id);
+    if(!res.ok){ box.innerHTML=`<span style="color:#c66">${tr('加载失败','Failed')}</span>`; return; }
+    const rec = await res.json();
+    _recDetailCache[id] = rec;
+    renderRecDetail(rec, box);
+  }catch(e){ box.innerHTML=`<span style="color:#c66">${tr('加载失败','Failed')}</span>`; }
+}
+function renderRecDetail(rec, box){
+  const perks = (rec.perks||[]).map(pid=>{ const u=UPGRADES.find(x=>x.id===pid); return u?L(u.n):pid; });
+  const perksLine = perks.length ? tr('技能','Perks')+': '+perks.join(' / ') : '';
+  box.innerHTML = `<div style="line-height:1.6">
+    ${perksLine?`<div>${perksLine}</div>`:''}
+    <div>❤️ ${tr('最终血量','Final HP')}: <b>${rec.maxHp||'--'}</b> · 💰${tr('金币','Gold')}: <b>${rec.gold||0}</b>${rec.cleared?` · 🏆 ${tr('已破关','Cleared')}`:''}</div>
+    ${rec.token?`<div style="color:#8b7aaa">${tr('服务端种子·可验证','Server seed · verifiable')}</div>`:`<div style="color:#c66">${tr('离线对局','Offline run')}</div>`}
+    <div style="margin-top:4px">
+      <button class="choice" style="width:auto;padding:3px 10px;font-size:11px" onclick="event.stopPropagation();startReplay(rec);">${tr('▶ 回放','▶ Replay')}</button>
+      <button class="choice" style="width:auto;padding:3px 10px;font-size:11px;margin-left:4px" onclick="event.stopPropagation();shareRec(rec);">${tr('🔗 分享','🔗 Share')}</button>
+    </div>
+  </div>`;
 }
 async function submitScore(r, level, gold){
   const box=document.getElementById('rankBox'); if(!box) return;
