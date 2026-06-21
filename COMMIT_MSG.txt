@@ -1,0 +1,3 @@
+v1.27.6: 小偷不再出现在里程碑Boss关；小丑混乱不影响怪物；收买冷却显示修正；350回合技能选择过滤本种族技能；蔓藤缠绕削弱；去掉单格弹窗
+
+Co-Authored-By: WorkBuddy <workbuddy@local>
