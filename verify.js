@@ -12,7 +12,7 @@ const SECRET = process.env.VERIFY_SECRET;
 // ---- 加载游戏确定性引擎（与 playtest.js 同法：DOM 桩件 + 注入导出）。一次加载可反复 startGame 重放多份录像 ----
 function loadEngine(file) {
   const script = fs.readFileSync(__dirname + '/' + file, 'utf8').match(/<script>([\s\S]*?)<\/script>/)[1];
-  const EXPORT = `globalThis.__E={VERSION,startGame,raceById,dispatchReplayAct,replay,
+  const EXPORT = `globalThis.__E={VERSION,startGame,raceById,dispatchReplayAct,
     get player(){return player}, get replaying(){return replaying}, set replaying(v){replaying=v},
     get replayRec(){return replayRec}, set replayRec(v){replayRec=v},
     srand, rnd};`;
