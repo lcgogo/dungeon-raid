@@ -1,0 +1,4 @@
+v1.27.7: 恢复单格轻触弹棋子信息
+
+- 轻点棋子（位移<10px）弹信息卡片，拖拽后松手不弹
+- 新增 dragStartX/dragStartY 记录 pointerdown 坐标区分轻触/拖拽
