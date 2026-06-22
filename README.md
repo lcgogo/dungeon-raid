@@ -62,7 +62,7 @@
 - **经验**只来自**击杀怪物**（每杀一只 +3），升级时**技能三选一**。
 - **连击加成**：一次连得越多收益越高，整体收益 `× (1 + (个数−2) × 15%)`（连 5 ≈ ×1.45，连 7 ≈ ×1.75）。
 - **护甲累积**：盾不直接给护甲，而是累积「护甲进度」，攒满 +1 护甲（越往后越贵）。受击时护甲先减伤，剩下的才掉血。
-- **金币商店**：💊 治疗（回复 10 生命，**每用一次 +2 恢复、+1 金**；**满血时不可用**，避免浪费）/ 💥 炸弹（全场怪 −6 血）。每件商品有独立冷却。
+- **金币商店**：💊 治疗（回复 10 生命，**每用一次 +2 恢复、+1 金**；**满血时不可用**，避免浪费）/ 💥 炸弹（全场怪 −5 血）。每件商品有独立冷却。
 
 ### 🧬 种族（开局选择）
 
@@ -121,7 +121,7 @@
 | 🧝 精灵 | 游侠 → 神射手 Sharpshooter | 剑链每击杀一只怪额外 +2 经验 |
 | 🧝 精灵 | 盗贼 → 影袭 Shadow | 炸弹冷却永久缩为 2 回合 |
 | 🧝 精灵 | 森林长老 → 荆棘 Thorns | 受到攻击时，把「当前护甲减伤量」反弹给攻击者本人（护甲越高反弹越多；尸毒/毒心反噬/石像反弹等非直接攻击不触发）|
-| 🎅 矮人 | 锻造师 → 爆破手 Demolitionist | 炸弹伤害更高，但花费金币更多 |
+| 🎅 矮人 | 锻造师 → 爆破手 Demolitionist | 每用一次炸弹：伤害 +1、花费 +5 金（越炸越强、越炸越贵）|
 | 🎅 矮人 | 守财奴 → 财阀 Tycoon | 获得金币时额外按一半转为经验 |
 | 🎅 矮人 | 会长 → 小气鬼 Cheapskate | 消耗金币的主动（商店 💊治疗 / 💥炸弹）花费减半 |
 | 🧌 兽人 | 狂战士 → 巨力 Titan | 最大生命越高，剑链固定伤害越高（每 12 点最大生命 +1）|
@@ -245,7 +245,7 @@ Each enemy tile shows three numbers:
 - **XP comes only from kills** (+3 per enemy). On level-up, **pick 1 of 3** upgrades.
 - **Combo bonus**: longer chains pay more — total reward `× (1 + (N − 2) × 15%)` (5-chain ≈ ×1.45, 7-chain ≈ ×1.75).
 - **Armor accumulates**: shields do not grant armor directly; they fill "armor progress," and filling it gives +1 armor (costs more each time). Armor soaks each hit, then the rest comes off your HP.
-- **Gold shop**: 💊 Heal (restore 10 HP, **+2 healing and +1 gold cost per use**; **unavailable at full HP** to avoid waste) / 💥 Bomb (all foes −6 HP). Each item has its own cooldown.
+- **Gold shop**: 💊 Heal (restore 10 HP, **+2 healing and +1 gold cost per use**; **unavailable at full HP** to avoid waste) / 💥 Bomb (all foes −5 HP). Each item has its own cooldown.
 
 ### 🧬 Races (chosen at start)
 
@@ -304,7 +304,7 @@ At **level 100 (Tier-2 Skill)** you automatically get the passive **locked to yo
 | 🧝 Elf | Ranger → Sharpshooter | +2 extra XP per enemy killed by a sword chain |
 | 🧝 Elf | Rogue → Shadow | Bomb cooldown becomes 2 turns permanently |
 | 🧝 Elf | Forest Elder → Thorns | When hit, reflect your current armor (damage-reduction) back to the attacker (more armor → more reflect; DoT/poison-backlash/Statue reflection do NOT trigger it) |
-| 🎅 Dwarf | Blacksmith → Demolitionist | Bomb hits harder but costs more gold |
+| 🎅 Dwarf | Blacksmith → Demolitionist | Each bomb use: +1 damage and +5 gold cost (stronger but pricier each time) |
 | 🎅 Dwarf | Miser → Tycoon | Gold gained also grants half as much XP |
 | 🎅 Dwarf | Guild Master → Cheapskate | Gold-spending actives (shop 💊Heal / 💥Bomb) cost half |
 | 🧌 Orc | Berserker → Titan | Higher max HP means higher flat sword damage (+1 per 12 max HP) |
