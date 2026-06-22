@@ -170,6 +170,7 @@
 - 🌈 **彩色日志**：游戏日志位于状态栏与棋盘正下方，外加边框框起。**按事件类型上色**——回血=绿、增益(护甲/金币/经验/职业主动)=蓝、攻击敌人=白、被攻击/Boss 出场=红、负面效果(冰封/中毒/偷金/打乱等)=黄。**点日志条**看本局完整历史。
 - 💾 **本地存档**：自动保存进度与最佳纪录，可「继续上局」。
 - 💡 **轻点任意方块**：查看说明与当前实时数值（如剑的当前威力与固定剑伤）；轻点 HUD 查看角色全部属性与职业详情。**长按商店/技能块**（治疗/炸弹/职业主动）弹出详细说明（含当前数值；置灰冷却时也能看）。**点日志条**看本局完整日志；**点底部版本号**看最近更新日志（嵌入页面、秒开，无需联网）。
+- ⚡ **双击 盾 / 心 / 金 棋子**：自动划出一条过该棋子、尽量长的同类贪心连线，省去手动长拖（仅资源棋子，剑链与怪/Boss 不触发，需自己控制）。
 - 🩸 **低血预警**：生命越低，屏幕边缘越红；危急时呼吸闪烁，生命条同步闪烁。
 - ☠️ **死亡报告**：倒下时列出致命回合各伤害来源的占比。
 - 🎬 **操作录制 / 回放**：自动记录每一局（种子 + 操作序列，确定性重放，一局约 2–4 KB）。死亡后可 **回放本局 / 复制 / 导出 / 🔗分享链接**；开始界面可 **回放上一局** 或 **粘贴导入** 别人的录像。回放中**点棋盘任意位置暂停/继续**，暂停后用 **◀ ▶ 单回合步进**（停在该回合连线「结算前」、把这一步连的线画出来便于看清；到首/末回合变灰），另有 1×/2×/4× 调速、**跳到回合 50/100/200/350 与「−10」（倒数第 10 回合看结局）**、⏹ 退出。回放中棋盘不可操作（严格按录像还原）。
@@ -357,6 +358,7 @@ Clearing shows a story-flavored congratulations screen; the Release build report
 - 🌈 **Color-coded log**: the boxed game log sits right under the status bar and board, **colored by event type** — heal = green, buff (armor/gold/XP/class actives) = blue, attacking enemies = white, getting hit / a boss appearing = red, debuffs (freeze/poison/theft/scramble) = yellow. **Tap the log** for the full run history.
 - 💾 **Local save**: progress and best record are saved automatically; resume your last run anytime.
 - 💡 **Tap any tile**: see its description and current live stats (e.g. your current sword power and flat bonus); tap the HUD to view all your stats and class details. **Long-press a shop/skill block** (Heal/Bomb/class active) for a detailed popup (with current values; works even while greyed-out on cooldown).
+- ⚡ **Double-tap a Shield / Heart / Coin tile**: auto-draws a greedy longest same-type chain through it, no manual dragging (resource tiles only — sword chains and monsters/bosses are left for you to control).
 - 🩸 **Low-HP warning**: the screen edges redden as health drops, pulsing when critical, with the HP bar blinking too.
 - ☠️ **Death report**: when you fall, it lists each damage source's share of the killing turn.
 - 🎬 **Record / replay**: every run is recorded (seed + input sequence — deterministic replay, ~2–4 KB per run). After death you can **replay / copy / export / 🔗 share-link** the recording; the start screen offers **replay last run** or **paste-import** someone else's. During replay, **tap anywhere on the board to pause/resume**; once paused, use **◀ ▶ to step one turn** (stops just **before** that turn's link resolves and draws the link so you can read it; greyed at the first/last turn), plus 1×/2×/4× speed, **jump-to-turn 50/100/200/350 and "−10" (10 turns from the end, to watch the finish)**, and ⏹ exit. The board is non-interactive during replay (strict playback).
