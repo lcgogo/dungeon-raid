@@ -170,7 +170,7 @@
 (()=>{
 //==================== 配置 ====================
 // 版本号 v主.次.修：小改动改"修"，新Boss/职业改"次"，大版本变更需先确认。页面底部显示。
-const VERSION='v1.27.10';
+const VERSION='v1.28.0';
 const CHANGELOG_LINES=["v1.27.4 — 修复回放跳转/步进后固定几格闪爆炸特效（addBossFx 补快进守卫 + 跳转清 bossFx）", "v1.27.3 — 血狂溢出转永久生命上限比例 50%→100%（兽人斗士后期增强）", "v1.27.2 — 精灵新职业改名 长老→森林长老、死亡缠绕→蔓藤缠绕（机制/id 不变）", "v1.27.1 — 击败350回合Boss后弹警告 + 此后每10回合同时降临2个不同Boss（终局前压力升级）", "v1.27.0 — 新精灵职业 长老(死亡缠绕：5回合每回合全场怪-10%你最大生命、敌人变绿) + 荆棘移精灵且反弹=护甲减伤量 + 兽人斗士改 血狂(吸血溢出半数升上限)", "v1.26.1 — 黑毒心/绿毒心底色改回与普通心一致（只靠 emoji 区分；普通心保留 💗，❤️ 在 iOS canvas 会偏移）", "v1.26.0 — 牧师二阶被动「不朽」改为「神圣打击」（治疗溢出随机攻击敌人，去超模）+ 主动「祝福」改为转经验同时回血", "v1.25.30 — 汲取生命吸血覆盖所有击杀手段（剑/炸弹/毒/箭雨/溅射/吸魂/荆棘反杀，统一 lifestealHeal + 日志显示）", "v1.25.29 — 修复汲取生命吸血像没效果（炸弹击杀也吸血 + 日志显示「吸血 +N」，原来只剑杀且无日志）", "v1.25.28 — 去掉万物皆毒描述里的「污染怪变化之后」交互说明（行为不变，文案精简；README 中英同步）", "v1.25.27 — 修复回放步进没连线/冒一堆炸弹特效（跳转清残留 bombFx + 停在连线结算前预显示该连线）", "v1.25.26 — 满血时治疗不可用（按钮置灰显示「已满血」、点击不购买）+ 更新描述", "v1.25.25 — 修复击败 Boss 没有奖励日志（奖励提示统一进 onBossKilled，剑/炸弹/荆棘/吸魂等都报「🏆击败Boss 💰+20 经验+15」）", "v1.25.24 — 修复荆棘反弹打成随机目标（说明是「反弹给攻击者」）——改为优先反弹给攻击者本人，攻击者离场才退回随机", "v1.25.23 — 吸血鬼吸到黑毒心会中毒/被毒死（正常心回血、毒心反害，净效果结算）——巫医蛊毒可反制吸血鬼", "v1.25.22 — 日志按事件类型上色（回血绿/增益蓝/攻击白/受击·Boss出场红/负面黄）+ 回放跳转固定 50/100/200/350 加「−10」看结局", "v1.25.21 — 修复巫医蛊毒发动后心不变黑（改为当场把全场红心燃成黑毒心 poison=true，立显🖤、连之毒全场）", "v1.25.20 — 修复炸弹说明里 {W} 未解析（tr→L，按种族渲染武器名）", "v1.25.19 — 英文文案——减伤 Cut→DR，护甲进度统一为 Armor XP（仅英文，中文不变）", "v1.25.18 — 13 个职业主动技能全部补上详细说明 desc（嗜血/蛊毒/箭雨/圣盾/囤金/收买/狂怒/重生等点开都有完整规则）", "v1.25.17 — 修复回放期间误写存档（退出后「继续上局」会接着玩回放残局；连带修复回放跳转按钮回合数错乱）——saveGame 回放中跳过", "v1.25.16 — 修复巫医蛊毒/黑毒心对剑免疫 Boss 没效果（毒伤改为命中全场怪含剑免疫，排除终焉，与炸弹/吸魂一致）", "v1.25.15 — 新增网页图标 favicon（内联 SVG 金色城堡+小旗，零外部文件）+ theme-color；游戏页与首页都加", "v1.25.14 — 修复炸弹炸怪同回合升级时升级框盖住爆炸特效（实玩等特效播完~0.43s再弹框；回放不受影响）", "v1.25.13 — 精简落地页玩法说明（去掉每50回合Boss强档/500回合破关剧透，保留神秘感，中英压缩一屏内）", "v1.25.12 — 修复回放「连线不对」（改两拍：结算前先画线再结算）+ 进度条独占一行/步进键保留占位/顶栏文字简化为「回合 X/总」", "v1.25.11 — 修复主栏红字与展开栏不一致（主栏也逐行按各自 red 标记上色，共用 logColor）", "v1.25.10 — 修复回放完全不显示连线（保留连线、只在暂停/跳转/结束清）+ 日志框左右与棋盘对齐", "v1.25.9 — 修复完整日志里红字丢失（历史记录带 red 标记）+ 主界面日志加框", "v1.25.8 — 修复吸魂红线闪 2 次（动画加 fill:forwards + 初始隐藏，去掉结束回弹）", "v1.25.7 — 炸弹爆炸特效（每个命中怪/Boss 格爆橙色闪光+扩散环；纯 UI）", "v1.25.6 — 修复回放/跳转后残留旧连线（画在重排棋盘上像“连了没连的”）+ 快进时不放吸魂特效", "v1.25.5 — 吸魂大法吸血特效（从被吸目标格画红线指向血条；纯 UI）", "v1.25.4 — 矮人↔兽人武器对调（兽人🪓斧、矮人🔨锤，纯显示）+ README 加在线试玩链接", "v1.25.3 — 会长「收买」改为真花「全怪血量」金币买通 + 移除冷却；饕餮显示动态攻击角标（=血量50%）", "v1.25.2 — 修复回放中可操作棋盘致回放与真实不符；回放控制改版（点棋盘暂停 + ◀▶单回合步进，边界变灰）", "v1.25.1 — 修复转职后技能/商店按钮停留在禁用态（老问题）——updateHUD 移到 busy 复位之后", "v1.25.0 — 职业进阶链重构（50主动→100锁定专属被动→200同族另一被动）+ 拆出皆可为剑/万物皆毒(黑毒心)", "v1.24.3 — 调高怪物/Boss 攻击力（怪 lv×0.7→1.1、Boss lv×1.2→1.8），避免后期护甲碾压攻击只吃 1 点", "v1.24.2 — 修复点版本号一直「加载中」（更新日志改为嵌入页面、零网络，dr.sh 自动从 CHANGELOG 注入）"];   /* auto-injected by dr.sh embed-changelog（勿手改） */
 const DEV=false;   // release build (DEV=false); dev build is dungeon-raid-dev.html (DEV=true)
 const REC_API='https://api.dungeonraid.win';   // 录像分享 API（Cloudflare Worker + KV）
@@ -420,6 +420,7 @@ function bossStats(){
 }
 function bossTier(){ return 1 + Math.floor(player.turns/50); }  // 每 50 回合 Boss 强度档位 +1
 function hasBoss(){ for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++) if(grid[r][c]&&grid[r][c].type==='boss') return true; return false; }
+function enemyHpSum(){ let h=0; for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const t=grid[r][c]; if(t&&t.type==='enemy') h+=t.hp; } return h; }   // 会长「收买」花费 = 全场普通怪当前血量之和
 // 是否还有可行连线（同类连接型 ×2，或 「剑」格紧邻可攻击目标 = 真能成剑链）。棋盘塞满怪时用来判负。
 function hasAnyMove(){
   for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const t=grid[r][c]; if(!t) continue;
@@ -431,7 +432,7 @@ function hasAnyMove(){
   return false;
 }
 // 这些一阶/换装主动会「清/转」棋子，发动后可能打破死局（清掉小怪或造出可连的局）
-const ESCAPE_ACTIVES=['priest','ranger','rogue','blacksmith','guildmaster','swordsaint','necromancer'];
+const ESCAPE_ACTIVES=['priest','ranger','rogue','blacksmith','guildmaster','swordsaint','necromancer','butcher'];
 // 是否还有「就绪且能改盘」的动作可打破死局——判负前的逃生检查，避免错杀还能救的局
 function hasEscapeAction(){
   const fz=player.frozen||{};
@@ -548,6 +549,13 @@ const TIER1={
     const h=gainHeal(healed); const lh=lifestealHeal(kills); applyGravity(); syncPositions(false);
     log(tr(`🪄 吸魂大法：吸取 ${pick.length} 个目标 ${healed} 生命，回血 ${h}`+(kills?`，击杀 ${kills} 只`:'')+(lh?`，吸血 +${lh}`:'')+(splashes.length?`，溅射 ${splashes.length} 次`:''),`🪄 Soul Drain: drained ${healed} from ${pick.length}, +${h} HP`+(kills?`, ${kills} killed`:'')+(lh?`, +${lh} lifesteal`:'')+(splashes.length?`, ${splashes.length} splash`:'')), 'heal'); return true; }}},
   skeletonking:{n:['骷髅王','Skeleton King'], quip:['死过一次，再死一次又何妨。','Died once already — what is one more?'], skill:{name:['重生','Rebirth'], short:['本回合致死则满血复活(此后冷却+2)','Cheat death this turn, full heal'], desc:['发动后本回合若受到致命伤害，会立刻满血复活而非死亡。每触发一次，重生的冷却永久 +2。发动即进入冷却（无论本回合是否真的触发）。','Armed this turn: if a lethal blow lands, you revive at full HP instead of dying. Each trigger permanently raises Rebirth’s cooldown by 2. Goes on cooldown when cast, whether or not it triggers.'], cd:5, f:p=>{ p.rebirthTurn=true; log(tr('💀 重生待命：本回合若被击败，将满血复活！','💀 Rebirth armed: if slain this turn, revive at full HP!'), 'buff'); return true; }}},
+  butcher:{n:['屠夫','Butcher'], quip:['钩子一甩，肉就乖乖到底。','One swing of the hook, and the meat comes to me.'], skill:{name:['钩子','Hook'], short:['把全场怪/Boss 拉到最底排','Drag all foes to the bottom rows'], desc:['一钩把棋盘上所有的怪和 Boss（含{W}免疫，终焉之主除外）顺着各自所在列拉到尽可能底部，其余棋子上浮——把敌人聚到底排，便于一条{W}链穿杀或集中处理。场上没有可拉的敌人时无效、不进冷却。','Hooks every monster & boss (incl. {W}-immune; not the Overlord) down to the bottom of its column while other tiles float up — herding foes into the bottom rows so one {W} chain can skewer many at once. No effect — and no cooldown — when there is nothing to pull.'], cd:5, f:p=>{
+    let moved=0; const isMon=t=>t&&(t.type==='enemy'||t.type==='boss')&&!t.finale;
+    for(let c=0;c<COLS;c++){ const col=[]; for(let r=0;r<ROWS;r++) col.push(grid[r][c]); if(!col.some(isMon)) continue;
+      const newCol=col.filter(t=>!isMon(t)).concat(col.filter(isMon));   // 非敌上浮、敌沉底
+      for(let r=0;r<ROWS;r++){ if(grid[r][c]!==newCol[r]) moved++; grid[r][c]=newCol[r]; } }
+    if(!moved) return false; applyGravity(); syncPositions(false);   // 满盘时 applyGravity 为空操作、不消耗 RNG；纯重排，重放确定
+    log(tr('🪝 钩子：把全场怪/Boss 拉到底排！','🪝 Hook: dragged all foes to the bottom!'), 'buff'); return true; }}},
 };
 // 二阶职业：被动
 const TIER2={
@@ -563,6 +571,7 @@ const TIER2={
   cheapskate:{n:['小气鬼','Cheapskate'], d:['消耗金币的主动（商店治疗/炸弹）花费减半','Gold-spending actives (shop Heal/Bomb) cost half'], f:p=>{ p.cheapskate=true; }},
   rejuvenation:{n:['回春','Rejuvenation'], d:['所有主动技能冷却 -1','All active-skill cooldowns -1'], f:p=>{ p.skillCdMod=(p.skillCdMod||0)-1; }},
   splash:{n:['溅射','Splash'], d:['攻击溢出伤害随机溅到剩余敌人（含{W}免疫 Boss）','Overflow damage splashes to a random remaining foe (incl. {W}-immune bosses)'], f:p=>{ p.splash=true; }},
+  rotflesh:{n:['积累腐肉','Carrion Feast'], d:['每杀死一个敌人/Boss，生命上限永久 +1（腐肉越积越厚）','Each enemy/boss killed: +1 permanent max HP (carrion keeps piling up)'], f:p=>{ p.rotflesh=true; }},
   bladeall:{n:['皆可为剑','Anything a Blade'], d:['每回合棋盘摆完后，把 3 个非敌/非剑棋子变成剑','Each turn after the board settles, turns 3 non-enemy non-sword tiles into swords'], f:p=>{ p.swordConvert=true; }},
   allpoison:{n:['万物皆毒','All is Poison'], d:['每回合把 3 个非敌/非心棋子燃成黑毒心；连黑毒心只放毒灌全场怪、不回血','Each turn burns 3 non-enemy non-heart tiles into BLACK poison hearts; linking them poisons all foes (no heal)'], f:p=>{ p.poisonConvert=true; }},
 };
@@ -571,14 +580,14 @@ const CLASS_T2={
   knight:'general', priest:'holystrike', swordsaint:'bladeall',
   ranger:'sharpshooter', rogue:'shadow', elder:'thorns',
   blacksmith:'demolitionist', miser:'tycoon', guildmaster:'cheapskate',
-  necromancer:'rejuvenation', skeletonking:'splash',
+  necromancer:'rejuvenation', skeletonking:'splash', butcher:'rotflesh',
   berserker:'warlord', fighter:'bloodfrenzy', witchdoctor:'allpoison',
 };
 const RACE_PATHS={
   human:{t1:['knight','priest','swordsaint'], t2:['general','holystrike','bladeall']},
   elf:  {t1:['ranger','rogue','elder'], t2:['sharpshooter','shadow','thorns']},
   dwarf:{t1:['blacksmith','miser','guildmaster'], t2:['demolitionist','tycoon','cheapskate']},
-  undead:{t1:['necromancer','skeletonking'], t2:['rejuvenation','splash']},
+  undead:{t1:['necromancer','skeletonking','butcher'], t2:['rejuvenation','splash','rotflesh']},
   orc:  {t1:['berserker','fighter','witchdoctor'], t2:['warlord','bloodfrenzy','allpoison']},
 };
 function raceById(id){ return RACES.find(r=>r.id===id)||RACES[0]; }
@@ -776,6 +785,7 @@ function chooseSwapSlot(skillId){
 // Boss 被击败时调用：到点则标记可转职（结算后弹选择）
 function onBossKilled(){
   log(tr('🏆 击败 Boss！厚赏 💰+20、经验 +15','🏆 Boss defeated! 💰+20, XP+15'), 'buff');   // 统一奖励日志：所有击杀路径（剑/炸弹/荆棘/吸魂/吸血鬼中毒）都会报
+  if(player.rotflesh) player.maxHp++;   // 屠夫·积累腐肉：击败 Boss 也 +1 生命上限
   if(!player.tier1 && player.turns>=50) player.t1Pending=true;
   else if(player.tier1 && !player.tier2 && player.turns>=100) player.t2Pending=true;
   else if(player.tier2 && !player.tier2b && player.turns>=200) player.t3Pending=true;     // 200回合：本种族第二被动
@@ -1187,7 +1197,7 @@ const SHOP={
     for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const t=grid[r][c];
       if(t&&(t.type==='enemy'||t.type==='boss')){ if(t.finale) continue; addBombFx(r,c); const dd=Math.min(D,t.hp); t.hp-=D; statueReflect(t, dd);   // 终焉之主打不掉；石像反弹；每个命中格爆一下特效
         if(t.hp<=0){ const isBoss=t.type==='boss'; grid[r][c]=null;
-          if(isBoss){ thiefRecover(t); boss++; player.xp+=15; player.gold+=20; onBossKilled(); } else { kills++; player.xp+=3+(player.killXp||0); } } } }
+          if(isBoss){ thiefRecover(t); boss++; player.xp+=15; player.gold+=20; onBossKilled(); } else { kills++; player.xp+=3+(player.killXp||0); if(player.rotflesh) player.maxHp++; } } } }   // 屠夫·积累腐肉：炸弹击杀也 +1 上限
     const lifeHeal=lifestealHeal(kills+boss);   // 汲取生命：炸弹击杀也回血
     log(tr(`💥 投掷炸弹，全场 −${D}`,`💥 Bomb: all foes −${D}`) + (kills?tr(`，击杀 ${kills} 只👹`,`, ${kills} killed`):'') + (lifeHeal?tr(`，吸血 +${lifeHeal}`,`, +${lifeHeal} lifesteal`):'') + (boss?tr(`，击败 ${boss} 个 Boss`,`, ${boss} boss(es) down`):''));   // Boss 奖励日志由 onBossKilled 统一报
     if(player.bombBoost) player.bombUses=(player.bombUses||0)+1;   // 爆破手：每用一次 → 下次 伤害+1、花费+5
@@ -1468,7 +1478,7 @@ function dealDamage(pool, targets, allFoes){
     statueReflect(e.t, hit);   // 石像：等量真实伤害反弹给玩家
     if(e.t.hp<=0){ grid[e.r][e.c]=null; kills++;
       if(e.t.type==='boss'){ thiefRecover(e.t); player.xp+=15; player.gold+=20; onBossKilled(); }  // 剑杀 Boss：厚赏 + 可能触发转职
-      else { player.xp+=3+(player.killXp||0); player.gold += 1; }                // 神射手：击杀额外经验
+      else { player.xp+=3+(player.killXp||0); player.gold += 1; if(player.rotflesh) player.maxHp++; }   // 神射手：击杀额外经验；屠夫·积累腐肉：+1 生命上限
       if(player.splash && pool>before) splashes.push(pool-before);   // 溅射：本次击杀的溢出留待砸向其它敌人
     }
   }
@@ -1482,7 +1492,7 @@ function splashHit(over){
   if(!foes.length) return {dmg:0,kills:0};
   const [r,c]=foes[Math.floor(rnd()*foes.length)]; const t=grid[r][c];
   const hit=Math.min(over,t.hp); t.hp-=hit; statueReflect(t, hit); let kills=0;
-  if(t.hp<=0){ const isB=t.type==='boss'; grid[r][c]=null; kills=1; if(isB){thiefRecover(t);player.xp+=15;player.gold+=20;onBossKilled();} else {player.xp+=3+(player.killXp||0);player.gold+=1;} }
+  if(t.hp<=0){ const isB=t.type==='boss'; grid[r][c]=null; kills=1; if(isB){thiefRecover(t);player.xp+=15;player.gold+=20;onBossKilled();} else {player.xp+=3+(player.killXp||0);player.gold+=1;if(player.rotflesh)player.maxHp++;} }   // 屠夫·积累腐肉：溅射击杀也 +1 上限
   return {dmg:hit, kills};
 }
 
@@ -2153,10 +2163,15 @@ function updateHUD(){
     sb.querySelector('small').textContent=L(sk.short);
     const hoarding = player.tier1==='miser' && player.goldLock>0;   // 囤金期间技能无法再发动，按锁定显示
     const fzs=player.frozen&&player.frozen.skill>0;   // 雪人冰封一阶主动
+    const isBuyout = player.tier1==='guildmaster';
+    const buyCost = isBuyout ? enemyHpSum() : 0;                          // 收买花费 = 全怪血量
+    const cantAfford = isBuyout && (buyCost<=0 || player.gold<buyCost);   // 没怪或钱不够 → 置灰
     sb.querySelector('em').textContent = fzs ? `❄️${player.frozen.skill}${tr('回合','t')}`
       : hoarding ? `🔒${player.goldLock}${tr('回合','t')}`
-      : player.skillCd>0 ? `⏳${player.skillCd}${tr('回合','t')}` : tr('可发动','Ready');
-    sb.classList.toggle('off', busy || pendingLevels || player.skillCd>0 || hoarding || fzs);
+      : player.skillCd>0 ? `⏳${player.skillCd}${tr('回合','t')}`
+      : isBuyout ? `💰${buyCost}`                                         // 收买：显示当前花费（全怪血量），钱不够时按钮置灰
+      : tr('可发动','Ready');
+    sb.classList.toggle('off', busy || pendingLevels || player.skillCd>0 || hoarding || fzs || cantAfford);
   } else { sb.style.display='none'; }
   saveGame();
 }
