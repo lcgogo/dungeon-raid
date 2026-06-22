@@ -132,7 +132,7 @@
 
 ### 👹 Boss 图鉴
 
-每约 **10 回合**会随机出现一个 Boss，**任何方式击败都厚赏 💰+20、经验 +15**（日志会提示）。Boss 强度每 **50 回合**提升一档（Lv2、Lv3…）。其中 **幽灵 / 小丑 / 污染怪 / 雪人只能用 💥 炸弹**（及与炸弹同类的毒/吸魂等非武器手段）打，其余都可以用剑链攻击（也能炸）。**击败第 350 回合的 Boss 后会弹警告，此后每 10 回合同时降临 2 个不同 Boss**——为第 500 回合的终局铺垫。
+每 **10 回合**必降临一个 Boss，**任何方式击败都厚赏 💰+20、经验 +15**（日志会提示）。**没及时清掉的话下一个照样来、会叠加**——别想靠囤一只弱 Boss 来压制后续。Boss 强度每 **50 回合**提升一档（Lv2、Lv3…）。其中 **幽灵 / 小丑 / 污染怪 / 雪人只能用 💥 炸弹**（及与炸弹同类的毒/吸魂等非武器手段）打，其余都可以用剑链攻击（也能炸）。**击败第 350 回合的 Boss 后会弹警告，此后每 10 回合同时降临 2 个不同 Boss**——为第 500 回合的终局铺垫。
 
 | Boss | 攻击方式 | 招数 |
 |---|---|---|
@@ -315,7 +315,7 @@ At **level 100 (Tier-2 Skill)** you automatically get the passive **locked to yo
 
 ### 👹 Bestiary
 
-About every **10 turns** a random boss appears; **beating one by any means rewards 💰+20 and +15 XP** (announced in the log). Boss strength steps up one tier every **50 turns** (Lv2, Lv3…). **Ghost / Clown / Corruptor / Snowman can only be hit with the 💥 Bomb** (or bomb-like non-weapon damage such as poison/drain); all others can be attacked with sword chains too. **After you beat the turn-350 boss, a warning pops and from then on 2 different bosses descend together every 10 turns** — a ramp toward the turn-500 endgame.
+Every **10 turns** a random boss is guaranteed to appear; **beating one by any means rewards 💰+20 and +15 XP** (announced in the log). **If you don't clear it in time the next one still comes and stacks** — no camping a weak boss to suppress the rest. Boss strength steps up one tier every **50 turns** (Lv2, Lv3…). **Ghost / Clown / Corruptor / Snowman can only be hit with the 💥 Bomb** (or bomb-like non-weapon damage such as poison/drain); all others can be attacked with sword chains too. **After you beat the turn-350 boss, a warning pops and from then on 2 different bosses descend together every 10 turns** — a ramp toward the turn-500 endgame.
 
 | Boss | How to hit | Gimmick |
 |---|---|---|
