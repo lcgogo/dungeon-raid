@@ -201,6 +201,7 @@ function maybeSkill(){
   else if(id==='berserker' && threat && p.hp<=0.5*p.maxHp) G.activateSkill(); // 狂怒：将被打死时用不屈保命
   else if(id==='guildmaster' && ens>=2) G.activateSkill();      // 收买：怪多时（技能自带「金币>全怪血」门槛）
   else if(id==='elder' && !p.deathCoil && (boss||ens>=2)) G.activateSkill();   // 死亡缠绕：有Boss/多怪且未在缠绕中（!p.deathCoil 兼容 undefined）
+  else if(id==='butcher' && (boss||ens>=3)) G.activateSkill();   // 钩子：有Boss或怪多时把敌人拉到底排聚怪
   resolveLevels();
 }
 // 机器人处理转职选择（resolve/buyItem 触发 showTierSelect/showSkillSwap 后，apply 第一个选项）

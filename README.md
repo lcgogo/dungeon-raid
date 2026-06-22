@@ -108,6 +108,7 @@
 | 🧌 兽人 | 🧪 巫医 Witch Doctor | 蛊毒 Hex | 把全场红心**当场燃成黑毒心 🖤**；连黑毒心不回血、而是把这些生命当毒灌给**全场怪（含剑免疫，终焉除外）**（其专属被动「万物皆毒」在 100 级解锁，见下）|
 | 🪦 活死人 | 🪄 死灵 Necromancer | 吸魂大法 Soul Drain | 随机吸取 2 个目标（怪或 Boss，**和炸弹一样含剑免疫的 Boss**；终焉之主除外）的生命补给自己，单个吸取量 = 玩家生命上限；吸取量 ≥ 目标生命则该目标死亡 |
 | 🪦 活死人 | 💀 骷髅王 Skeleton King | 重生 Rebirth | 本回合若被击败则不死、生命回满；此后「重生」自身冷却 +2（每次真正复活递增）|
+| 🪦 活死人 | 🪝 屠夫 Butcher | 钩子 Hook | 把场上所有怪/Boss（含剑免疫，终焉之主除外）顺着各自列拉到最底排、其余棋子上浮，方便一条剑链穿杀或集中处理（CD 5）|
 
 ### 🎖️ 二阶技能 / 本族技能 · 被动（锁定职业）
 
@@ -129,6 +130,7 @@
 | 🧌 兽人 | 巫医 → 万物皆毒 All is Poison | 每回合把 3 个非敌/非心棋子**燃成 🖤 黑毒心**；连黑毒心**只放毒灌全场怪、不回血**（红心照常回血，自取舍）|
 | 🪦 活死人 | 死灵 → 回春 Rejuvenation | 所有主动技能冷却 −1（正好抵消「迷惑」的 +1）|
 | 🪦 活死人 | 骷髅王 → 溅射 Splash | 攻击溢出伤害随机砸剩余一个敌人（**含剑免疫 Boss**）；剑链/箭雨/吸魂溢出都触发 |
+| 🪦 活死人 | 屠夫 → 积累腐肉 Carrion Feast | 每杀死一个敌人/Boss，生命上限永久 +1（腐肉越积越厚）|
 
 ### 👹 Boss 图鉴
 
@@ -291,6 +293,7 @@ Each race has **several** classes; every skill has a **5-turn cooldown** (except
 | 🧌 Orc | 🧪 Witch Doctor | Hex | **Burns every red heart on the board into a black poison heart 🖤**; linking them heals nothing and poisons **all foes (incl. sword-immune; Overlord excluded)** instead (its signature passive "All is Poison" unlocks at level 100, see below) |
 | 🪦 Undead | 🪄 Necromancer | Soul Drain | Drain HP from 2 random targets (monsters or bosses — **including sword-immune ones, like the bomb**; Overlord excluded) to heal yourself; per-target drain = your max HP, so any target with HP ≤ your max HP dies |
 | 🪦 Undead | 💀 Skeleton King | Rebirth | If slain this turn, cheat death and refill to full HP; afterward Rebirth's own cooldown grows +2 (each actual revive) |
+| 🪦 Undead | 🪝 Butcher | Hook | Drags every monster/boss (incl. sword-immune; Overlord excluded) down to the bottom of its column while other tiles float up — herding foes into the bottom rows for one chain to skewer (CD 5) |
 
 ### 🎖️ Tier-2 Skill / Race Skill · Passives (locked to class)
 
@@ -312,6 +315,7 @@ At **level 100 (Tier-2 Skill)** you automatically get the passive **locked to yo
 | 🧌 Orc | Witch Doctor → All is Poison | Each turn burns 3 non-enemy non-heart tiles into 🖤 **black poison hearts**; linking them **only poisons all foes (no heal)** — red hearts still heal, your choice |
 | 🪦 Undead | Necromancer → Rejuvenation | All active-skill cooldowns −1 (exactly offsets Confusion's +1) |
 | 🪦 Undead | Skeleton King → Splash | Overflow damage splashes to a random remaining foe (**including sword-immune bosses**); triggers from sword chains, Arrow Rain, and Soul Drain overflow |
+| 🪦 Undead | Butcher → Carrion Feast | Each enemy/boss killed: +1 permanent max HP (carrion keeps piling up) |
 
 ### 👹 Bestiary
 
