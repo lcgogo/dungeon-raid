@@ -107,7 +107,7 @@ cmd_deploy(){
   cmd_embed_changelog dungeon-raid-dev.html   # dev 站更新前先注入最新更新日志（只动 dev）
   rm -rf public
   mkdir -p public/functions
-  cp dungeon-raid.html dungeon-raid-dev.html index.html public/
+  cp dungeon-raid.html dungeon-raid-dev.html index.html apple-touch-icon.png public/
   cp pages/functions/_middleware.js public/functions/
   echo "public/ 内容（应只有网页文件，无私钥）："; ls -R public
   npx --yes wrangler pages project create "$PROJ" --production-branch=main 2>/dev/null || true
