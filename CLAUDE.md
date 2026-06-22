@@ -1,5 +1,7 @@
 # CLAUDE.md — 项目约定（每次 session 自动读取）
 
+> **统一规则源：先读 [`AGENTS.md`](AGENTS.md)**（多 AI 协作 + 硬约束 + 发版闸门，Claude/WorkBuddy 共用）。本文是 Claude 入口，下面是同一套约定的细化，与 AGENTS.md 冲突时以 AGENTS.md 为准。
+
 《地牢突袭 · Dungeon Raid》单文件 HTML 游戏 + Cloudflare Worker 后端。给 Claude 的固定约定如下。
 
 ## UI：一屏原则（重要）
