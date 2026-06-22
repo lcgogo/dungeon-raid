@@ -102,7 +102,7 @@
 | 🧝 精灵 | 🌿 森林长老 Forest Elder | 蔓藤缠绕 Vine Coil | 之后 3 回合，每回合让全场怪/Boss（含剑免疫，终焉除外）损失「你最大生命的 30%」；被缠绕期间敌人格变绿 |
 | 🎅 矮人 | 🔰 锻造师 Blacksmith | 锻甲 Forge Armor | 吞下全场的盾，全部转为护甲进度 |
 | 🎅 矮人 | 🔒 守财奴 Miser | 囤金 Hoard | 锁金 **4 回合**（期间不产/不花金币，到期返还 **2.5 倍**）|
-| 🎅 矮人 | 💼 会长 Guild Master | 收买 Buyout | **花掉「全场怪总血量」那么多金币**把它们全部买通**变成金币**（付得起才可发动；**无冷却**，有钱就能反复用；对 Boss 无效）|
+| 🎅 矮人 | 💼 会长 Guild Master | 收买 Buyout | **花掉「全场怪总血量」那么多金币**把它们全部买通**变成金币**（付得起才可发动；**无冷却**，有钱就能反复用；对 Boss 无效；学了小气鬼后花费减半）|
 | 🧌 兽人 | 🔪 狂战士 Berserker | 狂怒 Frenzy | 生命减半并进入**不屈**（仅**本回合**：无论受多少伤都保留 1 血）；并**永久**开启残血增伤——血越少剑伤越高（最高 +60%）|
 | 🧌 兽人 | 🩸 斗士 Fighter | 嗜血 Bloodthirst | 本回合剑链每击中一只怪回 3 血，**且可用剑攻击剑免疫的 Boss（幽灵/小丑）** |
 | 🧌 兽人 | 🧪 巫医 Witch Doctor | 蛊毒 Hex | 把全场红心**当场燃成黑毒心 🖤**；连黑毒心不回血、而是把这些生命当毒灌给**全场怪（含剑免疫，终焉除外）**（其专属被动「万物皆毒」在 100 级解锁，见下）|
@@ -124,7 +124,7 @@
 | 🧝 精灵 | 森林长老 → 荆棘 Thorns | 受到攻击时，把「当前护甲减伤量」反弹给攻击者本人（护甲越高反弹越多；尸毒/毒心反噬/石像反弹等非直接攻击不触发）|
 | 🎅 矮人 | 锻造师 → 爆破手 Demolitionist | 每用一次炸弹：伤害 +1、花费 +5 金（越炸越强、越炸越贵）|
 | 🎅 矮人 | 守财奴 → 财阀 Tycoon | 获得金币时额外按一半转为经验 |
-| 🎅 矮人 | 会长 → 小气鬼 Cheapskate | 消耗金币的主动（商店 💊治疗 / 💥炸弹）花费减半 |
+| 🎅 矮人 | 会长 → 小气鬼 Cheapskate | 消耗金币的主动（商店 💊治疗 / 💥炸弹、会长「收买」）花费减半 |
 | 🧌 兽人 | 狂战士 → 巨力 Titan | 最大生命越高，剑链固定伤害越高（每 12 点最大生命 +1）|
 | 🧌 兽人 | 斗士 → 血狂 Blood Frenzy | 吸血/嗜血回血超出生命上限时，把溢出的部分全部增为永久生命上限 |
 | 🧌 兽人 | 巫医 → 万物皆毒 All is Poison | 每回合把 3 个非敌/非心棋子**燃成 🖤 黑毒心**；连黑毒心**只放毒灌全场怪、不回血**（红心照常回血，自取舍）|
@@ -287,7 +287,7 @@ Each race has **several** classes; every skill has a **5-turn cooldown** (except
 | 🧝 Elf | 🌿 Forest Elder | Vine Coil | For the next 3 turns, all enemies/bosses (incl. sword-immune; Overlord excluded) lose 30% of your max HP each turn; cursed foes glow green |
 | 🎅 Dwarf | 🔰 Blacksmith | Forge Armor | Absorb all shields on the board into armor progress |
 | 🎅 Dwarf | 🔒 Miser | Hoard | Lock gold for **4 turns** (no gold in/out; **2.5×** payout at the end) |
-| 🎅 Dwarf | 💼 Guild Master | Buyout | **Pay gold equal to the total HP of all enemies** to bribe them all **into coins** (only if you can afford it; **no cooldown** — reuse it as long as you have gold; bosses unaffected) |
+| 🎅 Dwarf | 💼 Guild Master | Buyout | **Pay gold equal to the total HP of all enemies** to bribe them all **into coins** (only if you can afford it; **no cooldown** — reuse it as long as you have gold; bosses unaffected; costs half once you have Cheapskate) |
 | 🧌 Orc | 🔪 Berserker | Frenzy | Halve HP and become **Undying** (**this turn only**: keep ≥1 HP no matter the damage); also **permanently** enables low-HP scaling — lower HP means higher sword damage (up to +60%) |
 | 🧌 Orc | 🩸 Fighter | Bloodthirst | Heal 3 HP per enemy your sword chain hits this turn, **and your sword can hit sword-immune bosses (Ghost/Clown)** |
 | 🧌 Orc | 🧪 Witch Doctor | Hex | **Burns every red heart on the board into a black poison heart 🖤**; linking them heals nothing and poisons **all foes (incl. sword-immune; Overlord excluded)** instead (its signature passive "All is Poison" unlocks at level 100, see below) |
@@ -309,7 +309,7 @@ At **level 100 (Tier-2 Skill)** you automatically get the passive **locked to yo
 | 🧝 Elf | Forest Elder → Thorns | When hit, reflect your current armor (damage-reduction) back to the attacker (more armor → more reflect; DoT/poison-backlash/Statue reflection do NOT trigger it) |
 | 🎅 Dwarf | Blacksmith → Demolitionist | Each bomb use: +1 damage and +5 gold cost (stronger but pricier each time) |
 | 🎅 Dwarf | Miser → Tycoon | Gold gained also grants half as much XP |
-| 🎅 Dwarf | Guild Master → Cheapskate | Gold-spending actives (shop 💊Heal / 💥Bomb) cost half |
+| 🎅 Dwarf | Guild Master → Cheapskate | Gold-spending actives (shop 💊Heal / 💥Bomb, Guild Master’s Buyout) cost half |
 | 🧌 Orc | Berserker → Titan | Higher max HP means higher flat sword damage (+1 per 12 max HP) |
 | 🧌 Orc | Fighter → Blood Frenzy | When Lifesteal/Bloodthirst healing exceeds max HP, the full overflow becomes permanent max HP |
 | 🧌 Orc | Witch Doctor → All is Poison | Each turn burns 3 non-enemy non-heart tiles into 🖤 **black poison hearts**; linking them **only poisons all foes (no heal)** — red hearts still heal, your choice |
