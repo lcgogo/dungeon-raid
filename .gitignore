@@ -19,3 +19,6 @@ public/
 *.swo
 *~
 .DS_Store
+
+# release 提交说明的临时草稿（dr.sh 实际读 /tmp/，此处只防误提交）
+dr_commit_msg.txt

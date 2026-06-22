@@ -8,6 +8,7 @@ const crypto = require('crypto');
 
 const API = process.env.API_BASE || 'https://api.dungeonraid.win';
 const SECRET = process.env.VERIFY_SECRET;
+const DEBUG = !!process.env.DEBUG;   // 逐回合重放日志开关（默认关，避免常驻服务刷屏）
 
 // ---- 加载游戏确定性引擎（与 playtest.js 同法：DOM 桩件 + 注入导出）。一次加载可反复 startGame 重放多份录像 ----
 function loadEngine(file) {
@@ -47,12 +48,10 @@ function replay(G, rec, forceFirstGame) {
   G.startGame(G.raceById(rec.race));
   const p = G.player;
   let lastTurn = 0;
-  for (let i=0; i<rec.acts.length; i++) {
+  for (let i = 0; i < rec.acts.length; i++) {
     if (p.hp <= 0 || p.cleared) break;
-    const a = rec.acts[i];
-    G.dispatchReplayAct(a);
-    if (p.turns !== lastTurn) {
-      // 新回合开始，打印状态
+    G.dispatchReplayAct(rec.acts[i]);
+    if (DEBUG && p.turns !== lastTurn) {   // 逐回合状态仅在 DEBUG=1 时打印，避免常驻服务/Actions 日志洪水
       console.log(`回合 ${p.turns}: hp=${p.hp} level=${p.level} gold=${p.gold} actIdx=${i}`);
       lastTurn = p.turns;
     }
@@ -81,25 +80,22 @@ async function verifyPending(G, ENGINE_VER) {
   for (const e of pend) {
     // 录像只能在自己那个版本的引擎上正确重放；版本不符则跳过（不同版本本就不混排）
     if ((e.version || '') !== ENGINE_VER) { skip++; console.log(`⏭️  ${e.id} 版本 ${e.version || '?'} ≠ 引擎 ${ENGINE_VER}，跳过`); continue; }
-    let actual = null;
+    // 严格判定：重放真实结局是否坐实声称值（不偷看声称值来挑选解释）
+    const judge = a => !a ? false
+      : e.cleared ? (a.cleared === true && a.level === e.level)        // 破关：必须真的破关且等级吻合
+      : e.source === 'share' ? (a.turns >= e.turns - 1)                // 分享：能跑出≈声称回合即视为真录像
+      : (a.turns === e.turns && a.level === e.level && a.gold === e.gold);  // 分数：三项全中才算真
+    let actual = null, ok = false;
     try {
       const rec = await (await fetch(`${API}/rec/${e.id}`)).json();
-      actual = replay(G, rec);
-      // 旧版本录像可能没有 tut 字段，导致 firstGame 判断错误
-      // 尝试两种可能，选与声称回合更接近的结果
-      if (rec.tut === undefined) {
-        const r1 = replay(G, rec, true);
-        const r2 = replay(G, rec, false);
-        const d0 = actual ? Math.abs(actual.turns - e.turns) : 9999;
-        if (r1 && Math.abs(r1.turns - e.turns) < d0) actual = r1;
-        if (r2 && Math.abs(r2.turns - e.turns) < Math.abs((actual||{turns:0}).turns - e.turns)) actual = r2;
-      }
-    } catch (err) { actual = null; }
-    let ok;
-    if (!actual) ok = false;
-    else if (e.cleared) ok = actual.cleared === true && actual.level === e.level;  // 破关：必须真的破关且等级吻合
-    else if (e.source === 'share') ok = actual.turns >= e.turns - 1;             // 分享：能跑出≈声称回合即视为真录像
-    else ok = actual.turns === e.turns && actual.level === e.level && actual.gold === e.gold;  // 分数：三项全中才算真
+      // tut 缺失的旧录像有 ≤3 种确定性解释（默认/firstGame=true/false）：
+      // 任一解释满足严格判定即通过（OR 语义），report 用通过的那个，否则用默认重放值。
+      const cands = rec.tut === undefined
+        ? [replay(G, rec), replay(G, rec, true), replay(G, rec, false)]
+        : [replay(G, rec)];
+      actual = cands.find(judge) || cands[0];
+      ok = judge(actual);
+    } catch (err) { actual = null; ok = false; }
     await fetch(`${API}/verify?k=${encodeURIComponent(SECRET)}`, {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id: e.id, ok, turns: actual ? actual.turns : 0, level: actual ? actual.level : 0, gold: actual ? actual.gold : 0 }),
