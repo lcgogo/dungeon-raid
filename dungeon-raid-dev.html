@@ -171,7 +171,7 @@
 (()=>{
 //==================== 配置 ====================
 // 版本号 v主.次.修：小改动改"修"，新Boss/职业改"次"，大版本变更需先确认。页面底部显示。
-const VERSION='v1.30.1';
+const VERSION='v1.30.2';
 const CHANGELOG_LINES=["v1.27.4 — 修复回放跳转/步进后固定几格闪爆炸特效（addBossFx 补快进守卫 + 跳转清 bossFx）", "v1.27.3 — 血狂溢出转永久生命上限比例 50%→100%（兽人斗士后期增强）", "v1.27.2 — 精灵新职业改名 长老→森林长老、死亡缠绕→蔓藤缠绕（机制/id 不变）", "v1.27.1 — 击败350回合Boss后弹警告 + 此后每10回合同时降临2个不同Boss（终局前压力升级）", "v1.27.0 — 新精灵职业 长老(死亡缠绕：5回合每回合全场怪-10%你最大生命、敌人变绿) + 荆棘移精灵且反弹=护甲减伤量 + 兽人斗士改 血狂(吸血溢出半数升上限)", "v1.26.1 — 黑毒心/绿毒心底色改回与普通心一致（只靠 emoji 区分；普通心保留 💗，❤️ 在 iOS canvas 会偏移）", "v1.26.0 — 牧师二阶被动「不朽」改为「神圣打击」（治疗溢出随机攻击敌人，去超模）+ 主动「祝福」改为转经验同时回血", "v1.25.30 — 汲取生命吸血覆盖所有击杀手段（剑/炸弹/毒/箭雨/溅射/吸魂/荆棘反杀，统一 lifestealHeal + 日志显示）", "v1.25.29 — 修复汲取生命吸血像没效果（炸弹击杀也吸血 + 日志显示「吸血 +N」，原来只剑杀且无日志）", "v1.25.28 — 去掉万物皆毒描述里的「污染怪变化之后」交互说明（行为不变，文案精简；README 中英同步）", "v1.25.27 — 修复回放步进没连线/冒一堆炸弹特效（跳转清残留 bombFx + 停在连线结算前预显示该连线）", "v1.25.26 — 满血时治疗不可用（按钮置灰显示「已满血」、点击不购买）+ 更新描述", "v1.25.25 — 修复击败 Boss 没有奖励日志（奖励提示统一进 onBossKilled，剑/炸弹/荆棘/吸魂等都报「🏆击败Boss 💰+20 经验+15」）", "v1.25.24 — 修复荆棘反弹打成随机目标（说明是「反弹给攻击者」）——改为优先反弹给攻击者本人，攻击者离场才退回随机", "v1.25.23 — 吸血鬼吸到黑毒心会中毒/被毒死（正常心回血、毒心反害，净效果结算）——巫医蛊毒可反制吸血鬼", "v1.25.22 — 日志按事件类型上色（回血绿/增益蓝/攻击白/受击·Boss出场红/负面黄）+ 回放跳转固定 50/100/200/350 加「−10」看结局", "v1.25.21 — 修复巫医蛊毒发动后心不变黑（改为当场把全场红心燃成黑毒心 poison=true，立显🖤、连之毒全场）", "v1.25.20 — 修复炸弹说明里 {W} 未解析（tr→L，按种族渲染武器名）", "v1.25.19 — 英文文案——减伤 Cut→DR，护甲进度统一为 Armor XP（仅英文，中文不变）", "v1.25.18 — 13 个职业主动技能全部补上详细说明 desc（嗜血/蛊毒/箭雨/圣盾/囤金/收买/狂怒/重生等点开都有完整规则）", "v1.25.17 — 修复回放期间误写存档（退出后「继续上局」会接着玩回放残局；连带修复回放跳转按钮回合数错乱）——saveGame 回放中跳过", "v1.25.16 — 修复巫医蛊毒/黑毒心对剑免疫 Boss 没效果（毒伤改为命中全场怪含剑免疫，排除终焉，与炸弹/吸魂一致）", "v1.25.15 — 新增网页图标 favicon（内联 SVG 金色城堡+小旗，零外部文件）+ theme-color；游戏页与首页都加", "v1.25.14 — 修复炸弹炸怪同回合升级时升级框盖住爆炸特效（实玩等特效播完~0.43s再弹框；回放不受影响）", "v1.25.13 — 精简落地页玩法说明（去掉每50回合Boss强档/500回合破关剧透，保留神秘感，中英压缩一屏内）", "v1.25.12 — 修复回放「连线不对」（改两拍：结算前先画线再结算）+ 进度条独占一行/步进键保留占位/顶栏文字简化为「回合 X/总」", "v1.25.11 — 修复主栏红字与展开栏不一致（主栏也逐行按各自 red 标记上色，共用 logColor）", "v1.25.10 — 修复回放完全不显示连线（保留连线、只在暂停/跳转/结束清）+ 日志框左右与棋盘对齐", "v1.25.9 — 修复完整日志里红字丢失（历史记录带 red 标记）+ 主界面日志加框", "v1.25.8 — 修复吸魂红线闪 2 次（动画加 fill:forwards + 初始隐藏，去掉结束回弹）", "v1.25.7 — 炸弹爆炸特效（每个命中怪/Boss 格爆橙色闪光+扩散环；纯 UI）", "v1.25.6 — 修复回放/跳转后残留旧连线（画在重排棋盘上像“连了没连的”）+ 快进时不放吸魂特效", "v1.25.5 — 吸魂大法吸血特效（从被吸目标格画红线指向血条；纯 UI）", "v1.25.4 — 矮人↔兽人武器对调（兽人🪓斧、矮人🔨锤，纯显示）+ README 加在线试玩链接", "v1.25.3 — 会长「收买」改为真花「全怪血量」金币买通 + 移除冷却；饕餮显示动态攻击角标（=血量50%）", "v1.25.2 — 修复回放中可操作棋盘致回放与真实不符；回放控制改版（点棋盘暂停 + ◀▶单回合步进，边界变灰）", "v1.25.1 — 修复转职后技能/商店按钮停留在禁用态（老问题）——updateHUD 移到 busy 复位之后", "v1.25.0 — 职业进阶链重构（50主动→100锁定专属被动→200同族另一被动）+ 拆出皆可为剑/万物皆毒(黑毒心)", "v1.24.3 — 调高怪物/Boss 攻击力（怪 lv×0.7→1.1、Boss lv×1.2→1.8），避免后期护甲碾压攻击只吃 1 点", "v1.24.2 — 修复点版本号一直「加载中」（更新日志改为嵌入页面、零网络，dr.sh 自动从 CHANGELOG 注入）"];   /* auto-injected by dr.sh embed-changelog（勿手改） */
 const DEV=true;   // release build (DEV=false); dev build is dungeon-raid-dev.html (DEV=true)
 const REC_API='https://api.dungeonraid.win';   // 录像分享 API（Cloudflare Worker + KV）
@@ -1161,11 +1161,23 @@ function cellFromEvent(e){
 // 贪心连线：从 (r0,c0) 沿 8 向同类棋子两头延伸成一条尽量长的链（双击 盾/心/金 触发）。实际格子由 resolve 录制，回放无关。
 function greedyChain(r0,c0,type){
   const inB=(r,c)=>r>=0&&r<ROWS&&c>=0&&c<COLS;
-  const same=(r,c,vis)=>{ const o=[]; for(let dr=-1;dr<=1;dr++)for(let dc=-1;dc<=1;dc++){ if(!dr&&!dc) continue; const nr=r+dr,nc=c+dc; if(!inB(nr,nc)) continue; const t=grid[nr][nc]; if(t&&t.type===type&&!vis.has(nr*COLS+nc)) o.push([nr,nc]); } return o; };
-  const walk=(start,vis)=>{ const path=[]; let cur=start; while(true){ const opts=same(cur[0],cur[1],vis); if(!opts.length) break; opts.sort((a,b)=>same(a[0],a[1],vis).length-same(b[0],b[1],vis).length); cur=opts[0]; vis.add(cur[0]*COLS+cur[1]); path.push(cur); } return path; };   // Warnsdorff 式贪心：每步走「后续选择最少」的同类邻居，尽量不困死自己
-  const vis=new Set([r0*COLS+c0]);
-  const fwd=walk([r0,c0],vis), bwd=walk([r0,c0],vis);
-  return bwd.reverse().concat([[r0,c0]], fwd);   // 反向链 + 起点 + 正向链 = 一条过起点的连续路径
+  const nbrs=(r,c,vis)=>{ const o=[]; for(let dr=-1;dr<=1;dr++)for(let dc=-1;dc<=1;dc++){ if(!dr&&!dc) continue; const nr=r+dr,nc=c+dc; if(!inB(nr,nc)) continue; const t=grid[nr][nc]; if(t&&t.type===type){ const k=nr*COLS+nc; if(!vis.has(k)) o.push([nr,nc,k]); } } return o; };   // 8 向（含斜线）同类未访邻居
+  // DFS 求从 (sr,sc) 出发、避开 blocked 的最长简单路径：Warnsdorff 排序优先（快速逼近），回溯找更优，预算封顶防卡顿。返回含起点的格子数组。
+  function longestArm(sr,sc,blocked){
+    const vis=new Set([sr*COLS+sc]); if(blocked) blocked.forEach(k=>vis.add(k));
+    const path=[[sr,sc]]; let best=[[sr,sc]], budget=120000;
+    (function dfs(r,c){
+      if(--budget<0) return;
+      if(path.length>best.length) best=path.slice();
+      const ns=nbrs(r,c,vis); ns.sort((a,b)=>nbrs(a[0],a[1],vis).length-nbrs(b[0],b[1],vis).length);
+      for(const [nr,nc,k] of ns){ if(vis.has(k)) continue; vis.add(k); path.push([nr,nc]); dfs(nr,nc); path.pop(); vis.delete(k); }
+    })(sr,sc);
+    return best;
+  }
+  const arm1=longestArm(r0,c0,null);                                  // 起点 + 最长一条臂
+  const used=new Set(arm1.slice(1).map(([r,c])=>r*COLS+c));           // arm1 占用格（不含起点）
+  const arm2=longestArm(r0,c0,used);                                  // 另一条臂（避开 arm1）→ 起点两侧都抓，少漏
+  return arm2.slice(1).reverse().concat([[r0,c0]], arm1.slice(1));    // 臂2(反) + 起点 + 臂1 = 一条过起点的连续链
 }
 function autoGreedyChain(r0,c0,type){
   const chain=greedyChain(r0,c0,type);
