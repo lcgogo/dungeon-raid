@@ -60,58 +60,64 @@ async function cnt(env, where, ...bind) {
   const row = await env.DB.prepare(`SELECT COUNT(*) c FROM scores WHERE ${where}`).bind(...bind).first();
   return row ? row.c : 0;
 }
-// 百分位：超过了多少比例（按回合近似）。只在【同版本】内统计，不同版本不混排。
+// 榜单按【大.次版本】分桶（v1.30.12 → v1.30）：避免频繁补丁号把榜单切碎；平衡相关的次版本才分开。
+const minorKey = v => 'v' + String(v || '').replace(/^v/, '').split('.').slice(0, 2).join('.');   // v1.30.12 → v1.30
+const minorLike = v => minorKey(v) + '.%';   // SQL LIKE 模式，匹配同一「大.次」下所有补丁号
+// 百分位：超过了多少比例（按回合近似）。在【同大.次版本桶】内统计。
 async function ranking(env, version, race, turns, agent = 'human') {
-  const base = "source='play' AND verified>=0 AND agent=? AND version=?";   // 人类榜/AI榜分开计名次
-  const tot = await cnt(env, base, agent, version);
-  const better = await cnt(env, base + ' AND turns>?', agent, version, turns);
-  const rtot = await cnt(env, base + ' AND race=?', agent, version, race);
-  const rbetter = await cnt(env, base + ' AND race=? AND turns>?', agent, version, race, turns);
+  const vb = minorLike(version);
+  const base = "source='play' AND verified>=0 AND agent=? AND version LIKE ?";   // 人类榜/AI榜分开计名次；同大.次桶
+  const tot = await cnt(env, base, agent, vb);
+  const better = await cnt(env, base + ' AND turns>?', agent, vb, turns);
+  const rtot = await cnt(env, base + ' AND race=?', agent, vb, race);
+  const rbetter = await cnt(env, base + ' AND race=? AND turns>?', agent, vb, race, turns);
   const pct = (b, t) => t > 0 ? Math.round((1 - b / t) * 1000) / 10 : 100;
   return {
-    version,
+    version: minorKey(version),
     overall: { rank: better + 1, total: tot, pct: pct(better, tot) },
     race: { rank: rbetter + 1, total: rtot, pct: pct(rbetter, rtot) },
   };
 }
-// 破关榜名次：按【最低破关等级】，level 越低越前。rank = 比我等级更低的 + 1。
+// 破关榜名次：按【最低破关等级】，level 越低越前。rank = 比我等级更低的 + 1。（同大.次桶）
 async function clearRanking(env, version, race, level, agent = 'human') {
-  const base = "cleared=1 AND verified=1 AND agent=? AND version=?";   // 仅计已重放验证的真破关；人类榜/AI榜分开
-  const tot = await cnt(env, base, agent, version);
-  const better = await cnt(env, base + ' AND level<?', agent, version, level);
-  const worse = await cnt(env, base + ' AND level>?', agent, version, level);
-  const rtot = await cnt(env, base + ' AND race=?', agent, version, race);
-  const rbetter = await cnt(env, base + ' AND race=? AND level<?', agent, version, race, level);
-  const rworse = await cnt(env, base + ' AND race=? AND level>?', agent, version, race, level);
+  const vb = minorLike(version);
+  const base = "cleared=1 AND verified=1 AND agent=? AND version LIKE ?";   // 仅计已重放验证的真破关；人类榜/AI榜分开
+  const tot = await cnt(env, base, agent, vb);
+  const better = await cnt(env, base + ' AND level<?', agent, vb, level);
+  const worse = await cnt(env, base + ' AND level>?', agent, vb, level);
+  const rtot = await cnt(env, base + ' AND race=?', agent, vb, race);
+  const rbetter = await cnt(env, base + ' AND race=? AND level<?', agent, vb, race, level);
+  const rworse = await cnt(env, base + ' AND race=? AND level>?', agent, vb, race, level);
   const pct = (w, t) => t > 0 ? Math.round((w / t) * 1000) / 10 : 100;   // 我比 w 个更强（等级更高的）领先
   return {
-    version,
+    version: minorKey(version),
     overall: { rank: better + 1, total: tot, pct: pct(worse, tot) },
     race: { rank: rbetter + 1, total: rtot, pct: pct(rworse, rtot) },
   };
 }
 
-// 最近 n 个版本（按 semver 倒序）：榜单只保留最近几个版本，避免频繁补丁把榜单切碎
+// 最近 n 个【大.次版本桶】（按 semver 倒序）：榜单只保留最近几个桶，避免频繁补丁号把榜单切碎
 async function recentVersions(env, n) {
   const { results } = await env.DB.prepare("SELECT DISTINCT version FROM scores WHERE version != ''").all();
+  const minors = [...new Set((results || []).map(r => minorKey(r.version)))];
   const sv = v => v.replace(/^v/, '').split('.').map(x => parseInt(x, 10) || 0);
-  const vers = (results || []).map(r => r.version).sort((a, b) => {
+  minors.sort((a, b) => {
     const A = sv(a), B = sv(b);
-    for (let i = 0; i < 3; i++) { if ((A[i] || 0) !== (B[i] || 0)) return (B[i] || 0) - (A[i] || 0); }
+    for (let i = 0; i < 2; i++) { if ((A[i] || 0) !== (B[i] || 0)) return (B[i] || 0) - (A[i] || 0); }
     return 0;
   });
-  return vers.slice(0, n);
+  return minors.slice(0, n);   // 返回「大.次」键，如 ["v1.30","v1.29"]
 }
 // 定期清理：删除「不在最近 keepVers 个版本」且「created 早于 days 天」的录像（KV）+ 其 scores 行。
 // 每条 KV 录像都有对应 scores 行（/rec、/score、/clear 都同时写两边），故按 D1 驱动即可删全。
 // 每次最多删 max 条（留余量给 KV 免费版每日删除配额），多了下次接着删。
 async function pruneOld(env, { days = 30, keepVers = 5, max = 400 } = {}) {
-  const keep = await recentVersions(env, keepVers);
+  const keep = await recentVersions(env, keepVers);   // 最近 keepVers 个「大.次」桶
   const cutoff = Date.now() - days * 86400000;
-  const notIn = keep.length ? ` AND version NOT IN (${keep.map(() => '?').join(',')})` : '';
+  const notIn = keep.length ? ` AND ${keep.map(() => 'version NOT LIKE ?').join(' AND ')}` : '';   // 不在保留桶内
   const { results } = await env.DB.prepare(
     `SELECT id FROM scores WHERE created < ?${notIn} LIMIT ?`
-  ).bind(cutoff, ...keep, max).all();
+  ).bind(cutoff, ...keep.map(m => m + '.%'), max).all();
   const ids = (results || []).map(r => r.id);
   let deleted = 0;
   for (const id of ids) {
@@ -125,12 +131,12 @@ async function pruneOld(env, { days = 30, keepVers = 5, max = 400 } = {}) {
 async function versionFilter(env, url) {
   const recent = url.searchParams.get('recent');
   if (recent) {
-    const vers = await recentVersions(env, Math.min(5, Math.max(1, +recent || 3)));
-    if (vers.length) return { sql: ` AND version IN (${vers.map(() => '?').join(',')})`, binds: vers, versions: vers };
+    const mins = await recentVersions(env, Math.min(5, Math.max(1, +recent || 3)));   // 最近 n 个「大.次」桶
+    if (mins.length) return { sql: ` AND (${mins.map(() => 'version LIKE ?').join(' OR ')})`, binds: mins.map(m => m + '.%'), versions: mins };
     return { sql: '', binds: [], versions: [] };
   }
   const version = url.searchParams.get('version');
-  if (version) return { sql: ' AND version=?', binds: [version], versions: [version] };
+  if (version) { const mk = minorKey(version); return { sql: ' AND version LIKE ?', binds: [mk + '.%'], versions: [mk] }; }   // 指定版本也按其大.次桶
   return { sql: '', binds: [], versions: null };
 }
 
