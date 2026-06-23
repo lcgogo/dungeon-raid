@@ -162,7 +162,7 @@
 - 撑满 **10 波**还活着 → **破关！** 🏆（约第 511 回合）
 - 棋盘塞满怪、再无可连且无就绪技能/炸弹可解 → **判负**（任意对局皆判，不只终局；如召唤师刷满棋盘）
 
-破关后有故事化祝贺页；正式版会把破关上报**破关榜**（按**最低破关等级**排名，越低越强）。
+破关后有故事化祝贺页；正式版会把破关上报**破关榜**（按**最低破关等级**排名，越低越强；破关是稀有里程碑，**破关榜展示历代全部版本**，不像闯关榜只看最近 3 版）。
 
 ### ✨ 其他特性
 
@@ -350,7 +350,7 @@ At **turn 500**, the final boss — the **Overlord 👑** — descends. It has *
 - Survive all **10 waves** → **CLEARED!** 🏆 (around turn 511)
 - Board jammed with monsters, no legal move and no ready skill/bomb to break it → **defeat** (any game, not just the finale — e.g. a Summoner flooding the board)
 
-Clearing shows a story-flavored congratulations screen; the Release build reports clears to the **clear board**, ranked by **lowest clear level** (lower = stronger).
+Clearing shows a story-flavored congratulations screen; the Release build reports clears to the **clear board**, ranked by **lowest clear level** (lower = stronger). Clearing is a rare milestone, so the **clear board shows all builds ever** (unlike the survival board's latest-3-builds window).
 
 ### ✨ Other Features
 
