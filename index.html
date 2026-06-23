@@ -38,14 +38,23 @@
 
   <a class="play" href="./dungeon-raid.html">
     ▶ 开始游戏 <span class="badge rel">正式版</span>
-    <small>Play · Release</small>
+    <small>Play · Release<span id="prodVer"></span></small>
   </a>
 
-  <a class="dev" href="./dungeon-raid-dev.html">🚧 开发版 DEV · 最新 / 独立存档</a>
+  <a class="dev" href="./dungeon-raid-dev.html">🚧 开发版 DEV · 最新 / 独立存档<span id="devVer"></span></a>
 
   <div class="note">
     正式版与开发版的存档相互独立，互不覆盖。<br>
     Release and Dev keep separate saves — they never overwrite each other.
   </div>
+  <script>
+    // 版本号由 dr.sh 部署时写进 versions.json（正式版/开发版各自版本，可能不同）；取不到（本地直开）就不显示
+    fetch('versions.json', { cache: 'no-store' }).then(r => r.ok ? r.json() : null).then(v => {
+      if (!v) return;
+      const p = document.getElementById('prodVer'), d = document.getElementById('devVer');
+      if (p && v.prod) p.textContent = ' · ' + v.prod;
+      if (d && v.dev) d.textContent = ' · ' + v.dev;
+    }).catch(() => {});
+  </script>
 </body>
 </html>

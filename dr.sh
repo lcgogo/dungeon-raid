@@ -109,6 +109,7 @@ cmd_deploy(){
   mkdir -p public/functions
   cp dungeon-raid.html dungeon-raid-dev.html index.html apple-touch-icon.png public/
   cp pages/functions/_middleware.js public/functions/
+  printf '{"prod":"%s","dev":"%s"}\n' "$(ver_of dungeon-raid.html)" "$(ver_of dungeon-raid-dev.html)" > public/versions.json   # 首页显示两版本号（正式版只在 release 变，dev 可能领先）
   echo "public/ 内容（应只有网页文件，无私钥）："; ls -R public
   npx --yes wrangler pages project create "$PROJ" --production-branch=main 2>/dev/null || true
   npx --yes wrangler pages deploy public --project-name="$PROJ" --branch=main --commit-dirty=true
