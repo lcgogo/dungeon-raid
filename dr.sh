@@ -86,10 +86,16 @@ cmd_embed_changelog(){
   local files=("$@"); [ ${#files[@]} -eq 0 ] && files=(dungeon-raid-dev.html)
   python3 - "${files[@]}" <<'PY'
 import re, json, sys, os
-lines=[]
+# 同时认两种 CHANGELOG 格式：新「## [v1.30.12] 头 + 其下第一条 - 要点」、旧「[v1.27.4]: 一行描述」。新条目在文件上方→更新。
+lines=[]; cur=None
 for l in open('CHANGELOG.md', encoding='utf-8'):
-    m=re.match(r'^\[(v[\d.]+)\]:\s*(.+?)\s*$', l)
-    if m: lines.append(f"{m.group(1)} — {m.group(2)}")
+    h=re.match(r'^##\s*\[(v[\d.]+)\]', l)
+    if h: cur=h.group(1); continue
+    ref=re.match(r'^\[(v[\d.]+)\]:\s*(.+?)\s*$', l)
+    if ref: lines.append(f"{ref.group(1)} — {ref.group(2)}"); cur=None; continue
+    if cur:
+        b=re.match(r'^\s*-\s+(.+?)\s*$', l)
+        if b: lines.append(f"{cur} — {b.group(1).replace('**','')}"); cur=None
 lines=lines[:40]
 arr='const CHANGELOG_LINES='+json.dumps(lines, ensure_ascii=False)+';   /* auto-injected by dr.sh embed-changelog（勿手改） */'
 n=0
