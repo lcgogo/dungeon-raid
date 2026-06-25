@@ -31,7 +31,7 @@
 | ✅ **正式版** | `dungeon-raid.html` | 稳定版本 |
 | 🚧 **开发版 DEV** | `dungeon-raid-dev.html` | 指向最新开发版本，新功能先在这里试 |
 
-两个版本**存档相互独立、互不覆盖**（DEV 用单独的 localStorage 键）。开始界面与底部都会标明当前是「正式版」还是「DEV 开发版」。
+两个版本**存档相互独立、互不覆盖**（DEV 用单独的 localStorage 键）。开始界面与底部都会标明当前是「正式版」还是「DEV 开发版」。首页上的正式版 / 开发版版本号是**部署时静态写进 HTML** 的，不靠额外联网请求，弱网下也能直接看到。
 
 ### 🧩 核心玩法
 
@@ -219,7 +219,7 @@ Play online: **<https://dungeonraid.win>** (Dev build: <https://dungeonraid.win/
 | ✅ **Release** | `dungeon-raid.html` | The stable version |
 | 🚧 **Dev** | `dungeon-raid-dev.html` | Tracks the latest dev build; new features land here first |
 
-The two builds keep **separate, non-overwriting saves** (Dev uses its own localStorage keys). The start screen and footer both label which build you are in.
+The two builds keep **separate, non-overwriting saves** (Dev uses its own localStorage keys). The start screen and footer both label which build you are in. The home page’s Release / Dev version numbers are **statically injected at deploy time**, so they appear instantly even on weak connections without an extra fetch.
 
 ### 🧩 Core Gameplay
 

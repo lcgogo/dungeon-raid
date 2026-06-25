@@ -113,9 +113,22 @@ cmd_deploy(){
   cmd_embed_changelog dungeon-raid-dev.html   # dev 站更新前先注入最新更新日志（只动 dev）
   rm -rf public
   mkdir -p public/functions
-  cp dungeon-raid.html dungeon-raid-dev.html index.html apple-touch-icon.png public/
+  local prodVer devVer
+  prodVer=$(ver_of dungeon-raid.html)
+  devVer=$(ver_of dungeon-raid-dev.html)
+  python3 - "$prodVer" "$devVer" <<'PY'
+import pathlib, re, sys
+prod, dev = sys.argv[1], sys.argv[2]
+text = pathlib.Path('index.html').read_text(encoding='utf-8')
+text = re.sub(r'<small>Play · Release<span id="prodVer"></span></small>', f'<small>Play · Release · {prod}</small>', text, count=1)
+text = re.sub(r'<a class="dev" href="\./dungeon-raid-dev\.html">🚧 开发版 DEV · 最新 / 独立存档<span id="devVer"></span></a>', f'<a class="dev" href="./dungeon-raid-dev.html">🚧 开发版 DEV · 最新 / 独立存档 · {dev}</a>', text, count=1)
+if 'fetch(\'versions.json\'' in text or 'id="prodVer"' in text or 'id="devVer"' in text:
+    raise SystemExit('homepage version injection failed')
+pathlib.Path('public').mkdir(exist_ok=True)
+pathlib.Path('public/index.html').write_text(text, encoding='utf-8')
+PY
+  cp dungeon-raid.html dungeon-raid-dev.html apple-touch-icon.png public/
   cp pages/functions/_middleware.js public/functions/
-  printf '{"prod":"%s","dev":"%s"}\n' "$(ver_of dungeon-raid.html)" "$(ver_of dungeon-raid-dev.html)" > public/versions.json   # 首页显示两版本号（正式版只在 release 变，dev 可能领先）
   echo "public/ 内容（应只有网页文件，无私钥）："; ls -R public
   npx --yes wrangler pages project create "$PROJ" --production-branch=main 2>/dev/null || true
   npx --yes wrangler pages deploy public --project-name="$PROJ" --branch=main --commit-dirty=true

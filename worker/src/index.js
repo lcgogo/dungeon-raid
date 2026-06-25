@@ -17,6 +17,7 @@ const CORS = {
 const MAX_BYTES = 200000;   // 单份录像上限
 const MIN_TURNS = 30;       // 分享门槛：少于 30 回合不接收
 const SHARE_VERIFY_FACTOR = 1.5;  // 分享回合数 > 榜首×1.5（且≥榜首+30）→ 标记待验证
+const SHARE_VERIFY_TURN_CAP = 511;  // 分享待验证阈值封顶：避免榜首抬到终局可达范围之外
 const SEED_TTL = 7200;      // 服务端发放的种子 token 有效期（秒）：一局必须在此窗口内完成
 // 反作弊·服务端发种子：上榜成绩必须用服务端发的种子（防离线刷幸运种子）。
 // true = 强制：无 token 的提交一律拒收（v1.22.0 带 token 的正式版上线后开启）。
@@ -193,10 +194,12 @@ export default {
       const id = shortId();
       await env.REC.put(id, JSON.stringify(rec));
       // 回合远超正式版榜首 → 记一条 source=share 的待验证（定时任务会拉镜像跑一遍）
+      // 但阈值必须封顶到终局可达范围，否则榜首一高就会把门槛推到 510+ 之外。
       try {
         const topRow = await env.DB.prepare("SELECT MAX(turns) m FROM scores WHERE source='play' AND verified>=0").first();
         const top = (topRow && topRow.m) || 0;
-        if (turns > Math.max(top * SHARE_VERIFY_FACTOR, top + 30)) {
+        const shareThreshold = Math.min(Math.max(top * SHARE_VERIFY_FACTOR, top + 30), SHARE_VERIFY_TURN_CAP - 1);
+        if (turns > shareThreshold) {
           await env.DB.prepare("INSERT INTO scores(id,version,race,turns,level,gold,source,verified,created) VALUES(?,?,?,?,0,0,'share',0,?)")
             .bind(id, rec.ver || '', rec.race, turns, Date.now()).run();
         }

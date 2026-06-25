@@ -165,11 +165,20 @@ function cmd_deploy {
     if (Test-Path "public") { Remove-Item "public" -Recurse -Force }
     New-Item -ItemType Directory -Path "public\functions" -Force > $null
 
+    $prodVer = ver_of "dungeon-raid.html"
+    $devVer = ver_of "dungeon-raid-dev.html"
+    $home = Get-Content "index.html" -Raw
+    $home = $home.Replace('<small>Play · Release<span id="prodVer"></span></small>', "<small>Play · Release · $prodVer</small>")
+    $home = $home.Replace('<a class="dev" href="./dungeon-raid-dev.html">🚧 开发版 DEV · 最新 / 独立存档<span id="devVer"></span></a>', ('<a class="dev" href="./dungeon-raid-dev.html">🚧 开发版 DEV · 最新 / 独立存档 · {0}</a>' -f $devVer))
+    if ($home.Contains("fetch('versions.json'") -or $home.Contains('id="prodVer"') -or $home.Contains('id="devVer"')) {
+        throw "homepage version injection failed"
+    }
+    $home | Out-File "public\index.html" -Encoding utf8
+
     # public/ 里放：
-    #   index.html         = 正式版（默认入口）
+    #   index.html         = 首页（版本号已在构建期注入）
     #   dungeon-raid.html = 正式版（显式访问）
     #   dungeon-raid-dev.html = dev 版（dev 域名通过 Cloudflare Pages 设置指向此文件）
-    Copy-Item "dungeon-raid.html" "public\index.html"
     Copy-Item "dungeon-raid.html" "public\dungeon-raid.html"
     Copy-Item "dungeon-raid-dev.html" "public\dungeon-raid-dev.html"
     Copy-Item "pages\functions\_middleware.js" "public\functions\" -Force
