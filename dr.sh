@@ -7,10 +7,11 @@
 #   gh-release [vX.Y.Z] 创建/更新 GitHub Release（默认读正式版 const VERSION；可指定版本回填）
 #   integrity           核对正式版引擎 sha256 是否与 engines.json 登记一致（完整性校验）
 #   embed-changelog     把 CHANGELOG.md 摘要注入页面 CHANGELOG_LINES（deploy/release 自动调用）
-#   classify <id> <ai|human>  把某条成绩在 人类榜↔AI榜 之间改判（需 VERIFY_SECRET 环境变量）
-#   delete <id>         删除某条成绩（需 VERIFY_SECRET）
-#   prune [天数=30] [保留版本数=5]  手动清理旧版本+陈旧录像（worker 也每日自动跑；需 VERIFY_SECRET）
-#   wipe                清空整个榜单（删 scores 全表，需 VERIFY_SECRET；危险）
+#   classify <id> <ai|human>  把某条成绩在 人类榜↔AI榜 之间改判（需 ADMIN_SECRET 环境变量）
+#   delete <id>         删除某条成绩（需 ADMIN_SECRET）
+#   prune [天数=30] [保留版本数=5]  手动清理旧版本+陈旧录像（worker 也每日自动跑；需 ADMIN_SECRET）
+#   wipe                清空整个榜单（删 scores 全表，需 ADMIN_SECRET；危险）
+#   seed-debug          申请一枚调试种子（需 DEBUG_SEED_SECRET；可绕过上传门槛）
 #   backfill-releases   为 CHANGELOG 里每个版本补打 tag+release（已存在的跳过）
 #   bind-domains        把自定义域名绑定到 Pages 项目
 #   help                显示本说明
@@ -36,39 +37,46 @@ cmd_integrity(){
   if [ "$hash" = "$want" ]; then echo "  ✅ 一致，文件未被改动"; else echo "  ❌ 不一致！文件与登记版本不符"; return 1; fi
 }
 
-# ---------- 黑盒改判：把某条成绩在 人类榜↔AI榜 之间挪（需环境变量 VERIFY_SECRET）----------
+# ---------- 黑盒改判：把某条成绩在 人类榜↔AI榜 之间挪（需环境变量 ADMIN_SECRET）----------
 cmd_classify(){
   local id="$1" agent="$2"
-  [ -n "$id" ] && { [ "$agent" = ai ] || [ "$agent" = human ]; } || { echo "用法: VERIFY_SECRET=… bash dr.sh classify <id> <ai|human>"; return 1; }
-  [ -n "$VERIFY_SECRET" ] || { echo "缺少环境变量 VERIFY_SECRET"; return 1; }
-  curl -s -X POST "https://api.dungeonraid.win/classify?k=$VERIFY_SECRET" \
+  [ -n "$id" ] && { [ "$agent" = ai ] || [ "$agent" = human ]; } || { echo "用法: ADMIN_SECRET=… bash dr.sh classify <id> <ai|human>"; return 1; }
+  [ -n "$ADMIN_SECRET" ] || { echo "缺少环境变量 ADMIN_SECRET"; return 1; }
+  curl -s -X POST "https://api.dungeonraid.win/classify?k=$ADMIN_SECRET" \
     -H 'Content-Type: application/json' -d "{\"id\":\"$id\",\"agent\":\"$agent\"}"; echo
 }
 
-# ---------- 删除单条成绩（需 VERIFY_SECRET）----------
+# ---------- 删除单条成绩（需 ADMIN_SECRET）----------
 cmd_delete(){
   local id="$1"
-  [ -n "$id" ] || { echo "用法: VERIFY_SECRET=… bash dr.sh delete <id>"; return 1; }
-  [ -n "$VERIFY_SECRET" ] || { echo "缺少环境变量 VERIFY_SECRET"; return 1; }
-  curl -s -X POST "https://api.dungeonraid.win/admin?k=$VERIFY_SECRET" \
+  [ -n "$id" ] || { echo "用法: ADMIN_SECRET=… bash dr.sh delete <id>"; return 1; }
+  [ -n "$ADMIN_SECRET" ] || { echo "缺少环境变量 ADMIN_SECRET"; return 1; }
+  curl -s -X POST "https://api.dungeonraid.win/admin?k=$ADMIN_SECRET" \
     -H 'Content-Type: application/json' -d "{\"op\":\"del\",\"id\":\"$id\"}"; echo
 }
 
-# ---------- 手动清理旧版本+陈旧录像（需 VERIFY_SECRET）。用法: prune [天数=30] [保留版本数=5] ----------
+# ---------- 手动清理旧版本+陈旧录像（需 ADMIN_SECRET）。用法: prune [天数=30] [保留版本数=5] ----------
 cmd_prune(){
-  [ -n "$VERIFY_SECRET" ] || { echo "缺少环境变量 VERIFY_SECRET"; return 1; }
+  [ -n "$ADMIN_SECRET" ] || { echo "缺少环境变量 ADMIN_SECRET"; return 1; }
   local days="${1:-30}" keep="${2:-5}"
-  curl -s -X POST "https://api.dungeonraid.win/admin?k=$VERIFY_SECRET" \
+  curl -s -X POST "https://api.dungeonraid.win/admin?k=$ADMIN_SECRET" \
     -H 'Content-Type: application/json' -d "{\"op\":\"prune\",\"days\":$days,\"keep\":$keep}"; echo
 }
 
-# ---------- 清空整个榜单（删 scores 全表，需 VERIFY_SECRET；危险）----------
+# ---------- 清空整个榜单（删 scores 全表，需 ADMIN_SECRET；危险）----------
 cmd_wipe(){
-  [ -n "$VERIFY_SECRET" ] || { echo "缺少环境变量 VERIFY_SECRET"; return 1; }
+  [ -n "$ADMIN_SECRET" ] || { echo "缺少环境变量 ADMIN_SECRET"; return 1; }
   printf "⚠️  将删除 scores 表【全部】成绩（人类榜+AI榜+破关榜，不可恢复）。输入 YES 确认: "
   read -r ans; [ "$ans" = YES ] || { echo "已取消"; return 1; }
-  curl -s -X POST "https://api.dungeonraid.win/admin?k=$VERIFY_SECRET" \
+  curl -s -X POST "https://api.dungeonraid.win/admin?k=$ADMIN_SECRET" \
     -H 'Content-Type: application/json' -d '{"op":"wipe","confirm":"YES"}'; echo
+}
+
+# ---------- 申请调试 seed（需 DEBUG_SEED_SECRET；带 debug_bypass）----------
+cmd_seed_debug(){
+  [ -n "$DEBUG_SEED_SECRET" ] || { echo "缺少环境变量 DEBUG_SEED_SECRET"; return 1; }
+  curl -s -X POST "https://api.dungeonraid.win/seed-debug?k=$DEBUG_SEED_SECRET" \
+    -H 'Content-Type: application/json'; echo
 }
 
 # ---------- 跑测试 ----------
@@ -162,8 +170,10 @@ cmd_release(){
   echo "两文件差异（应仅 DEV 一行）："; diff dungeon-raid.html dungeon-raid-dev.html || true
   # 2) 登记正式版引擎 sha256（版本号当人类标签，哈希用于完整性校验）
   local ver hash; ver=$(ver_of dungeon-raid.html); hash=$(sha256_of dungeon-raid.html)
+  mkdir -p engines
+  cp dungeon-raid.html "engines/$ver.html"
   node -e "const fs=require('fs');const f='engines.json';const m=fs.existsSync(f)?JSON.parse(fs.readFileSync(f,'utf8')):{};m['$ver']='$hash';fs.writeFileSync(f,JSON.stringify(m,null,2)+'\n');"
-  echo "🔏 engines.json 登记 $ver → $hash"
+  echo "🔏 engines.json 登记 $ver → $hash（快照: engines/$ver.html）"
   # 3) 提交 + 推送
   git add -A; git commit -F /tmp/dr_commit_msg.txt; git push
   # 3) 部署 Pages
@@ -215,6 +225,7 @@ case "${1:-help}" in
   delete)            cmd_delete "$2" ;;
   prune)             cmd_prune "$2" "$3" ;;
   wipe)              cmd_wipe ;;
+  seed-debug)        cmd_seed_debug ;;
   backfill-releases) cmd_backfill_releases ;;
   bind-domains)      cmd_bind_domains ;;
   help|--help|-h|*)  sed -n '2,16p' "$0" | sed 's/^# \{0,1\}//' ;;

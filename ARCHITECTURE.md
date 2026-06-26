@@ -48,16 +48,18 @@
 | Secret | 存放 | 用途 |
 |---|---|---|
 | `VERIFY_SECRET` | Cloudflare Worker secret · GitHub Actions secret · render env | `/pending`·`/verify`·`/verify-now` 的访问口令 |
+| `ADMIN_SECRET` | Cloudflare Worker secret · 仅你本地运维环境 | `/admin`·`/classify` 的管理口令 |
+| `DEBUG_SEED_SECRET` | Cloudflare Worker secret · 仅你本地调试环境 | `/seed-debug` 的调试口令（签发可绕过上传门槛的 token） |
 | `VERIFY_PUSH_URL` | Cloudflare Worker secret | 验证器地址(填 `https://verify.dungeonraid.win`)；未设则不推送、靠轮询/cron 兜底 |
 | `RENDER_PING_URL` | GitHub Actions secret | keepalive ping 地址(同上) |
 
-> 都是「只写不可读」：Cloudflare/GitHub 都只能覆盖、看不到原值。丢了就轮换一个新值、三处同步填。
+> 都是「只写不可读」：Cloudflare/GitHub 都只能覆盖、看不到原值。`VERIFY_SECRET` 需在 Worker / render / GitHub Actions 三处同值；`ADMIN_SECRET` 与 `DEBUG_SEED_SECRET` 只应保存在 Worker 与你自己的本地运维/调试环境，不给 render / GitHub Actions。
 
 ## 运维速查
 
 - 发版（游戏）：`bash dr.sh release`（dev→正式版同步 + 提交 + push + 部署 Pages + GitHub Release）；只发 dev：`bash dr.sh deploy`；完整性核对：`bash dr.sh integrity`。
 - 部署 Worker：`cd worker && npx wrangler deploy`。
-- render：从本仓库部署 `node verify-server.js`（`render.yaml` 蓝图 / `Procfile` 通用）；自定义域 `verify.dungeonraid.win`（Cloudflare 橙云 + SSL 模式 **Full**，非 strict）。
+- render：从本仓库部署 `node verify-server.js`（`render.yaml` 蓝图 / `Procfile` 通用）；自定义域 `verify.dungeonraid.win`（Cloudflare 橙云 + SSL 模式 **Full**，非 strict）。验证器现会优先按 `engines/<version>.html` 选精确引擎；`dr.sh release` / `dr.ps1 release` 会自动归档正式版快照到 `engines/`，供旧版本录像重放。
 - 看录像：`https://api.dungeonraid.win/rec/<id>`；列 KV：`npx wrangler kv key list --namespace-id <REC_ID>`。
 - 验证器状态：`https://verify.dungeonraid.win/`（看 engineVersion / last / lastErr）。
 - 手动验证一次：`API_BASE=https://api.dungeonraid.win VERIFY_SECRET=… node verify.js`。

@@ -6,7 +6,7 @@
 //   环境变量：VERIFY_SECRET（必填，与 Worker 一致）、API_BASE（默认 https://api.dungeonraid.win）、POLL_MS（默认 7000）、PORT（平台注入）
 //   启动：node verify-server.js
 const http = require('http');
-const { loadEngine, verifyPending, integrityNote, API } = require('./verify.js');
+const { loadEngine, verifyPending, integrityNote, resolveEnginePath, API } = require('./verify.js');
 
 const SECRET = process.env.VERIFY_SECRET;
 if (!SECRET) { console.error('缺少 VERIFY_SECRET 环境变量，拒绝启动'); process.exit(1); }
@@ -16,7 +16,7 @@ const POLL_MS = Math.max(2000, +process.env.POLL_MS || 7000);   // 最小 2s，�
 const G = loadEngine('dungeon-raid.html');
 const VER = G.VERSION || '';
 integrityNote(VER);
-console.log(`🛡️ verify-server 引擎 ${VER} · API ${API} · 轮询 ${POLL_MS}ms`);
+console.log(`🛡️ verify-server 默认引擎 ${VER} · API ${API} · 轮询 ${POLL_MS}ms`);
 
 let last = { at: null, pass: 0, fail: 0, skip: 0, total: 0 };
 let lastErr = null;
@@ -45,7 +45,7 @@ http.createServer((req, res) => {
   }
   // 健康/状态端点（也供免费档外部保活 ping、肉眼查看进度）
   res.writeHead(200, { 'Content-Type': 'application/json' });
-  res.end(JSON.stringify({ service: 'dungeon-raid-verify', engineVersion: VER, pollMs: POLL_MS, last, lastErr }));
+  res.end(JSON.stringify({ service: 'dungeon-raid-verify', engineVersion: VER, enginePath: resolveEnginePath(VER), pollMs: POLL_MS, last, lastErr }));
 }).listen(PORT, () => console.log(`🌐 健康端点 + /verify-now :${PORT}`));
 
 // 轮询兜底（即便没人推送，也每 POLL_MS 自己捡一遍）

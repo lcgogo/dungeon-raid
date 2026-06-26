@@ -4,6 +4,7 @@
 //   一次性（GitHub Actions / 本地）： API_BASE=… VERIFY_SECRET=… node verify.js
 //   常驻轮询（render/railway/fly/任意 Node 主机）：见 verify-server.js（require 本文件的导出函数）。
 const fs = require('fs');
+const path = require('path');
 const crypto = require('crypto');
 
 const API = process.env.API_BASE || 'https://api.dungeonraid.win';
@@ -12,12 +13,13 @@ const DEBUG = !!process.env.DEBUG;   // 逐回合重放日志开关（默认关�
 
 // ---- 加载游戏确定性引擎（与 playtest.js 同法：DOM 桩件 + 注入导出）。一次加载可反复 startGame 重放多份录像 ----
 function loadEngine(file) {
-  const script = fs.readFileSync(__dirname + '/' + file, 'utf8').match(/<script>([\s\S]*?)<\/script>/)[1];
+  const fullPath = path.isAbsolute(file) ? file : path.join(__dirname, file);
+  const script = fs.readFileSync(fullPath, 'utf8').match(/<script>([\s\S]*?)<\/script>/)[1];
   const EXPORT = `globalThis.__E={VERSION,startGame,raceById,dispatchReplayAct,
     get player(){return player}, get replaying(){return replaying}, set replaying(v){replaying=v},
     get replayRec(){return replayRec}, set replayRec(v){replayRec=v},
     srand, rnd};`;
-  if (!script.includes('resize(); showClassSelect(); loop();')) throw new Error('startup line not found in ' + file);
+  if (!script.includes('resize(); showClassSelect(); loop();')) throw new Error('startup line not found in ' + fullPath);
   const src = script.replace('resize(); showClassSelect(); loop();', EXPORT);
   const elH = { get(t, p) {
     if (p === 'style') return t._s || (t._s = {});
@@ -70,16 +72,33 @@ function integrityNote(ENGINE_VER) {
   } catch (e) {}
 }
 
-// 拉取并验证当前引擎版本的全部待验证项，回写结果。返回 {pass,fail,skip,total}。可被常驻服务反复调用。
+function resolveEnginePath(version) {
+  if (!version) return path.join(__dirname, 'dungeon-raid.html');
+  const snap = path.join(__dirname, 'engines', `${version}.html`);
+  return fs.existsSync(snap) ? snap : path.join(__dirname, 'dungeon-raid.html');
+}
+
+function loadEnginesForPending(pend) {
+  const cache = new Map();
+  for (const e of pend) {
+    const ver = e.version || '';
+    if (!cache.has(ver)) cache.set(ver, loadEngine(resolveEnginePath(ver)));
+  }
+  return cache;
+}
+
+// 拉取并验证待验证项，按录像自己的 release 版本选择引擎。返回 {pass,fail,skip,total}。可被常驻服务反复调用。
 async function verifyPending(G, ENGINE_VER) {
   if (!SECRET) throw new Error('缺少 VERIFY_SECRET 环境变量');
   const purl = `${API}/pending?k=${encodeURIComponent(SECRET)}` + (ENGINE_VER ? `&version=${encodeURIComponent(ENGINE_VER)}` : '');
   const pend = (await (await fetch(purl)).json()).pending || [];
   if (!pend.length) return { pass: 0, fail: 0, skip: 0, total: 0 };
+  const engines = loadEnginesForPending(pend);
   let pass = 0, fail = 0, skip = 0;
   for (const e of pend) {
-    // 录像只能在自己那个版本的引擎上正确重放；版本不符则跳过（不同版本本就不混排）
-    if ((e.version || '') !== ENGINE_VER) { skip++; console.log(`⏭️  ${e.id} 版本 ${e.version || '?'} ≠ 引擎 ${ENGINE_VER}，跳过`); continue; }
+    const runVer = e.version || '';
+    const engine = engines.get(runVer);
+    if (!engine || (engine.VERSION || '') !== runVer) { skip++; console.log(`⏭️  ${e.id} 缺少匹配引擎 ${runVer || '?'}`); continue; }
     // 严格判定：重放真实结局是否坐实声称值（不偷看声称值来挑选解释）
     const judge = a => !a ? false
       : e.cleared ? (a.cleared === true && a.level === e.level)        // 破关：必须真的破关且等级吻合
@@ -91,8 +110,8 @@ async function verifyPending(G, ENGINE_VER) {
       // tut 缺失的旧录像有 ≤3 种确定性解释（默认/firstGame=true/false）：
       // 任一解释满足严格判定即通过（OR 语义），report 用通过的那个，否则用默认重放值。
       const cands = rec.tut === undefined
-        ? [replay(G, rec), replay(G, rec, true), replay(G, rec, false)]
-        : [replay(G, rec)];
+        ? [replay(engine, rec), replay(engine, rec, true), replay(engine, rec, false)]
+        : [replay(engine, rec)];
       actual = cands.find(judge) || cands[0];
       ok = judge(actual);
     } catch (err) { actual = null; ok = false; }
@@ -101,7 +120,7 @@ async function verifyPending(G, ENGINE_VER) {
       body: JSON.stringify({ id: e.id, ok, turns: actual ? actual.turns : 0, level: actual ? actual.level : 0, gold: actual ? actual.gold : 0 }),
     });
     ok ? pass++ : fail++;
-    console.log(`${ok ? '✅' : '❌'} ${e.id} [${e.source}] claim ${e.turns}/${e.level}/${e.gold} → actual ${actual ? `${actual.turns}/${actual.level}/${actual.gold}` : 'ERR'}`);
+    console.log(`${ok ? '✅' : '❌'} ${e.id} [${e.source}] ${runVer || '?'} claim ${e.turns}/${e.level}/${e.gold} → actual ${actual ? `${actual.turns}/${actual.level}/${actual.gold}` : 'ERR'}`);
   }
   return { pass, fail, skip, total: pend.length };
 }
@@ -117,5 +136,5 @@ async function main() {
   else console.log(`完成：${r.pass} 通过 / ${r.fail} 失败 / ${r.skip} 跳过（共 ${r.total}），引擎版本 ${ENGINE_VER}`);
 }
 
-module.exports = { loadEngine, replay, verifyPending, integrityNote, API };
+module.exports = { loadEngine, replay, verifyPending, integrityNote, resolveEnginePath, loadEnginesForPending, API };
 if (require.main === module) main().catch(e => { console.error(e); process.exit(1); });

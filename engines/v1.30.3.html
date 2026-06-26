@@ -7,8 +7,7 @@
 <meta name="theme-color" content="#241b30">
 <!-- 标签页/书签/主屏图标：内联 SVG（金色城堡+小旗，单文件零外部依赖）。🏰 是本作品牌标。 -->
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23241b30'/%3E%3Cg fill='%23e7c14a'%3E%3Crect x='15' y='21' width='7' height='9'/%3E%3Crect x='28' y='21' width='8' height='9'/%3E%3Crect x='42' y='21' width='7' height='9'/%3E%3Crect x='15' y='29' width='34' height='22' rx='1'/%3E%3C/g%3E%3Cpath d='M26 51V41a6 6 0 0 1 12 0v10z' fill='%23241b30'/%3E%3Crect x='31' y='12' width='3' height='10' fill='%23e7c14a'/%3E%3Cpath d='M34 13l8 2-8 2z' fill='%23c0392b'/%3E%3C/svg%3E">
-<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
-<meta name="apple-mobile-web-app-title" content="地牢突袭">
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23241b30'/%3E%3Cg fill='%23e7c14a'%3E%3Crect x='15' y='21' width='7' height='9'/%3E%3Crect x='28' y='21' width='8' height='9'/%3E%3Crect x='42' y='21' width='7' height='9'/%3E%3Crect x='15' y='29' width='34' height='22' rx='1'/%3E%3C/g%3E%3Cpath d='M26 51V41a6 6 0 0 1 12 0v10z' fill='%23241b30'/%3E%3Crect x='31' y='12' width='3' height='10' fill='%23e7c14a'/%3E%3Cpath d='M34 13l8 2-8 2z' fill='%23c0392b'/%3E%3C/svg%3E">
 <style>
   :root{
     --bg:#1a1423; --panel:#241b30; --panel2:#2f2440;
@@ -116,7 +115,7 @@
 <body>
 <div id="wrap">
   <button id="langBtn">EN</button>
-  <h1 id="title">　　🏰 地牢突袭·网页版</h1>
+  <h1 id="title">　　🏰 地牢突袭·网页版 <span class="sub">Dungeon Raid</span></h1>
 
   <div id="hud">
     <div class="row"><span class="lbl" id="lblHp">生命</span>
@@ -172,8 +171,8 @@
 (()=>{
 //==================== 配置 ====================
 // 版本号 v主.次.修：小改动改"修"，新Boss/职业改"次"，大版本变更需先确认。页面底部显示。
-const VERSION='v1.30.20';
-const CHANGELOG_LINES=["v1.30.20 — 排行榜验证链升级为“按版本快照选引擎”：release 会把正式版自动归档到 `engines/<version>.html`，验证器优先按录像自己的 `rec.ver` 选精确引擎，不再只能拿当前正式版硬验旧录像。", "v1.30.19 — 修复偶发棋盘缺块：商店治疗触发「神圣打击」击杀敌人后，若盘面留下空洞，会立刻补格，不再把空白格留在实战棋盘上。", "v1.30.18 — 火枪手的「狙击 Snipe」现在优先攻击 Boss；若场上有多个 Boss，则命中生命最低的那个，场上没有 Boss 时才回退到原先的最高血量目标。", "v1.30.17 — 屠夫 Butcher 的「钩子 Hook」现在在把怪/Boss 拉到底排后，会按离底线的距离追加伤害：最底排吃 1× 固定伤害、倒数第二排吃 2×，依此类推；无目标时仍无效、不进冷却。", "v1.30.16 — 首页版本号改为构建期静态注入：不再在 `index.html` 里运行时请求 `versions.json`，而是在部署脚本里直接把正式版/开发版版本号写进首页 HTML；弱网/离线缓存下也能立刻看到版本号。并同步删掉 `public/versions.json` 的生成，Windows 的 `dr.ps1` / `dr.bat` 与 Bash 脚本保持同一行为。", "v1.30.15 — 切换语言时日志不再残留旧语言：日志条目是翻译好的定文（含「−5」等动态值，无法逐条回译），切语言会清空日志，后续事件按新语言记。开局/继续本就会清并重记，所以开局前切语言完全正常；这里修的是对局中途切换会中英混排的问题。", "v1.30.14 — 顶部标题不再中英都印：原 h1 中文模式下同时显示「地牢突袭·网页版」+ 英文副标「Dungeon Raid」。现按语言只显示一个——中文「🏰 地牢突袭·网页版」/ 英文「🏰 Dungeon Raid · Web」。", "v1.30.13 — 修复游戏内「更新日志」久不更新（一直停在 v1.27.4）：dr.sh 的注入脚本只认旧的 `[vX]: 描述` 引用格式，而 CHANGELOG 早已改用 `## [vX]` 标题 + 要点格式，导致新版本全被漏掉。现解析器两种格式都认（新格式取每版第一条要点），点版本号即可看到最新更新。", "v1.30.12 — 修复「死了之后『继续上局』又能玩」：gameOver/onClear 已清存档，但结束后若还有延迟的 updateHUD（如双击连线的 setTimeout）会把死局重新存回去。新增 ended 标记，本局结束后 saveGame 直接拒绝写入；开新局/继续上局时重置。", "v1.30.11 — 排行榜详情里 ▶回放 / 🔗分享 两个按钮改为 flex 同一行、等宽居中（原来因 .choice 默认 block 各占一行、左对齐显得没对齐）。", "v1.30.10 — 排行榜详情弹框重做：去掉常显 `--` / `0` 的「最终血量/金币」（旧录像没存这俩），改为显示回合 + 等级（取自已验证的榜单条目，永远可靠）+ 职业线（从录像 acts 解析一阶/二阶/跨界，id 取值跨版本稳定，旧录像也认）+ 技能(升级 perks，新录像有)+ 是否破关 + ▶回放/🔗分享。", "v1.30.9 — 破关榜改为「历代全部」：不再只看最近 3 个版本——破关是稀有里程碑成就，频繁发版会把老版本的真破关挤出窗口。现展示所有版本的已验证破关（每行带版本标签），副标题相应改为「历代全部」。（修复：有玩家 v1.27.4 的破关因版本窗口被埋。）", "v1.30.8 — 破关榜空状态改为说明性文案：「🏆 还没有人破关 · 撑过第 500 回合的终局 10 波即可登顶」，不再只是干巴巴的「暂无记录」（破关榜只收已验证的真破关，目前确实还没人到 510 回合）。", "v1.30.7 — 修复 350 跨界技能列表 / 技能详情里「收买」重复显示两次「无冷却」：其短描述里自带的「（无冷却）」与统一追加的冷却标记重复，已从短描述去掉，冷却由统一标记显示。", "v1.30.6 — 小丑不再冒新怪：它的「重洗」原本把资源格换成随机新格、会按正常概率滚出怪，与召唤师职能重合。现强制只重洗成资源（剑/盾/心/金），纯搅乱连线、绝不出怪。Boss 描述同步更新。", "v1.30.5 — 充实「吸魂大法」技能详情：分点讲清——可吸 {W} 免疫特殊 Boss、吸力随你的生命上限成长（越高越能一发吸死）、回血封顶在上限（活死人治疗减半也生效）、与溅射/汲取生命的协同、以及打法定位。长按技能块查看。", "v1.30.4 — 修复 iOS「添加到主屏幕」图标显示成「地」字：原 apple-touch-icon 用的是 SVG（iOS 主屏不认），换成真实的 180×180 PNG 城堡 logo（`apple-touch-icon.png`，随 Pages 部署），并加短标题「地牢突袭」。游戏页与首页都接上。", "v1.30.3 — 双击贪心连线不再漏掉起点旁的格子：上一版「先吃最长一臂、再补另一臂」会把另一侧本该留的格子占掉。改为穷举「过起点」的最长简单路径（前臂×后臂所有组合），起点两侧联合最优。6×6 实测连满整个同类连通块 59%→69%；实战单类型块小、单次 <5ms（最坏约 40ms 封顶）。", "v1.30.2 — 双击贪心连线少漏格：原 Warnsdorff 单路径常把分叉/斜线另一侧的同类格落下。改为带预算的 DFS 最长路径、从起点向两侧各伸一条臂——起点两边都抓。6×6 随机测试平均连 7.9→10.0 格、59% 直接连满整个同类连通块，单次约 1.6ms 仍瞬时。", "v1.30.1 — 双击贪心连线现在会先把连线亮出来一拍（约 0.26s）再结算，能看到划出的那条线（原先同拍结算、线没机会渲染就被清掉了）。", "v1.30.0 — 新增快捷操作 双击 盾/心/金 棋子 → 自动贪心连线：从该棋子沿 8 向两头延伸出一条尽量长的同类连线并直接结算，省去手动长拖。仅限资源棋子（剑链与怪/Boss 不触发，攻击仍由玩家自己控制）。", "v1.29.1 — 修复排行榜点不开详情：原先只有玩家名那一小段可点（窄、且内联 onclick 在 iOS 偶发不触发）。改为整行可点、JS 绑定事件、行尾加 ⓘ 提示，点哪都能弹出详情框。", "v1.29.0 — 锻造师二阶锁定被动改为 盾击 Shield Bash：把「护甲减伤量」加到固定剑伤上（护甲越厚剑伤越高），与「锻甲」吸盾成甲形成攻坦一体。原「爆破手」移交新职业火枪手。", "v1.28.2 — 修复「收买」学了小气鬼后花费没减半：收买花费在自己的技能里算、绕过了只作用于商店治疗/炸弹的小气鬼减半。现改为小气鬼也让收买花费减半（会长 100 回合必得小气鬼，本是配套）。技能按钮显示的 💰花费、扣款、日志全部按减半计；小气鬼/收买说明同步。", "v1.28.1 — 弹层卡片内容超一屏时可在卡片内上下滑动（`.card` 加 max-height:88vh + overflow，兜底所有长列表）——修复 350 回合「跨界技能」列表过长顶出屏外、底部选项/返回点不到。", "v1.28.0 — 新增活死人第三职业 屠夫 Butcher（活死人原本只有两条职业线，补齐到三条）。", "v1.27.11 — 会长「收买」按钮现在显示当前花费（💰=全场怪总血量），当金币 < 总血量（或场上无怪）时按钮置灰，一眼可知能不能发动。", "v1.27.10 — 弱网下选完种族不再卡顿：进选种族页就后台预取服务端种子，把网络耗时藏在挑种族的时间里，点种族通常瞬开。", "v1.27.9 — 排行榜瘦身：榜单行不再显示金币，只保留回合与等级。", "v1.27.8 — 修复 Boss 投放漏洞：场上已有 Boss 时，到下一个 10 回合节点不再「跳过」新 Boss，而是必降临（强制叠加）。此前可囤一只早期弱 Boss 压制后续强 Boss，在 50/100/200/350 里程碑轻松击杀晋级——已堵死。", "v1.27.7 — 恢复单格轻触弹棋子信息（位移<10px判定为轻触，拖拽后松手不弹）", "v1.27.6 — 小偷不再出现在里程碑Boss关（50/100/200/350），回归普通每10回合Boss池", "v1.27.4 — 回放跳转/步进后固定有几格闪爆炸特效：`addBossFx`（Boss 入场闪光）漏了「无头/快进」守卫——跳转/步进会从种子重跑整局、把途中每次 Boss 入场的闪光一股脑堆出来，在跳转后的棋盘上同时乱闪（数量≈到该回合为止刷过的 Boss 数）。现在 `addBossFx` 也在快进时跳过；跳转/退出回放时一并清空 `bossFx`（此前只清了 `bombFx`）。", "v1.27.3 — 血狂 Blood Frenzy 增强：吸血/嗜血溢出生命上限的部分，转为永久生命上限的比例由 50% → 100%（溢出全部转化）。强化兽人斗士的后期续航/滚雪球。", "v1.27.2 — 精灵新职业改名：长老 → 森林长老 Forest Elder；其主动 死亡缠绕 → 蔓藤缠绕 Vine Coil（机制不变；内部 id 不变）。游戏 + README 中英同步。", "v1.27.1 — 击败第 350 回合 Boss 后：终局前压力升级。打掉那只 Boss（触发跨界换装）时，弹出红色警告；此后每 10 回合同时降临 2 个不同的 Boss（强制刷新、不再「场上有 Boss 就不刷」，尽量两种不同；棋盘塞满则少刷）。为第 500 回合终焉之主的浪潮做铺垫。", "v1.27.0 — 新增精灵职业「长老 Elder」，主动技能 死亡缠绕 Death Coil：发动后 5 个回合内每回合让场上所有怪/Boss（含剑免疫，终焉之主除外）损失「你最大生命的 10%」；被缠绕期间敌人格变绿。可击杀并给奖励/吸血。（精灵由 2 个职业增至 3 个。）", "v1.26.1 — 黑毒心🖤 / 绿毒心💚 的底色改回与普通心一致：之前它们用暗紫/绿底，和普通心差别大。现在三种心底色、高亮都一样，只靠 emoji（💗/💚/🖤）区分，棋盘更统一。", "v1.26.0 — 牧师二阶被动「不朽」→ 改为「神圣打击」：原「不朽」把治疗溢出转为永久生命上限，越滚越肥、过于超模。改为 神圣打击：治疗溢出的部分随机砸向一个敌人/Boss（排除终焉之主）——溢出不再白白浪费，但也不再无限堆血。", "v1.25.30 — 「汲取生命」吸血覆盖所有击杀手段：继 v1.25.29（剑/炸弹）之后，把吸血接进全部击杀路径——剑链、炸弹、蛊毒/黑毒心、箭雨、溅射、吸魂大法、荆棘反杀，凡是你击杀怪/Boss 都按「每杀 ×吸血值」回血，并在各自日志里显示「吸血 +N」。统一走 `lifestealHeal()` 助手，口径一致。"];   /* auto-injected by dr.sh embed-changelog（勿手改） */
+const VERSION='v1.30.3';
+const CHANGELOG_LINES=["v1.27.4 — 修复回放跳转/步进后固定几格闪爆炸特效（addBossFx 补快进守卫 + 跳转清 bossFx）", "v1.27.3 — 血狂溢出转永久生命上限比例 50%→100%（兽人斗士后期增强）", "v1.27.2 — 精灵新职业改名 长老→森林长老、死亡缠绕→蔓藤缠绕（机制/id 不变）", "v1.27.1 — 击败350回合Boss后弹警告 + 此后每10回合同时降临2个不同Boss（终局前压力升级）", "v1.27.0 — 新精灵职业 长老(死亡缠绕：5回合每回合全场怪-10%你最大生命、敌人变绿) + 荆棘移精灵且反弹=护甲减伤量 + 兽人斗士改 血狂(吸血溢出半数升上限)", "v1.26.1 — 黑毒心/绿毒心底色改回与普通心一致（只靠 emoji 区分；普通心保留 💗，❤️ 在 iOS canvas 会偏移）", "v1.26.0 — 牧师二阶被动「不朽」改为「神圣打击」（治疗溢出随机攻击敌人，去超模）+ 主动「祝福」改为转经验同时回血", "v1.25.30 — 汲取生命吸血覆盖所有击杀手段（剑/炸弹/毒/箭雨/溅射/吸魂/荆棘反杀，统一 lifestealHeal + 日志显示）", "v1.25.29 — 修复汲取生命吸血像没效果（炸弹击杀也吸血 + 日志显示「吸血 +N」，原来只剑杀且无日志）", "v1.25.28 — 去掉万物皆毒描述里的「污染怪变化之后」交互说明（行为不变，文案精简；README 中英同步）", "v1.25.27 — 修复回放步进没连线/冒一堆炸弹特效（跳转清残留 bombFx + 停在连线结算前预显示该连线）", "v1.25.26 — 满血时治疗不可用（按钮置灰显示「已满血」、点击不购买）+ 更新描述", "v1.25.25 — 修复击败 Boss 没有奖励日志（奖励提示统一进 onBossKilled，剑/炸弹/荆棘/吸魂等都报「🏆击败Boss 💰+20 经验+15」）", "v1.25.24 — 修复荆棘反弹打成随机目标（说明是「反弹给攻击者」）——改为优先反弹给攻击者本人，攻击者离场才退回随机", "v1.25.23 — 吸血鬼吸到黑毒心会中毒/被毒死（正常心回血、毒心反害，净效果结算）——巫医蛊毒可反制吸血鬼", "v1.25.22 — 日志按事件类型上色（回血绿/增益蓝/攻击白/受击·Boss出场红/负面黄）+ 回放跳转固定 50/100/200/350 加「−10」看结局", "v1.25.21 — 修复巫医蛊毒发动后心不变黑（改为当场把全场红心燃成黑毒心 poison=true，立显🖤、连之毒全场）", "v1.25.20 — 修复炸弹说明里 {W} 未解析（tr→L，按种族渲染武器名）", "v1.25.19 — 英文文案——减伤 Cut→DR，护甲进度统一为 Armor XP（仅英文，中文不变）", "v1.25.18 — 13 个职业主动技能全部补上详细说明 desc（嗜血/蛊毒/箭雨/圣盾/囤金/收买/狂怒/重生等点开都有完整规则）", "v1.25.17 — 修复回放期间误写存档（退出后「继续上局」会接着玩回放残局；连带修复回放跳转按钮回合数错乱）——saveGame 回放中跳过", "v1.25.16 — 修复巫医蛊毒/黑毒心对剑免疫 Boss 没效果（毒伤改为命中全场怪含剑免疫，排除终焉，与炸弹/吸魂一致）", "v1.25.15 — 新增网页图标 favicon（内联 SVG 金色城堡+小旗，零外部文件）+ theme-color；游戏页与首页都加", "v1.25.14 — 修复炸弹炸怪同回合升级时升级框盖住爆炸特效（实玩等特效播完~0.43s再弹框；回放不受影响）", "v1.25.13 — 精简落地页玩法说明（去掉每50回合Boss强档/500回合破关剧透，保留神秘感，中英压缩一屏内）", "v1.25.12 — 修复回放「连线不对」（改两拍：结算前先画线再结算）+ 进度条独占一行/步进键保留占位/顶栏文字简化为「回合 X/总」", "v1.25.11 — 修复主栏红字与展开栏不一致（主栏也逐行按各自 red 标记上色，共用 logColor）", "v1.25.10 — 修复回放完全不显示连线（保留连线、只在暂停/跳转/结束清）+ 日志框左右与棋盘对齐", "v1.25.9 — 修复完整日志里红字丢失（历史记录带 red 标记）+ 主界面日志加框", "v1.25.8 — 修复吸魂红线闪 2 次（动画加 fill:forwards + 初始隐藏，去掉结束回弹）", "v1.25.7 — 炸弹爆炸特效（每个命中怪/Boss 格爆橙色闪光+扩散环；纯 UI）", "v1.25.6 — 修复回放/跳转后残留旧连线（画在重排棋盘上像“连了没连的”）+ 快进时不放吸魂特效", "v1.25.5 — 吸魂大法吸血特效（从被吸目标格画红线指向血条；纯 UI）", "v1.25.4 — 矮人↔兽人武器对调（兽人🪓斧、矮人🔨锤，纯显示）+ README 加在线试玩链接", "v1.25.3 — 会长「收买」改为真花「全怪血量」金币买通 + 移除冷却；饕餮显示动态攻击角标（=血量50%）", "v1.25.2 — 修复回放中可操作棋盘致回放与真实不符；回放控制改版（点棋盘暂停 + ◀▶单回合步进，边界变灰）", "v1.25.1 — 修复转职后技能/商店按钮停留在禁用态（老问题）——updateHUD 移到 busy 复位之后", "v1.25.0 — 职业进阶链重构（50主动→100锁定专属被动→200同族另一被动）+ 拆出皆可为剑/万物皆毒(黑毒心)", "v1.24.3 — 调高怪物/Boss 攻击力（怪 lv×0.7→1.1、Boss lv×1.2→1.8），避免后期护甲碾压攻击只吃 1 点", "v1.24.2 — 修复点版本号一直「加载中」（更新日志改为嵌入页面、零网络，dr.sh 自动从 CHANGELOG 注入）"];   /* auto-injected by dr.sh embed-changelog（勿手改） */
 const DEV=false;   // release build (DEV=false); dev build is dungeon-raid-dev.html (DEV=true)
 const REC_API='https://api.dungeonraid.win';   // 录像分享 API（Cloudflare Worker + KV）
 // 带种子随机数（mulberry32）：游戏全程用 rnd() 取代原生随机，配合录制种子可确定性重放
@@ -224,7 +223,6 @@ function setLang(l){
   try{ localStorage.setItem('dr_lang',lang); }catch(e){}
   const lb=document.getElementById('langBtn'); if(lb) lb.textContent = lang==='en'?'中文':'EN';
   applyStaticLang();
-  logClear();   // 日志条目已是翻译好的定文（含 −5 等动态值），切语言无法逐条回译——清空，后续事件按新语言记
   if(player) updateHUD();
   // 选职业界面正开着 → 用新语言重绘
   if(!grid && document.getElementById('overlay').classList.contains('show')) showClassSelect();
@@ -234,7 +232,7 @@ function applyStaticLang(){
   const set=(id,txt)=>{ const el=document.getElementById(id); if(el) el.textContent=txt; };
   if(document.documentElement) document.documentElement.lang = lang==='en'?'en':'zh-CN';
   const tt=document.getElementById('title');
-  if(tt) tt.innerHTML = tr('　　🏰 地牢突袭·网页版','　　🏰 Dungeon Raid · Web');
+  if(tt) tt.innerHTML = tr('　　🏰 地牢突袭·网页版 <span class="sub">Dungeon Raid</span>','　　🏰 Dungeon Raid · Web');
   set('lblHp', tr('生命','HP'));
   set('lblAr', tr('护甲进度','Armor XP'));
   set('lblXp', tr('等级经验','Level XP'));
@@ -252,7 +250,6 @@ function applyStaticLang(){
 //==================== 状态 ====================
 let grid, player, selection, dragging, anim, busy=false, pendingLevels=0;
 let rec=null, replaying=false;   // rec=本局录像{v,seed,race,acts}；replaying=回放中（回放时不录、抑制弹窗）
-let replayResumeState=null;   // 进入回放前的 live 快照：退出回放时恢复，避免技能槽/职业/棋盘状态泄漏回实玩
 let headless=false;   // 无头机器人模式：抑制升级弹窗(及其抽池消耗RNG)，由机器人自行抽池+录制，保证录像可确定性重放
 
 function newPlayer(){
@@ -288,8 +285,8 @@ const BOSSES=[
   { id:'ghost', emoji:'👻', name:['幽灵','Ghost'], quip:['{W}？穿过去了，挠痒痒都算不上。','{W}s? They pass right through me.'],
     desc:['{WC}对它无效，只能用 💥炸弹 炸。倒计时归零会对你重击！','Immune to {WC} — only the 💥 Bomb hurts it. It strikes you hard at 0!'] },
   { id:'clown', emoji:'🤡', name:['小丑','Clown'], quip:['笑一个嘛，反正棋盘已经乱了。','Smile! Your board is a mess anyway.'], perTurn:true,
-    special:['每回合重洗几个资源棋子','Re-rolls a few resource tiles each turn'],
-    desc:['{WC}对它无效，只能用 💥炸弹 炸。它【每回合】把场上随机几个非怪棋子重洗成别的资源（剑/盾/心/金），搅乱你的连线节奏。它不会变出新怪、也不碰你已有的怪/Boss（出怪是召唤师的活）——纯粹捣乱，趁早炸掉它。','Immune to {WC} — only the 💥 Bomb works. Every turn it re-rolls a few random non-monster tiles into other resources ({WC}/shield/heart/coin), disrupting your chains. It does NOT spawn monsters and never touches your existing foes (summoning is the Summoner’s job) — pure chaos, so bomb it early.'],
+    special:['每回合打乱 3 个棋子','Scrambles 3 tiles each turn'],
+    desc:['{WC}对它无效，只能用 💥炸弹 炸。它【每回合】都会随机打乱棋盘上 3 个棋子，制造持续混乱！','Immune to {WC} — only the 💥 Bomb works. Every turn it scrambles 3 random tiles, causing constant chaos!'],
     act(t){ const k=scrambleTiles(2+(t.tier||1), ['boss','enemy']); log(tr(`🤡 小丑捣乱，打乱了 ${k} 个棋子！`,`🤡 The Clown scrambles ${k} tiles!`), 'debuff'); } },
   { id:'vampire', emoji:'🧛', name:['吸血鬼','Vampire'], quip:['你的心留着也浪费，我喝了。','Those hearts are wasted on you. Mine now.'], perTurn:true, swordable:true,
     special:['每回合吸取场上的 ❤️ 回血','Drains ❤️ each turn to heal'],
@@ -357,7 +354,6 @@ const BOSSES=[
       t.cd=t.baseCd=K+2+extraFoeCd(); },   // 再冻间隔 = 冻结时长+2，> 冻结时长 → 必留出可炸窗口（不靠通用 cd）
     cdAttack(t){ this.onSpawn(t); } },   // 倒计时归零 → 再次冰封（不造成伤害；cd 由结算重置回 baseCd）
   { id:'birdman', emoji:'🦅', name:['鸟人','Birdman'], quip:['抓不住我，我会飞（还会瞬移）。','Catch me? I fly — and teleport.'], monster:true, swordable:true, perTurn:true,
-    atkLabel:['啄击伤害','Peck damage'], shownAtk:t=>Math.max(1,Math.ceil(t.atk*0.5)),   // 面板/角标展示真实啄击伤害（基础 atk 的 50%，向上取整）
     special:['每回合啄你一下并瞬移换位','Pecks you and teleports each turn'],
     desc:['可以用{W}攻击它。它【每回合】都会俯冲啄你一下，并在回合末和棋盘上任意一个棋子【互换位置】——飘忽难缠，想连它的{WC}得算准它的落点，速战速决！','You CAN hit it with a {WC}. Every turn it dives to peck you, then swaps places with a random tile at turn end — elusive and nagging, so line up your chain where it lands and finish it fast!'],
     act(t){
@@ -465,14 +461,14 @@ function checkDeadlock(){
 function isInfected(){ for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const t=grid[r][c]; if(t&&t.type==='boss'&&t.bossId==='zombie') return true; } return false; }
 // 污染怪在场：全场心变毒心（绿心），连之扣血；炸掉它即恢复正常（光环式，不留持久状态）
 function pollutionActive(){ for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const t=grid[r][c]; if(t&&t.type==='boss'&&t.bossId==='pollution') return true; } return false; }
-// 随机把 n 个棋子重洗成新的随机【资源】棋子（只出剑/盾/心/金，不出怪——出怪是召唤师的活，避免小丑与之重合）
+// 随机把 n 个非 Boss 棋子换成新的随机棋子
 function scrambleTiles(n, excludeTypes){
   const cells=[];
   const excl = excludeTypes||['boss'];
   for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const t=grid[r][c]; if(t && !excl.includes(t.type)) cells.push([r,c]); }
   for(let i=cells.length-1;i>0;i--){ const j=Math.floor(rnd()*(i+1)); [cells[i],cells[j]]=[cells[j],cells[i]]; }
-  const k=Math.min(n,cells.length), pool=connectablePool();
-  for(let i=0;i<k;i++){ const [r,c]=cells[i]; const nt=makeTile(pool[Math.floor(rnd()*pool.length)]); nt.curY=cellY(r); grid[r][c]=nt; }   // 指定资源类型→绝不滚出怪
+  const k=Math.min(n,cells.length);
+  for(let i=0;i<k;i++){ const [r,c]=cells[i]; const nt=makeTile(); nt.curY=cellY(r); grid[r][c]=nt; }
   syncPositions(false);
   return k;
 }
@@ -536,14 +532,12 @@ const TIER1={
   elder:{n:['森林长老','Forest Elder'], quip:['生命有借有还——敌人先还。','Life is a loan; your enemies pay first.'], skill:{name:['蔓藤缠绕','Vine Coil'], short:['3回合内每回合全场怪 −30%你最大生命','3 turns: all foes −30% your max HP/turn'], desc:['发动后接下来 3 个回合，每回合让场上所有怪/Boss（含剑免疫，终焉之主除外）损失「你最大生命的 30%」。被缠绕期间敌人格变绿。','For the next 3 turns, every turn all enemies/bosses (incl. sword-immune; Overlord excluded) lose 30% of your max HP. Cursed foes glow green.'], cd:5, f:p=>{ p.deathCoil=3; log(tr('🟢 蔓藤缠绕：未来 3 回合，全场怪每回合流失你 30% 最大生命！','🟢 Vine Coil: for 3 turns, all foes lose 30% of your max HP each turn!'), 'buff'); return true; }}},
   blacksmith:{n:['锻造师','Blacksmith'], quip:['盾别拿手里，焊身上才香。','Do not hold shields — wear them.'], skill:{name:['锻甲','Forge Armor'], short:['收全场盾→护甲','Absorb all shields'], desc:['吞下棋盘上所有的盾，按「每盾护甲进度」一次性转成护甲进度并立刻结算升甲。兽人无甲→无效；场上没盾→无效、不进冷却。','Devours every shield on the board, converting each into Armor XP at your per-shield rate and leveling armor at once. No effect for the armor-less Orc, or when there are no shields (no cooldown then).'], cd:5, f:p=>{ if(p.noArmor) return false; let n=0; for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){const t=grid[r][c]; if(t&&t.type==='shield'){grid[r][c]=null;n++;}} if(!n)return false; p.shieldXp+=n*p.armorPerShield; while(p.shieldXp>=armorNeeded(p.armor)){p.shieldXp-=armorNeeded(p.armor);p.armor++;} applyGravity(); syncPositions(false); log(tr(`🔰 锻甲：吞下 ${n} 盾（减伤 ${p.armor}）`,`🔰 Forge: ${n} shields (armor ${p.armor})`), 'buff'); return n; }}},
   miser:{n:['守财奴','Miser'], quip:['钱躺一会儿，利滚利。','Let the gold nap — it wakes up doubled.'], skill:{name:['囤金','Hoard'], short:['锁金生利','Lock gold for interest'], desc:['锁金 4 回合：期间金币不直接进账、也不能用商店/技能，而是先囤起来；4 回合后一次性按 2.5 倍返还囤积的金币。','Locks gold for 4 turns: coins are stockpiled (not banked or spent) and shop/skills are disabled; after 4 turns the stockpile is paid back at 2.5×.'], cd:5, f:p=>{ if(p.goldLock>0) return false; const n=4; p.goldLock=n; p.goldFrozen=0; log(tr(`🔒 囤金：锁定 ${n} 回合（期间不产/不花金币，到期返还 2.5 倍）`,`🔒 Hoard: locked ${n} turns (no gold in/out; 2.5× payout at end)`), 'buff'); return true; }}},
-  guildmaster:{n:['会长','Guild Master'], quip:['有钱能使鬼推磨。','Money makes the world go round.'], skill:{name:['收买','Buyout'], short:['花「全怪血量」的金币把全场怪买通成金币','Pay gold = total enemy HP to bribe all enemies into coins'], desc:['花费「场上所有普通怪当前血量之和」那么多金币，把它们全部买通、原地变成金币（不影响 Boss）。金币不够则发动不了。无冷却，钱够就能反复用。学了「小气鬼」后花费减半。','Spend gold equal to the total current HP of all regular monsters to bribe them all into coins on the spot (bosses unaffected). Fails if you cannot afford it. No cooldown — reusable while you have the gold. Costs half once you have Cheapskate.'], cd:5, noCd:true, f:p=>{ let hp=0; const cells=[]; for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const t=grid[r][c]; if(t&&t.type==='enemy'){ hp+=t.hp; cells.push([r,c]); } } const cost=p.cheapskate?Math.ceil(hp/2):hp;   // 小气鬼：买通花费也减半（会长100回合必得小气鬼）
+  guildmaster:{n:['会长','Guild Master'], quip:['有钱能使鬼推磨。','Money makes the world go round.'], skill:{name:['收买','Buyout'], short:['花「全怪血量」的金币把全场怪买通成金币（无冷却）','Pay gold = total enemy HP to bribe all enemies into coins (no cooldown)'], desc:['花费「场上所有普通怪当前血量之和」那么多金币，把它们全部买通、原地变成金币（不影响 Boss）。金币不够则发动不了。无冷却，钱够就能反复用。学了「小气鬼」后花费减半。','Spend gold equal to the total current HP of all regular monsters to bribe them all into coins on the spot (bosses unaffected). Fails if you cannot afford it. No cooldown — reusable while you have the gold. Costs half once you have Cheapskate.'], cd:5, noCd:true, f:p=>{ let hp=0; const cells=[]; for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const t=grid[r][c]; if(t&&t.type==='enemy'){ hp+=t.hp; cells.push([r,c]); } } const cost=p.cheapskate?Math.ceil(hp/2):hp;   // 小气鬼：买通花费也减半（会长100回合必得小气鬼）
     if(!cells.length || p.gold<cost) return false; p.gold-=cost;   // 真正花钱：付「全怪血量」金币买通
     for(const [r,c] of cells){ const nt=makeTile('coin'); nt.curY=cellY(r); grid[r][c]=nt; } syncPositions(false); log(tr(`💰 收买：花 ${cost} 金币买通 ${cells.length} 只怪，化为金币！`,`💰 Buyout: paid ${cost} gold to bribe ${cells.length} enemies into coins!`), 'buff'); return cells.length; }}},
-  musketeer:{n:['火枪手','Musketeer'], quip:['一颗子弹，喂饱最肥的那个。','One bullet for the fattest one.'], skill:{name:['狙击','Snipe'], short:['优先轰 Boss；多 Boss 取血最少','Prioritize bosses; lowest-HP boss first'], desc:['优先狙击场上的 Boss；如果有多个 Boss，则选择【生命最低】的那个。若场上没有 Boss，再狙击当前生命最高的怪/Boss（炸弹式攻击，含{W}免疫与特殊 Boss，终焉之主除外），伤害 = 炸弹伤害 ×2（炸弹被「爆破手」强化时，狙击同步增强）。若这一发把它打死，获得 3 倍经验与 3 倍金币。场上没有目标时无效、不进冷却。','Prioritize bosses on the board; if there are multiple bosses, shoot the one with the **lowest HP**. If there is no boss, fall back to the highest-HP monster/boss (bomb-type — hits {W}-immune & special bosses; not the Overlord) for 2× your Bomb damage (scales with Demolitionist). If the shot kills, gain triple XP and triple gold. No effect — and no cooldown — when there is no target.'], cd:5, f:p=>{
-    let bossT=null, bossR=-1, bossC=-1, bossHP=Infinity, t=null, tr_=-1, tc=-1, best=-1;
-    for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const g=grid[r][c]; if(!g || g.finale) continue; if(g.type==='boss'){ if(g.hp<bossHP){ bossT=g; bossHP=g.hp; bossR=r; bossC=c; } }
-      else if(g.type==='enemy' && g.hp>best){ t=g; best=g.hp; tr_=r; tc=c; } }
-    if(bossT){ t=bossT; tr_=bossR; tc=bossC; } else if(!t){ return false; }
+  musketeer:{n:['火枪手','Musketeer'], quip:['一颗子弹，喂饱最肥的那个。','One bullet for the fattest one.'], skill:{name:['狙击','Snipe'], short:['对最肥目标轰一发 炸弹×2；击杀得3倍奖励','Blast the toughest foe for 2× Bomb; triple rewards on kill'], desc:['对场上当前生命最高的怪/Boss（炸弹式攻击，含{W}免疫与特殊 Boss，终焉之主除外）打一发，伤害 = 炸弹伤害 ×2（炸弹被「爆破手」强化时，狙击同步增强）。若这一发把它打死，获得 3 倍经验与 3 倍金币。场上没有目标时无效、不进冷却。','Fires at the highest-HP monster/boss on the board (bomb-type — hits {W}-immune & special bosses; not the Overlord) for 2× your Bomb damage (scales with Demolitionist). If the shot kills, gain triple XP and triple gold. No effect — and no cooldown — when there is no target.'], cd:5, f:p=>{
+    let t=null, tr_=-1, tc=-1, best=-1;
+    for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const g=grid[r][c]; if(g&&(g.type==='enemy'||(g.type==='boss'&&!g.finale)) && g.hp>best){ t=g; best=g.hp; tr_=r; tc=c; } }
     if(!t) return false;   // 没有可狙击目标
     const D=bombDamage(p)*2, isBoss=t.type==='boss', before=t.hp, dealt=Math.min(D,before);
     addBombFx(tr_,tc); t.hp-=D; statueReflect(t, dealt);   // 复用炸弹特效；石像会反弹
@@ -558,7 +552,7 @@ const TIER1={
   fighter:{n:['斗士','Fighter'], quip:['越打越精神，血是我的能量饮料。','The more I fight, the better I feel.'], skill:{name:['嗜血','Bloodthirst'], short:['回血+本回合可攻击{W}免疫怪','Heal + pierce {W}-immunity'], desc:['本回合的{W}攻击附带两个效果：① 每命中一只怪/Boss 回复 3 点生命（按命中数算，不是击杀数）；② 可以打到平时{W}免疫的 Boss（幽灵/小丑/雪人/污染怪等，终焉之主除外）。只持续本回合，本回合不出{W}就浪费。','This turn your {W} attack gains two effects: (1) heal 3 HP per foe you hit (by hits, not kills); (2) it can strike normally {W}-immune bosses (Ghost/Clown/Snowman/Corruptor…; not the Overlord). This turn only — wasted if you make no {W} attack.'], cd:5, f:p=>{ p.bloodthirst=1; p.pierceTurn=true; log(tr(`🩸 嗜血：本回合${wChain()}每击中一只怪回 3 血，且可用${wN()}攻击${wN()}免疫的 Boss（幽灵/小丑）`,`🩸 Bloodthirst: heal 3 per enemy hit this turn, and your ${wN()} can hit ${wN()}-immune bosses (Ghost/Clown)`), 'buff'); return true; }}},
   witchdoctor:{n:['巫医','Witch Doctor'], quip:['你的心意我收下，怪替你喝。','Your love? The monsters drink it for you.'], skill:{name:['蛊毒','Hex'], short:['全场心燃成黑毒心','Burn hearts → black poison'], desc:['把棋盘上所有的红心当场燃成黑毒心（🖤）。之后连接黑毒心不回血，而是把这些生命当毒灌给场上所有怪/Boss（含{W}免疫的，终焉之主除外，与炸弹同口径）。毒伤 = 心数 × 每颗心回复量 × 连击。场上没有心时无效、不进冷却。','Burns every red heart on the board into a black poison heart (🖤) on the spot. Linking a black heart heals nothing — it poisons every foe instead (incl. {W}-immune; not the Overlord, same reach as the Bomb). Poison = hearts × heal-per-heart × combo. No effect — and no cooldown — if there are no hearts.'], cd:5, f:p=>{ let n=0; for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const t=grid[r][c]; if(t&&t.type==='heart'&&!t.poison){ t.poison=true; n++; } } if(!n) return false; syncPositions(false); log(tr(`🧪 蛊毒：${n} 颗心燃成黑毒心（连它们毒灌全场怪、不回血）`,`🧪 Hex: ${n} hearts burned into black poison (link them to poison all foes, no heal)`), 'buff'); return n; }}},
   swordsaint:{n:['剑圣','Sword Saint'], quip:['在我眼里，万物皆可开刃。','In my eyes, anything can be a blade.'], skill:{name:['化剑','Bladeshift'], short:['全场心/金币→剑','Hearts & coins → swords'], desc:['把棋盘上所有的心和金币都变成{W}，便于接出更长的{W}链打出爆发。场上没有心/金币时无效、不进冷却。','Turns every heart and coin on the board into {W}s so you can chain longer for a burst. No effect — and no cooldown — if there are none.'], cd:5, f:p=>{ let n=0; for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const t=grid[r][c]; if(t&&(t.type==='heart'||t.type==='coin')){ t.type='sword'; n++; } } if(!n) return false; log(tr(`⚔️ 化剑：${n} 个心/金币化为剑`,`⚔️ Bladeshift: ${n} hearts/coins → swords`), 'buff'); return n; }}},
-  necromancer:{n:['死灵','Necromancer'], quip:['你的魂，我借来续命。','Your soul keeps me going. Thanks.'], skill:{name:['吸魂大法','Soul Drain'], short:['随机吸 2 个目标的生命补自己','Drain 2 random targets to heal'], desc:['随机选 2 个目标下手——普通怪或 Boss 都行，<b>含 {W} 免疫的特殊 Boss</b>（幽灵/小丑/污染怪/雪人），仅终焉之主除外。<br>对每个目标，吸取「你当前生命上限」与「它当前血量」里<b>较小</b>的那个：所以<b>吸力随你的生命上限成长</b>——上限越高，单发吸得越狠、越容易一发吸死（吸取量 ≥ 它血量即死亡）。<br>吸到的生命总量给你回血，<b>封顶在生命上限</b>（活死人「一切治疗减半」对这部分也生效）。<br>协同：① 学了「溅射」，被吸死目标多出的吸力（你的上限 − 它血量）会溅到剩余的一个敌人；② 击杀同样会触发「汲取生命」（前提是你还有血量空间）。<br>打法：应急回血 + 专治 {W} 免疫 Boss；越堆生命上限（巨力等）越强。','Drains 2 random targets — regular monsters or bosses alike, <b>including {W}-immune special bosses</b> (Ghost/Clown/Corruptor/Snowman); only the Overlord is exempt.<br>From each it takes the <b>lesser</b> of your current max HP and the target’s current HP — so its power <b>scales with YOUR max HP</b>: the higher your cap, the harder each drain hits and the more likely it kills outright (drain ≥ its HP = dead).<br>The total drained heals you, <b>capped at your max HP</b> (Undead’s halved-healing applies here too).<br>Synergy: (1) with Splash, a lethal drain’s leftover power (your max HP − its HP) splashes to one more foe; (2) kills also trigger Drain Life (if you have HP to spare).<br>Play: emergency healing + a hard counter to {W}-immune bosses; scales with max-HP builds (Titan, etc.).'], cd:5, f:p=>{
+  necromancer:{n:['死灵','Necromancer'], quip:['你的魂，我借来续命。','Your soul keeps me going. Thanks.'], skill:{name:['吸魂大法','Soul Drain'], short:['随机吸 2 个目标的生命补自己','Drain 2 random targets to heal'], desc:['随机选 2 个目标（怪或 Boss，含{W}免疫的，终焉之主除外）。每个吸取「你的生命上限」与「它当前血量」中的较小值——即单个最多吸等于你生命上限的血，吸取量≥它血量就把它吸死。吸到的总量给你回血（受治疗减半等影响）。若把目标吸死且已学「溅射」，多出的吸力（你的上限−它血量）会溅射到剩余的一个敌人。','Picks 2 random targets (monsters or bosses, incl. {W}-immune; not the Overlord). Each drains the lesser of your max HP and its current HP — so up to your max HP per target, and it dies if that ≥ its HP. The total drained heals you (subject to halved healing, etc.). If a drained target dies and you have Splash, the overflow (your max HP − its HP) splashes to a remaining foe.'], cd:5, f:p=>{
     const foes=[]; for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const t=grid[r][c]; if(t&&(t.type==='enemy'||(t.type==='boss'&&!t.finale))) foes.push([r,c]); }
     if(!foes.length) return false;
     for(let i=foes.length-1;i>0;i--){ const j=Math.floor(rnd()*(i+1)); [foes[i],foes[j]]=[foes[j],foes[i]]; }
@@ -572,17 +566,13 @@ const TIER1={
     const h=gainHeal(healed); const lh=lifestealHeal(kills); applyGravity(); syncPositions(false);
     log(tr(`🪄 吸魂大法：吸取 ${pick.length} 个目标 ${healed} 生命，回血 ${h}`+(kills?`，击杀 ${kills} 只`:'')+(lh?`，吸血 +${lh}`:'')+(splashes.length?`，溅射 ${splashes.length} 次`:''),`🪄 Soul Drain: drained ${healed} from ${pick.length}, +${h} HP`+(kills?`, ${kills} killed`:'')+(lh?`, +${lh} lifesteal`:'')+(splashes.length?`, ${splashes.length} splash`:'')), 'heal'); return true; }}},
   skeletonking:{n:['骷髅王','Skeleton King'], quip:['死过一次，再死一次又何妨。','Died once already — what is one more?'], skill:{name:['重生','Rebirth'], short:['本回合致死则满血复活(此后冷却+2)','Cheat death this turn, full heal'], desc:['发动后本回合若受到致命伤害，会立刻满血复活而非死亡。每触发一次，重生的冷却永久 +2。发动即进入冷却（无论本回合是否真的触发）。','Armed this turn: if a lethal blow lands, you revive at full HP instead of dying. Each trigger permanently raises Rebirth’s cooldown by 2. Goes on cooldown when cast, whether or not it triggers.'], cd:5, f:p=>{ p.rebirthTurn=true; log(tr('💀 重生待命：本回合若被击败，将满血复活！','💀 Rebirth armed: if slain this turn, revive at full HP!'), 'buff'); return true; }}},
-  butcher:{n:['屠夫','Butcher'], quip:['钩子一甩，肉就乖乖到底。','One swing of the hook, and the meat comes to me.'], skill:{name:['钩子','Hook'], short:['拉到底排；离底越远伤害越高','Drag down; farther from bottom = more damage'], desc:['一钩把棋盘上所有的怪和 Boss（含{W}免疫，终焉之主除外）顺着各自所在列拉到尽可能底部，其余棋子上浮；随后按【离底线的距离】造成伤害：最底排吃 1× 固定伤害、倒数第二排吃 2×，依此类推。场上没有可拉的敌人时无效、不进冷却。','Hooks every monster & boss (incl. {W}-immune; not the Overlord) down to the bottom of its column while other tiles float up; then deals damage by【distance from the bottom】— bottom row takes 1× flat damage, second-from-bottom 2×, and so on. No effect — and no cooldown — when there is nothing to pull.'], cd:5, f:p=>{
-    let moved=0, any=false, dmg=0, kills=0; const isMon=t=>t&&(t.type==='enemy'||t.type==='boss')&&!t.finale; const hookBase=Math.max(1, p.swordFlat||0);
-    for(let c=0;c<COLS;c++){ const col=[]; for(let r=0;r<ROWS;r++) col.push(grid[r][c]); if(!col.some(isMon)) continue; any=true;
+  butcher:{n:['屠夫','Butcher'], quip:['钩子一甩，肉就乖乖到底。','One swing of the hook, and the meat comes to me.'], skill:{name:['钩子','Hook'], short:['把全场怪/Boss 拉到最底排','Drag all foes to the bottom rows'], desc:['一钩把棋盘上所有的怪和 Boss（含{W}免疫，终焉之主除外）顺着各自所在列拉到尽可能底部，其余棋子上浮——把敌人聚到底排，便于一条{W}链穿杀或集中处理。场上没有可拉的敌人时无效、不进冷却。','Hooks every monster & boss (incl. {W}-immune; not the Overlord) down to the bottom of its column while other tiles float up — herding foes into the bottom rows so one {W} chain can skewer many at once. No effect — and no cooldown — when there is nothing to pull.'], cd:5, f:p=>{
+    let moved=0; const isMon=t=>t&&(t.type==='enemy'||t.type==='boss')&&!t.finale;
+    for(let c=0;c<COLS;c++){ const col=[]; for(let r=0;r<ROWS;r++) col.push(grid[r][c]); if(!col.some(isMon)) continue;
       const newCol=col.filter(t=>!isMon(t)).concat(col.filter(isMon));   // 非敌上浮、敌沉底
       for(let r=0;r<ROWS;r++){ if(grid[r][c]!==newCol[r]) moved++; grid[r][c]=newCol[r]; } }
-    if(!any) return false;
-    for(let r=ROWS-1;r>=0;r--)for(let c=0;c<COLS;c++){ const t=grid[r][c]; if(!isMon(t)) continue;
-      const hit=Math.min(t.hp, hookBase*(ROWS-r)); t.hp-=hit; dmg+=hit; statueReflect(t, hit);
-      if(t.hp<=0){ const isB=t.type==='boss'; grid[r][c]=null; kills++; if(isB){ thiefRecover(t); player.xp+=15; player.gold+=20; onBossKilled(); } else { player.xp+=3+(player.killXp||0); player.gold+=1; if(player.rotflesh) player.maxHp++; } } }
-    const lh=lifestealHeal(kills); applyGravity(); syncPositions(false);   // 满盘时 applyGravity 为空操作、不消耗 RNG；纯重排，重放确定
-    log(tr(`🪝 钩子：把全场怪/Boss 拉到底排，造成 ${dmg} 伤害`+(kills?`，击杀 ${kills}`:'')+(lh?`，吸血 +${lh}`:''),`🪝 Hook: dragged all foes down for ${dmg} damage`+(kills?`, ${kills} killed`:'')+(lh?`, +${lh} lifesteal`:'')), moved?'buff':''); return true; }}},
+    if(!moved) return false; applyGravity(); syncPositions(false);   // 满盘时 applyGravity 为空操作、不消耗 RNG；纯重排，重放确定
+    log(tr('🪝 钩子：把全场怪/Boss 拉到底排！','🪝 Hook: dragged all foes to the bottom!'), 'buff'); return true; }}},
 };
 // 二阶职业：被动
 const TIER2={
@@ -828,37 +818,22 @@ function prefetchSeed(){
   if(typeof navigator!=='undefined' && navigator.onLine===false){ _seedPrefetch=Promise.resolve(null); return; }   // 明确离线：不发请求
   _seedPrefetch=(async()=>{
     try{ const r=await fetch(REC_API+'/seed',{method:'POST'});
-      if(r&&r.ok){ const x=await r.json(); if(typeof x.seed==='number'&&x.token) return {seed:x.seed>>>0, token:x.token, threshold:x.threshold||null}; }
+      if(r&&r.ok){ const x=await r.json(); if(typeof x.seed==='number'&&x.token) return {seed:x.seed>>>0, token:x.token}; }
     }catch(e){} return null;
   })();
-}
-// 顶部居中的临时提示条，数秒后淡出（纯 UI，不影响逻辑/重放）
-function toast(html, ms){
-  if(headless||replaying) return;
-  let el=document.getElementById('toast');
-  if(!el){ el=document.createElement('div'); el.id='toast'; document.body.appendChild(el); }
-  el.style.cssText='position:fixed;left:50%;top:13%;transform:translateX(-50%);max-width:86%;z-index:70;background:rgba(40,32,16,.96);border:1px solid var(--gold);color:#ffe9a8;font-size:13px;line-height:1.55;padding:10px 14px;border-radius:12px;box-shadow:0 6px 24px rgba(0,0,0,.55);text-align:center;transition:opacity .45s;opacity:1';
-  el.innerHTML=html;
-  clearTimeout(toast._t); toast._t=setTimeout(()=>{ el.style.opacity='0'; }, ms||4200);
-}
-// 没拿到服务端种子时的统一提示：醒目 toast + 日志，讲清「本地随机、照常可玩、只是不计榜」
-function offlineSeedNotice(){
-  log(tr('⚠️ 没拿到服务端种子：本局本地随机，照常可玩，只是不计排行榜。','⚠️ No server seed: local random run — fully playable, just not ranked.'), 'debuff');
-  toast(tr('⚠️ 没拿到服务端种子，本局用<b>本地随机</b>开局<br>照常可玩，<b>只是不计排行榜</b>','⚠️ No server seed — using a <b>local random</b> seed<br>fully playable, <b>just not ranked</b>'));
 }
 // 开新局入口：正式版先向服务端要一个种子+token（防离线刷幸运种子）；dev 或离线失败 → 本地随机（可玩，不计排名）
 async function freshStart(rc){
   if(DEV){ startGame(rc); return; }
-  if(typeof navigator!=='undefined' && navigator.onLine===false){ startGame(rc); offlineSeedNotice(); return; }   // 明确离线：秒开不等
+  if(typeof navigator!=='undefined' && navigator.onLine===false){ startGame(rc); log(tr('⚠️ 离线：本局可玩，但不计排名。','⚠️ Offline: playable but not ranked.')); return; }   // 明确离线：秒开不等
   if(!_seedPrefetch) prefetchSeed();   // 没在选种族页预取过（如直接进）就现取
   let srv=null;
   try{ srv=await Promise.race([ _seedPrefetch, new Promise(res=>setTimeout(()=>res(null), 2500)) ]); }catch(e){}   // 预取通常此刻已就绪；最多再等 2.5s 回退本地
   _seedPrefetch=null;   // 用过即弃，下局重取
   startGame(rc, srv);
-  if(!srv) offlineSeedNotice();
+  if(!srv) log(tr('⚠️ 离线/未取到服务端种子：本局可玩，但不计排名。','⚠️ Offline / no server seed: playable but not ranked.'));
 }
 function startGame(rc, srv){   // srv={seed,token}：服务端发的种子（正式版上榜用）；缺省则本地随机（dev / 离线，不计排名）
-  ended=false;   // 新局开始，重新允许存档
   let firstGame=false;
   if(replaying){ srand(replayRec.seed); firstGame=!!replayRec.tut; }   // 回放：是否新手局以录像里的 tut 标志为准（保持棋盘可复现）
   else {
@@ -866,7 +841,6 @@ function startGame(rc, srv){   // srv={seed,token}：服务端发的种子（正
     const seed = (srv && typeof srv.seed==='number') ? (srv.seed>>>0) : (((Date.now()>>>0)^(__seedCtr++*0x9E3779B9))>>>0); srand(seed);
     rec={v:1,seed,ver:VERSION,race:rc.id,t0:Date.now(),acts:[]};        // ver：版本分桶；t0：开局时刻
     if(srv && srv.token) rec.token=srv.token;                          // 服务端种子 token：提交时随录像带上、供 worker 校验
-    if(srv && srv.threshold) rec.threshold=srv.threshold;              // 服务器下发的上传门槛快照：完局时决定是否值得正式上传
     if(firstGame){ rec.tut=1; try{ localStorage.setItem(TUT_KEY,'1'); }catch(e){} }
     saveRec();
   }
@@ -920,9 +894,8 @@ function fmtDur(ms){ const s=Math.round(ms/1000); if(s<60) return tr(`${s} 秒`,
 function saveRec(){ try{ if(rec) localStorage.setItem(REC_KEY, JSON.stringify(rec)); }catch(e){} }
 function loadRec(){ try{ return JSON.parse(localStorage.getItem(REC_KEY)||'null'); }catch(e){ return null; } }
 function getLastRec(){ try{ return JSON.parse(localStorage.getItem(REC_LAST_KEY)||'null'); }catch(e){ return null; } }
-let ended=false;   // 本局是否已结束（死亡/破关）。结束后绝不再写存档——防「死了之后继续上局又能玩」：gameOver/onClear 清了存档，但若随后还有延迟的 updateHUD（如双击连线的 setTimeout）会把死局重新存回去。
 function saveGame(){
-  if(replaying || ended) return;   // 回放中 / 本局已结束 → 不写存档
+  if(replaying) return;   // 回放中绝不写存档：否则回放的临时局面会被存成「上一局」，退出后「继续上局」会接着玩回放的残局（且 rec 与之错位→回放跳转按钮等错乱）
   if(!grid||!player) return;
   try{
     localStorage.setItem(SAVE_KEY, JSON.stringify({
@@ -940,7 +913,6 @@ function loadGame(){
     const data=JSON.parse(localStorage.getItem(SAVE_KEY)); if(!data) return false;
     if(!DEV && data.ver!==VERSION){ clearSave(); try{ localStorage.removeItem(REC_KEY); }catch(e){} return false; }   // 正式版：版本变化→存档不兼容，丢弃从头开始
     player=data.player;
-    ended=false;   // 继续上局 = 恢复进行中的对局，重新允许存档
     pendingLevels=data.pendingLevels||0;
     grid=data.grid.map(row=>row.map(t=> t?{...t}:null));
     rec=loadRec();   // 恢复进行中的录像，继续游戏时录制不断
@@ -1052,9 +1024,9 @@ function draw(){
       ctx.fillStyle='#fff'; ctx.font='700 '+Math.floor(TILE*0.34)+'px system-ui';
       if(!t.finale) ctx.fillText(t.hp, cx, cy+TILE*0.10);
       else { ctx.fillStyle='#ffd54a'; ctx.fillText('∞', cx, cy+TILE*0.10); }
-      // 攻击力角标（左上）——特效/大招型 Boss（攻击力无意义）不显示；但有 shownAtk/dynAtk 的按展示值显示，避免漏看
-      if(!isBoss || (!bdef.act && !bdef.cdAttack) || bdef.shownAtk || bdef.dynAtk){
-        const av=(isBoss && (bdef.shownAtk||bdef.dynAtk)) ? (bdef.shownAtk?bdef.shownAtk(t):bdef.dynAtk(t)) : t.atk;
+      // 攻击力角标（左上）——特效/大招型 Boss（攻击力无意义）不显示；但有动态攻击的（饕餮）按 dynAtk 显示，避免漏看
+      if(!isBoss || (!bdef.act && !bdef.cdAttack) || bdef.dynAtk){
+        const av=(isBoss && bdef.dynAtk) ? bdef.dynAtk(t) : t.atk;
         const ax=x+10, ay=y+10, ar=TILE*0.16;
         ctx.beginPath(); ctx.arc(ax,ay,ar,0,7);
         ctx.fillStyle=(isBoss&&bdef.trueDmg)?'#8e44ad':'#c0392b'; ctx.fill(); ctx.strokeStyle='#000'; ctx.lineWidth=1; ctx.stroke();
@@ -1303,7 +1275,6 @@ function buyItem(key){
   const it=SHOP[key]; if(!it) return;
   const cost=shopCost(key); if(player.gold<cost) return;
   player.gold-=cost; it.f();
-  if(grid.some(row=>row.some(t=>!t))){ applyGravity(); syncPositions(false); }   // 商店即时效果（如神圣打击）若打出空洞，立刻补格；正常回合结算仍走 resolve 末尾统一补格
   recAct(['b',key]);   // 录制购买
   player.shopCd[key]= (key==='bomb' && player.bombCd) ? player.bombCd : 3;  // 影袭：炸弹冷却2回合
   checkLevel(); updateHUD();
@@ -1722,7 +1693,6 @@ function showLevelUp(){
 
 function gameOver(){
   if(jumping) return;   // 跳回合快进中：不弹结束画面（循环靠 hp>0 自行停下）
-  ended=true;   // 本局结束，封死后续存档写入
   busy=true;
   const durMs=playMs();   // 游玩时长（须在 stopReplay 清空 replayRec 之前取）
   const wasReplay=replaying;
@@ -1773,7 +1743,7 @@ function gameOver(){
 // 破关：撑过终焉 10 波。胜利结算 + 破关榜（按最低等级排名）
 function onClear(){
   if(jumping){ player.cleared=true; return; }   // 跳回合快进中：标记破关但不弹结束画面
-  busy=true; player.cleared=true; ended=true;   // 破关也结束本局，封死后续存档
+  busy=true; player.cleared=true;
   const durMs=playMs();   // 游玩时长（须在 stopReplay 前取）
   const wasReplay=replaying;
   for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const t=grid[r][c]; if(t&&t.bossId==='finale') grid[r][c]=null; }  // 移除终焉之主
@@ -1819,7 +1789,6 @@ function wireEndButtons(finished){
 async function submitClear(r, level){
   const box=document.getElementById('rankBox'); if(!box) return;
   if(!r.token){ box.innerHTML=`<div style="text-align:center;color:var(--dim);font-size:12px">${tr('🔌 本局未用服务端种子（离线），未计破关榜','🔌 Offline run (no server seed) — not on clear board')}</div>`; return; }
-  if(r.threshold && r.threshold.upload_min_turns>0 && (r.turns||0) < r.threshold.upload_min_turns){ box.innerHTML=`<div style="text-align:center;color:var(--dim);font-size:12px">${approxPctLine(r.threshold, r.turns||0)}</div>`; return; }
   box.innerHTML=`<div style="text-align:center;color:var(--dim);font-size:12px">🏆 ${tr('破关榜上传中…','Submitting clear…')}</div>`;
   try{
     const res=await fetch(REC_API+'/clear',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({level,rec:r,agent:'human',name:getName()})});   // 真人破关上报人类榜
@@ -1835,12 +1804,6 @@ function rankRow(label, o){
   return `<div style="display:flex;justify-content:space-between;gap:8px;padding:3px 6px;font-size:13px">
     <span>${label}</span><b style="color:var(--gold)">#${o.rank} / ${o.total} · ${tr('超过','beats')} ${o.pct}%</b></div>`;
 }
-function approxPctLine(th, turns){
-  if(!th||!th.total) return tr('📊 本局未达上传门槛，未计入正式榜单','📊 Below upload threshold — not submitted to the ranked board');
-  turns = turns || (player&&player.turns) || 0;
-  const pct = turns>=th.p5?5 : turns>=th.p10?10 : turns>=th.p30?30 : turns>=th.p50?50 : turns>=th.p70?70 : turns>=th.p90?90 : 100;
-  return tr(`📊 本局未达上传门槛（需至少 ${th.upload_min_turns} 回合）；按开局快照估算，约超过 ${pct}% 对局`,`📊 Below upload threshold (need at least ${th.upload_min_turns} turns); launch-time snapshot estimates you beat about ${pct}% of runs`);
-}
 // ==================== 排行榜浏览（人类 / AI 切换） ====================
 let lbAgent='human', lbBoard='top', lbRace='';   // 当前查看：human|ai，top(闯关·按回合)|clear(破关·按最低等级)，lbRace=''为全部种族
 function medal(i){ return i===0?'🥇':i===1?'🥈':i===2?'🥉':`#${i+1}`; }
@@ -1850,7 +1813,7 @@ async function renderLeaderboard(){
   const tab=(id,lab,on)=>`<button class="choice" id="${id}" style="width:auto;margin:0;padding:5px 12px;${on?'border-color:var(--gold);color:var(--gold)':''}">${lab}</button>`;
   const rtab=(id,lab)=>`<button class="choice" id="lbR_${id||'all'}" style="width:auto;margin:0;padding:5px 9px;font-size:13px;${lbRace===id?'border-color:var(--gold);color:var(--gold)':''}">${lab}</button>`;
   card.innerHTML=`<h2 style="color:var(--gold)">🏆 ${tr('排行榜','Leaderboard')}</h2>
-    <p style="color:var(--dim);font-size:12px;margin:-6px 0 8px">${lbBoard==='clear'?tr('历代全部','All builds'):tr('最近 3 个版本','Latest 3 builds')} · ${tr('仅已验证','verified only')}</p>
+    <p style="color:var(--dim);font-size:12px;margin:-6px 0 8px">${tr('最近 3 个版本','Latest 3 builds')} · ${tr('仅已验证','verified only')}</p>
     <div style="display:flex;gap:6px;justify-content:center;margin-bottom:6px">
       ${tab('lbHuman','🧑 '+tr('人类','Human'),lbAgent==='human')}${tab('lbAi','🤖 '+tr('AI','AI'),lbAgent==='ai')}</div>
     <div style="display:flex;gap:6px;justify-content:center;margin-bottom:6px">
@@ -1871,17 +1834,12 @@ async function renderLeaderboard(){
   try{
     const rq = lbRace ? `&race=${lbRace}` : '';
     const ep = lbBoard==='clear'
-      ? `/clearboard?agent=${lbAgent}${rq}&n=20`        // 破关榜：历代全部（稀有里程碑，不按版本分桶，免得被频繁发版挤出窗口）
+      ? `/clearboard?recent=3&agent=${lbAgent}${rq}&n=10`
       : `/top?recent=3&agent=${lbAgent}${rq}&n=10`;
     const res=await fetch(REC_API+ep); const j=await res.json();
     const rows = lbBoard==='clear' ? (j.clears||[]) : (j.top||[]);
-    if(!rows.length){ const empty = lbBoard==='clear'
-        ? tr('🏆 还没有人破关<br><span style="font-size:11px">撑过第 500 回合的终局 10 波即可登顶</span>','🏆 No one has cleared yet<br><span style="font-size:11px">Survive all 10 endgame waves after turn 500 to top it</span>')
-        : tr('暂无记录','No entries yet');
-      list.innerHTML=`<div style="text-align:center;color:var(--dim);padding:20px 0;line-height:1.7">${empty}</div>`; return; }
-    _lbEntries={};
+    if(!rows.length){ list.innerHTML=`<div style="text-align:center;color:var(--dim);padding:20px 0">${tr('暂无记录','No entries yet')}</div>`; return; }
     list.innerHTML=rows.map((e,i)=>{
-      _lbEntries[e.id]=e;   // 缓存榜单条目（含已验证的 level/turns），详情弹框用
       const rc=raceById(e.race); const rn=`${rc?rc.e:'❓'} ${e.name||tr('无名','Anon')}`;
       const ver=e.version&&e.version!==VERSION?` <span style="color:var(--dim);font-size:10px">${e.version}</span>`:'';
       const metric = lbBoard==='clear'
@@ -1893,8 +1851,8 @@ async function renderLeaderboard(){
     list.querySelectorAll('.lbRow').forEach(row=>{ row.onclick=()=>showRecDetail(row.dataset.rid); });   // 整行可点→弹详情（JS 绑定，避免内联 onclick 在 iOS 等环境偶发不触发）
   }catch(e){ list.innerHTML=`<div style="text-align:center;color:var(--dim);padding:20px 0">${tr('榜单加载失败','Leaderboard unavailable')}</div>`; }
 }
-// 点击排行榜玩家名：弹框展示该记录详情（回合/等级/职业线/技能、回放/分享）
-const _recDetailCache = {}; let _lbEntries = {};
+// 点击排行榜玩家名：弹框展示该记录详情（技能列表、最终状态、回放/分享）
+const _recDetailCache = {};
 async function showRecDetail(id){
   let modal=document.getElementById('recModal');
   if(!modal){ modal=document.createElement('div'); modal.id='recModal'; document.body.appendChild(modal); }
@@ -1910,35 +1868,19 @@ async function showRecDetail(id){
     try{ const res=await fetch(REC_API+'/rec/'+id); if(!res.ok) throw 0; rec=await res.json(); _recDetailCache[id]=rec; }
     catch(e){ body.innerHTML=`<span style="color:#c66">${tr('加载失败','Failed')}</span>`; return; }
   }
-  renderRecDetail(rec, body, _lbEntries[id]);
+  renderRecDetail(rec, body);
 }
 function closeRecModal(){ const m=document.getElementById('recModal'); if(m) m.remove(); }
-// 从录像的 acts 里解析职业线（id 取值，跨版本稳定，旧录像也认）：一阶职业 / 二阶被动 / 350 跨界
-function recClassLine(rec){
-  const cls=[];
-  for(const a of (rec.acts||[])){ if(a[0]!=='t') continue;
-    if(a[1]===1 && TIER1[a[2]]) cls.push(L(TIER1[a[2]].n));
-    else if((a[1]===2||a[1]===3) && TIER2[a[2]]) cls.push(L(TIER2[a[2]].n));
-    else if(a[1]===4 && TIER1[a[2]]) cls.push(L(TIER1[a[2]].n)+(a[3]==='heal'?'→💊':'→💥'));
-  }
-  return cls;
-}
-function renderRecDetail(rec, box, entry){
-  entry = entry || {};
-  const turns = entry.turns!=null ? entry.turns : (rec.acts ? rec.acts.filter(a=>a[0]==='m').length : 0);
-  const level = entry.level!=null ? entry.level : '--';
-  const cleared = lbBoard==='clear' || rec.cleared;
-  const rcd = raceById(entry.race||rec.race);
-  const cls = recClassLine(rec);
+function renderRecDetail(rec, box){
   const perks = (rec.perks||[]).map(pid=>{ const u=UPGRADES.find(x=>x.id===pid); return u?L(u.n):pid; });
-  box.innerHTML = `<div style="line-height:1.8">
-    <div>📊 ${tr('回合','Turns')} <b style="color:var(--gold)">${turns}</b> · ${tr('等级','Lv')} <b style="color:var(--gold)">${level}</b>${cleared?` · 🏆 ${tr('已破关','Cleared')}`:''}</div>
-    <div style="margin-top:5px">⚔️ ${rcd?rcd.e+' ':''}${cls.length?cls.join(' / '):tr('（无职业记录）','(no class)')}</div>
-    <div style="margin-top:5px;color:var(--dim);font-size:12px">🔼 ${tr('技能','Perks')}：${perks.length?perks.join(' · '):tr('旧录像未记录','not recorded')}</div>
-    ${rec.token?`<div style="margin-top:5px;color:#8b7aaa;font-size:12px">${tr('服务端种子·可验证','Server seed · verifiable')}</div>`:`<div style="margin-top:5px;color:#c66;font-size:12px">${tr('离线对局','Offline run')}</div>`}
-    <div style="margin-top:12px;display:flex;gap:8px">
-      <button class="choice" id="recReplayBtn" style="flex:1;width:auto;margin:0;padding:7px;font-size:12px;text-align:center">${tr('▶ 回放','▶ Replay')}</button>
-      <button class="choice" id="recShareBtn" style="flex:1;width:auto;margin:0;padding:7px;font-size:12px;text-align:center">${tr('🔗 分享','🔗 Share')}</button>
+  const perksLine = perks.length ? tr('技能','Perks')+': '+perks.join(' / ') : '';
+  box.innerHTML = `<div style="line-height:1.7">
+    ${perksLine?`<div>${perksLine}</div>`:''}
+    <div>❤️ ${tr('最终血量','Final HP')}: <b>${rec.maxHp||'--'}</b> · 💰${tr('金币','Gold')}: <b>${rec.gold||0}</b>${rec.cleared?` · 🏆 ${tr('已破关','Cleared')}`:''}</div>
+    ${rec.token?`<div style="color:#8b7aaa">${tr('服务端种子·可验证','Server seed · verifiable')}</div>`:`<div style="color:#c66">${tr('离线对局','Offline run')}</div>`}
+    <div style="margin-top:12px">
+      <button class="choice" id="recReplayBtn" style="width:auto;padding:5px 14px;font-size:12px">${tr('▶ 回放','▶ Replay')}</button>
+      <button class="choice" id="recShareBtn" style="width:auto;padding:5px 14px;font-size:12px;margin-left:6px">${tr('🔗 分享','🔗 Share')}</button>
     </div>
   </div>`;
   const rb=box.querySelector('#recReplayBtn'); if(rb) rb.onclick=()=>{ closeRecModal(); startReplay(rec); };   // 闭包绑定本条 rec（修旧版 onclick 引用全局 rec 的隐患）
@@ -1947,7 +1889,6 @@ function renderRecDetail(rec, box, entry){
 async function submitScore(r, level, gold){
   const box=document.getElementById('rankBox'); if(!box) return;
   if(!r.token){ box.innerHTML=`<div style="text-align:center;color:var(--dim);font-size:12px">${tr('🔌 本局未用服务端种子（离线），未计排名','🔌 Offline run (no server seed) — not ranked')}</div>`; return; }   // 无 token：不计排名
-  if(r.threshold && r.threshold.upload_min_turns>0 && (r.turns||0) < r.threshold.upload_min_turns){ box.innerHTML=`<div style="text-align:center;color:var(--dim);font-size:12px">${approxPctLine(r.threshold, r.turns||0)}</div>`; return; }
   box.innerHTML=`<div style="text-align:center;color:var(--dim);font-size:12px">🏆 ${tr('排名上传中…','Submitting score…')}</div>`;
   try{
     const res=await fetch(REC_API+'/score',{method:'POST',headers:{'Content-Type':'application/json'},
@@ -1988,11 +1929,6 @@ let jumping=false;   // 跳回合快进期间：抑制 gameOver/onClear，避免
 const REPLAY_BASE=620;   // 每步基础间隔 ms（按倍速缩短）
 function startReplay(recObj){
   if(!recObj||!Array.isArray(recObj.acts)){ alert(tr('录像无效','Invalid recording')); return; }
-  replayResumeState = player&&grid ? {
-    player: JSON.parse(JSON.stringify(player)),
-    grid: grid.map(row=>row.map(t=> t?{type:t.type,hp:t.hp,maxHp:t.maxHp,atk:t.atk,cd:t.cd,baseCd:t.baseCd,bossId:t.bossId,tier:t.tier,stolen:t.stolen,finale:t.finale,incub:t.incub,poison:t.poison}:null)),
-    pendingLevels, busy, dragging:!!dragging, selection:selection?selection.map(s=>({...s})):[], rec:rec?JSON.parse(JSON.stringify(rec)):null, ended
-  } : null;
   replaying=true; replayRec=recObj; replayIdx=0; replaySpeed=1; replayPaused=false; replayAutoPaused=false; replayPending=null; rec=null;
   replayTotalTurns=recObj.acts.filter(a=>a[0]==='m').length;   // 总回合数（=连线动作数）
   hideOverlay(); busy=false;
@@ -2057,24 +1993,7 @@ function updateReplayBar(){
   document.querySelectorAll('#replayBar .rbSpd').forEach(b=>b.classList.toggle('on', +b.dataset.spd===replaySpeed));
 }
 function replayDone(){ clearTimeout(replayTimer); replayTimer=null; replayPaused=true; replayPending=null; selection=[]; updateReplayBar(); log(tr('🎬 回放结束（点 ⏹ 退出）','🎬 Replay finished (⏹ to exit)')); }
-function stopReplay(){
-  clearTimeout(replayTimer); replayTimer=null;
-  replaying=false; replayRec=null; replayPending=null;
-  bombFx.length=0; bossFx.length=0;
-  document.getElementById('replayBar').classList.remove('show');
-  if(replayResumeState){
-    player=replayResumeState.player;
-    grid=replayResumeState.grid;
-    pendingLevels=replayResumeState.pendingLevels;
-    busy=replayResumeState.busy;
-    dragging=replayResumeState.dragging;
-    selection=replayResumeState.selection;
-    rec=replayResumeState.rec;
-    ended=replayResumeState.ended;
-    replayResumeState=null;
-    syncPositions(true); updateHUD();
-  }
-}
+function stopReplay(){ clearTimeout(replayTimer); replayTimer=null; replaying=false; replayRec=null; replayPending=null; bombFx.length=0; bossFx.length=0; document.getElementById('replayBar').classList.remove('show'); }
 // 跳到指定回合：从种子重头快进（确定性、瞬间），到目标回合后暂停
 function jumpToTurn(target){
   if(!replaying||!replayRec) return;
@@ -2123,7 +2042,7 @@ function togglePauseReplay(){ if(!replaying) return; if(replayIdx>=(replayRec?re
 function stepReplay(dir){ if(!replaying||!replayRec) return; const cur=(player?player.turns:0)+(replayPending?1:0); const target=Math.max(1, Math.min(replayTotalTurns, cur+dir)); if(target!==cur) jumpToTurn(target); }
 document.getElementById('rbPrev').onclick=()=>stepReplay(-1);
 document.getElementById('rbNext').onclick=()=>stepReplay(1);
-document.getElementById('rbExit').onclick=()=>{ const hadLive=!!replayResumeState; stopReplay(); if(hadLive){ hideOverlay(); busy=false; } else showClassSelect(); };
+document.getElementById('rbExit').onclick=()=>{ stopReplay(); showClassSelect(); };
 document.querySelectorAll('#replayBar .rbSpd').forEach(b=>{ b.onclick=()=>{ replaySpeed=+b.dataset.spd; updateReplayBar(); scheduleReplay(); }; });
 
 //==================== 方块说明（点击查看）====================
@@ -2163,8 +2082,7 @@ function tileInfo(t){
   if(t.type==='boss'){ const def=bossDef(t);
     const rows=[ [tr('血量','HP'), `${t.hp} / ${t.maxHp}`] ];
     if(def.special) rows.push([tr('特殊','Special'), L(def.special)]);
-    if(def.shownAtk) rows.push([L(def.atkLabel||['攻击力','Attack']), `${def.shownAtk(t)}`]);
-    else if(!def.special) rows.push([def.trueDmg?tr('攻击力（真实·无视护甲）','Attack (TRUE, ignores armor)'):tr('攻击力','Attack'), `${t.atk}`]);
+    else rows.push([def.trueDmg?tr('攻击力（真实·无视护甲）','Attack (TRUE, ignores armor)'):tr('攻击力','Attack'), `${t.atk}`]);
     if(def.dynAtk) rows.push([tr('当前攻击','Attack now'), `${def.dynAtk(t)} ${tr('（=血量50%）','(=50% HP)')}`]);   // 饕餮：动态攻击
     if(!def.perTurn) rows.push([tr(def.flee?'逃走倒计时':'倒计时',def.flee?'Escape timer':'Timer'), `${t.cd} / ${t.baseCd}`]);
     else if(!def.finale) rows.push([tr('倒计时','Timer'), tr('每回合出手','Every turn')]);

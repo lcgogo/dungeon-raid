@@ -19,11 +19,14 @@ const MIN_TURNS = 30;       // 分享门槛：少于 30 回合不接收
 const SHARE_VERIFY_FACTOR = 1.5;  // 分享回合数 > 榜首×1.5（且≥榜首+30）→ 标记待验证
 const SHARE_VERIFY_TURN_CAP = 511;  // 分享待验证阈值封顶：避免榜首抬到终局可达范围之外
 const SEED_TTL = 7200;      // 服务端发放的种子 token 有效期（秒）：一局必须在此窗口内完成
+const THRESH_SCOPE = 'recent5:human';
+const THRESH_RECENT = 5;
+const THRESH_DEFAULT = { scope: THRESH_SCOPE, recent: THRESH_RECENT, agent: 'human', versions: [], total: 0, upload_min_turns: 0, top1_turns: 0, p5: 0, p10: 0, p30: 0, p50: 0, p70: 0, p90: 0, computed: 0 };
 // 反作弊·服务端发种子：上榜成绩必须用服务端发的种子（防离线刷幸运种子）。
 // true = 强制：无 token 的提交一律拒收（v1.22.0 带 token 的正式版上线后开启）。
 const REQUIRE_TOKEN = true;
 
-// 校验并消费一次性种子 token：present 且有效 → 标记已用、返回 {ok:true}；否则 {ok:false,reason}
+// 校验并消费一次性种子 token：present 且有效 → 标记已用、返回 {ok:true,dbg,gate}；否则 {ok:false,reason}
 async function consumeToken(env, token, seed) {
   if (!token) return { ok: false, reason: 'no-token' };
   if (!env.REC) return { ok: false, reason: 'no-kv' };
@@ -33,8 +36,8 @@ async function consumeToken(env, token, seed) {
   let t; try { t = JSON.parse(raw); } catch { return { ok: false, reason: 'corrupt' }; }
   if (t.u) return { ok: false, reason: 'used' };
   if ((t.s >>> 0) !== (seed >>> 0)) return { ok: false, reason: 'seed-mismatch' };
-  await env.REC.put(k, JSON.stringify({ s: t.s, u: 1 }), { expirationTtl: 600 });  // 标记已用，短 TTL 防复用
-  return { ok: true };
+  await env.REC.put(k, JSON.stringify({ ...t, u: 1 }), { expirationTtl: 600 });  // 标记已用，短 TTL 防复用
+  return { ok: true, dbg: !!t.dbg, gate: t.gate || null };
 }
 
 const json = (o, s = 200) => new Response(JSON.stringify(o), { status: s, headers: { 'Content-Type': 'application/json', ...CORS } });
@@ -141,17 +144,78 @@ async function versionFilter(env, url) {
   return { sql: '', binds: [], versions: null };
 }
 
+function quantileDesc(rows, pct) {
+  if (!rows.length) return 0;
+  const idx = Math.min(rows.length - 1, Math.max(0, Math.ceil(rows.length * pct) - 1));
+  return rows[idx] ? rows[idx].turns | 0 : 0;
+}
+
+async function computeThresholdSnapshot(env, recent = THRESH_RECENT, agent = 'human') {
+  const versions = await recentVersions(env, recent);
+  const whereBase = "source='play' AND verified>=0 AND agent=?";
+  let where = whereBase, binds = [agent];
+  if (versions.length) { where += ` AND (${versions.map(() => 'version LIKE ?').join(' OR ')})`; binds.push(...versions.map(v => v + '.%')); }
+  const { results } = await env.DB.prepare(`SELECT turns FROM scores WHERE ${where} ORDER BY turns DESC`).bind(...binds).all();
+  const rows = (results || []).map(r => ({ turns: r.turns | 0 }));
+  const total = rows.length;
+  const top1Idx = total ? Math.min(total - 1, Math.max(0, Math.ceil(total * 0.01) - 1)) : 0;
+  const top1Turns = total ? rows[top1Idx].turns : 0;
+  return {
+    scope: THRESH_SCOPE,
+    recent,
+    agent,
+    versions,
+    total,
+    upload_min_turns: quantileDesc(rows, 0.30),
+    top1_turns: top1Turns,
+    p5: quantileDesc(rows, 0.05),
+    p10: quantileDesc(rows, 0.10),
+    p30: quantileDesc(rows, 0.30),
+    p50: quantileDesc(rows, 0.50),
+    p70: quantileDesc(rows, 0.70),
+    p90: quantileDesc(rows, 0.90),
+    computed: Date.now(),
+  };
+}
+
+async function refreshThresholdSnapshot(env, recent = THRESH_RECENT, agent = 'human') {
+  const snap = await computeThresholdSnapshot(env, recent, agent);
+  await env.DB.prepare(`INSERT INTO score_thresholds(scope,recent,agent,versions_json,total,upload_min_turns,top1_turns,p5,p10,p30,p50,p70,p90,computed)
+    VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+    ON CONFLICT(scope) DO UPDATE SET recent=excluded.recent, agent=excluded.agent, versions_json=excluded.versions_json, total=excluded.total,
+      upload_min_turns=excluded.upload_min_turns, top1_turns=excluded.top1_turns, p5=excluded.p5, p10=excluded.p10, p30=excluded.p30, p50=excluded.p50, p70=excluded.p70, p90=excluded.p90, computed=excluded.computed`)
+    .bind(snap.scope, snap.recent, snap.agent, JSON.stringify(snap.versions), snap.total, snap.upload_min_turns, snap.top1_turns, snap.p5, snap.p10, snap.p30, snap.p50, snap.p70, snap.p90, snap.computed).run();
+  return snap;
+}
+
+async function loadThresholdSnapshot(env, scope = THRESH_SCOPE) {
+  try {
+    const row = await env.DB.prepare("SELECT scope,recent,agent,versions_json,total,upload_min_turns,top1_turns,p5,p10,p30,p50,p70,p90,computed FROM score_thresholds WHERE scope=?").bind(scope).first();
+    if (!row) return { ...THRESH_DEFAULT };
+    let versions = [];
+    try { versions = JSON.parse(row.versions_json || '[]'); } catch (e) {}
+    return { scope: row.scope, recent: row.recent | 0, agent: row.agent || 'human', versions, total: row.total | 0, upload_min_turns: row.upload_min_turns | 0, top1_turns: row.top1_turns | 0, p5: row.p5 | 0, p10: row.p10 | 0, p30: row.p30 | 0, p50: row.p50 | 0, p70: row.p70 | 0, p90: row.p90 | 0, computed: row.computed | 0 };
+  } catch (e) {
+    return { ...THRESH_DEFAULT };
+  }
+}
+
 // 该成绩是否进入「顶尖」（前 1%，且至少前 10 名）→ 值得即时验证
 function isTopTier(rk) { const o = rk && rk.overall; return !!o && o.rank <= Math.max(10, Math.ceil(o.total * 0.01)); }
-// 顶尖成绩即时验证：直接 ping 常驻验证服务的 /verify-now，让它立刻重放校验。去抖：90s 内不重复推。
+// 顶尖成绩即时验证：直接 ping 常驻验证服务的 /verify-now，让它立刻重放校验。
+// 仅当验证器健康端点报告的 engineVersion 与本次成绩的精确 release 版本一致时才推，避免发版窗口里旧引擎误杀新成绩。
 // 验证服务地址走 secret env.VERIFY_PUSH_URL（不写进仓库；可填 render 原址或 Cloudflare 代理子域）。
 // 未设置时跳过推送——仍由 render 每 ~7s 轮询 + GitHub cron 兜底。
-async function triggerVerify(env) {
-  if (!env.REC || !env.VERIFY_SECRET || !env.VERIFY_PUSH_URL) return;
+async function triggerVerify(env, runVersion) {
+  if (!env.REC || !env.VERIFY_SECRET || !env.VERIFY_PUSH_URL || !runVersion) return;
   try {
-    if (await env.REC.get('vdispatch')) return;                     // 去抖：上次触发 90s 内不再发
-    await env.REC.put('vdispatch', '1', { expirationTtl: 90 });
     const base = env.VERIFY_PUSH_URL.replace(/\/$/, '');
+    const status = await fetch(base, { headers: { 'User-Agent': 'dungeon-raid-worker' } });
+    if (!status.ok) return;
+    const info = await status.json();
+    if (!info || info.engineVersion !== runVersion) return;         // render 还没切到同版本 → 留给轮询/cron 安全兜底
+    if (await env.REC.get('vdispatch')) return;                     // 去抖：版本已匹配时才占 90s 窗口，避免旧引擎卡住后续真推送
+    await env.REC.put('vdispatch', '1', { expirationTtl: 90 });
     await fetch(`${base}/verify-now?k=${encodeURIComponent(env.VERIFY_SECRET)}`, { headers: { 'User-Agent': 'dungeon-raid-worker' } });
   } catch (e) { /* 推送失败不影响成绩提交：render 轮询 + GitHub cron 兜底 */ }
 }
@@ -168,12 +232,23 @@ export default {
       if (!success) return json({ error: 'too many requests, slow down' }, 429);
     }
 
-    // POST /seed —— 发放一次性服务端种子 + token（上榜成绩须用它，防离线刷种子）。已被上方按 IP 限流。
+    // POST /seed —— 发放一次性服务端种子 + token（上榜成绩须用它，防离线刷种子）+ 当前上传门槛快照。已被上方按 IP 限流。
     if (req.method === 'POST' && p === '/seed') {
       const seed = crypto.getRandomValues(new Uint32Array(1))[0] >>> 0;
       const token = shortId(16);
-      if (env.REC) await env.REC.put('seed:' + token, JSON.stringify({ s: seed, u: 0 }), { expirationTtl: SEED_TTL });
-      return json({ seed, token });
+      const threshold = await loadThresholdSnapshot(env);
+      if (env.REC) await env.REC.put('seed:' + token, JSON.stringify({ s: seed, u: 0, dbg: 0, gate: threshold }), { expirationTtl: SEED_TTL });
+      return json({ seed, token, threshold, debug_bypass: false });
+    }
+
+    // POST /seed-debug?k= —— 调试专用 seed：允许绕过上传门槛，但仍复用正常 token / 排名 / 验证链。
+    if (req.method === 'POST' && p === '/seed-debug') {
+      if (url.searchParams.get('k') !== env.DEBUG_SEED_SECRET) return json({ error: 'forbidden' }, 403);
+      const seed = crypto.getRandomValues(new Uint32Array(1))[0] >>> 0;
+      const token = shortId(16);
+      const threshold = await loadThresholdSnapshot(env);
+      if (env.REC) await env.REC.put('seed:' + token, JSON.stringify({ s: seed, u: 0, dbg: 1, gate: threshold }), { expirationTtl: SEED_TTL });
+      return json({ seed, token, threshold, debug_bypass: true });
     }
 
     // GET /rec/:id
@@ -217,6 +292,8 @@ export default {
       if (tkn && !tok.ok) return json({ error: 'invalid seed token: ' + tok.reason }, 422);
       if (!tkn && REQUIRE_TOKEN) return json({ error: 'ranked play requires a server seed' }, 422);
       const turns = turnCount(d.rec);                 // 回合以录像动作数为准，防止伪报
+      const threshold = tok.gate || await loadThresholdSnapshot(env);
+      if (!tok.dbg && threshold.upload_min_turns > 0 && turns < threshold.upload_min_turns) return json({ error: 'below upload threshold', threshold, turns }, 422);
       const level = d.level | 0, gold = d.gold | 0, race = d.rec.race, version = d.rec.ver || '';
       const agent = d.agent === 'ai' ? 'ai' : 'human';   // 自报，非 'ai' 一律按人类
       const name = subName(d, agent);   // 玩家展示名（alias）；AI 无名则随机起名
@@ -225,7 +302,7 @@ export default {
       await env.DB.prepare("INSERT INTO scores(id,version,race,turns,level,gold,source,agent,name,verified,created) VALUES(?,?,?,?,?,?,'play',?,?,0,?)")
         .bind(id, version, race, turns, level, gold, agent, name, Date.now()).run();
       const rk = await ranking(env, version, race, turns, agent);
-      if (isTopTier(rk) && ctx) ctx.waitUntil(triggerVerify(env));   // 顶尖成绩 → 立刻触发验证（~1 分钟内上榜），不阻塞响应
+      if (isTopTier(rk) && ctx) ctx.waitUntil(triggerVerify(env, version));   // 顶尖成绩：仅当 render 已切到同 release 版本时才即时推送，不阻塞响应
       return json({ id, turns, agent, name, ...rk });
     }
 
@@ -240,6 +317,8 @@ export default {
       if (!tkn && REQUIRE_TOKEN) return json({ error: 'ranked play requires a server seed' }, 422);
       const turns = turnCount(d.rec);
       if (turns < 510) return json({ error: 'not a clear (need >=510 turns)' }, 422);
+      const threshold = tok.gate || await loadThresholdSnapshot(env);
+      if (!tok.dbg && threshold.upload_min_turns > 0 && turns < threshold.upload_min_turns) return json({ error: 'below upload threshold', threshold, turns }, 422);
       const level = d.level | 0, race = d.rec.race, version = d.rec.ver || '';
       const agent = d.agent === 'ai' ? 'ai' : 'human';   // 自报，非 'ai' 一律按人类
       const name = subName(d, agent);
@@ -248,7 +327,7 @@ export default {
       await env.DB.prepare("INSERT INTO scores(id,version,race,turns,level,gold,source,cleared,agent,name,verified,created) VALUES(?,?,?,?,?,0,'play',1,?,?,0,?)")
         .bind(id, version, race, turns, level, agent, name, Date.now()).run();
       const rk = await clearRanking(env, version, race, level, agent);
-      if (isTopTier(rk) && ctx) ctx.waitUntil(triggerVerify(env));   // 顶尖破关 → 立刻触发验证，不阻塞响应
+      if (isTopTier(rk) && ctx) ctx.waitUntil(triggerVerify(env, version));   // 顶尖破关：仅当 render 已切到同 release 版本时才即时推送，不阻塞响应
       return json({ id, level, agent, name, ...rk });
     }
 
@@ -294,18 +373,18 @@ export default {
       return json({ pending: results || [] });
     }
 
-    // POST /classify?k= —— 私有黑盒改判某条成绩的 agent（human↔ai）。仅密钥可调。
+    // POST /classify?k= —— 私有黑盒改判某条成绩的 agent（human↔ai）。仅管理密钥可调。
     if (req.method === 'POST' && p === '/classify') {
-      if (url.searchParams.get('k') !== env.VERIFY_SECRET) return json({ error: 'forbidden' }, 403);
+      if (url.searchParams.get('k') !== env.ADMIN_SECRET) return json({ error: 'forbidden' }, 403);
       let d; try { d = JSON.parse(await req.text()); } catch { return json({ error: 'invalid json' }, 400); }
       if (!d || !d.id || (d.agent !== 'ai' && d.agent !== 'human')) return json({ error: 'invalid' }, 400);
       await env.DB.prepare("UPDATE scores SET agent=? WHERE id=?").bind(d.agent, d.id).run();
       return json({ ok: true, id: d.id, agent: d.agent });
     }
 
-    // POST /admin?k= —— 管理删除（仅密钥）：删单条 {op:'del',id}，或清空全部 {op:'wipe',confirm:'YES'}
+    // POST /admin?k= —— 管理删除（仅管理密钥）：删单条 {op:'del',id}，或清空全部 {op:'wipe',confirm:'YES'}
     if (req.method === 'POST' && p === '/admin') {
-      if (url.searchParams.get('k') !== env.VERIFY_SECRET) return json({ error: 'forbidden' }, 403);
+      if (url.searchParams.get('k') !== env.ADMIN_SECRET) return json({ error: 'forbidden' }, 403);
       let d; try { d = JSON.parse(await req.text()); } catch { return json({ error: 'invalid json' }, 400); }
       if (d && d.op === 'del' && d.id) {
         await env.DB.prepare("DELETE FROM scores WHERE id=?").bind(d.id).run();
@@ -342,8 +421,9 @@ export default {
     return json({ error: 'not found' }, 404);
   },
 
-  // 每日 Cron：自动清理旧版本+陈旧录像（默认保留最近 5 版、删 30 天前的，单次≤400 条）
+  // 定时任务：刷新上传门槛快照 + 每日清理旧版本+陈旧录像（默认保留最近 5 版、删 30 天前的，单次≤400 条）
   async scheduled(event, env, ctx) {
+    ctx.waitUntil(refreshThresholdSnapshot(env).then(r => console.log('threshold', JSON.stringify(r))).catch(e => console.log('threshold_err', e && e.message ? e.message : String(e))));
     ctx.waitUntil(pruneOld(env, {}).then(r => console.log('prune', JSON.stringify(r))));
   },
 };

@@ -10,10 +10,11 @@
 #                       运行前请把提交说明写入 COMMIT_MSG.txt
 #   gh-release [vX.Y.Z] 创建/更新 GitHub Release
 #   integrity           核对正式版引擎 sha256 是否与 engines.json 登记一致
-#   classify <id> <ai|human>  把某条成绩在 人类榜↔AI榜 之间改判（需 $env:VERIFY_SECRET）
-#   delete <id>         删除某条成绩（需 $env:VERIFY_SECRET）
-#   prune [天数=30] [保留版本数=5]  手动清理旧版本+陈旧录像
-#   wipe                清空整个榜单（危险，需输入 YES 确认）
+#   classify <id> <ai|human>  把某条成绩在 人类榜↔AI榜 之间改判（需 $env:ADMIN_SECRET）
+#   delete <id>         删除某条成绩（需 $env:ADMIN_SECRET）
+#   prune [天数=30] [保留版本数=5]  手动清理旧版本+陈旧录像（需 $env:ADMIN_SECRET）
+#   wipe                清空整个榜单（危险，需输入 YES 确认；需 $env:ADMIN_SECRET）
+#   seed-debug          申请一枚调试种子（需 $env:DEBUG_SEED_SECRET；可绕过上传门槛）
 #   backfill-releases   为 CHANGELOG 里每个版本补打 tag+release
 #   bind-domains        把自定义域名绑定到 Pages 项目
 #   help                显示本说明
@@ -53,6 +54,20 @@ function require_verify_secret {
     }
 }
 
+function require_admin_secret {
+    if (-not $env:ADMIN_SECRET) {
+        Write-Host "❌ 缺少环境变量 ADMIN_SECRET" -ForegroundColor Red
+        exit 1
+    }
+}
+
+function require_debug_seed_secret {
+    if (-not $env:DEBUG_SEED_SECRET) {
+        Write-Host "❌ 缺少环境变量 DEBUG_SEED_SECRET" -ForegroundColor Red
+        exit 1
+    }
+}
+
 # ============ 各命令实现 ============
 
 # ---------- integrity ----------
@@ -87,12 +102,12 @@ function cmd_integrity {
 # ---------- classify ----------
 function cmd_classify($id, $agent) {
     if (-not $id -or ($agent -ne "ai" -and $agent -ne "human")) {
-        Write-Host "用法: `$env:VERIFY_SECRET='...' .\dr.bat classify <id> <ai|human>"
+        Write-Host "用法: `$env:ADMIN_SECRET='...' .\dr.bat classify <id> <ai|human>"
         exit 1
     }
-    require_verify_secret
+    require_admin_secret
     $body = @{ id = $id; agent = $agent } | ConvertTo-Json -Compress
-    curl -s -X POST "https://api.dungeonraid.win/classify?k=$env:VERIFY_SECRET" `
+    curl -s -X POST "https://api.dungeonraid.win/classify?k=$env:ADMIN_SECRET" `
         -H "Content-Type: application/json" -d $body
     Write-Host ""
 }
@@ -100,34 +115,42 @@ function cmd_classify($id, $agent) {
 # ---------- delete ----------
 function cmd_delete($id) {
     if (-not $id) {
-        Write-Host "用法: `$env:VERIFY_SECRET='...' .\dr.bat delete <id>"
+        Write-Host "用法: `$env:ADMIN_SECRET='...' .\dr.bat delete <id>"
         exit 1
     }
-    require_verify_secret
+    require_admin_secret
     $body = @{ op = "del"; id = $id } | ConvertTo-Json -Compress
-    curl -s -X POST "https://api.dungeonraid.win/admin?k=$env:VERIFY_SECRET" `
+    curl -s -X POST "https://api.dungeonraid.win/admin?k=$env:ADMIN_SECRET" `
         -H "Content-Type: application/json" -d $body
     Write-Host ""
 }
 
 # ---------- prune ----------
 function cmd_prune($days=30, $keep=5) {
-    require_verify_secret
+    require_admin_secret
     $body = @{ op = "prune"; days = [int]$days; keep = [int]$keep } | ConvertTo-Json -Compress
-    curl -s -X POST "https://api.dungeonraid.win/admin?k=$env:VERIFY_SECRET" `
+    curl -s -X POST "https://api.dungeonraid.win/admin?k=$env:ADMIN_SECRET" `
         -H "Content-Type: application/json" -d $body
     Write-Host ""
 }
 
 # ---------- wipe ----------
 function cmd_wipe {
-    require_verify_secret
+    require_admin_secret
     Write-Host "⚠️  将删除 scores 表【全部】成绩（人类榜+AI榜+破关榜，不可恢复）。输入 YES 确认: " -NoNewline
     $ans = Read-Host
     if ($ans -ne "YES") { Write-Host "已取消"; exit 1 }
     $body = @{ op = "wipe"; confirm = "YES" } | ConvertTo-Json -Compress
-    curl -s -X POST "https://api.dungeonraid.win/admin?k=$env:VERIFY_SECRET" `
+    curl -s -X POST "https://api.dungeonraid.win/admin?k=$env:ADMIN_SECRET" `
         -H "Content-Type: application/json" -d $body
+    Write-Host ""
+}
+
+# ---------- seed-debug ----------
+function cmd_seed_debug {
+    require_debug_seed_secret
+    curl -s -X POST "https://api.dungeonraid.win/seed-debug?k=$env:DEBUG_SEED_SECRET" `
+        -H "Content-Type: application/json"
     Write-Host ""
 }
 
@@ -247,6 +270,8 @@ function cmd_release {
     # 2) 登记正式版引擎 sha256
     $ver = ver_of "dungeon-raid.html"
     $hash = sha256_of "dungeon-raid.html"
+    if (-not (Test-Path "engines")) { New-Item -ItemType Directory -Path "engines" -Force > $null }
+    Copy-Item "dungeon-raid.html" ("engines\{0}.html" -f $ver) -Force
     $engines = @{}
     if (Test-Path "engines.json") {
         $raw = Get-Content "engines.json" -Raw | ConvertFrom-Json
@@ -254,7 +279,7 @@ function cmd_release {
     }
     $engines[$ver] = $hash
     $engines | ConvertTo-Json -Compress:$false | Out-File "engines.json" -Encoding utf8
-    Write-Host "🔏 engines.json 登记 $ver → $hash"
+    Write-Host "🔏 engines.json 登记 $ver → $hash（快照: engines\$ver.html）"
 
     # 3) 提交 + 推送（需要 GIT_SSL_NO_VERIFY=1）
     $env:GIT_SSL_NO_VERIFY = "1"
@@ -346,10 +371,11 @@ function cmd_help {
   release             晋级正式版（需提前创建 COMMIT_MSG.txt）
   gh-release [vX.Y.Z] 创建/更新 GitHub Release
   integrity           核对正式版引擎 sha256 是否与 engines.json 登记一致
-  classify <id> <ai|human>  改判成绩所属榜单（需 VERIFY_SECRET）
-  delete <id>         删除某条成绩（需 VERIFY_SECRET）
-  prune [天数] [保留数]  手动清理旧版本+陈旧录像
-  wipe                清空整个榜单（需输入 YES 确认）
+  classify <id> <ai|human>  改判成绩所属榜单（需 ADMIN_SECRET）
+  delete <id>         删除某条成绩（需 ADMIN_SECRET）
+  prune [天数] [保留数]  手动清理旧版本+陈旧录像（需 ADMIN_SECRET）
+  wipe                清空整个榜单（需输入 YES 确认；需 ADMIN_SECRET）
+  seed-debug          申请调试 seed（需 DEBUG_SEED_SECRET）
   backfill-releases   为 CHANGELOG 里每个版本补打 tag+release
   bind-domains        绑定自定义域名到 Pages 项目
   help                显示本说明
@@ -372,6 +398,7 @@ switch ($cmd) {
     "delete"            { cmd_delete $restArgs[0] }
     "prune"             { cmd_prune $restArgs[0] $restArgs[1] }
     "wipe"              { cmd_wipe }
+    "seed-debug"        { cmd_seed_debug }
     "backfill-releases" { cmd_backfill_releases }
     "bind-domains"      { cmd_bind_domains }
     default             { cmd_help }
