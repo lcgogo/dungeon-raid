@@ -1,3 +1,8 @@
+## [v1.31.3]
+
+- 修复 replay / verify 在升级三选一上的随机漂移：升级池原先用 `sort(() => rnd() - 0.5)` 洗牌，不同 JS 引擎/实现下会以不同顺序和次数调用比较器，导致相同 seed 的 live 对局与 replay/verify 在升级点后消耗 RNG 不一致。现改为确定性的 Fisher-Yates 洗牌，避免录像明明打到高回合、回放却在升级后提前跑偏。
+- Fix replay / verify RNG drift in the upgrade-choice pool: upgrade shuffling previously used `sort(() => rnd() - 0.5)`, whose comparator order/count can vary across JS engines, causing the same seed to consume RNG differently after level-up in live play versus replay/verification. It now uses a deterministic Fisher-Yates shuffle so long runs no longer desync and die early after upgrade points.
+
 ## [v1.31.2]
 
 - 强化 `playtest.js` 的竞技型 AI：提交模式现在会优先走更强的 build（如精灵长老线、矮人会长线），并改进升级、技能、商店与连线选择逻辑，目标是稳定冲过 live 上传门槛，而不再只是普通贪心乱跑。
