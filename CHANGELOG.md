@@ -1,3 +1,8 @@
+## [v1.31.1]
+
+- 修复 AI / 无头提交在结算时丢失服务端 seed token：录像原本在开局已拿到 `rec.token`，但死亡结算会被 `player.token||''` 覆盖成空串，导致 `/score` / `/clear` 误报 `ranked play requires a server seed`。现在结算会保留已有 `rec.token`，自动提交流程可正常进入验证链。
+- Fix server-seed token loss at the end of AI / headless runs: recordings already had `rec.token` at game start, but death cleanup overwrote it with `player.token||''`, causing `/score` / `/clear` to fail with `ranked play requires a server seed`. The end-of-run snapshot now preserves an existing `rec.token`, so automated submissions can enter the verification pipeline correctly.
+
 ## [v1.31.0]
 
 > Version-Impact: verify
