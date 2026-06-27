@@ -59,9 +59,10 @@ function loadGame(transform){
 let G = loadGame();
 
 // ---------- 2.5) 命令行参数：可指定职业线 / Boss，便于和历史对比 ----------
-//   node playtest.js --race=orc --t1=berserker --t2=warlord --boss=zombie --enemy=C2 --games=40
+//   node playtest.js --race=orc --t1=berserker --t2=titan --boss=zombie --enemy=C2 --games=40
 const ARG = Object.fromEntries(process.argv.slice(2).map(s=>{ const m=s.match(/^--([^=]+)=?(.*)$/); return m?[m[1], m[2]]:[s,'']; }));
-const FOCUS = !!(ARG.race||ARG.boss||ARG.t1||ARG.t2) || ('report' in ARG);
+const COMPETITIVE = 'competitive' in ARG || 'submit-ai' in ARG;
+const FOCUS = !!(ARG.race||ARG.boss||ARG.t1||ARG.t2||ARG.profile) || ('report' in ARG);
 // 把指定 Boss 固定为唯一会刷的 Boss（原地裁剪 BOSSES，spawnBoss 闭包引用同一数组）
 function applyBossFilter(g){
   if(!ARG.boss) return;
@@ -171,48 +172,188 @@ const UP_PROFILES={
 };
 let UP_PRIORITY=UP_PROFILES.balanced;   // 当前取向（默认均衡，与历史一致）；--upsweep 时逐套切换
 const upRank=n=>{const i=UP_PRIORITY.indexOf(n);return i<0?99:i;};
+const COMPETITIVE_BUILDS={
+  human:{ t1:['knight','priest','swordsaint'], t3:['holystrike','bladeall','general'], profile:'sustain' },
+  elf:{ t1:['elder','ranger','rogue'], t3:['sharpshooter','shadow','thorns'], profile:'sustain' },
+  dwarf:{ t1:['guildmaster','miser','musketeer','blacksmith'], t3:['demolitionist','tycoon','cheapskate','shieldbash'], profile:'offense' },
+  orc:{ t1:['fighter','berserker','witchdoctor'], t3:['titan','bloodfrenzy','allispoison'], profile:'offense' },
+  undead:{ t1:['necromancer','butcher','skeletonking'], t3:['splash','rejuvenation','carrion'], profile:'sustain' },
+};
+const COMPETITIVE_SWAP_SKILLS=['guildmaster','elder','priest','knight','musketeer','rogue','ranger','necromancer'];
+function countBoard(type){ const g=grid(); let n=0; for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){const t=g[r][c]; if(t&&t.type===type)n++;} return n; }
+function boardEnemies(){ const g=grid(),e=[]; for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){const t=g[r][c]; if(t&&t.type==='enemy')e.push(t);} return e; }
+function boardSwords(){ return countBoard('sword'); }
+function boardBoss(){ const g=grid(); for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){const t=g[r][c]; if(t&&t.type==='boss')return t;} return null; }
+function boardHearts(){ return countBoard('heart'); }
+function boardCoins(){ return countBoard('coin'); }
+function boardShields(){ return countBoard('shield'); }
+function boardState(){
+  const p=P();
+  const enemies=boardEnemies();
+  const boss=boardBoss();
+  const imminent=enemies.filter(e=>e.cd<=1).reduce((s,e)=>s+e.atk,0) + (boss&&boss.cd<=1?boss.atk:0);
+  const enemyHp=enemies.reduce((s,e)=>s+e.hp,0);
+  const immuneBoss=!!(boss && !G.isSwordTarget(boss));
+  return {
+    player:p,
+    enemies,
+    enemyCount:enemies.length,
+    enemyHp,
+    boss,
+    bossId:boss&&boss.bossId,
+    imminent,
+    immuneBoss,
+    hearts:boardHearts(),
+    shields:boardShields(),
+    coins:boardCoins(),
+    swords:boardSwords(),
+    lowHp:p.hp<=0.45*p.maxHp,
+    criticalHp:p.hp<=0.28*p.maxHp,
+  };
+}
+function competitiveProfile(){
+  if(!COMPETITIVE) return UP_PRIORITY;
+  const cfg=COMPETITIVE_BUILDS[ARG.race||''] || COMPETITIVE_BUILDS[(P()&&P().race)||''] || null;
+  const explicit=ARG.profile && UP_PROFILES[ARG.profile];
+  return explicit || (cfg && UP_PROFILES[cfg.profile]) || UP_PROFILES.sustain;
+}
+function dynamicUpgradeScore(u, state){
+  const p=state.player, name=u.n[0];
+  const prof=competitiveProfile();
+  const idx=prof.indexOf(name);
+  let score=120 - (idx<0?90:idx*12);
+  if(name==='强化体魄') score += state.criticalHp?120:state.lowHp?70:15;
+  if(name==='加固护甲') score += p.race==='dwarf'?80:25;
+  if(name==='强化盾术') score += state.shields?55:10;
+  if(name==='磨利刀刃') score += state.enemyCount>=2?85:35;
+  if(name==='淬炼锋芒') score += state.boss?85:30;
+  if(name==='汲取生命') score += state.enemyCount>=2?100:45;
+  if(name==='凝聚生机') score += state.lowHp?85:40;
+  if(name==='精研医术') score += state.hearts>=2?70:20;
+  if(name==='搜刮财富') score += p.tier1==='guildmaster'?90:15;
+  if(name==='临战突破') score += state.boss?50:10;
+  return score;
+}
 function resolveLevels(){
   while(G.pendingLevels>0){
     const pool=G.rollUpgradePool();   // 用游戏真实升级池（消耗游戏 RNG），保证录像可确定性重放
-    const choose=pool.slice().sort((a,b)=>upRank(a.n[0])-upRank(b.n[0]))[0];
+    const state=boardState();
+    const choose=(COMPETITIVE
+      ? pool.slice().sort((a,b)=>dynamicUpgradeScore(b,state)-dynamicUpgradeScore(a,state) || upRank(a.n[0])-upRank(b.n[0]))[0]
+      : pool.slice().sort((a,b)=>upRank(a.n[0])-upRank(b.n[0]))[0]);
     G.recAct(['u', G.UPGRADES.indexOf(choose)]);   // 录制升级选择（按 UPGRADES 索引，与回放一致）
     G.applyUpgrade(choose);   // 内部 u.f + 钳血 + pendingLevels--
   }
   G.busy=false;
 }
-
-function boardEnemies(){ const g=grid(),e=[]; for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){const t=g[r][c]; if(t&&t.type==='enemy')e.push(t);} return e; }
-function boardSwords(){ const g=grid(); let n=0; for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){const t=g[r][c]; if(t&&t.type==='sword')n++;} return n; }
-function boardBoss(){ const g=grid(); for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){const t=g[r][c]; if(t&&t.type==='boss')return t;} return null; }
-
-// 一阶主动技能使用策略（仅在有利时用；囤金/点金属高风险/情境，机器人不用）
-function boardHearts(){ const g=grid(); let n=0; for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){const t=g[r][c]; if(t&&t.type==='heart')n++;} return n; }
-function maybeSkill(){
-  const p=P(); if(!p.tier1 || p.skillCd>0) return;
-  const bossT=boardBoss();
-  const ens=boardEnemies().length, threat=boardEnemies().some(e=>e.cd<=1), boss=!!bossT;
-  const immuneBoss=bossT && !G.isSwordTarget(bossT);  // 剑免疫 Boss（幽灵/小丑）当前在场
-  const id=p.tier1;
-  if(id==='knight' && (boss||threat)) G.activateSkill();        // 圣盾：将受击时
-  else if(id==='priest' && boardHearts()>=3) G.activateSkill(); // 祝福：心多时转经验
-  else if(id==='ranger' && ens>=2) G.activateSkill();           // 箭雨：怪多时
-  else if(id==='blacksmith' && bestSimple('shield')) G.activateSkill(); // 锻甲：有盾时
-  else if(id==='fighter' && (immuneBoss || ens>=2)) G.activateSkill();  // 嗜血：有剑免疫Boss(开穿透)或怪多时
-  else if(id==='berserker' && threat && p.hp<=0.5*p.maxHp) G.activateSkill(); // 狂怒：将被打死时用不屈保命
-  else if(id==='guildmaster' && ens>=2) G.activateSkill();      // 收买：怪多时（技能自带「金币>全怪血」门槛）
-  else if(id==='elder' && !p.deathCoil && (boss||ens>=2)) G.activateSkill();   // 死亡缠绕：有Boss/多怪且未在缠绕中（!p.deathCoil 兼容 undefined）
-  else if(id==='butcher' && (boss||ens>=3)) G.activateSkill();   // 钩子：有Boss或怪多时把敌人拉到底排聚怪
-  else if(id==='musketeer' && (boss||ens>=1)) G.activateSkill();   // 狙击：有Boss或怪时轰最肥目标（2×炸弹+击杀3倍奖励）
-  resolveLevels();
+function chooseTier1(p){
+  const ids=G.RACE_PATHS[p.race].t1;
+  const forced=ARG.t1;
+  if(forced&&ids.includes(forced)) return forced;
+  if(!COMPETITIVE) return ids[0];
+  const pref=(COMPETITIVE_BUILDS[p.race]&&COMPETITIVE_BUILDS[p.race].t1)||ids;
+  return pref.find(id=>ids.includes(id)) || ids[0];
 }
-// 机器人处理转职选择（resolve/buyItem 触发 showTierSelect/showSkillSwap 后，apply 第一个选项）
+function chooseTier3(p){
+  const pool=G.RACE_PATHS[p.race].t2.filter(x=>x!==p.tier2);
+  const forced=ARG.t2;
+  if(forced&&pool.includes(forced)) return forced;
+  if(!COMPETITIVE) return pool[0];
+  const pref=(COMPETITIVE_BUILDS[p.race]&&COMPETITIVE_BUILDS[p.race].t3)||pool;
+  return pref.find(id=>pool.includes(id)) || pool[0];
+}
+function chooseSwap(p){
+  const boss=boardBoss();
+  const keepBomb = !!(boss || p.bombBoost || p.cheapskate || p.tier1==='guildmaster' || p.race==='dwarf' || p.tier1==='elder');
+  const ids=COMPETITIVE ? COMPETITIVE_SWAP_SKILLS : [p.tier1||Object.keys(G.TIER1)[0]];
+  const skillId=(ids.find(id=>G.TIER1[id]) || p.tier1 || Object.keys(G.TIER1)[0]);
+  return { id:skillId, slot: keepBomb ? 'heal' : 'bomb' };
+}
+function scoreSwordCandidate(path, state){
+  const ev=swordEval(path);
+  const killWeight=state.boss?1300:1000;
+  let score=ev.kills*killWeight + ev.threat*55 + ev.enemies*18 + ev.nS*8 + ev.len;
+  if(state.criticalHp) score += ev.threat*25;
+  if(state.immuneBoss) score -= 220;
+  if(state.player.tier1==='fighter'&&state.immuneBoss) score += 260;
+  return {path, score, ev};
+}
+function bestSword(){
+  const g=grid(); let best=null;
+  const pred=t=>t&&(t.type==='sword'||G.isSwordTarget(t));
+  const state=boardState();
+  for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){
+    const t=g[r][c]; if(!t||!(t.type==='sword'||G.isSwordTarget(t)))continue;
+    const path=greedyPath(r,c,pred,true);
+    if(path.length<2)continue;
+    const cand=scoreSwordCandidate(path,state);
+    if(cand.ev.nS<1||cand.ev.enemies<1)continue;
+    if(!best||cand.score>best.score) best=cand;
+  }
+  return best;
+}
+function resourceValue(type, len, state){
+  const p=state.player;
+  if(type==='heart') return len*(state.criticalHp?120:state.lowHp?70:18) + (state.bossId==='pollution'?-9999:0);
+  if(type==='shield') return len*((p.race==='dwarf'?50:26) + (state.imminent>0?18:0));
+  if(type==='coin'){
+    let score=len*(state.boss||p.tier1==='guildmaster'||p.tier1==='miser'?42:20);
+    if(state.boss && p.gold<G.shopCost('bomb')) score+=90;
+    if(p.tier1==='guildmaster'&&p.cheapskate) score+=80;
+    if(p.tier1==='miser'&&p.goldLock<=0) score+=60;
+    return score;
+  }
+  return len;
+}
+function bestSimple(type){
+  const g=grid(); let best=null;
+  const pred=t=>t&&t.type===type;
+  const state=boardState();
+  for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){
+    if(!pred(g[r][c]))continue;
+    const path=greedyPath(r,c,pred,false);
+    if(path.length<2)continue;
+    const score=resourceValue(type, path.length, state);
+    if(!best||score>best.score) best={path,len:path.length,score};
+  }
+  return best;
+}
+function shouldUseSkill(state){
+  const p=state.player; if(!p.tier1 || p.skillCd>0) return false;
+  const id=p.tier1;
+  if(id==='knight') return !!(state.boss || state.imminent>0 || state.criticalHp);
+  if(id==='priest') return state.hearts>=2 && (state.lowHp || state.boss || p.level<8);
+  if(id==='ranger') return state.enemyCount>=2 || !!state.boss;
+  if(id==='blacksmith') return state.shields>=2 || (state.imminent>0 && state.shields>=1);
+  if(id==='fighter') return state.immuneBoss || state.enemyCount>=3 || state.lowHp;
+  if(id==='berserker') return state.imminent>0 && p.hp<=0.45*p.maxHp;
+  if(id==='guildmaster'){
+    const cost=p.cheapskate?Math.ceil(state.enemyHp/2):state.enemyHp;
+    return state.enemyCount>=2 && cost>0 && p.gold>=cost;
+  }
+  if(id==='elder') return !p.deathCoil && (!!state.boss || state.enemyCount>=2);
+  if(id==='butcher') return !!state.boss || state.enemyCount>=3;
+  if(id==='musketeer') return !!state.boss || state.enemyCount>=1;
+  if(id==='necromancer') return !!state.boss || state.enemyCount>=2 || state.lowHp;
+  if(id==='rogue') return state.coins===0 && state.swords>=4;
+  if(id==='swordsaint') return state.hearts+state.coins>=4;
+  return false;
+}
+function maybeSkill(){
+  const state=boardState();
+  if(!shouldUseSkill(state)) return false;
+  const ok=G.activateSkill();
+  resolveLevels();
+  return ok;
+}
+// 机器人处理转职选择（resolve/buyItem 触发 showTierSelect/showSkillSwap 后，按 build-aware 方案选）
 function botTransform(){
   const p=P(); if(!p.awaitingTier) return;
   const t=p.awaitingTier;
-  if(t===1){ const ids=G.RACE_PATHS[p.race].t1; const f=ARG.t1; const id=(f&&ids.includes(f))?f:ids[0]; G.recAct(['t',1,id]); p.tier1=id; }
+  if(t===1){ const id=chooseTier1(p); G.recAct(['t',1,id]); p.tier1=id; }
   else if(t===2){ const id=G.CLASS_T2[p.tier1]; G.recAct(['t',2,id]); p.tier2=id; G.TIER2[id].f(p); p.hp=Math.min(p.hp,p.maxHp); }   // 100回合：锁定职业专属被动
-  else if(t===3){ const f=ARG.t2; const pool=G.RACE_PATHS[p.race].t2.filter(x=>x!==p.tier2); const id=(f&&pool.includes(f))?f:pool[0]; if(id){ G.recAct(['t',3,id]); p.tier2b=id; G.TIER2[id].f(p); p.hp=Math.min(p.hp,p.maxHp); } }   // 200回合：同族其余被动（--t2 选）
-  else if(t===4){ const id2=p.tier1||Object.keys(G.TIER1)[0]; G.recAct(['t',4,id2,'bomb']); p.skill2={id:id2, slot:'bomb'}; p.skill2Cd=0; }   // 350回合：用自己的一阶主动替换炸弹槽
+  else if(t===3){ const id=chooseTier3(p); if(id){ G.recAct(['t',3,id]); p.tier2b=id; G.TIER2[id].f(p); p.hp=Math.min(p.hp,p.maxHp); } }   // 200回合：同族其余被动（--t2 选）
+  else if(t===4){ const pick=chooseSwap(p); G.recAct(['t',4,pick.id,pick.slot]); p.skill2={id:pick.id, slot:pick.slot}; p.skill2Cd=0; }   // 350回合：按 build 决定换装技能与槽位
   p.awaitingTier=0; G.busy=false;
 }
 
@@ -225,34 +366,36 @@ function playGame(rc, srv){   // srv={seed,token}：用服务端种子开局（-
     const p=P();
     if(p.hp<=0) break;
     botTransform();   // 处理上一步触发的转职
-    // 商店（先于行动；买东西不推进回合）
     G.busy=false;
-    const ens=boardEnemies(), threatened=ens.some(e=>e.cd<=1);
-    const boss=boardBoss();
-    if(p.hp<=0.3*p.maxHp && p.gold>=G.shopCost('heal')){ G.buyItem('heal'); botTransform(); resolveLevels(); }
-    else if(boss && p.gold>=G.shopCost('bomb')){ G.buyItem('bomb'); botTransform(); resolveLevels(); }
-    else if(boardEnemies().length>=4 && p.gold>=G.shopCost('bomb')){ G.buyItem('bomb'); botTransform(); resolveLevels(); }
-    maybeSkill();   // 一阶主动
+    let state=boardState();
 
-    // 选招
+    if(state.criticalHp && p.gold>=G.shopCost('heal') && state.hearts<2){ G.buyItem('heal'); botTransform(); resolveLevels(); state=boardState(); }
+    else if(state.boss && p.gold>=G.shopCost('bomb') && (state.immuneBoss || state.enemyCount>=3 || state.bossId==='pollution')){ G.buyItem('bomb'); botTransform(); resolveLevels(); state=boardState(); }
+    else if(p.tier1==='guildmaster'){
+      const buyCost=p.cheapskate?Math.ceil(state.enemyHp/2):state.enemyHp;
+      if(state.enemyCount>=2 && buyCost>0 && p.gold<buyCost && state.coins>=2){ /* 留给金币链攒钱 */ }
+      else if(state.enemyCount>=4 && p.gold>=G.shopCost('bomb')){ G.buyItem('bomb'); botTransform(); resolveLevels(); state=boardState(); }
+    }
+    else if(state.enemyCount>=4 && p.gold>=G.shopCost('bomb') && (state.imminent>0 || state.lowHp)){ G.buyItem('bomb'); botTransform(); resolveLevels(); state=boardState(); }
+    maybeSkill();   // 一阶主动
+    state=boardState();
+
     const sword=bestSword();
     let heart=bestSimple('heart');
-    if(boss && boss.bossId==='pollution') heart=null;   // 污染怪在场：心变毒心，连之扣血——机器人不碰，改靠炸弹清掉它
+    if(state.boss && state.bossId==='pollution') heart=null;   // 污染怪在场：心变毒心，连之扣血——机器人不碰，改靠炸弹清掉它
     const shield=bestSimple('shield');
     const coin=bestSimple('coin');
 
-    let sel=null;
-    if(p.hp<=0.35*p.maxHp && heart){ sel=toSelection(heart.path,'heart'); }
-    else if(sword){ sel=toSelection(sword.path,'sword'); }
-    else if(boss && p.gold<G.shopCost('bomb') && coin){ sel=toSelection(coin.path,'coin'); } // 攒钱炸Boss
-    else if(p.hp<0.6*p.maxHp && heart){ sel=toSelection(heart.path,'heart'); }
-    else if(p.armor<6 && shield){ sel=toSelection(shield.path,'shield'); }
-    else if(coin){ sel=toSelection(coin.path,'coin'); }
-    else if(shield){ sel=toSelection(shield.path,'shield'); }
-    else if(heart){ sel=toSelection(heart.path,'heart'); }
-    else break; // 无可行连线（极少）
+    const options=[];
+    if(heart) options.push({type:'heart', score:resourceValue('heart', heart.len, state), sel:toSelection(heart.path,'heart')});
+    if(shield) options.push({type:'shield', score:resourceValue('shield', shield.len, state), sel:toSelection(shield.path,'shield')});
+    if(coin) options.push({type:'coin', score:resourceValue('coin', coin.len, state), sel:toSelection(coin.path,'coin')});
+    if(sword) options.push({type:'sword', score:sword.score, sel:toSelection(sword.path,'sword')});
+    if(!options.length) break;
+    options.sort((a,b)=>b.score-a.score);
+    const pick=options[0];
 
-    G.selection=sel;
+    G.selection=pick.sel;
     G.resolve();
     if(P().hp<=0){ turn++; break; }
     botTransform();   // resolve 可能触发转职
@@ -344,11 +487,25 @@ else if('survivors' in ARG){
   console.log(`\n共 ${hit}/${total} 局撑到 ≥${TH} 回合。`);
 }
 else if('submit-ai' in ARG){
-  // ---- 提交模式：跑机器人 → 本地重放校验 → 把可验证录像以 agent=ai 提交到 AI 榜 ----
+  // ---- 提交模式：跑竞技机器人 → 本地重放校验 → 把可验证录像以 agent=ai 提交到 AI 榜 ----
   G = loadGame(); applyBossFilter(G);
   const API = ARG.api || 'https://api.dungeonraid.win';
-  const races = ARG.race ? G.RACES.filter(r=>r.id===ARG.race) : G.RACES;
-  if(ARG.race && !races.length){ console.error('未知种族: '+ARG.race); process.exit(1); }
+  const submitRace = ARG.race || 'elf';
+  if(!ARG.race) ARG.race = submitRace;
+  if(!ARG.t1 && submitRace==='elf') ARG.t1='elder';
+  else if(!ARG.t1 && submitRace==='dwarf') ARG.t1='guildmaster';
+  else if(!ARG.t1 && submitRace==='human') ARG.t1='knight';
+  else if(!ARG.t1 && submitRace==='undead') ARG.t1='necromancer';
+  else if(!ARG.t1 && submitRace==='orc') ARG.t1='fighter';
+  if(!ARG.t2 && submitRace==='elf') ARG.t2='sharpshooter';
+  else if(!ARG.t2 && submitRace==='dwarf') ARG.t2='demolitionist';
+  else if(!ARG.t2 && submitRace==='human') ARG.t2='holystrike';
+  else if(!ARG.t2 && submitRace==='undead') ARG.t2='splash';
+  else if(!ARG.t2 && submitRace==='orc') ARG.t2='titan';
+  if(!ARG.profile){ const cfg=COMPETITIVE_BUILDS[submitRace]; if(cfg) ARG.profile=cfg.profile; }
+  UP_PRIORITY = competitiveProfile();
+  const races = G.RACES.filter(r=>r.id===submitRace);
+  if(!races.length){ console.error('未知种族: '+submitRace); process.exit(1); }
   const N = ARG.games?+ARG.games:3, DRY='dry' in ARG;
   (async()=>{
     const runs=[];
