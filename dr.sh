@@ -94,25 +94,36 @@ cmd_embed_changelog(){
   local files=("$@"); [ ${#files[@]} -eq 0 ] && files=(dungeon-raid-dev.html)
   python3 - "${files[@]}" <<'PY'
 import re, json, sys, os
-# 同时认两种 CHANGELOG 格式：新「## [v1.30.12] 头 + 其下第一条 - 要点」、旧「[v1.27.4]: 一行描述」。新条目在文件上方→更新。
-lines=[]; cur=None
+# 新格式：每个版本节取前两条 bullet（默认中文 + English）。旧 [vX]: 一行格式则 zh/en 同文兜底。
+entries=[]; cur=None; bullets=[]
 for l in open('CHANGELOG.md', encoding='utf-8'):
     h=re.match(r'^##\s*\[(v[\d.]+)\]', l)
-    if h: cur=h.group(1); continue
+    if h:
+        if cur and bullets:
+            zh=bullets[0].replace('**','')
+            en=bullets[1].replace('**','') if len(bullets)>1 else zh
+            entries.append({'ver': cur, 'zh': zh, 'en': en})
+        cur=h.group(1); bullets=[]; continue
     ref=re.match(r'^\[(v[\d.]+)\]:\s*(.+?)\s*$', l)
-    if ref: lines.append(f"{ref.group(1)} — {ref.group(2)}"); cur=None; continue
+    if ref:
+        entries.append({'ver': ref.group(1), 'zh': ref.group(2), 'en': ref.group(2)})
+        cur=None; bullets=[]; continue
     if cur:
         b=re.match(r'^\s*-\s+(.+?)\s*$', l)
-        if b: lines.append(f"{cur} — {b.group(1).replace('**','')}"); cur=None
-lines=lines[:40]
-arr='const CHANGELOG_LINES='+json.dumps(lines, ensure_ascii=False)+';   /* auto-injected by dr.sh embed-changelog（勿手改） */'
+        if b and len(bullets) < 2: bullets.append(b.group(1))
+if cur and bullets:
+    zh=bullets[0].replace('**','')
+    en=bullets[1].replace('**','') if len(bullets)>1 else zh
+    entries.append({'ver': cur, 'zh': zh, 'en': en})
+entries=entries[:5]
+arr='const CHANGELOG_LINES='+json.dumps(entries, ensure_ascii=False)+';   /* auto-injected by dr.sh embed-changelog（勿手改） */'
 n=0
 for f in sys.argv[1:]:
     if not os.path.exists(f): continue
     s=open(f, encoding='utf-8').read()
     s2=re.sub(r'^const CHANGELOG_LINES=.*$', lambda m: arr, s, count=1, flags=re.M)
     if s2!=s: open(f,'w',encoding='utf-8').write(s2); n+=1
-print(f"📝 注入 {len(lines)} 条更新摘要 → {n} 个文件")
+print(f"📝 注入 {len(entries)} 条双语更新摘要 → {n} 个文件")
 PY
 }
 

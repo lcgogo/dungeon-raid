@@ -1,28 +1,36 @@
+## [v1.30.23]
+
+- 游戏内内嵌 changelog 现缩减为最近 **5** 条，并支持按当前语言显示中英文摘要：中文界面看中文，英文界面看英文；若某条缺失英文，则自动回退到中文。
+- The in-game embedded changelog is now trimmed to the latest **5** entries and supports bilingual summaries: Chinese UI shows Chinese text, English UI shows English text, and missing EN summaries gracefully fall back to Chinese.
+
 ## [v1.30.22]
 
 - 修复排行榜上传门槛提示偶尔误判：结算页现在会先把最终回合/等级/金币写回录像，再缓存 `REC_LAST_KEY` 并做门槛判断，不再出现“实际 216 回合却被当成低于 169 门槛”的串值问题。
+- Fix intermittent leaderboard-threshold misclassification on the result screen: the final turns/level/gold are now written back into the recording before `REC_LAST_KEY` is cached and checked, so a 216-turn run is no longer mistaken as being below a 169-turn gate.
 
 ## [v1.30.21]
 
 - 血狂 Blood Frenzy 新增负面效果：每回合结束损失 5% 最大生命（无视护甲，至少 1 点）。保留现有效果——吸血/嗜血溢出生命上限时，仍把其中的 30% 转为永久最大生命。
+- Blood Frenzy now has a downside: at the end of every turn, lose 5% of max HP (ignores armor, minimum 1). Its existing upside remains unchanged: 30% of Lifesteal/Bloodthirst overflow still becomes permanent max HP.
 
 ## [v1.30.20]
 
 - 排行榜验证链升级为“**按版本快照选引擎**”：release 会把正式版自动归档到 `engines/<version>.html`，验证器优先按录像自己的 `rec.ver` 选精确引擎，不再只能拿当前正式版硬验旧录像。
+- Upgrade the leaderboard verifier to **select engines by archived release snapshot**: every release now stores the formal build as `engines/<version>.html`, and replay verification prefers the exact engine matching `rec.ver` instead of forcing old recordings through the current build.
 - 顶尖成绩的**即时验证 push 加上版本同步闸门**：只有当 render 验证器健康端点报告的 `engineVersion` 与本次成绩版本完全一致时，Worker 才触发 `/verify-now`；否则保留 `verified=0`，交给轮询 / GitHub cron 安全兜底，避免发版窗口里旧引擎误杀新成绩。
-- `/seed` 现在会下发**上传门槛快照**（最近 5 个小版本桶的人类榜，含 p5/p10/p30/p50/p70/p90 与 top1% 下限）；当前 `upload_min_turns` 取 **p30**。低于门槛的对局会直接在本地显示“约分位”，不再正式上传进验证链；服务端也会再兜底拒收。
-- 新增 **`/seed-debug`** 与三把分权密钥：`VERIFY_SECRET` 只管验证链、`ADMIN_SECRET` 只管 `/admin` / `/classify`、`DEBUG_SEED_SECRET` 只管调试 seed。调试 seed 能绕过上传门槛，但仍复用正常 token / 排名 / 验证链。
-- 修复偶发棋盘缺块：商店治疗触发「神圣打击」击杀敌人后，若盘面留下空洞，会立刻补格，不再把空白格留在实战棋盘上。
-- 修复看完回放后技能槽串台：退出 replay 现在会恢复进入回放前的 live 状态，不再把录像里的跨界技能（如把治疗变成「点金」）泄漏回实战。
+- Add a version-sync gate to **instant verification pushes**: Worker only calls `/verify-now` when the render verifier reports the exact same `engineVersion` as the submitted run; otherwise the score stays `verified=0` and safely falls back to polling / GitHub cron, avoiding release-window false negatives.
 
 ## [v1.30.19]
 
 - 修复偶发棋盘缺块：商店治疗触发「神圣打击」击杀敌人后，若盘面留下空洞，会立刻补格，不再把空白格留在实战棋盘上。
+- Fix intermittent missing board tiles: when shop Heal triggers Holy Strike and kills something, any hole left on the board is now refilled immediately instead of lingering as an empty cell.
 - 修复看完回放后技能槽串台：退出 replay 现在会恢复进入回放前的 live 状态，不再把录像里的跨界技能（如把治疗变成「点金」）泄漏回实战。
+- Fix replay state leakage: exiting replay now restores the pre-replay live state, so replayed crossover skills (for example replacing Heal with Gold Touch) no longer bleed back into real play.
 
 ## [v1.30.18]
 
 - 火枪手的「狙击 Snipe」现在**优先攻击 Boss**；若场上有多个 Boss，则命中**生命最低**的那个，场上没有 Boss 时才回退到原先的最高血量目标。
+- Musketeer's **Snipe** now prioritizes bosses; when multiple bosses are present, it targets the one with the **lowest HP**, and only falls back to the old highest-HP target rule when there is no boss on the board.
 
 ## [v1.30.17]
 
