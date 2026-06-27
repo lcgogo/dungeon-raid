@@ -29,10 +29,11 @@
 
 ## 2. 版本与构建
 
-- 版本号 `v主.次.修`：小改 / 修 bug / 调参 → **修**；新 Boss / 职业 / 机制 → **次**；大重构 → **主**（大版本先问用户）。页面 `const VERSION` 与 CHANGELOG 同步。
+- 版本号 `v主.次.修`：**不影响 verify / replay 兼容边界**的小改 / 修 bug / 调参 / UI 文案 → **修**；任何会影响 **verify / replay / 版本分桶 / release 验证语义** 的改动 → **次**（包括新 Boss / 职业 / 机制，以及其他会开启新兼容期的变更）；大重构 → **主**（大版本先问用户）。页面 `const VERSION` 与 CHANGELOG 同步。
+- **凡是 verify / replay 影响改动，都要在对应 CHANGELOG 版本节正文加入一行 `> Version-Impact: verify`**；未标记时默认按 patch 处理。release 脚本会据此拒绝“应升次版本却只升修订号”的发版。
 - **两个 HTML，仅 `const DEV` 一行不同**：开发版 `dungeon-raid-dev.html`（`DEV=true`），正式版 `dungeon-raid.html`（`DEV=false`）。
 - **默认只改开发版**。正式版晋级需用户明确指示。
-- **两套发布脚本必须行为一致**：`dr.sh`（bash）与 `dr.ps1`/`dr.bat`（Windows）做的事必须等价——只翻 `const DEV` → 把正式版 sha256 写进 `engines.json` → 嵌入 CHANGELOG → 提交/推送/部署 Pages → 打/更新 GitHub Release（tag 取正式版 `const VERSION`，notes 取 CHANGELOG 对应节）。**改了其中一套的 release 逻辑，必须同步改另一套**，否则两边发出来的版本会不一致。
+- **两套发布脚本必须行为一致**：`dr.sh`（bash）与 `dr.ps1`/`dr.bat`（Windows）做的事必须等价——只翻 `const DEV` → 先跑版本闸门 → 把正式版 sha256 写进 `engines.json` → 嵌入 CHANGELOG → 提交/推送/部署 Pages → 打/更新 GitHub Release（tag 取正式版 `const VERSION`，notes 取 CHANGELOG 对应节）。**改了其中一套的 release 逻辑，必须同步改另一套**，否则两边发出来的版本会不一致。
 - **commit message 必须在 release 前当场写新**：`dr.sh release` 读 `/tmp/dr_commit_msg.txt`。曾因复用陈旧文件，commit 标题串成上一版本号——发版前务必重写它。
 
 ---

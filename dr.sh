@@ -3,9 +3,10 @@
 #
 #   test                跑全部烟测/回归（test/*.js）
 #   deploy              部署当前文件到 Cloudflare Pages（dev 站更新、正式版按当前 dungeon-raid.html 不变）= 单独发 dev
-#   release             晋级正式版：同步 dev→prod + 提交 + push + 部署 + GitHub Release（提交说明读 /tmp/dr_commit_msg.txt）
+#   release             晋级正式版：先过版本闸门，再同步 dev→prod + 提交 + push + 部署 + GitHub Release（提交说明读 /tmp/dr_commit_msg.txt）
 #   gh-release [vX.Y.Z] 创建/更新 GitHub Release（默认读正式版 const VERSION；可指定版本回填）
 #   integrity           核对正式版引擎 sha256 是否与 engines.json 登记一致（完整性校验）
+#   check-version [from to impact]  校验版本闸门（默认读正式版→开发版；impact=patch|verify）
 #   embed-changelog     把 CHANGELOG.md 摘要注入页面 CHANGELOG_LINES（deploy/release 自动调用）
 #   classify <id> <ai|human>  把某条成绩在 人类榜↔AI榜 之间改判（需 ADMIN_SECRET 环境变量）
 #   delete <id>         删除某条成绩（需 ADMIN_SECRET）
@@ -24,6 +25,11 @@ ACCT=5f2bcd334702a2c76245d5832c0cf767
 # sha256（macOS shasum / Linux sha256sum 兼容）
 sha256_of(){ if command -v sha256sum >/dev/null 2>&1; then sha256sum "$1"|cut -d' ' -f1; else shasum -a 256 "$1"|cut -d' ' -f1; fi; }
 ver_of(){ grep -oE "const VERSION='v[0-9.]+'" "$1"|grep -oE 'v[0-9.]+'; }
+
+# ---------- 版本闸门：verify/replay 影响改动必须升次版本 ----------
+cmd_check_version(){
+  node version-gate.js "$@"
+}
 
 # ---------- 完整性：核对正式版文件的 sha256 是否与 engines.json 登记的一致 ----------
 cmd_integrity(){
@@ -173,6 +179,7 @@ cmd_gh_release(){
 # ---------- 晋级正式版 ----------
 cmd_release(){
   [ -f /tmp/dr_commit_msg.txt ] || { echo "缺少 /tmp/dr_commit_msg.txt（提交说明）"; exit 1; }
+  cmd_check_version
   # 0) 把最新 CHANGELOG 摘要注入 dev（随后同步给正式版）
   cmd_embed_changelog dungeon-raid-dev.html
   # 1) 同步 dev → 正式版（两文件仅 const DEV 一行不同）
@@ -231,6 +238,7 @@ case "${1:-help}" in
   release)           cmd_release ;;
   gh-release)        cmd_gh_release "$2" ;;
   integrity)         cmd_integrity ;;
+  check-version)     shift; cmd_check_version "$@" ;;
   embed-changelog)   shift; cmd_embed_changelog "$@" ;;
   classify)          cmd_classify "$2" "$3" ;;
   delete)            cmd_delete "$2" ;;

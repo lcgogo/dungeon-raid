@@ -1,3 +1,12 @@
+## [v1.31.0]
+
+> Version-Impact: verify
+
+- 明确发版版本号新规则：凡是影响 **verify / replay / 版本分桶 / release 验证语义** 的改动，都必须升 **次版本**，而不是继续只升 patch。
+- Clarify the release-versioning rule: any change that affects **verify / replay / version bucketing / release verification semantics** must bump the **minor** version instead of staying on a patch release.
+- `dr.sh` / `dr.ps1` 新增 **check-version** 版本闸门；`release` 会先执行该校验，若 CHANGELOG 版本节标记 `Version-Impact: verify` 却只升了 patch，会直接拒绝发版。
+- `dr.sh` / `dr.ps1` now include a **check-version** release gate; `release` runs it first and refuses to ship a patch-only bump when the changelog marks the release with `Version-Impact: verify`.
+
 ## [v1.30.23]
 
 - 游戏内内嵌 changelog 现缩减为最近 **5** 条，并支持按当前语言显示中英文摘要：中文界面看中文，英文界面看英文；若某条缺失英文，则自动回退到中文。
@@ -177,9 +186,11 @@
 
 本文件记录《地牢突袭》各版本的改动。版本号遵循 `v主.次.修`：
 
-- **修订号**：小改动 / 修 bug / 调参
-- **次版本**：新增 Boss / 新职业 / 新机制
+- **修订号**：不影响 verify / replay 兼容边界的小改动 / 修 bug / 调参 / UI 文案
+- **次版本**：任何会影响 verify / replay / 版本分桶 / release 验证语义的改动（包括新 Boss / 新职业 / 新机制，以及其他会开启新兼容期的变更）
 - **主版本**：大版本重构
+
+若某个版本节属于 verify / replay 影响改动，需在该版本节正文加入单独一行：`> Version-Impact: verify`。未标记时默认按 patch 处理；release 脚本会据此拒绝“应升次版本却只升修订号”的发版。
 
 格式参考 [Keep a Changelog](https://keepachangelog.com/zh-CN/)。日期为本地时间。
 

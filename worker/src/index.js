@@ -64,7 +64,7 @@ async function cnt(env, where, ...bind) {
   const row = await env.DB.prepare(`SELECT COUNT(*) c FROM scores WHERE ${where}`).bind(...bind).first();
   return row ? row.c : 0;
 }
-// 榜单按【大.次版本】分桶（v1.30.12 → v1.30）：避免频繁补丁号把榜单切碎；平衡相关的次版本才分开。
+// 榜单按【大.次版本】分桶（v1.30.12 → v1.30）：避免频繁补丁号把榜单切碎；凡是会影响 verify/replay 兼容边界的变更应升次版本，开启新的榜单桶。
 const minorKey = v => 'v' + String(v || '').replace(/^v/, '').split('.').slice(0, 2).join('.');   // v1.30.12 → v1.30
 const minorLike = v => minorKey(v) + '.%';   // SQL LIKE 模式，匹配同一「大.次」下所有补丁号
 // 百分位：超过了多少比例（按回合近似）。在【同大.次版本桶】内统计。

@@ -9,7 +9,8 @@
 - 做法：文案从简（长背景/致敬只留 2–3 行）；次级按钮单行（去掉副标题）；能拆两步就拆（开始页：落地 → START → 选种族）。新增/改动任何弹层都按此自检。
 
 ## 版本与构建
-- 版本号 `v主.次.修`：小改/修 bug/调参 → 修；新 Boss/职业/机制 → 次；大重构 → 主（大版本先问用户）。页面 `const VERSION` 与 CHANGELOG 同步。
+- 版本号 `v主.次.修`：**不影响 verify / replay 兼容边界**的小改/修 bug/调参/UI 文案 → 修；任何会影响 **verify / replay / 版本分桶 / release 验证语义** 的改动 → 次（包括新 Boss/职业/机制，以及其他会开启新兼容期的变更）；大重构 → 主（大版本先问用户）。页面 `const VERSION` 与 CHANGELOG 同步。
+- 凡是 verify / replay 影响改动，都要在对应 CHANGELOG 版本节正文加入一行 `> Version-Impact: verify`；未标记时默认按 patch 处理，release 脚本会据此拒绝“应升次版本却只升修订号”的发版。
 - **两个 HTML，仅 `const DEV` 一行不同**：开发版 `dungeon-raid-dev.html`（DEV=true），正式版 `dungeon-raid.html`（DEV=false）。
 - **所有脚本合到 `dr.sh`，用子命令控制**：`bash dr.sh <命令>`——`test`/`deploy`（单独发 dev，正式版不变）/`release`（晋级正式版）/`gh-release [vX.Y.Z]`/`integrity`（核对正式版 sha256）/`backfill-releases`/`bind-domains`。`bash dr.sh help` 看说明。
 - **版本标识 = 显式 `const VERSION`（人类标签）+ `engines.json` 里的引擎 sha256（完整性）**：`dr.sh release` 自动把正式版文件的 sha256 写进 `engines.json`；verify.js 读运行时 `VERSION`（不靠正则、minify 无关）并核对 sha256。哈希只用于「校验这份文件是不是该版本」，不用来反推版本。

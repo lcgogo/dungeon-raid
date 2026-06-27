@@ -75,6 +75,7 @@ function integrityNote(ENGINE_VER) {
 function resolveEnginePath(version) {
   if (!version) return path.join(__dirname, 'dungeon-raid.html');
   const snap = path.join(__dirname, 'engines', `${version}.html`);
+  // verify 始终按录像自己的精确 rec.ver 选快照；若某次改动会改变 replay/verify 兼容边界，就应升次版本而不是继续沿用同一 patch 序列。
   return fs.existsSync(snap) ? snap : path.join(__dirname, 'dungeon-raid.html');
 }
 

@@ -6,10 +6,11 @@
 # 命令列表：
 #   test                跑全部烟测/回归（test/*.js）
 #   deploy              部署当前文件到 Cloudflare Pages（dev 站更新）
-#   release             晋级正式版：同步 dev→prod + 提交 + push + 部署 + GitHub Release
+#   release             晋级正式版：先过版本闸门，再同步 dev→prod + 提交 + push + 部署 + GitHub Release
 #                       运行前请把提交说明写入 COMMIT_MSG.txt
 #   gh-release [vX.Y.Z] 创建/更新 GitHub Release
 #   integrity           核对正式版引擎 sha256 是否与 engines.json 登记一致
+#   check-version [from to impact]  校验版本闸门（默认读正式版→开发版；impact=patch|verify）
 #   classify <id> <ai|human>  把某条成绩在 人类榜↔AI榜 之间改判（需 $env:ADMIN_SECRET）
 #   delete <id>         删除某条成绩（需 $env:ADMIN_SECRET）
 #   prune [天数=30] [保留版本数=5]  手动清理旧版本+陈旧录像（需 $env:ADMIN_SECRET）
@@ -66,6 +67,11 @@ function require_debug_seed_secret {
         Write-Host "❌ 缺少环境变量 DEBUG_SEED_SECRET" -ForegroundColor Red
         exit 1
     }
+}
+
+function cmd_check_version {
+    node version-gate.js @args
+    if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 }
 
 # ============ 各命令实现 ============
@@ -253,6 +259,7 @@ function cmd_gh_release($VER="") {
 # ---------- release ----------
 function cmd_release {
     require_commit_msg
+    cmd_check_version
 
     # 0) 把最新 CHANGELOG 摘要注入 dev
     cmd_embed_changelog @("dungeon-raid-dev.html")
@@ -371,6 +378,7 @@ function cmd_help {
   release             晋级正式版（需提前创建 COMMIT_MSG.txt）
   gh-release [vX.Y.Z] 创建/更新 GitHub Release
   integrity           核对正式版引擎 sha256 是否与 engines.json 登记一致
+  check-version [from to impact]  校验版本闸门（默认读正式版→开发版）
   classify <id> <ai|human>  改判成绩所属榜单（需 ADMIN_SECRET）
   delete <id>         删除某条成绩（需 ADMIN_SECRET）
   prune [天数] [保留数]  手动清理旧版本+陈旧录像（需 ADMIN_SECRET）
@@ -393,6 +401,7 @@ switch ($cmd) {
     "release"           { cmd_release }
     "gh-release"        { cmd_gh_release @restArgs }
     "integrity"         { cmd_integrity }
+    "check-version"     { cmd_check_version @restArgs }
     "embed-changelog"   { cmd_embed_changelog @restArgs }
     "classify"          { cmd_classify $restArgs[0] $restArgs[1] }
     "delete"            { cmd_delete $restArgs[0] }
