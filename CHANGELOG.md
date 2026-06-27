@@ -1,3 +1,10 @@
+## [v1.31.2]
+
+- 强化 `playtest.js` 的竞技型 AI：提交模式现在会优先走更强的 build（如精灵长老线、矮人会长线），并改进升级、技能、商店与连线选择逻辑，目标是稳定冲过 live 上传门槛，而不再只是普通贪心乱跑。
+- Strengthen the competitive AI in `playtest.js`: submit mode now prioritizes stronger builds (such as Elf Elder and Dwarf Guild Master lines) and uses improved upgrade, skill, shop, and chain-selection logic so it can consistently challenge the live upload threshold instead of acting like a generic greedy bot.
+- 新增 `submit-ai-until-posted.js` 轮询器：会按强势组合依次尝试真实 AI 提交，并在打出可上传成绩后轮询当前版本 AI 榜，方便直接验证 live 提交流程。
+- Add `submit-ai-until-posted.js`, a strong-build portfolio runner that cycles through real AI submissions and then polls the current-version AI leaderboard once a score clears the upload gate.
+
 ## [v1.31.1]
 
 - 修复 AI / 无头提交在结算时丢失服务端 seed token：录像原本在开局已拿到 `rec.token`，但死亡结算会被 `player.token||''` 覆盖成空串，导致 `/score` / `/clear` 误报 `ranked play requires a server seed`。现在结算会保留已有 `rec.token`，自动提交流程可正常进入验证链。

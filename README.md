@@ -198,7 +198,7 @@ node playtest.js --race=dwarf --enemy=C2             # 指定敌人数值候选�
 node playtest.js --replay=run.json   # 回放一份游戏导出的录像（确定性重演），输出结局/死因，便于分析真实人类玩法
 node playtest.js --dev               # 用开发版（dungeon-raid-dev.html）跑，验证未发布的数值改动
 node playtest.js --submit-ai --games=3   # 跑机器人 → 本地重放校验 → 把可验证录像以 agent=ai 提交到 AI 榜（加 --dry 只校验不提交）
-node submit-ai-until-posted.js           # 反复跑默认强势配置（默认矮人+dwarf / assassin 池）直到至少成功提交 1 条 AI 成绩，并轮询是否进入当前版本 AI 榜
+node submit-ai-until-posted.js           # 轮流尝试强势 build（默认精灵长老 / 矮人会长 / 人族骑士等），直到至少成功提交 1 条 AI 成绩，并轮询是否进入当前版本 AI 榜
 ```
 
 平衡基准数据见 [`TEST_REPORT.md`](TEST_REPORT.md)（带版本号，可作回归对比）；版本改动历史见 [`CHANGELOG.md`](CHANGELOG.md)。
