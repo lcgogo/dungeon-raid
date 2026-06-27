@@ -146,12 +146,12 @@
 | 🥷 刺客 Assassin | 剑 / 炸弹 | 属性同普通怪，但攻击是**真实伤害**，无视护甲直接掉血 |
 | 🦖 饕餮 Devourer | 剑 / 炸弹 | 每回合吸取场上每只怪一半生命壮大；倒计时归零放出等于自身 50% 血量的强击 |
 | 🧙 召唤师 Summoner | 剑 / 炸弹 | 每回合把一个非怪棋子变成一只怪，拖得越久怪越多 |
-| 🦹 小偷 Thief | 剑 / 炸弹 | 现身即偷走一定比例金币（一阶 20%、二阶 40%…，高档位最多偷光、不会偷成负数）；倒计时内击败夺回，让它逃走则永久失去 |
+| 🦹 小偷 Thief | 剑 / 炸弹 | 现身即偷走一定比例金币（一阶 10%、二阶 20%，之后每阶 +10%；高档位最多偷光、不会偷成负数）；倒计时内击败夺回，让它逃走则永久失去 |
 | 🧟 僵尸 Zombie | 剑 / 炸弹 | 现身即让你感染尸毒（血条变绿），**潜伏一回合后**每回合按生命百分比掉血（随档位递增，单回合最高 30%，无视护甲）；趁潜伏期击败它即解除感染 |
 | 🦅 鸟人 Birdman | 剑 / 炸弹 | **每回合**俯冲啄你一下（半攻击力），并在回合末和棋盘上**任意一个棋子互换位置（瞬移）**——飘忽难缠，想连它的剑链得算准它的落点，速战速决 |
 | 🗿 石像 Statue | 剑 / 炸弹（慎用） | 它【受到多少伤害，就把等量伤害当作**真实伤害（无视护甲）反弹给你**】——攻击它=伤害自己。想杀它先确保血够厚，别一刀连自己也送走（剑/炸弹/溅射/吸魂都会反弹）|
 | 🦠 污染怪 Corruptor | 仅炸弹 | 只要它在场，**全场的心都变成毒心（绿心 💚）**——连毒心不再回血、反而按等量【**扣血**（无视护甲）】！炸掉它，心立刻恢复正常（低血量，一两发炸弹即可）|
-| ⛄ 雪人 Snowman | 仅炸弹 | 现身就**随机冰封你的主动**——按 Boss 档位冻 1~3 个（职业主动/💊治疗/💥炸弹 里随机），4 回合内不可用（❄️ 标记）；之后**每次倒计时归零再次冰封**。**本身不攻击、不掉你血**——趁解冻空档炸掉它（再冻间隔比冻结时长长，总有可炸窗口）|
+| ⛄ 雪人 Snowman | 仅炸弹 | 现身就**随机冰封你的主动**——1 阶封 1 个技能 1 回合、2 阶封 2 个技能 1 回合、3 阶封 1 个技能 2 回合、4 阶封 2 个技能 2 回合、5 阶封 2 个技能 3 回合、6 阶封 3 个技能 3 回合、7 阶封 3 个技能 4 回合、8 阶封 3 个技能 5 回合、9 阶封 3 个技能 6 回合。之后**每次倒计时归零再次冰封**。**本身不攻击、不掉你血**——趁解冻空档炸掉它 |
 
 > Boss 入场时会有**扩散冲击环 + 闪光**特效（普通 Boss 红、终焉之主金），一眼可辨。每个 Boss 与职业主动技能在信息弹窗里都附带一句**俏皮话**。
 
@@ -340,7 +340,7 @@ Every **10 turns** a random boss is guaranteed to appear; **beating one by any m
 | 🦅 Birdman | Sword / Bomb | **Every turn** it dives to peck you (half attack) and, at turn end, **swaps places with a random tile (teleport)** — elusive and nagging, so line up your chain where it lands and finish it fast |
 | 🗿 Statue | Sword / Bomb (careful!) | **Whatever damage it takes, it reflects back at you as TRUE damage (ignoring armor)** — attacking it hurts you. Make sure you have the HP to survive the kill; don't one-shot yourself (sword/bomb/splash/drain all reflect) |
 | 🦠 Corruptor | Bomb only | While it's on the board, **all hearts become poison (green 💚)** — linking them DRAINS that much HP (ignoring armor) instead of healing! Bomb it and hearts return to normal (low HP, one or two bombs) |
-| ⛄ Snowman | Bomb only | On arrival it **freezes random actives** — 1 at Lv1, 2 at Lv2, 3 at Lv3 (class active / 💊Heal / 💥Bomb), unusable for 4 turns (❄️ marker); then **re-freezes every time its countdown hits 0**. It deals **NO damage itself** — bomb it during the thaw (re-freeze interval > freeze duration, so a window always opens) |
+| ⛄ Snowman | Bomb only | On arrival it **freezes random actives** — Lv1: 1 skill for 1 turn; Lv2: 2 for 1 turn; Lv3: 1 for 2 turns; Lv4: 2 for 2 turns; Lv5: 2 skills for 3 turns; Lv6: 3 for 3 turns; Lv7: 3 for 4 turns; Lv8: 3 for 5 turns; Lv9: 3 for 6 turns. Then it **re-freezes every time its countdown hits 0**. It deals **NO damage itself** — bomb it during the thaw window |
 
 > Each boss arrives with a **shockwave ring + flash** effect (crimson for normal bosses, gold for the Overlord), so you never miss one. Every boss and every class active also carries a one-line **quip** in its info popup.
 

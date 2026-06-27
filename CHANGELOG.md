@@ -1,3 +1,14 @@
+## [v1.32.0]
+
+> Version-Impact: verify
+
+- 下调小偷 Boss 的偷金比例：从原先的一阶 20%、二阶 40% 系列，改为 **一阶 10%、二阶 20%，之后每阶 +10%**，减轻高金币局被瞬间掏空的惩罚。
+- 重做雪人 Boss 的冻结阶梯：1 阶封 1 个技能 1 回合、2 阶封 2 个技能 1 回合、3 阶封 1 个技能 2 回合、4 阶封 2 个技能 2 回合、5 阶封 2 个技能 3 回合、6 阶封 3 个技能 3 回合、7 阶封 3 个技能 4 回合、8 阶封 3 个技能 5 回合、9 阶封 3 个技能 6 回合。
+- 这两项都属于会改变同种子同操作结局的平衡调整，因此按当前版本规则改用 **minor** 发版，而不是继续走 patch。
+- Nerf the Thief boss’s gold-steal scaling: instead of the old 20% at Lv1 / 40% at Lv2 progression, it now steals **10% at Lv1, 20% at Lv2, then +10% per tier**, softening the punishment on high-gold runs.
+- Rework the Snowman boss’s freeze ladder: Lv1 freezes 1 skill for 1 turn, Lv2 freezes 2 for 1 turn, Lv3 freezes 1 for 2 turns, Lv4 freezes 2 for 2 turns, Lv5 freezes 2 skills for 3 turns, Lv6 freezes 3 for 3 turns, Lv7 freezes 3 for 4 turns, Lv8 freezes 3 for 5 turns, and Lv9 freezes 3 for 6 turns.
+- Because both changes alter outcomes for the same seed + action sequence, they now ship as a **minor** release rather than a patch under the current replay/versioning policy.
+
 ## [v1.31.7]
 
 - 排行榜上传失败现在会弹更明确的提示：区分服务端种子过期、种子已用、seed 不匹配、未达上传门槛，以及通用网络/服务异常，不再只显示一句模糊的“上传失败”。
