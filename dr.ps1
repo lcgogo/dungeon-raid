@@ -210,6 +210,8 @@ function cmd_deploy {
     #   dungeon-raid-dev.html = dev 版（dev 域名通过 Cloudflare Pages 设置指向此文件）
     Copy-Item "dungeon-raid.html" "public\dungeon-raid.html"
     Copy-Item "dungeon-raid-dev.html" "public\dungeon-raid-dev.html"
+    Copy-Item "apple-touch-icon.png" "public\apple-touch-icon.png" -Force
+    Copy-Item "manifest.webmanifest" "public\manifest.webmanifest" -Force
     Copy-Item "pages\functions\_middleware.js" "public\functions\" -Force
 
     Write-Host "public/ 内容（应只有网页文件，无私钥）:"

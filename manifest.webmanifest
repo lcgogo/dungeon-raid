@@ -1,0 +1,15 @@
+{
+  "name": "地牢突袭 · Dungeon Raid",
+  "short_name": "地牢突袭",
+  "start_url": "/dungeon-raid.html",
+  "display": "standalone",
+  "background_color": "#241b30",
+  "theme_color": "#241b30",
+  "icons": [
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ]
+}

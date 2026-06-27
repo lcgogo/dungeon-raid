@@ -1,3 +1,10 @@
+## [v1.31.4]
+
+- 新增 `manifest.webmanifest`，并让首页、正式版、开发版三个入口页都显式声明 `<link rel="manifest">`，让 Android / Chrome 添加到主屏时的名称、主题色与图标来源更稳定。
+- Add `manifest.webmanifest` and link it from the landing page plus both game entry pages, giving Android / Chrome a stable source of install metadata (name, theme color, and icon) instead of relying on browser fallbacks.
+- `dr.sh` / `dr.ps1` 的 deploy 流程现在会把 manifest 一起复制到 `public/`，避免每次部署后静态安装元数据丢失。
+- `dr.sh` / `dr.ps1` now copy the manifest into `public/` during deploy so install metadata survives every dev/prod deployment.
+
 ## [v1.31.3]
 
 - 修复 replay / verify 在升级三选一上的随机漂移：升级池原先用 `sort(() => rnd() - 0.5)` 洗牌，不同 JS 引擎/实现下会以不同顺序和次数调用比较器，导致相同 seed 的 live 对局与 replay/verify 在升级点后消耗 RNG 不一致。现改为确定性的 Fisher-Yates 洗牌，避免录像明明打到高回合、回放却在升级后提前跑偏。
