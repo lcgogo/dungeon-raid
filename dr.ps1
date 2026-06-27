@@ -211,6 +211,8 @@ function cmd_deploy {
     Copy-Item "dungeon-raid.html" "public\dungeon-raid.html"
     Copy-Item "dungeon-raid-dev.html" "public\dungeon-raid-dev.html"
     Copy-Item "apple-touch-icon.png" "public\apple-touch-icon.png" -Force
+    Copy-Item "icon-192.png" "public\icon-192.png" -Force
+    Copy-Item "icon-512.png" "public\icon-512.png" -Force
     Copy-Item "manifest.webmanifest" "public\manifest.webmanifest" -Force
     Copy-Item "pages\functions\_middleware.js" "public\functions\" -Force
 

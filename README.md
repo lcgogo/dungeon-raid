@@ -31,7 +31,7 @@
 | ✅ **正式版** | `dungeon-raid.html` | 稳定版本 |
 | 🚧 **开发版 DEV** | `dungeon-raid-dev.html` | 指向最新开发版本，新功能先在这里试 |
 
-两个版本**存档相互独立、互不覆盖**（DEV 用单独的 localStorage 键）。开始界面与底部都会标明当前是「正式版」还是「DEV 开发版」。首页上的正式版 / 开发版版本号是**部署时静态写进 HTML** 的，不靠额外联网请求，弱网下也能直接看到。项目现在还提供 `manifest.webmanifest`，让 Android / Chrome 添加到主屏时的名称、主题色与图标来源更稳定；iOS 仍继续使用 `apple-touch-icon.png`。
+两个版本**存档相互独立、互不覆盖**（DEV 用单独的 localStorage 键）。开始界面与底部都会标明当前是「正式版」还是「DEV 开发版」。首页上的正式版 / 开发版版本号是**部署时静态写进 HTML** 的，不靠额外联网请求，弱网下也能直接看到。项目现在还提供 `manifest.webmanifest`：Android / Chrome 添加到主屏时会优先使用 `icon-192.png` / `icon-512.png` 及 manifest 元数据；iOS 仍继续使用 `apple-touch-icon.png`。
 
 ### 🧩 核心玩法
 

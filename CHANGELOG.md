@@ -1,3 +1,10 @@
+## [v1.31.5]
+
+- 为 Android / Chrome 安装图标补上标准 PNG 尺寸：新增 `icon-192.png` 与 `icon-512.png`，并写入 `manifest.webmanifest` 的 `icons` 列表，避免主屏图标继续回退到浏览器自行猜测。
+- Add standard Android / Chrome install icon sizes by introducing `icon-192.png` and `icon-512.png` and wiring them into the `icons` array in `manifest.webmanifest`, so home-screen installs no longer rely on browser fallbacks.
+- `dr.sh` / `dr.ps1` 的 deploy 流程现在会把这两个 PNG 一并复制到 `public/`，确保发布后的 manifest 不会引用缺失文件。
+- `dr.sh` / `dr.ps1` now copy both PNG icon files into `public/`, ensuring the released manifest never points at missing assets.
+
 ## [v1.31.4]
 
 - 新增 `manifest.webmanifest`，并让首页、正式版、开发版三个入口页都显式声明 `<link rel="manifest">`，让 Android / Chrome 添加到主屏时的名称、主题色与图标来源更稳定。
