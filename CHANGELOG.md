@@ -1,3 +1,10 @@
+## [v1.31.6]
+
+- 服务端种子 token 的有效期从 2 小时延长到 **72 小时（现实时间）**，高回合/破关后有更宽松的补交窗口；token 仍然是一次性使用，消费后继续短 TTL 保留防复用。
+- Extend server-seed token validity from 2 hours to **72 real-time hours**, giving high-turn / clear runs a much wider resubmission window; tokens remain one-shot and still collapse to a short TTL after use to prevent reuse.
+- 录像详情与结算页现在会明确提示：服务端种子是**现实时间 72 小时**有效，过期后旧录像即使可 replay，也不能再补交排行榜。
+- Record details and end screens now explicitly say that server-seed tokens are valid for **72 real-time hours** and that old recordings may remain replayable after expiry but can no longer be resubmitted to the leaderboard.
+
 ## [v1.31.5]
 
 - 为 Android / Chrome 安装图标补上标准 PNG 尺寸：新增 `icon-192.png` 与 `icon-512.png`，并写入 `manifest.webmanifest` 的 `icons` 列表，避免主屏图标继续回退到浏览器自行猜测。

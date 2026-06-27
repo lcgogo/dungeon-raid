@@ -18,7 +18,7 @@
 ## 验证链条
 
 ```
-玩家死亡/破关（录像=种子+操作序列+服务端一次性 token）
+玩家死亡/破关（录像=种子+操作序列+服务端一次性 token；token 现实时间 72 小时内可用于提交/补交）
   → Worker /score|/clear：校验 token → 录像存 KV、成绩存 D1(verified=0) → 算名次返回
   → 若顶尖(前1%/前10)：90s 去抖后 fetch verify.dungeonraid.win/verify-now?k=SECRET（→ 橙云 → 隐藏的 render）
   → render：加载当前正式版引擎(启动一次) → /pending?version=当前版 → 逐条 /rec/:id 取录像 → 确定性重放(同种子+同操作→同结局) → 比对 → POST /verify
