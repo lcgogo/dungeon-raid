@@ -1,3 +1,8 @@
+## [v1.31.7]
+
+- 排行榜上传失败现在会弹更明确的提示：区分服务端种子过期、种子已用、seed 不匹配、未达上传门槛，以及通用网络/服务异常，不再只显示一句模糊的“上传失败”。
+- Ranking upload failures now show specific toast reasons: expired server seed, already-used seed, seed mismatch, below-threshold runs, and generic network/service issues instead of one vague failure message.
+
 ## [v1.31.6]
 
 - 服务端种子 token 的有效期从 2 小时延长到 **72 小时（现实时间）**，高回合/破关后有更宽松的补交窗口；token 仍然是一次性使用，消费后继续短 TTL 保留防复用。
