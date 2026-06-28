@@ -173,8 +173,8 @@
 (()=>{
 //==================== 配置 ====================
 // 版本号 v主.次.修：不影响 verify/replay 兼容边界的小改动改"修"；凡是影响 verify/replay/版本分桶/release 验证语义的改动都改"次"；大版本变更需先确认。页面底部显示。
-const VERSION='v1.32.0';
-const CHANGELOG_LINES=[{"ver": "v1.32.0", "zh": "下调小偷 Boss 的偷金比例：从原先的一阶 20%、二阶 40% 系列，改为 一阶 10%、二阶 20%，之后每阶 +10%，减轻高金币局被瞬间掏空的惩罚。", "en": "重做雪人 Boss 的冻结阶梯：1 阶封 1 个技能 1 回合、2 阶封 2 个技能 1 回合、3 阶封 1 个技能 2 回合、4 阶封 2 个技能 2 回合、5 阶封 2 个技能 3 回合、6 阶封 3 个技能 3 回合、7 阶封 3 个技能 4 回合、8 阶封 3 个技能 5 回合、9 阶封 3 个技能 6 回合。"}, {"ver": "v1.31.7", "zh": "排行榜上传失败现在会弹更明确的提示：区分服务端种子过期、种子已用、seed 不匹配、未达上传门槛，以及通用网络/服务异常，不再只显示一句模糊的“上传失败”。", "en": "Ranking upload failures now show specific toast reasons: expired server seed, already-used seed, seed mismatch, below-threshold runs, and generic network/service issues instead of one vague failure message."}, {"ver": "v1.31.6", "zh": "服务端种子 token 的有效期从 2 小时延长到 72 小时（现实时间），高回合/破关后有更宽松的补交窗口；token 仍然是一次性使用，消费后继续短 TTL 保留防复用。", "en": "Extend server-seed token validity from 2 hours to 72 real-time hours, giving high-turn / clear runs a much wider resubmission window; tokens remain one-shot and still collapse to a short TTL after use to prevent reuse."}, {"ver": "v1.31.5", "zh": "为 Android / Chrome 安装图标补上标准 PNG 尺寸：新增 `icon-192.png` 与 `icon-512.png`，并写入 `manifest.webmanifest` 的 `icons` 列表，避免主屏图标继续回退到浏览器自行猜测。", "en": "Add standard Android / Chrome install icon sizes by introducing `icon-192.png` and `icon-512.png` and wiring them into the `icons` array in `manifest.webmanifest`, so home-screen installs no longer rely on browser fallbacks."}, {"ver": "v1.31.4", "zh": "新增 `manifest.webmanifest`，并让首页、正式版、开发版三个入口页都显式声明 `<link rel=\"manifest\">`，让 Android / Chrome 添加到主屏时的名称、主题色与图标来源更稳定。", "en": "Add `manifest.webmanifest` and link it from the landing page plus both game entry pages, giving Android / Chrome a stable source of install metadata (name, theme color, and icon) instead of relying on browser fallbacks."}];   /* auto-injected by dr.sh embed-changelog（勿手改） */
+const VERSION='v1.32.1';
+const CHANGELOG_LINES=[{"ver": "v1.32.1", "zh": "给屠夫的「钩子 Hook」补了一条短暂的铁灰色拖拽线特效，并在末端加了更清晰的钩尖，让怪物被拉到底排时的方向感更直观；纯视觉，不改变技能结算与 replay 逻辑。", "en": "Add a short iron-gray drag line to Butcher’s Hook, with a clearer hook-head at the pulled end so the downward drag reads more clearly; this is purely visual and does not change skill resolution or replay behavior."}, {"ver": "v1.32.0", "zh": "下调小偷 Boss 的偷金比例：从原先的一阶 20%、二阶 40% 系列，改为 一阶 10%、二阶 20%，之后每阶 +10%，减轻高金币局被瞬间掏空的惩罚。", "en": "重做雪人 Boss 的冻结阶梯：1 阶封 1 个技能 1 回合、2 阶封 2 个技能 1 回合、3 阶封 1 个技能 2 回合、4 阶封 2 个技能 2 回合、5 阶封 2 个技能 3 回合、6 阶封 3 个技能 3 回合、7 阶封 3 个技能 4 回合、8 阶封 3 个技能 5 回合、9 阶封 3 个技能 6 回合。"}, {"ver": "v1.31.7", "zh": "排行榜上传失败现在会弹更明确的提示：区分服务端种子过期、种子已用、seed 不匹配、未达上传门槛，以及通用网络/服务异常，不再只显示一句模糊的“上传失败”。", "en": "Ranking upload failures now show specific toast reasons: expired server seed, already-used seed, seed mismatch, below-threshold runs, and generic network/service issues instead of one vague failure message."}, {"ver": "v1.31.6", "zh": "服务端种子 token 的有效期从 2 小时延长到 72 小时（现实时间），高回合/破关后有更宽松的补交窗口；token 仍然是一次性使用，消费后继续短 TTL 保留防复用。", "en": "Extend server-seed token validity from 2 hours to 72 real-time hours, giving high-turn / clear runs a much wider resubmission window; tokens remain one-shot and still collapse to a short TTL after use to prevent reuse."}, {"ver": "v1.31.5", "zh": "为 Android / Chrome 安装图标补上标准 PNG 尺寸：新增 `icon-192.png` 与 `icon-512.png`，并写入 `manifest.webmanifest` 的 `icons` 列表，避免主屏图标继续回退到浏览器自行猜测。", "en": "Add standard Android / Chrome install icon sizes by introducing `icon-192.png` and `icon-512.png` and wiring them into the `icons` array in `manifest.webmanifest`, so home-screen installs no longer rely on browser fallbacks."}];   /* auto-injected by dr.sh embed-changelog（勿手改） */
 const DEV=true;   // release build (DEV=false); dev build is dungeon-raid-dev.html (DEV=true)
 const REC_API='https://api.dungeonraid.win';   // 录像分享 API（Cloudflare Worker + KV）
 // 带种子随机数（mulberry32）：游戏全程用 rnd() 取代原生随机，配合录制种子可确定性重放
@@ -576,10 +576,16 @@ const TIER1={
     log(tr(`🪄 吸魂大法：吸取 ${pick.length} 个目标 ${healed} 生命，回血 ${h}`+(kills?`，击杀 ${kills} 只`:'')+(lh?`，吸血 +${lh}`:'')+(splashes.length?`，溅射 ${splashes.length} 次`:''),`🪄 Soul Drain: drained ${healed} from ${pick.length}, +${h} HP`+(kills?`, ${kills} killed`:'')+(lh?`, +${lh} lifesteal`:'')+(splashes.length?`, ${splashes.length} splash`:'')), 'heal'); return true; }}},
   skeletonking:{n:['骷髅王','Skeleton King'], quip:['死过一次，再死一次又何妨。','Died once already — what is one more?'], skill:{name:['重生','Rebirth'], short:['本回合致死则满血复活(此后冷却+2)','Cheat death this turn, full heal'], desc:['发动后本回合若受到致命伤害，会立刻满血复活而非死亡。每触发一次，重生的冷却永久 +2。发动即进入冷却（无论本回合是否真的触发）。','Armed this turn: if a lethal blow lands, you revive at full HP instead of dying. Each trigger permanently raises Rebirth’s cooldown by 2. Goes on cooldown when cast, whether or not it triggers.'], cd:5, f:p=>{ p.rebirthTurn=true; log(tr('💀 重生待命：本回合若被击败，将满血复活！','💀 Rebirth armed: if slain this turn, revive at full HP!'), 'buff'); return true; }}},
   butcher:{n:['屠夫','Butcher'], quip:['钩子一甩，肉就乖乖到底。','One swing of the hook, and the meat comes to me.'], skill:{name:['钩子','Hook'], short:['拉到底排；离底越远伤害越高','Drag down; farther from bottom = more damage'], desc:['一钩把棋盘上所有的怪和 Boss（含{W}免疫，终焉之主除外）顺着各自所在列拉到尽可能底部，其余棋子上浮；随后按【离底线的距离】造成伤害：最底排吃 1× 固定伤害、倒数第二排吃 2×，依此类推。场上没有可拉的敌人时无效、不进冷却。','Hooks every monster & boss (incl. {W}-immune; not the Overlord) down to the bottom of its column while other tiles float up; then deals damage by【distance from the bottom】— bottom row takes 1× flat damage, second-from-bottom 2×, and so on. No effect — and no cooldown — when there is nothing to pull.'], cd:5, f:p=>{
-    let moved=0, any=false, dmg=0, kills=0; const isMon=t=>t&&(t.type==='enemy'||t.type==='boss')&&!t.finale; const hookBase=Math.max(1, p.swordFlat||0);
-    for(let c=0;c<COLS;c++){ const col=[]; for(let r=0;r<ROWS;r++) col.push(grid[r][c]); if(!col.some(isMon)) continue; any=true;
+    let moved=0, any=false, dmg=0, kills=0; const isMon=t=>t&&(t.type==='enemy'||t.type==='boss')&&!t.finale; const hookBase=Math.max(1, p.swordFlat||0); const lines=[];
+    for(let c=0;c<COLS;c++){
+      const col=[]; for(let r=0;r<ROWS;r++) col.push(grid[r][c]); if(!col.some(isMon)) continue; any=true;
+      const mons=[]; for(let r=0;r<ROWS;r++){ const t=grid[r][c]; if(isMon(t)) mons.push({tile:t, from:r}); }
       const newCol=col.filter(t=>!isMon(t)).concat(col.filter(isMon));   // 非敌上浮、敌沉底
-      for(let r=0;r<ROWS;r++){ if(grid[r][c]!==newCol[r]) moved++; grid[r][c]=newCol[r]; } }
+      const byTile=new Map(); for(let r=0;r<ROWS;r++){ const t=newCol[r]; if(isMon(t)) byTile.set(t,r); }
+      for(const m0 of mons){ const to=byTile.get(m0.tile); if(to!=null && to!==m0.from) lines.push({c1:c,r1:m0.from,c2:c,r2:to}); }
+      for(let r=0;r<ROWS;r++){ if(grid[r][c]!==newCol[r]) moved++; grid[r][c]=newCol[r]; }
+    }
+    if(lines.length) addHookFx(lines);
     if(!any) return false;
     for(let r=ROWS-1;r>=0;r--)for(let c=0;c<COLS;c++){ const t=grid[r][c]; if(!isMon(t)) continue;
       const hit=Math.min(t.hp, hookBase*(ROWS-r)); t.hp-=hit; dmg+=hit; statueReflect(t, hit);
@@ -1082,6 +1088,7 @@ function draw(){
   }
   drawBossFx();   // Boss 入场冲击环（叠在棋子之上）
   drawBombFx();   // 炸弹爆炸特效
+  drawHookFx();   // 屠夫钩子拖拽线
   // 连接线
   if(selection.length){
     const d=DEF[selection[0].type];
@@ -1124,6 +1131,37 @@ function drawBossFx(){
 // 炸弹命中的每个怪/Boss 格爆一下：橙色闪光 + 扩散环。锚定到格子（命中后棋子常被移除，不跟随重力）。纯帧驱动、可重放无关。
 const bombFx=[]; const BOMB_FX_LIFE=26, BOMB_FX_MS=Math.round(BOMB_FX_LIFE/60*1000);   // ~0.43s @60fps
 function addBombFx(r,c){ if(headless||jumping) return; bombFx.push({r,c,life:BOMB_FX_LIFE,max:BOMB_FX_LIFE}); }   // 无头/快进不放
+const hookFx=[]; const HOOK_FX_LIFE=14;
+function addHookFx(lines){ if(headless||jumping||!lines||!lines.length) return; hookFx.push(...lines.map(l=>({...l,life:HOOK_FX_LIFE,max:HOOK_FX_LIFE}))); }   // 屠夫钩子：纯视觉拖拽线，无头/快进不放
+function drawHookFx(){
+  for(const f of hookFx){
+    const p=1-f.life/f.max;
+    const sx=cellX(f.c1)+TILE/2, sy=cellY(f.r1)+TILE/2;
+    const ex=cellX(f.c2)+TILE/2, ey=cellY(f.r2)+TILE/2;
+    const dx=ex-sx, dy=ey-sy, len=Math.hypot(dx,dy)||1;
+    const ux=dx/len, uy=dy/len, px=-uy, py=ux;
+    const hx=ex-ux*TILE*0.15, hy=ey-uy*TILE*0.15;
+    const wing=TILE*0.08;
+    ctx.save();
+    ctx.lineCap='round';
+    ctx.strokeStyle=hexA('#9aa1a8',0.9*(1-p*0.35));
+    ctx.lineWidth=Math.max(2,TILE*0.06*(1-p*0.3));
+    ctx.shadowColor='#60666d'; ctx.shadowBlur=8*(1-p);
+    ctx.beginPath(); ctx.moveTo(sx,sy); ctx.lineTo(ex,ey); ctx.stroke();
+    ctx.strokeStyle=hexA('#d0d4d9',0.38*(1-p));
+    ctx.lineWidth=Math.max(1,TILE*0.025*(1-p*0.4));
+    ctx.beginPath(); ctx.moveTo(sx,sy); ctx.lineTo(ex,ey); ctx.stroke();
+    ctx.fillStyle=hexA('#8b9299',0.88*(1-p*0.3));
+    ctx.beginPath();
+    ctx.moveTo(ex,ey);
+    ctx.lineTo(hx+px*wing, hy+py*wing);
+    ctx.lineTo(hx-px*wing, hy-py*wing);
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+  }
+  ctx.shadowBlur=0;
+}
 function drawBombFx(){
   for(const f of bombFx){
     const p=1-f.life/f.max;
@@ -1174,6 +1212,7 @@ function loop(){
     t.curY += (ty-t.curY)*0.3; if(Math.abs(ty-t.curY)<0.5)t.curY=ty; }
   for(let i=bossFx.length-1;i>=0;i--){ if(--bossFx[i].life<=0) bossFx.splice(i,1); }   // 推进/回收入场特效
   for(let i=bombFx.length-1;i>=0;i--){ if(--bombFx[i].life<=0) bombFx.splice(i,1); }   // 推进/回收炸弹特效
+  for(let i=hookFx.length-1;i>=0;i--){ if(--hookFx[i].life<=0) hookFx.splice(i,1); }   // 推进/回收屠夫拖拽线
   draw(); requestAnimationFrame(loop);
 }
 
@@ -2076,7 +2115,7 @@ function replayDone(){ clearTimeout(replayTimer); replayTimer=null; replayPaused
 function stopReplay(){
   clearTimeout(replayTimer); replayTimer=null;
   replaying=false; replayRec=null; replayPending=null;
-  bombFx.length=0; bossFx.length=0;
+  bombFx.length=0; bossFx.length=0; hookFx.length=0;
   document.getElementById('replayBar').classList.remove('show');
   if(replayResumeState){
     player=replayResumeState.player;
@@ -2096,7 +2135,7 @@ function jumpToTurn(target){
   if(!replaying||!replayRec) return;
   const rec0=replayRec, acts=rec0.acts;            // 本地持有：防止快进中误触 stopReplay 把 replayRec 置空
   clearTimeout(replayTimer); replayTimer=null; replayPending=null;
-  bombFx.length=0; bossFx.length=0;                 // 清掉上一段残留的爆炸/入场特效，否则会画在跳转后的棋盘上
+  bombFx.length=0; bossFx.length=0; hookFx.length=0;                 // 清掉上一段残留的爆炸/入场/拖拽特效，否则会画在跳转后的棋盘上
   replayAutoPaused = target>=replayTotalTurns-10;   // 跳到接近终点就别再自动暂停
   replayIdx=0; busy=false; jumping=true; selection=[];   // 快进期间抑制 gameOver/onClear
   try{

@@ -1,3 +1,8 @@
+## [v1.32.1]
+
+- 给屠夫的「钩子 Hook」补了一条短暂的铁灰色拖拽线特效，并在末端加了更清晰的钩尖，让怪物被拉到底排时的方向感更直观；纯视觉，不改变技能结算与 replay 逻辑。
+- Add a short iron-gray drag line to Butcher’s Hook, with a clearer hook-head at the pulled end so the downward drag reads more clearly; this is purely visual and does not change skill resolution or replay behavior.
+
 ## [v1.32.0]
 
 > Version-Impact: verify
