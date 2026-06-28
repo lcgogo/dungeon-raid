@@ -173,13 +173,13 @@
 (()=>{
 //==================== 配置 ====================
 // 版本号 v主.次.修：不影响 verify/replay 兼容边界的小改动改"修"；凡是影响 verify/replay/版本分桶/release 验证语义的改动都改"次"；大版本变更需先确认。页面底部显示。
-const VERSION='v1.32.1';
-const CHANGELOG_LINES=[{"ver": "v1.32.1", "zh": "给屠夫的「钩子 Hook」补了一条短暂的铁灰色拖拽线特效，并在末端加了更清晰的钩尖，让怪物被拉到底排时的方向感更直观；纯视觉，不改变技能结算与 replay 逻辑。", "en": "Add a short iron-gray drag line to Butcher’s Hook, with a clearer hook-head at the pulled end so the downward drag reads more clearly; this is purely visual and does not change skill resolution or replay behavior."}, {"ver": "v1.32.0", "zh": "下调小偷 Boss 的偷金比例：从原先的一阶 20%、二阶 40% 系列，改为 一阶 10%、二阶 20%，之后每阶 +10%，减轻高金币局被瞬间掏空的惩罚。", "en": "重做雪人 Boss 的冻结阶梯：1 阶封 1 个技能 1 回合、2 阶封 2 个技能 1 回合、3 阶封 1 个技能 2 回合、4 阶封 2 个技能 2 回合、5 阶封 2 个技能 3 回合、6 阶封 3 个技能 3 回合、7 阶封 3 个技能 4 回合、8 阶封 3 个技能 5 回合、9 阶封 3 个技能 6 回合。"}, {"ver": "v1.31.7", "zh": "排行榜上传失败现在会弹更明确的提示：区分服务端种子过期、种子已用、seed 不匹配、未达上传门槛，以及通用网络/服务异常，不再只显示一句模糊的“上传失败”。", "en": "Ranking upload failures now show specific toast reasons: expired server seed, already-used seed, seed mismatch, below-threshold runs, and generic network/service issues instead of one vague failure message."}, {"ver": "v1.31.6", "zh": "服务端种子 token 的有效期从 2 小时延长到 72 小时（现实时间），高回合/破关后有更宽松的补交窗口；token 仍然是一次性使用，消费后继续短 TTL 保留防复用。", "en": "Extend server-seed token validity from 2 hours to 72 real-time hours, giving high-turn / clear runs a much wider resubmission window; tokens remain one-shot and still collapse to a short TTL after use to prevent reuse."}, {"ver": "v1.31.5", "zh": "为 Android / Chrome 安装图标补上标准 PNG 尺寸：新增 `icon-192.png` 与 `icon-512.png`，并写入 `manifest.webmanifest` 的 `icons` 列表，避免主屏图标继续回退到浏览器自行猜测。", "en": "Add standard Android / Chrome install icon sizes by introducing `icon-192.png` and `icon-512.png` and wiring them into the `icons` array in `manifest.webmanifest`, so home-screen installs no longer rely on browser fallbacks."}];   /* auto-injected by dr.sh embed-changelog（勿手改） */
+const VERSION='v1.33.0';
+const CHANGELOG_LINES=[{"ver": "v1.33.0", "zh": "修复「继续上局」后录像会悄悄漂移：本地存档现在会连同 RNG 内部状态一起保存/恢复，续局后的补格、刷怪、Boss 落点与升级洗牌都会沿着原来的随机轨迹继续，不再出现实玩能打到高回合、导出/上传后 replay 却从中途开始对不上棋盘的问题。", "en": "Fix replay drift after using Continue Last Run: local saves now persist and restore the RNG internal state together with the board, so refills, enemy spawns, boss placement, and upgrade shuffles resume on the original random path instead of desyncing mid-run when the recording is exported or verified."}, {"ver": "v1.32.1", "zh": "给屠夫的「钩子 Hook」补了一条短暂的铁灰色拖拽线特效，并在末端加了更清晰的钩尖，让怪物被拉到底排时的方向感更直观；纯视觉，不改变技能结算与 replay 逻辑。", "en": "Add a short iron-gray drag line to Butcher’s Hook, with a clearer hook-head at the pulled end so the downward drag reads more clearly; this is purely visual and does not change skill resolution or replay behavior."}, {"ver": "v1.32.0", "zh": "下调小偷 Boss 的偷金比例：从原先的一阶 20%、二阶 40% 系列，改为 一阶 10%、二阶 20%，之后每阶 +10%，减轻高金币局被瞬间掏空的惩罚。", "en": "重做雪人 Boss 的冻结阶梯：1 阶封 1 个技能 1 回合、2 阶封 2 个技能 1 回合、3 阶封 1 个技能 2 回合、4 阶封 2 个技能 2 回合、5 阶封 2 个技能 3 回合、6 阶封 3 个技能 3 回合、7 阶封 3 个技能 4 回合、8 阶封 3 个技能 5 回合、9 阶封 3 个技能 6 回合。"}, {"ver": "v1.31.7", "zh": "排行榜上传失败现在会弹更明确的提示：区分服务端种子过期、种子已用、seed 不匹配、未达上传门槛，以及通用网络/服务异常，不再只显示一句模糊的“上传失败”。", "en": "Ranking upload failures now show specific toast reasons: expired server seed, already-used seed, seed mismatch, below-threshold runs, and generic network/service issues instead of one vague failure message."}, {"ver": "v1.31.6", "zh": "服务端种子 token 的有效期从 2 小时延长到 72 小时（现实时间），高回合/破关后有更宽松的补交窗口；token 仍然是一次性使用，消费后继续短 TTL 保留防复用。", "en": "Extend server-seed token validity from 2 hours to 72 real-time hours, giving high-turn / clear runs a much wider resubmission window; tokens remain one-shot and still collapse to a short TTL after use to prevent reuse."}];   /* auto-injected by dr.sh embed-changelog（勿手改） */
 const DEV=true;   // release build (DEV=false); dev build is dungeon-raid-dev.html (DEV=true)
 const REC_API='https://api.dungeonraid.win';   // 录像分享 API（Cloudflare Worker + KV）
 // 带种子随机数（mulberry32）：游戏全程用 rnd() 取代原生随机，配合录制种子可确定性重放
-let __rng=null;
-function srand(s){ let a=s>>>0; __rng=()=>{ a|=0; a=a+0x6D2B79F5|0; let t=Math.imul(a^a>>>15,1|a); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; }
+let __rng=null, __rngState=0;
+function srand(s){ __rngState=s>>>0; __rng=()=>{ __rngState|=0; __rngState=__rngState+0x6D2B79F5|0; let t=Math.imul(__rngState^__rngState>>>15,1|__rngState); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; }
 function rnd(){ if(!__rng) srand((Date.now()>>>0)^0x9e3779b9); return __rng(); }
 const COLS=6, ROWS=6, PAD=8;
 let TILE=70;                       // 实际按画布宽度自适应
@@ -937,6 +937,7 @@ function saveGame(){
     localStorage.setItem(SAVE_KEY, JSON.stringify({
       ver: VERSION,   // 存档版本：正式版换版本即判不兼容、从头开始（dev 不受影响）
       pendingLevels,
+      rngState: __rngState>>>0,   // 恢复续局时也要续上同一条 RNG 轨迹，否则后续补格/刷怪会让 replay 漂移
       player:{...player},
       grid: grid.map(row=>row.map(t=> t?{type:t.type,hp:t.hp,maxHp:t.maxHp,atk:t.atk,cd:t.cd,baseCd:t.baseCd,bossId:t.bossId,tier:t.tier,stolen:t.stolen,finale:t.finale,incub:t.incub,poison:t.poison}:null)),
     }));
@@ -948,6 +949,8 @@ function loadGame(){
   try{
     const data=JSON.parse(localStorage.getItem(SAVE_KEY)); if(!data) return false;
     if(!DEV && data.ver!==VERSION){ clearSave(); try{ localStorage.removeItem(REC_KEY); }catch(e){} return false; }   // 正式版：版本变化→存档不兼容，丢弃从头开始
+    if(typeof data.rngState==='number') srand(data.rngState>>>0);   // 续局必须接回原 RNG 轨迹，否则后续补格/刷怪会让 replay 漂移
+    else { __rng=null; __rngState=0; }   // 旧存档缺少 RNG 快照时，至少别误沿用本页残留状态
     player=data.player;
     ended=false;   // 继续上局 = 恢复进行中的对局，重新允许存档
     pendingLevels=data.pendingLevels||0;

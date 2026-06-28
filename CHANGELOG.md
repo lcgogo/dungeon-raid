@@ -1,3 +1,10 @@
+## [v1.33.0]
+
+> Version-Impact: verify
+
+- 修复「继续上局」后录像会悄悄漂移：本地存档现在会连同 RNG 内部状态一起保存/恢复，续局后的补格、刷怪、Boss 落点与升级洗牌都会沿着原来的随机轨迹继续，不再出现实玩能打到高回合、导出/上传后 replay 却从中途开始对不上棋盘的问题。
+- Fix replay drift after using Continue Last Run: local saves now persist and restore the RNG internal state together with the board, so refills, enemy spawns, boss placement, and upgrade shuffles resume on the original random path instead of desyncing mid-run when the recording is exported or verified.
+
 ## [v1.32.1]
 
 - 给屠夫的「钩子 Hook」补了一条短暂的铁灰色拖拽线特效，并在末端加了更清晰的钩尖，让怪物被拉到底排时的方向感更直观；纯视觉，不改变技能结算与 replay 逻辑。
