@@ -1,3 +1,8 @@
+## [v1.33.1]
+
+- 开始页新增「📲 放到桌面」入口：支持安装弹窗的浏览器可直接触发安装；iPhone / iPad Safari 或不支持一键安装的浏览器则弹出简短指引，告诉你去点分享菜单里的「添加到主屏幕 / 安装应用」。入口只显示在未以主屏模式运行时，不占对局中的 HUD 空间。
+- Add a new “📲 Add to Home Screen” entry on the start screen: browsers that expose an install prompt can launch it directly, while iPhone / iPad Safari and unsupported browsers show a short instruction sheet pointing to “Add to Home Screen” / “Install App” in the browser share/menu UI. The entry only appears when the game is not already running in standalone mode, so it does not consume in-run HUD space.
+
 ## [v1.33.0]
 
 > Version-Impact: verify
