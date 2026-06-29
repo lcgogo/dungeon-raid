@@ -1,3 +1,8 @@
+## [v1.33.2]
+
+- 把「📲 放到桌面」从开始页入口改成左上角小按钮，位置与右上角语言切换呼应；支持安装弹窗的浏览器可直接触发安装，iPhone / iPad Safari 与不支持一键安装的浏览器仍弹出简短指引。若已经从主屏模式启动，按钮会自动隐藏。
+- Move “📲 Add to Home Screen” from the start-screen entry into a small top-left button that mirrors the language toggle on the right; browsers with an install prompt can launch it directly, while iPhone / iPad Safari and unsupported browsers still show a short instruction sheet. The button hides itself automatically when the game is already running in standalone mode.
+
 ## [v1.33.1]
 
 - 开始页新增「📲 放到桌面」入口：支持安装弹窗的浏览器可直接触发安装；iPhone / iPad Safari 或不支持一键安装的浏览器则弹出简短指引，告诉你去点分享菜单里的「添加到主屏幕 / 安装应用」。入口只显示在未以主屏模式运行时，不占对局中的 HUD 空间。
