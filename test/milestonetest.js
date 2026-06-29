@@ -46,8 +46,15 @@ G.buyItem('bomb');
 ok(p.skill2Cd>0,'点炸弹槽→施放换装主动(进冷却 skill2Cd>0)');
 ok(p.gold===goldBefore,'施放主动不花金币(炸弹槽未被当消耗品买)');
 
+// 盗贼链：100 回合锁定被动 shadow，现显示/生效为「乾坤一掷」
+G.replayRec={seed:11,race:'elf',acts:[]}; G.replaying=true; G.startGame(G.raceById('elf')); G.replaying=false;
+const e=G.player; e.hp=e.maxHp=999999; G.busy=false; G.pendingLevels=0;
+e.turns=100; e.tier1='rogue'; G.onBossKilled(); ok(e.t2Pending,'盗贼100回合→t2Pending'); e.t2Pending=false;
+G.dispatchReplayAct(['t',2,'shadow']);
+ok(e.tier2==='shadow' && e.shadowBombGold===true,'盗贼二阶=乾坤一掷(被动生效)');
+
 // onBossKilled 链：未到回合不应误触发
-const q=Object.assign({},{t1:p.t1Pending,t2:p.t2Pending,t3:p.t3Pending,t4:p.t4Pending});
+const q=Object.assign({},{t1:e.t1Pending||p.t1Pending,t2:e.t2Pending||p.t2Pending,t3:e.t3Pending||p.t3Pending,t4:e.t4Pending||p.t4Pending});
 ok(!q.t1&&!q.t2&&!q.t3&&!q.t4,'里程碑用尽后无残留 pending');
 
 console.log(fails?`\n❌ ${fails} 项未通过`:'\n✅ 里程碑链 + 换装主动 全部通过');

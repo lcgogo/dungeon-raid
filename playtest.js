@@ -335,7 +335,7 @@ function shouldUseSkill(state){
   if(id==='butcher') return !!state.boss || state.enemyCount>=3;
   if(id==='musketeer') return !!state.boss || state.enemyCount>=1;
   if(id==='necromancer') return !!state.boss || state.enemyCount>=2 || state.lowHp;
-  if(id==='rogue') return state.coins===0 && state.swords>=4;
+  if(id==='rogue') return (state.enemyCount>=2 && state.swords>=2) || (!!state.boss && state.swords>=1);
   if(id==='swordsaint') return state.hearts+state.coins>=4;
   return false;
 }

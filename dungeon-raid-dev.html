@@ -176,8 +176,8 @@
 (()=>{
 //==================== 配置 ====================
 // 版本号 v主.次.修：不影响 verify/replay 兼容边界的小改动改"修"；凡是影响 verify/replay/版本分桶/release 验证语义的改动都改"次"；大版本变更需先确认。页面底部显示。
-const VERSION='v1.33.4';
-const CHANGELOG_LINES=[{"ver": "v1.33.4", "zh": "澄清中文里治疗涨价的描述：把容易误读成“获得 1 金”的「耗金 +1 / +1 金」统一改成「下次多花 1 金」，明确表达是下次购买更贵，而不是返还金币。", "en": "Clarify the Chinese wording for potion price scaling: phrases that could be misread as “gain 1 gold” are now rewritten as “the next use costs 1 more gold,” making it explicit that the potion gets more expensive instead of refunding gold."}, {"ver": "v1.33.3", "zh": "修复矮人「一锤打出 0 伤」的违和边界：保留武器总伤 ×0.85 并继续向下取整，但只要这次连线是一次合法的武器攻击，就至少保底造成 1 点伤害，避免前期单锤命中怪物却完全不掉血。", "en": "Fix the awkward Dwarf “single hammer deals 0 damage” edge case: weapon damage still uses the ×0.85 penalty and still rounds down overall, but any legal weapon attack now deals at least 1 damage so an early one-hammer hit no longer lands for zero."}, {"ver": "v1.33.2", "zh": "把「📲 放到桌面」从开始页入口改成左上角小按钮，位置与右上角语言切换呼应；支持安装弹窗的浏览器可直接触发安装，iPhone / iPad Safari 与不支持一键安装的浏览器仍弹出简短指引。若已经从主屏模式启动，按钮会自动隐藏。", "en": "Move “📲 Add to Home Screen” from the start-screen entry into a small top-left button that mirrors the language toggle on the right; browsers with an install prompt can launch it directly, while iPhone / iPad Safari and unsupported browsers still show a short instruction sheet. The button hides itself automatically when the game is already running in standalone mode."}, {"ver": "v1.33.1", "zh": "开始页新增「📲 放到桌面」入口：支持安装弹窗的浏览器可直接触发安装；iPhone / iPad Safari 或不支持一键安装的浏览器则弹出简短指引，告诉你去点分享菜单里的「添加到主屏幕 / 安装应用」。入口只显示在未以主屏模式运行时，不占对局中的 HUD 空间。", "en": "Add a new “📲 Add to Home Screen” entry on the start screen: browsers that expose an install prompt can launch it directly, while iPhone / iPad Safari and unsupported browsers show a short instruction sheet pointing to “Add to Home Screen” / “Install App” in the browser share/menu UI. The entry only appears when the game is not already running in standalone mode, so it does not consume in-run HUD space."}, {"ver": "v1.33.0", "zh": "修复「继续上局」后录像会悄悄漂移：本地存档现在会连同 RNG 内部状态一起保存/恢复，续局后的补格、刷怪、Boss 落点与升级洗牌都会沿着原来的随机轨迹继续，不再出现实玩能打到高回合、导出/上传后 replay 却从中途开始对不上棋盘的问题。", "en": "Fix replay drift after using Continue Last Run: local saves now persist and restore the RNG internal state together with the board, so refills, enemy spawns, boss placement, and upgrade shuffles resume on the original random path instead of desyncing mid-run when the recording is exported or verified."}];   /* auto-injected by dr.sh embed-changelog（勿手改） */
+const VERSION='v1.34.0';
+const CHANGELOG_LINES=[{"ver": "v1.34.0", "zh": "重做盗贼 Rogue：主动技能改为「妙手空空 Empty Pockets」——本回合用剑链攻击到的每个敌人，都会额外掉落其命中前血量 20% 的金币（向下取整，至少 1 金），连线会变金色；若这回合没用剑打到敌人，则白开。盗贼的锁定二阶被动改为「乾坤一掷 All-In」——买完炸弹后，再额外扣当前金币的 20%，并把这笔数额加到这次炸弹伤害上。", "en": "Redesign Rogue: its active skill becomes “Empty Pockets” — for this turn, every enemy hit by your sword chain drops extra gold equal to 20% of its pre-hit HP (rounded down, minimum 1), and the chain turns gold; if the turn ends without hitting anything, the buff is wasted. Rogue’s locked tier-2 passive becomes “All-In” — after buying a bomb, also spend 20% of your current gold and add exactly that amount to this bomb’s damage."}, {"ver": "v1.33.4", "zh": "澄清中文里治疗涨价的描述：把容易误读成“获得 1 金”的「耗金 +1 / +1 金」统一改成「下次多花 1 金」，明确表达是下次购买更贵，而不是返还金币。", "en": "Clarify the Chinese wording for potion price scaling: phrases that could be misread as “gain 1 gold” are now rewritten as “the next use costs 1 more gold,” making it explicit that the potion gets more expensive instead of refunding gold."}, {"ver": "v1.33.3", "zh": "修复矮人「一锤打出 0 伤」的违和边界：保留武器总伤 ×0.85 并继续向下取整，但只要这次连线是一次合法的武器攻击，就至少保底造成 1 点伤害，避免前期单锤命中怪物却完全不掉血。", "en": "Fix the awkward Dwarf “single hammer deals 0 damage” edge case: weapon damage still uses the ×0.85 penalty and still rounds down overall, but any legal weapon attack now deals at least 1 damage so an early one-hammer hit no longer lands for zero."}, {"ver": "v1.33.2", "zh": "把「📲 放到桌面」从开始页入口改成左上角小按钮，位置与右上角语言切换呼应；支持安装弹窗的浏览器可直接触发安装，iPhone / iPad Safari 与不支持一键安装的浏览器仍弹出简短指引。若已经从主屏模式启动，按钮会自动隐藏。", "en": "Move “📲 Add to Home Screen” from the start-screen entry into a small top-left button that mirrors the language toggle on the right; browsers with an install prompt can launch it directly, while iPhone / iPad Safari and unsupported browsers still show a short instruction sheet. The button hides itself automatically when the game is already running in standalone mode."}, {"ver": "v1.33.1", "zh": "开始页新增「📲 放到桌面」入口：支持安装弹窗的浏览器可直接触发安装；iPhone / iPad Safari 或不支持一键安装的浏览器则弹出简短指引，告诉你去点分享菜单里的「添加到主屏幕 / 安装应用」。入口只显示在未以主屏模式运行时，不占对局中的 HUD 空间。", "en": "Add a new “📲 Add to Home Screen” entry on the start screen: browsers that expose an install prompt can launch it directly, while iPhone / iPad Safari and unsupported browsers show a short instruction sheet pointing to “Add to Home Screen” / “Install App” in the browser share/menu UI. The entry only appears when the game is not already running in standalone mode, so it does not consume in-run HUD space."}];   /* auto-injected by dr.sh embed-changelog（勿手改） */
 const DEV=true;   // release build (DEV=false); dev build is dungeon-raid-dev.html (DEV=true)
 const REC_API='https://api.dungeonraid.win';   // 录像分享 API（Cloudflare Worker + KV）
 // 带种子随机数（mulberry32）：游戏全程用 rnd() 取代原生随机，配合录制种子可确定性重放
@@ -270,9 +270,9 @@ function newPlayer(){
     skill2:null, skill2Cd:0, t4Pending:false,                              // 350回合：任选主动替换治疗/炸弹槽
     comboMult:1, swordMult:1, armorMult:1, maxHpUpMult:1, noArmor:false,
     chosenPerks:[],                                                      // 本局已选技能名（按选择顺序，供录像/展示用）
-    heartPoison:false,                                                      // 巫医蛊毒：本回合连心改为毒怪
+    heartPoison:false, rogueStealTurn:false,                              // 巫医蛊毒：本回合连心改为毒怪；盗贼：本回合命中偷金
     foeCdBonus:0, skillCdMod:0, splash:false, rebirthTurn:false, rebirthSaves:0, healMult:1,  // 活死人：迷惑/技能冷却修正/溅射/重生/治疗减半
-    upgradeChoices:3, bombCd:3, goldLock:0, goldFrozen:0, healUses:0, bombUses:0, frozen:{},  // 转职被动相关；healUses：治疗递增；bombUses：爆破手炸弹递增；frozen：雪人冰封的主动剩余回合（skill/heal/bomb）
+    upgradeChoices:3, bombCd:3, goldLock:0, goldFrozen:0, healUses:0, bombUses:0, shadowBombGold:false, frozen:{},  // 转职被动相关；healUses：治疗递增；bombUses：爆破手炸弹递增；shadowBombGold：乾坤一掷；frozen：雪人冰封的主动剩余回合（skill/heal/bomb）
     finaleStarted:false, finaleWave:0, cleared:false};                      // 终局：终焉之主浪潮 / 破关
 }
 function xpNeeded(lv){ return 10 + lv*6; }
@@ -435,6 +435,8 @@ function bossTier(){ return 1 + Math.floor(player.turns/50); }  // 每 50 回合
 function hasBoss(){ for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++) if(grid[r][c]&&grid[r][c].type==='boss') return true; return false; }
 function enemyHpSum(){ let h=0; for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const t=grid[r][c]; if(t&&t.type==='enemy') h+=t.hp; } return h; }   // 会长「收买」花费 = 全场普通怪当前血量之和
 function bombDamage(p){ p=p||player; return 5 + (p.bombBoost ? (p.bombUses||0) : 0); }   // 炸弹伤害=基础5+爆破手累计；火枪手「狙击」=本值×2，故炸弹变强狙击同步变强
+function bombGoldSacrificeBonus(p){ p=p||player; return p.shadowBombGold ? Math.floor((p.gold||0)*0.2) : 0; }   // 乾坤一掷：买完炸弹后，再额外扣当前金币的 20% 并把同值加到这次炸弹伤害
+function bombGoldSacrificePreviewBonus(p){ p=p||player; return p.shadowBombGold ? Math.floor(Math.max(0,(p.gold||0)-shopCost('bomb'))*0.2) : 0; }   // 面板预览：先扣正常炸弹价，再估算乾坤一掷会额外扣多少金币
 function shieldBashFlat(p){ p=p||player; return p.shieldBash ? (p.armor*(p.armorMult||1)+(p.toughness||0)) : 0; }   // 盾击：把护甲减伤量加到固定剑伤上
 // 是否还有可行连线（同类连接型 ×2，或 「剑」格紧邻可攻击目标 = 真能成剑链）。棋盘塞满怪时用来判负。
 function hasAnyMove(){
@@ -447,7 +449,7 @@ function hasAnyMove(){
   return false;
 }
 // 这些一阶/换装主动会「清/转」棋子，发动后可能打破死局（清掉小怪或造出可连的局）
-const ESCAPE_ACTIVES=['priest','ranger','rogue','blacksmith','guildmaster','swordsaint','necromancer','butcher'];
+const ESCAPE_ACTIVES=['priest','ranger','blacksmith','guildmaster','swordsaint','necromancer','butcher'];
 // 是否还有「就绪且能改盘」的动作可打破死局——判负前的逃生检查，避免错杀还能救的局
 function hasEscapeAction(){
   const fz=player.frozen||{};
@@ -540,7 +542,7 @@ const TIER1={
   knight:{n:['骑士','Knight'], quip:['盾举起来，伤害？不存在的。','Shield up. Damage? Never heard of it.'], skill:{name:['圣盾','Aegis'], short:['本回合免伤','No damage this turn'], desc:['本回合受到的所有伤害全部归 0——含 Boss 重击、无视护甲的真实伤害、石像反弹、毒心反噬等。只护本回合，下回合恢复正常。','All damage you take this turn becomes 0 — boss strikes, armor-piercing true damage, statue reflection, poison-heart backlash, everything. This turn only.'], cd:5, f:p=>{ p.shieldTurn=true; log(tr('🛡️ 圣盾：本回合免疫伤害','🛡️ Aegis: immune to damage this turn'), 'buff'); return true; }}},
   priest:{n:['牧师','Priest'], quip:['心给我，经验你拿，公平交易。','Hearts to me, XP to you. Fair deal.'], skill:{name:['祝福','Blessing'], short:['全场❤️转经验+回血','Hearts→XP & heal'], desc:['立即清空棋盘上所有的「心」：每颗转成 3 点经验，同时按每颗心的回复量给你回血。场上没有心时无效、不进冷却。','Instantly clears every heart on the board: each becomes 3 XP and also heals you (by your heal-per-heart). No effect — and no cooldown — if there are no hearts.'], cd:5, f:p=>{ let n=0; for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){const t=grid[r][c]; if(t&&t.type==='heart'){grid[r][c]=null;n++;}} if(!n)return false; player.xp+=n*3; const h=gainHeal(n*player.healPerHeart); applyGravity(); syncPositions(false); checkLevel(); log(tr(`💗 祝福：${n} 颗心 → ${n*3} 经验，回血 ${h}`,`💗 Blessing: ${n} hearts → ${n*3} XP, +${h} HP`), 'buff'); return n; }}},
   ranger:{n:['游侠','Ranger'], quip:['抬头——那不是雨，是箭。','Heads up — those are not raindrops.'], skill:{name:['箭雨','Arrow Rain'], short:['全场怪受{W}威力×2','×2 {W} power to all'], desc:['对场上每一只可{W}攻击的怪/Boss 各打一发「{W}威力×2」的伤害（每只独立全额，不分摊）。{W}免疫的 Boss（幽灵/小丑等）不受影响——箭属武器攻击。','Hits every {W}-targetable foe for ×2 {W} power (full damage to each, not shared). {W}-immune bosses (Ghost/Clown…) are unaffected — arrows are a weapon attack.'], cd:5, f:p=>{ const titanFlat=(p.titan?Math.floor(p.maxHp/12):0)+shieldBashFlat(p); const pool=Math.floor((p.weaponPower*2 + p.swordFlat + titanFlat)*(p.swordMult||1)); const r=dealDamage(pool,null); const lh=lifestealHeal(r.kills); applyGravity(); syncPositions(false); log(tr(`🏹 箭雨：全场 ${r.dmg} 伤害`+(r.kills?`，击杀 ${r.kills}`:'')+(lh?`，吸血 +${lh}`:''),`🏹 Arrow Rain: ${r.dmg} dmg`+(r.kills?`, ${r.kills} killed`:'')+(lh?`, +${lh} lifesteal`:''))); return true; }}},
-  rogue:{n:['盗贼','Rogue'], quip:['剑能砍人，但金币能买命。','Swords kill. Coins buy your life back.'], skill:{name:['点金','Gold Touch'], short:['{W}变金币','{W}→Coins'], desc:['把棋盘上所有的{W}变成金币（随后连金币换钱）。场上没有{W}时无效、不进冷却。','Turns every {W} on the board into coins (link them for gold). No effect — and no cooldown — if there are no {W}s.'], cd:5, f:p=>{ let n=0; for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){const t=grid[r][c]; if(t&&t.type==='sword'){t.type='coin';n++;}} if(!n)return false; log(tr(`💰 点金：${n} 个${wN()}化为金币`,`💰 Gold Touch: ${n} ${wN()} → coins`), 'buff'); return n; }}},
+  rogue:{n:['盗贼','Rogue'], quip:['剑能砍人，钱要从刀口里拿。','If the blade lands, the purse opens.'], skill:{name:['妙手空空','Empty Pockets'], short:['本回合命中偷金','Hits steal bonus gold'], desc:['本回合你用{WC}攻击到的每个敌人，都会额外掉落它当前血量 20% 的金币（向下取整，至少 1 金）。连线会变成金色；若这回合没用{W}打到敌人，就等于白开。','For this turn, every enemy your {WC} hits drops extra gold equal to 20% of its current HP (rounded down, minimum 1). The chain turns gold; if your {W} fails to hit anything this turn, the buff is wasted.'], cd:5, f:p=>{ p.rogueStealTurn=true; log(tr(`📲 妙手空空：本回合用${wChain()}命中的敌人，会按命中前血量额外掉金币`,`💰 Empty Pockets: enemies hit by your ${wChain()} this turn drop bonus gold from their pre-hit HP`), 'buff'); return true; }}},
   elder:{n:['森林长老','Forest Elder'], quip:['生命有借有还——敌人先还。','Life is a loan; your enemies pay first.'], skill:{name:['蔓藤缠绕','Vine Coil'], short:['3回合内每回合全场怪 −30%你最大生命','3 turns: all foes −30% your max HP/turn'], desc:['发动后接下来 3 个回合，每回合让场上所有怪/Boss（含剑免疫，终焉之主除外）损失「你最大生命的 30%」。被缠绕期间敌人格变绿。','For the next 3 turns, every turn all enemies/bosses (incl. sword-immune; Overlord excluded) lose 30% of your max HP. Cursed foes glow green.'], cd:5, f:p=>{ p.deathCoil=3; log(tr('🟢 蔓藤缠绕：未来 3 回合，全场怪每回合流失你 30% 最大生命！','🟢 Vine Coil: for 3 turns, all foes lose 30% of your max HP each turn!'), 'buff'); return true; }}},
   blacksmith:{n:['锻造师','Blacksmith'], quip:['盾别拿手里，焊身上才香。','Do not hold shields — wear them.'], skill:{name:['锻甲','Forge Armor'], short:['收全场盾→护甲','Absorb all shields'], desc:['吞下棋盘上所有的盾，按「每盾护甲进度」一次性转成护甲进度并立刻结算升甲。兽人无甲→无效；场上没盾→无效、不进冷却。','Devours every shield on the board, converting each into Armor XP at your per-shield rate and leveling armor at once. No effect for the armor-less Orc, or when there are no shields (no cooldown then).'], cd:5, f:p=>{ if(p.noArmor) return false; let n=0; for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){const t=grid[r][c]; if(t&&t.type==='shield'){grid[r][c]=null;n++;}} if(!n)return false; p.shieldXp+=n*p.armorPerShield; while(p.shieldXp>=armorNeeded(p.armor)){p.shieldXp-=armorNeeded(p.armor);p.armor++;} applyGravity(); syncPositions(false); log(tr(`🔰 锻甲：吞下 ${n} 盾（减伤 ${p.armor}）`,`🔰 Forge: ${n} shields (armor ${p.armor})`), 'buff'); return n; }}},
   miser:{n:['守财奴','Miser'], quip:['钱躺一会儿，利滚利。','Let the gold nap — it wakes up doubled.'], skill:{name:['囤金','Hoard'], short:['锁金生利','Lock gold for interest'], desc:['锁金 4 回合：期间金币不直接进账、也不能用商店/技能，而是先囤起来；4 回合后一次性按 2.5 倍返还囤积的金币。','Locks gold for 4 turns: coins are stockpiled (not banked or spent) and shop/skills are disabled; after 4 turns the stockpile is paid back at 2.5×.'], cd:5, f:p=>{ if(p.goldLock>0) return false; const n=4; p.goldLock=n; p.goldFrozen=0; log(tr(`🔒 囤金：锁定 ${n} 回合（期间不产/不花金币，到期返还 2.5 倍）`,`🔒 Hoard: locked ${n} turns (no gold in/out; 2.5× payout at end)`), 'buff'); return true; }}},
@@ -603,7 +605,7 @@ const TIER2={
   holystrike:{n:['神圣打击','Holy Strike'], d:['治疗溢出的部分随机攻击一个敌人','Healing overflow strikes a random enemy'], f:p=>{ p.holyStrike=true; }},
   general:{n:['将军','General'], d:['升级时四选一','Level-up offers 4 choices'], f:p=>{ p.upgradeChoices=4; }},
   sharpshooter:{n:['神射手','Sharpshooter'], d:['{WC}击杀怪 +2 经验','+2 XP per {W} kill'], f:p=>{ p.killXp=(p.killXp||0)+2; }},
-  shadow:{n:['影袭','Shadow'], d:['炸弹冷却永久缩为 2 回合','Bomb cooldown becomes 2 turns'], f:p=>{ p.bombCd=2; }},
+  shadow:{n:['乾坤一掷','All-In'], d:['买炸弹后，再额外扣当前金币的 20%，并把这笔数额加到这次炸弹伤害上','After buying a bomb, also spend 20% of your current gold and add exactly that amount to this bomb’s damage'], f:p=>{ p.shadowBombGold=true; }},
   demolitionist:{n:['爆破手','Demolitionist'], d:['每用一次炸弹：伤害 +1、花费 +5 金（越炸越强、越炸越贵）','Each bomb use: +1 damage and +5 gold cost (stronger but pricier each time)'], f:p=>{ p.bombBoost=true; }},
   shieldbash:{n:['盾击','Shield Bash'], d:['把「护甲减伤量」加到固定{WC}伤害上（护甲越厚、剑伤越高）','Adds your armor (damage-reduction) value to flat {W} damage — more armor, harder hits'], f:p=>{ p.shieldBash=true; }},
   tycoon:{n:['财阀','Tycoon'], d:['获得金币时额外按一半转为经验','Gold gained also grants half as XP'], f:p=>{ p.goldXp=true; }},
@@ -1137,8 +1139,9 @@ function draw(){
   // 连接线
   if(selection.length){
     const d=DEF[selection[0].type];
+    const lineGlow=(selection[0].type==='sword' && player && player.rogueStealTurn) ? DEF.coin.glow : d.glow;
     ctx.lineWidth=TILE*0.16; ctx.lineCap='round'; ctx.lineJoin='round';
-    ctx.strokeStyle=hexA(d.glow,.9); ctx.shadowColor=d.glow; ctx.shadowBlur=12;
+    ctx.strokeStyle=hexA(lineGlow,.9); ctx.shadowColor=lineGlow; ctx.shadowBlur=12;
     ctx.beginPath();
     selection.forEach((s,i)=>{ const px=cellX(s.c)+TILE/2, py=cellY(s.r)+TILE/2;
       i?ctx.lineTo(px,py):ctx.moveTo(px,py); });
@@ -1368,13 +1371,13 @@ cv.addEventListener('pointercancel',endDrag);
 //==================== 金币商店 ====================
 const SHOP={
   heal: {cost:15, f(){ const base=10+2*(player.healUses||0); const h=gainHeal(base); player.healUses=(player.healUses||0)+1; log(tr(`💊 喝下药水，回复 ${h} 生命`,`💊 Potion: +${h} HP`), 'heal'); }},   // 每使用一次：恢复量 +2、下次多花 1 金（后期不再鸡肋）
-  bomb: {cost:25, f(){ let kills=0, boss=0; const D = bombDamage(player);   // 基础5 + 爆破手累计（见 bombDamage）
+  bomb: {cost:25, f(){ let kills=0, boss=0; const extra = bombGoldSacrificeBonus(player); if(extra>0) player.gold=Math.max(0, player.gold-extra); const D = bombDamage(player)+extra;   // 基础5 + 爆破手累计 + 乾坤一掷（先买炸弹，再额外扣当前金币 20% 换伤害）
     for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const t=grid[r][c];
       if(t&&(t.type==='enemy'||t.type==='boss')){ if(t.finale) continue; addBombFx(r,c); const dd=Math.min(D,t.hp); t.hp-=D; statueReflect(t, dd);   // 终焉之主打不掉；石像反弹；每个命中格爆一下特效
         if(t.hp<=0){ const isBoss=t.type==='boss'; grid[r][c]=null;
           if(isBoss){ thiefRecover(t); boss++; player.xp+=15; player.gold+=20; onBossKilled(); } else { kills++; player.xp+=3+(player.killXp||0); if(player.rotflesh) player.maxHp++; } } } }   // 屠夫·积累腐肉：炸弹击杀也 +1 上限
     const lifeHeal=lifestealHeal(kills+boss);   // 汲取生命：炸弹击杀也回血
-    log(tr(`💥 投掷炸弹，全场 −${D}`,`💥 Bomb: all foes −${D}`) + (kills?tr(`，击杀 ${kills} 只👹`,`, ${kills} killed`):'') + (lifeHeal?tr(`，吸血 +${lifeHeal}`,`, +${lifeHeal} lifesteal`):'') + (boss?tr(`，击败 ${boss} 个 Boss`,`, ${boss} boss(es) down`):''));   // Boss 奖励日志由 onBossKilled 统一报
+    log(tr(`💥 投掷炸弹，全场 −${D}`+(extra?`（乾坤一掷 +${extra}）`:''),`💥 Bomb: all foes −${D}`+(extra?` (All-In +${extra})`:'')) + (kills?tr(`，击杀 ${kills} 只👹`,`, ${kills} killed`):'') + (lifeHeal?tr(`，吸血 +${lifeHeal}`,`, +${lifeHeal} lifesteal`):'') + (boss?tr(`，击败 ${boss} 个 Boss`,`, ${boss} boss(es) down`):''));   // Boss 奖励日志由 onBossKilled 统一报
     if(player.bombBoost) player.bombUses=(player.bombUses||0)+1;   // 爆破手：每用一次 → 下次 伤害+1、花费+5
     applyGravity(); syncPositions(false); }},
 };
@@ -1392,7 +1395,7 @@ function buyItem(key){
   player.gold-=cost; it.f();
   if(grid.some(row=>row.some(t=>!t))){ applyGravity(); syncPositions(false); }   // 商店即时效果（如神圣打击）若打出空洞，立刻补格；正常回合结算仍走 resolve 末尾统一补格
   recAct(['b',key]);   // 录制购买
-  player.shopCd[key]= (key==='bomb' && player.bombCd) ? player.bombCd : 3;  // 影袭：炸弹冷却2回合
+  player.shopCd[key]= (key==='bomb' && player.bombCd) ? player.bombCd : 3;  // 炸弹默认冷却 3；若有被动修改 bombCd，则按其值进入冷却
   checkLevel(); updateHUD();
   const pops=()=>{
     if(player.t1Pending){ player.t1Pending=false; showTierSelect(1); return; }  // 炸弹击败Boss也可触发转职
@@ -1462,13 +1465,14 @@ function shopInfoData(key){
              [tr('已使用','Used'), `${p.healUses||0} ${tr('次','×')}`] ] };
   }
   if(key==='bomb'){
-    const D=bombDamage(p), cd=p.bombCd||3;
+    const extra=bombGoldSacrificePreviewBonus(p), cd=p.bombCd||3, D=bombDamage(p)+extra;
     return { icon:'💥', title:tr('炸弹','Bomb'),
-      desc:L(['投掷炸弹，对全场怪与 Boss 造成固定伤害（无视档位倍率）。能炸{W}免疫的 Boss（幽灵/小丑/污染怪/雪人）；终焉之主无效；石像会把伤害反弹给你。',
-              'Throw a bomb for fixed damage to all monsters & bosses (ignores tier scaling). Hits {W}-immune bosses (Ghost/Clown/Corruptor/Snowman); no effect on the Overlord; the Statue reflects it back.']),
-      rows:[ [tr('当前伤害','Damage'), `−${D}`+(p.bombBoost?tr(`（爆破手 +${p.bombUses||0}）`,`(Demo +${p.bombUses||0})`):'')],
+      desc:L(['投掷炸弹，对全场怪与 Boss 造成固定伤害（无视档位倍率）。能炸{W}免疫的 Boss（幽灵/小丑/污染怪/雪人）；终焉之主无效；石像会把伤害反弹给你。若有「乾坤一掷」，买完炸弹后还会再额外扣当前金币的 20%，并把这笔数额加到这次炸弹伤害上。',
+              'Throw a bomb for fixed damage to all monsters & bosses (ignores tier scaling). Hits {W}-immune bosses (Ghost/Clown/Corruptor/Snowman); no effect on the Overlord; the Statue reflects it back. With All-In, buying the bomb also spends 20% of your current gold and adds exactly that amount to this bomb’s damage.']),
+      rows:[ [tr('当前伤害','Damage'), `−${D}`+(p.bombBoost?tr(`（爆破手 +${p.bombUses||0}）`,`(Demo +${p.bombUses||0})`):'')+(extra?tr(`（乾坤一掷 +${extra}）`,` (All-In +${extra})`):'')],
              [tr('花费','Cost'), `${shopCost('bomb')} 💰`+(p.cheapskate?tr('（小气鬼半价）',' (½)'):'')+(p.bombBoost?tr(`（爆破手 +${5*(p.bombUses||0)}）`,` (Demo +${5*(p.bombUses||0)})`):'')],
-             [tr('冷却','Cooldown'), `${cd} ${tr('回合','t')}`+(p.bombCd?tr('（影袭）',' (Shadow)'):'')] ] };
+             [tr('额外扣金','Extra gold spent'), extra?`${extra} 💰`:tr('无','None')],
+             [tr('冷却','Cooldown'), `${cd} ${tr('回合','t')}`+(p.shadowBombGold?tr('（乾坤一掷）',' (All-In)'):'')] ] };
   }
   if(key==='skill'){
     const t1=p.tier1&&TIER1[p.tier1]; if(!t1||!t1.skill) return null; const sk=t1.skill;
@@ -1540,14 +1544,14 @@ function resolve(){
     if(player.lowHpDmg) pool*=1+(1-player.hp/player.maxHp)*0.6;  // 狂战：越缺血越猛（最高+60%）
     pool=Math.floor(pool);
     if(targets.length && nS>0) pool=Math.max(1, pool);   // 矮人 ×0.85 等减伤仍按 floor；但合法武器攻击至少造成 1 点伤害，避免一锤打出 0 伤
-    let dmg=0, kills=0;
-    if(targets.length){ ({dmg,kills}=dealDamage(pool, targets)); }
+    let dmg=0, kills=0, bonusGold=0;
+    if(targets.length){ ({dmg,kills,bonusGold}=dealDamage(pool, targets)); }
     const lifeHeal=lifestealHeal(kills);   // 汲取生命：每杀一只回血（含溅射击杀，kills 已含）
     let blood=0;
     if(player.bloodthirst && targets.length){ blood=vampGain(targets.length*3); player.bloodthirst=0; } // 斗士嗜血（血狂时溢出转上限）
     const comboTxt=combo>1?tr(` 连击×${combo.toFixed(2)}`,` combo×${combo.toFixed(2)}`):'';
     msg=`${wE()}×${nS}${comboTxt}` + (targets.length
-      ? tr(` 直击 ${targets.length} 只怪 → ${dmg} 伤害`,` hit ${targets.length} → ${dmg} dmg`) + (kills?tr(`，击杀 ${kills} 只👹`,`, ${kills} killed`):'') + (lifeHeal?tr(`，吸血 +${lifeHeal}`,`, +${lifeHeal} lifesteal`):'') + (blood?tr(`，回血 ${blood}`,`, +${blood} HP`):'')
+      ? tr(` 直击 ${targets.length} 只怪 → ${dmg} 伤害`,` hit ${targets.length} → ${dmg} dmg`) + (kills?tr(`，击杀 ${kills} 只👹`,`, ${kills} killed`):'') + (bonusGold?tr(`，妙手空空 +${bonusGold} 金`,`，Empty Pockets +${bonusGold} gold`):'') + (lifeHeal?tr(`，吸血 +${lifeHeal}`,`, +${lifeHeal} lifesteal`):'') + (blood?tr(`，回血 ${blood}`,`, +${blood} HP`):'')
       : tr('（未串到怪）','(no enemy hit)'));
   } else {
     const count=selection.length;
@@ -1583,6 +1587,7 @@ function resolve(){
   log(msg, mk);
   if(player.pierceTurn) player.pierceTurn=false;   // 斗士嗜血穿透仅本回合
   if(player.heartPoison) player.heartPoison=false; // 巫医蛊毒仅本回合（未连心则失效）
+  if(player.rogueStealTurn) player.rogueStealTurn=false; // 妙手空空仅本回合（没打到也会失效）
 
   // 回合推进：怪物倒计时 / 攻击
   player.turns++;
@@ -1640,18 +1645,20 @@ function holyStrikeDamage(amt){
 }
 
 function dealDamage(pool, targets, allFoes){
-  let dmg=0, kills=0;
+  let dmg=0, kills=0, bonusGold=0;
   const list=[];
+  const seen=new Set();
   // allFoes=true：命中全场怪含【剑免疫 Boss】（蛊毒/黑毒心「灌给全场怪」，与炸弹/吸魂一致，仅排除终焉之主）；否则只命中可剑攻击目标
   const hits = t => allFoes ? (t && (t.type==='enemy' || (t.type==='boss' && !t.finale))) : isSwordTarget(t);
-  if(targets){ targets.forEach(s=>{ const t=grid[s.r][s.c];
-    if(hits(t)) list.push({r:s.r,c:s.c,t}); }); }
+  if(targets){ targets.forEach(s=>{ const t=grid[s.r][s.c], key=`${s.r},${s.c}`;
+    if(hits(t) && !seen.has(key)){ seen.add(key); list.push({r:s.r,c:s.c,t}); } }); }
   else { for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const t=grid[r][c];
     if(hits(t)) list.push({r,c,t}); } }   // 全场型（箭雨：allFoes 缺省→只可剑攻击 / 蛊毒·黑毒心：allFoes→含剑免疫）
   // 原版算法：剑链伤害对每只目标【独立、全额】生效，不共享、不分配
   const splashes=[];
   for(const e of list){
     const before=e.t.hp;
+    if(player.rogueStealTurn && !allFoes && targets) bonusGold += Math.max(1, Math.floor(before*0.2));
     const hit=Math.min(pool, before);
     e.t.hp-=hit; dmg+=hit;
     statueReflect(e.t, hit);   // 石像：等量真实伤害反弹给玩家
@@ -1661,9 +1668,10 @@ function dealDamage(pool, targets, allFoes){
       if(player.splash && pool>before) splashes.push(pool-before);   // 溅射：本次击杀的溢出留待砸向其它敌人
     }
   }
+  if(bonusGold>0) player.gold+=bonusGold;
   // 溅射（骷髅王被动）：每份溢出随机砸到棋盘上剩余的一个敌人/Boss（含剑免疫，排除终焉之主）
   for(const over of splashes){ const r=splashHit(over); dmg+=r.dmg; kills+=r.kills; }
-  return {dmg,kills};
+  return {dmg,kills,bonusGold};
 }
 // 溅射落点：随机选一个剩余敌人/Boss（含剑免疫，排除终焉之主），造成 over 伤害
 function splashHit(over){
@@ -2397,7 +2405,7 @@ function updateHUD(){
     }
     const c=shopCost(key), cd=scd[key]||0, fz=player.frozen&&player.frozen[key]>0;   // 雪人冰封该槽
     if(key==='heal'){ const hv=Math.round((10+2*(player.healUses||0))*(player.healMult||1)); btn.querySelector('small').textContent=tr(`回复 ${hv} 生命`,`Restore ${hv} HP`); }   // 治疗恢复量随次数递增（活死人按 healMult 折算）
-    if(key==='bomb'){ const D=bombDamage(player); btn.querySelector('small').textContent=tr(`全场怪 -${D} 血`,`All foes -${D} HP`); }   // 炸弹伤害随爆破手累计增长，动态显示
+    if(key==='bomb'){ const extra=bombGoldSacrificeBonus(player), D=bombDamage(player)+extra; btn.querySelector('small').textContent=tr(`全场怪 -${D} 血`+(extra?`（乾坤一掷 +${extra}）`:''),`All foes -${D} HP`+(extra?` (All-In +${extra})`:'')); }   // 炸弹伤害随爆破手/乾坤一掷动态显示
     const full = key==='heal' && player.hp>=player.maxHp;   // 满血时治疗禁用
     btn.querySelector('em').textContent = fz ? `❄️${player.frozen[key]}${tr('回合','t')}` : cd>0 ? `⏳${cd}${tr('回合','t')}` : full ? tr('已满血','Full HP') : c+'💰';
     btn.classList.toggle('off', busy || pendingLevels || cd>0 || player.goldLock>0 || player.gold < c || fz || full); });
