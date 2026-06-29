@@ -168,7 +168,7 @@
 
 - 📖 **开篇引言 / 玩法演示 / 破关祝贺**：开始界面有虚构背景 + 玩法速览（含穿怪剑链小图，体现横竖斜 8 向都能连）与致敬原作的说明；**新手第一局**棋盘必有「剑-怪-剑」可连组合，便于立刻上手；撑过终焉之主 10 波破关后，有故事化的祝贺结算页。
 - 🌈 **彩色日志**：游戏日志位于状态栏与棋盘正下方，外加边框框起。**按事件类型上色**——回血=绿、增益(护甲/金币/经验/职业主动)=蓝、攻击敌人=白、被攻击/Boss 出场=红、负面效果(冰封/中毒/偷金/打乱等)=黄。**点日志条**看本局完整历史。
-- 📲 **放到桌面快捷键**：左上角新增一个和语言切换同级的小按钮；支持安装弹窗的浏览器可直接拉起安装，不支持时会给出简短的「添加到主屏幕 / 安装应用」指引。若已经从主屏模式启动，按钮会自动隐藏。
+- 📲 **放到桌面快捷键**：入口放在首页左上角（正式版 / DEV 选择页）；支持安装弹窗的浏览器可直接拉起安装，不支持时会给出简短的「添加到主屏幕 / 安装应用」指引。若已经从主屏模式启动，按钮会自动隐藏。
 - 💾 **本地存档**：自动保存进度与最佳纪录，可「继续上局」；续局会连同 RNG 轨迹一起恢复，后续补格/刷怪/升级洗牌仍保持确定性，不会把录像悄悄续歪。
 - 🔨 **矮人保底伤害**：矮人的武器总伤仍按 `×0.85` 并向下取整结算，但只要是一次合法的锤链攻击，就至少会造成 1 点伤害，不会再出现单锤命中却完全不掉血。
 - 💡 **轻点任意方块**：查看说明与当前实时数值（如剑的当前威力与固定剑伤）；轻点 HUD 查看角色全部属性与职业详情。**长按商店/技能块**（治疗/炸弹/职业主动）弹出详细说明（含当前数值；置灰冷却时也能看）。**50 回合选职业时，长按职业卡**可预览它 100 回合锁定拿到的二阶被动。**点日志条**看本局完整日志；**点底部版本号**看最近更新日志（嵌入页面、秒开，无需联网）。
@@ -359,8 +359,7 @@ Clearing shows a story-flavored congratulations screen; the Release build report
 
 - 📖 **Opening intro / gameplay demo / clear celebration**: the start screen has a fictional backstory + gameplay primer (with a chain-through-monster demo showing all 8 directions, diagonals included) and a tribute note; your **first-ever run** is guaranteed a “sword–monster–sword” combo to learn the core move immediately; surviving all 10 Overlord waves shows a story-flavored congratulations screen.
 - 🌈 **Color-coded log**: the boxed game log sits right under the status bar and board, **colored by event type** — heal = green, buff (armor/gold/XP/class actives) = blue, attacking enemies = white, getting hit / a boss appearing = red, debuffs (freeze/poison/theft/scramble) = yellow. **Tap the log** for the full run history.
-- 📲 **Add-to-home-screen shortcut**: a small top-left button now sits alongside the language toggle; browsers with an install prompt can launch it directly, while unsupported browsers show a short “Add to Home Screen / Install App” hint. The button hides itself automatically when the game is already running in standalone mode.
-- 💾 **Local save**: progress and best record are saved automatically; resume your last run anytime, with the RNG path restored too so refills / spawns / upgrade shuffles stay deterministic instead of quietly desyncing the recording.
+- 📲 **Add-to-home-screen shortcut**: the entry now lives at the top-left corner of the landing page (the Release / Dev chooser); browsers with an install prompt can launch it directly, while unsupported browsers show a short “Add to Home Screen / Install App” hint. The button hides itself automatically when the game is already running in standalone mode.- 💾 **Local save**: progress and best record are saved automatically; resume your last run anytime, with the RNG path restored too so refills / spawns / upgrade shuffles stay deterministic instead of quietly desyncing the recording.
 - 🔨 **Dwarf minimum damage**: Dwarf weapon damage still applies the `×0.85` penalty and rounds down overall, but any legal hammer-chain attack now deals at least 1 damage so a lone early hammer hit no longer lands for zero.
 - 💡 **Tap any tile**: see its description and current live stats (e.g. your current sword power and flat bonus); tap the HUD to view all your stats and class details. **Long-press a shop/skill block** (Heal/Bomb/class active) for a detailed popup (with current values; works even while greyed-out on cooldown). **At the turn-50 class pick, long-press a class card** to preview its locked tier-2 passive before choosing.
 - ⚡ **Double-tap a Shield / Heart / Coin tile**: auto-draws a greedy longest same-type chain through it, no manual dragging (resource tiles only — sword chains and monsters/bosses are left for you to control).

@@ -31,9 +31,13 @@
   .badge{ display:inline-block; font-size:11px; font-weight:700; padding:1px 8px; border-radius:9px; vertical-align:middle; }
   .badge.rel{ background:#2e7d46; color:#fff; }
   .badge.dev{ background:#7d3cad; color:#fff; }
+  #installHomeBtn{ position:fixed; left:12px; top:12px; z-index:20; background:#2b2350; color:#d9ccff; border:1px solid #6a4fa3;
+    border-radius:999px; padding:7px 14px; font-size:12px; font-weight:700; cursor:pointer; box-shadow:0 6px 18px rgba(0,0,0,.25); }
+  #installHomeBtn:hover{ border-color:#ffd86b; color:#fff; }
 </style>
 </head>
 <body>
+  <button id="installHomeBtn" style="display:none">📲 放桌面</button>
   <h1>🏰 地牢突袭</h1>
   <div class="sub">Dungeon Raid · 连线消除 Roguelike</div>
 
@@ -49,5 +53,40 @@
     Release and Dev keep separate saves — they never overwrite each other.
   </div>
   <!-- 版本号由 dr.sh 在部署时注入到 public/index.html；这里不做运行时请求 -->
+  <script>
+    (()=>{
+      const btn=document.getElementById('installHomeBtn');
+      if(!btn) return;
+      let installPromptEvt=null;
+      const isStandalone=()=>{
+        try{ return !!((window.matchMedia&&window.matchMedia('(display-mode: standalone)').matches) || navigator.standalone); }
+        catch(e){ return false; }
+      };
+      const isiOS=()=>{
+        try{ const ua=((navigator.userAgent||'')+'').toLowerCase(); return /iphone|ipad|ipod/.test(ua) || (navigator.platform==='MacIntel' && navigator.maxTouchPoints>1); }
+        catch(e){ return false; }
+      };
+      const label=()=>document.documentElement&&document.documentElement.lang==='en' ? '📲 Install' : '📲 放桌面';
+      const refresh=()=>{ btn.textContent=label(); btn.style.display=isStandalone()?'none':''; };
+      async function triggerInstall(){
+        if(installPromptEvt){
+          try{ const evt=installPromptEvt; installPromptEvt=null; evt.prompt(); await evt.userChoice; }catch(e){}
+          refresh();
+          return;
+        }
+        const zh=document.documentElement&&document.documentElement.lang!=='en';
+        const msg=isiOS()
+          ? (zh ? '在 Safari 点分享按钮，再选“添加到主屏幕”。' : 'In Safari, tap Share and then choose “Add to Home Screen”.')
+          : (zh ? '当前浏览器没有提供一键安装弹窗；可用浏览器菜单里的“添加到主屏幕”或“安装应用”。' : 'This browser did not expose a one-tap install prompt; use the browser menu’s “Add to Home Screen” or “Install App” option.');
+        alert(msg);
+      }
+      btn.onclick=triggerInstall;
+      if(typeof window!=='undefined'){
+        window.addEventListener('beforeinstallprompt', e=>{ e.preventDefault(); installPromptEvt=e; refresh(); });
+        window.addEventListener('appinstalled', ()=>{ installPromptEvt=null; refresh(); });
+      }
+      refresh();
+    })();
+  </script>
 </body>
 </html>

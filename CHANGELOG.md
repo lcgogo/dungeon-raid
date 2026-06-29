@@ -1,3 +1,8 @@
+## [v1.34.2]
+
+- 把「📲 放到桌面」按钮挪到首页左上角（正式版 / DEV 选择页），不再放在游戏页内部；支持安装弹窗的浏览器可直接拉起安装，不支持时仍会给出简短的“添加到主屏幕 / 安装应用”指引。主屏模式启动时继续自动隐藏。
+- Move the “📲 Add to Home Screen” button to the top-left corner of the landing page (the Release / Dev chooser) instead of showing it inside the game page; browsers with an install prompt can launch it directly, while unsupported browsers still get a short “Add to Home Screen / Install App” hint. The button still hides itself automatically when already running in standalone mode.
+
 ## [v1.34.1]
 
 - 50 回合选职业时，长按职业卡现在会弹出预览，直接告诉你这个职业在 100 回合锁定拿到的二阶被动是什么、效果如何；这样不用背表，也不用等升到 100 才知道自己后面会拿到什么。

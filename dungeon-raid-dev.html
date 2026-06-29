@@ -27,11 +27,9 @@
   h1{font-size:17px; margin:2px 0 1px; letter-spacing:1px;}
   h1 .sub{font-size:11px; color:var(--dim); letter-spacing:1px;}
   #wrap{width:100%; max-width:440px; position:relative;}
-  #langBtn,#installCornerBtn{position:fixed; top:8px; z-index:20; background:var(--panel2); color:var(--dim);
+  #langBtn{position:fixed; top:8px; right:10px; z-index:20; background:var(--panel2); color:var(--dim);
            border:1px solid #3a2d4d; border-radius:8px; font-size:11px; padding:3px 9px; cursor:pointer;}
-  #langBtn{right:10px;}
-  #installCornerBtn{left:10px;}
-  #langBtn:hover,#installCornerBtn:hover{border-color:var(--gold); color:var(--txt);}
+  #langBtn:hover{border-color:var(--gold); color:var(--txt);}
 
   /* HUD */
   #hud{background:var(--panel); border:1px solid #3a2d4d; border-radius:12px; padding:6px 10px; margin-bottom:6px; cursor:pointer;}
@@ -118,7 +116,6 @@
 </head>
 <body>
 <div id="wrap">
-  <button id="installCornerBtn" style="display:none">📲</button>
   <button id="langBtn">EN</button>
   <h1 id="title">　　🏰 地牢突袭·网页版</h1>
 
@@ -176,8 +173,7 @@
 (()=>{
 //==================== 配置 ====================
 // 版本号 v主.次.修：不影响 verify/replay 兼容边界的小改动改"修"；凡是影响 verify/replay/版本分桶/release 验证语义的改动都改"次"；大版本变更需先确认。页面底部显示。
-const VERSION='v1.34.1';
-const CHANGELOG_LINES=[{"ver": "v1.34.1", "zh": "50 回合选职业时，长按职业卡现在会弹出预览，直接告诉你这个职业在 100 回合锁定拿到的二阶被动是什么、效果如何；这样不用背表，也不用等升到 100 才知道自己后面会拿到什么。", "en": "At the turn-50 class selection, long-pressing a class card now opens a preview that shows which locked tier-2 passive the class will gain at turn 100 and what it does, so you no longer have to memorize the table or wait until turn 100 to see the payoff."}, {"ver": "v1.34.0", "zh": "重做盗贼 Rogue：主动技能改为「妙手空空 Empty Pockets」——本回合用剑链攻击到的每个敌人，都会额外掉落其命中前血量 20% 的金币（向下取整，至少 1 金），连线会变金色；若这回合没用剑打到敌人，则白开。盗贼的锁定二阶被动改为「乾坤一掷 All-In」——买完炸弹后，再额外扣当前金币的 20%，并把这笔数额加到这次炸弹伤害上。", "en": "Redesign Rogue: its active skill becomes “Empty Pockets” — for this turn, every enemy hit by your sword chain drops extra gold equal to 20% of its pre-hit HP (rounded down, minimum 1), and the chain turns gold; if the turn ends without hitting anything, the buff is wasted. Rogue’s locked tier-2 passive becomes “All-In” — after buying a bomb, also spend 20% of your current gold and add exactly that amount to this bomb’s damage."}, {"ver": "v1.33.4", "zh": "澄清中文里治疗涨价的描述：把容易误读成“获得 1 金”的「耗金 +1 / +1 金」统一改成「下次多花 1 金」，明确表达是下次购买更贵，而不是返还金币。", "en": "Clarify the Chinese wording for potion price scaling: phrases that could be misread as “gain 1 gold” are now rewritten as “the next use costs 1 more gold,” making it explicit that the potion gets more expensive instead of refunding gold."}, {"ver": "v1.33.3", "zh": "修复矮人「一锤打出 0 伤」的违和边界：保留武器总伤 ×0.85 并继续向下取整，但只要这次连线是一次合法的武器攻击，就至少保底造成 1 点伤害，避免前期单锤命中怪物却完全不掉血。", "en": "Fix the awkward Dwarf “single hammer deals 0 damage” edge case: weapon damage still uses the ×0.85 penalty and still rounds down overall, but any legal weapon attack now deals at least 1 damage so an early one-hammer hit no longer lands for zero."}, {"ver": "v1.33.2", "zh": "把「📲 放到桌面」从开始页入口改成左上角小按钮，位置与右上角语言切换呼应；支持安装弹窗的浏览器可直接触发安装，iPhone / iPad Safari 与不支持一键安装的浏览器仍弹出简短指引。若已经从主屏模式启动，按钮会自动隐藏。", "en": "Move “📲 Add to Home Screen” from the start-screen entry into a small top-left button that mirrors the language toggle on the right; browsers with an install prompt can launch it directly, while iPhone / iPad Safari and unsupported browsers still show a short instruction sheet. The button hides itself automatically when the game is already running in standalone mode."}];   /* auto-injected by dr.sh embed-changelog（勿手改） */
+const VERSION='v1.34.2';const CHANGELOG_LINES=[{"ver": "v1.34.1", "zh": "50 回合选职业时，长按职业卡现在会弹出预览，直接告诉你这个职业在 100 回合锁定拿到的二阶被动是什么、效果如何；这样不用背表，也不用等升到 100 才知道自己后面会拿到什么。", "en": "At the turn-50 class selection, long-pressing a class card now opens a preview that shows which locked tier-2 passive the class will gain at turn 100 and what it does, so you no longer have to memorize the table or wait until turn 100 to see the payoff."}, {"ver": "v1.34.0", "zh": "重做盗贼 Rogue：主动技能改为「妙手空空 Empty Pockets」——本回合用剑链攻击到的每个敌人，都会额外掉落其命中前血量 20% 的金币（向下取整，至少 1 金），连线会变金色；若这回合没用剑打到敌人，则白开。盗贼的锁定二阶被动改为「乾坤一掷 All-In」——买完炸弹后，再额外扣当前金币的 20%，并把这笔数额加到这次炸弹伤害上。", "en": "Redesign Rogue: its active skill becomes “Empty Pockets” — for this turn, every enemy hit by your sword chain drops extra gold equal to 20% of its pre-hit HP (rounded down, minimum 1), and the chain turns gold; if the turn ends without hitting anything, the buff is wasted. Rogue’s locked tier-2 passive becomes “All-In” — after buying a bomb, also spend 20% of your current gold and add exactly that amount to this bomb’s damage."}, {"ver": "v1.33.4", "zh": "澄清中文里治疗涨价的描述：把容易误读成“获得 1 金”的「耗金 +1 / +1 金」统一改成「下次多花 1 金」，明确表达是下次购买更贵，而不是返还金币。", "en": "Clarify the Chinese wording for potion price scaling: phrases that could be misread as “gain 1 gold” are now rewritten as “the next use costs 1 more gold,” making it explicit that the potion gets more expensive instead of refunding gold."}, {"ver": "v1.33.3", "zh": "修复矮人「一锤打出 0 伤」的违和边界：保留武器总伤 ×0.85 并继续向下取整，但只要这次连线是一次合法的武器攻击，就至少保底造成 1 点伤害，避免前期单锤命中怪物却完全不掉血。", "en": "Fix the awkward Dwarf “single hammer deals 0 damage” edge case: weapon damage still uses the ×0.85 penalty and still rounds down overall, but any legal weapon attack now deals at least 1 damage so an early one-hammer hit no longer lands for zero."}, {"ver": "v1.33.2", "zh": "把「📲 放到桌面」从开始页入口改成左上角小按钮，位置与右上角语言切换呼应；支持安装弹窗的浏览器可直接触发安装，iPhone / iPad Safari 与不支持一键安装的浏览器仍弹出简短指引。若已经从主屏模式启动，按钮会自动隐藏。", "en": "Move “📲 Add to Home Screen” from the start-screen entry into a small top-left button that mirrors the language toggle on the right; browsers with an install prompt can launch it directly, while iPhone / iPad Safari and unsupported browsers still show a short instruction sheet. The button hides itself automatically when the game is already running in standalone mode."}];   /* auto-injected by dr.sh embed-changelog（勿手改） */
 const DEV=true;   // release build (DEV=false); dev build is dungeon-raid-dev.html (DEV=true)
 const REC_API='https://api.dungeonraid.win';   // 录像分享 API（Cloudflare Worker + KV）
 // 带种子随机数（mulberry32）：游戏全程用 rnd() 取代原生随机，配合录制种子可确定性重放
@@ -251,7 +247,6 @@ function applyStaticLang(){
   set('shBombName', tr('💥 炸弹','💥 Bomb'));
   set('shBombDesc', tr('全场怪-5血','All foes -5 HP'));
   set('tapHint', tr('💡：点开任意方块查看更多','💡: Tap any tile for more'));
-  set('installCornerBtn', tr('📲 放桌面','📲 Install'));
   set('ver', VERSION+(DEV?tr(' · 🚧 DEV 开发版',' · 🚧 DEV build'):tr(' · 正式版',' · Release'))+' 📝');
 }
 
@@ -668,11 +663,6 @@ async function triggerInstall(){
   document.getElementById('insClose').onclick=()=>showClassSelect();
   showOverlay();
 }
-function updateInstallCorner(){
-  const b=document.getElementById('installCornerBtn');
-  if(!b) return;
-  b.style.display = isStandaloneMode() ? 'none' : '';
-}
 function showClassSelect(){
   // 首次进入：若 URL 带 ?rec=<id> → 拉取分享录像并回放（仅 boot 时触发一次）
   if(!__bootHandled){ __bootHandled=true;
@@ -680,7 +670,6 @@ function showClassSelect(){
     if(id){ loadSharedReplay(id); return; }
   }
   busy=true;
-  updateInstallCorner();
   const card=document.getElementById('card');
   const verBadge = DEV
     ? `<span style="background:#7d3cad;color:#fff;font-size:12px;font-weight:700;padding:3px 12px;border-radius:12px;letter-spacing:1px">🚧 DEV ${tr('开发版·最新','build · latest')}</span>`
@@ -2507,22 +2496,14 @@ function showChangelog(){
 //==================== 启动 ====================
 document.getElementById('langBtn').onclick=()=>setLang(lang==='en'?'zh':'en');
 document.getElementById('langBtn').textContent = lang==='en'?'中文':'EN';
-document.getElementById('installCornerBtn').onclick=triggerInstall;
 if(typeof window!=='undefined'){
   window.addEventListener('beforeinstallprompt', e=>{
     e.preventDefault();
     installPromptEvt=e;
-    updateInstallCorner();
-    if(!grid && document.getElementById('overlay').classList.contains('show')) showClassSelect();
   });
-  window.addEventListener('appinstalled', ()=>{
-    installPromptEvt=null;
-    updateInstallCorner();
-    if(!grid && document.getElementById('overlay').classList.contains('show')) showClassSelect();
-  });
+  window.addEventListener('appinstalled', ()=>{ installPromptEvt=null; });
 }
 applyStaticLang();
-updateInstallCorner();
 { const ve=document.getElementById('ver'); if(ve) ve.onclick=showChangelog; }
 resize(); showClassSelect(); loop();
 })();
