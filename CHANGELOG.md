@@ -1,3 +1,8 @@
+## [v1.34.1]
+
+- 50 回合选职业时，长按职业卡现在会弹出预览，直接告诉你这个职业在 100 回合锁定拿到的二阶被动是什么、效果如何；这样不用背表，也不用等升到 100 才知道自己后面会拿到什么。
+- At the turn-50 class selection, long-pressing a class card now opens a preview that shows which locked tier-2 passive the class will gain at turn 100 and what it does, so you no longer have to memorize the table or wait until turn 100 to see the payoff.
+
 ## [v1.34.0]
 
 > Version-Impact: verify

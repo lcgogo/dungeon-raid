@@ -105,7 +105,7 @@
 | 🎅 矮人 | 💼 会长 Guild Master | 收买 Buyout | **花掉「全场怪总血量」那么多金币**把它们全部买通**变成金币**（付得起才可发动；**无冷却**，有钱就能反复用；对 Boss 无效；学了小气鬼后花费减半）|
 | 🎅 矮人 | 🔫 火枪手 Musketeer | 狙击 Snipe | 优先狙击 Boss；若有多个 Boss，则打**生命最低**的那个。若场上没有 Boss，再打当前**生命最高**的怪/Boss（炸弹式攻击，含剑免疫与特殊 Boss，终焉之主除外），伤害 = 炸弹伤害 ×2；若击杀则得 **3 倍经验 + 3 倍金币**（CD 5；炸弹被爆破手强化时狙击同步增强）|
 | 🧌 兽人 | 🔪 狂战士 Berserker | 狂怒 Frenzy | 生命减半并进入**不屈**（仅**本回合**：无论受多少伤都保留 1 血）；并**永久**开启残血增伤——血越少剑伤越高（最高 +60%）|
-| 🧌 兽人 | 🩸 斗士 Fighter | 嗜血 Bloodthirst | 本回合剑链每击中一只怪回 3 血，**且可用剑攻击剑免疫的 Boss（幽灵/小丑）** |
+| 🧌 兽人 | 🩸 斗士 Fighter | 嗜血 Bloodthirst | 本回合剑链**每命中一只怪 / Boss 吸 3 血**，**且可用剑攻击剑免疫的 Boss（幽灵/小丑）** |
 | 🧌 兽人 | 🧪 巫医 Witch Doctor | 蛊毒 Hex | 把全场红心**当场燃成黑毒心 🖤**；连黑毒心不回血、而是把这些生命当毒灌给**全场怪（含剑免疫，终焉除外）**（其专属被动「万物皆毒」在 100 级解锁，见下）|
 | 🪦 活死人 | 🪄 死灵 Necromancer | 吸魂大法 Soul Drain | 随机吸取 2 个目标（怪或 Boss，**和炸弹一样含剑免疫的 Boss**；终焉之主除外）的生命补给自己，单个吸取量 = 玩家生命上限；吸取量 ≥ 目标生命则该目标死亡 |
 | 🪦 活死人 | 💀 骷髅王 Skeleton King | 重生 Rebirth | 本回合若被击败则不死、生命回满；此后「重生」自身冷却 +2（每次真正复活递增）|
@@ -171,7 +171,7 @@
 - 📲 **放到桌面快捷键**：左上角新增一个和语言切换同级的小按钮；支持安装弹窗的浏览器可直接拉起安装，不支持时会给出简短的「添加到主屏幕 / 安装应用」指引。若已经从主屏模式启动，按钮会自动隐藏。
 - 💾 **本地存档**：自动保存进度与最佳纪录，可「继续上局」；续局会连同 RNG 轨迹一起恢复，后续补格/刷怪/升级洗牌仍保持确定性，不会把录像悄悄续歪。
 - 🔨 **矮人保底伤害**：矮人的武器总伤仍按 `×0.85` 并向下取整结算，但只要是一次合法的锤链攻击，就至少会造成 1 点伤害，不会再出现单锤命中却完全不掉血。
-- 💡 **轻点任意方块**：查看说明与当前实时数值（如剑的当前威力与固定剑伤）；轻点 HUD 查看角色全部属性与职业详情。**长按商店/技能块**（治疗/炸弹/职业主动）弹出详细说明（含当前数值；置灰冷却时也能看）。**点日志条**看本局完整日志；**点底部版本号**看最近更新日志（嵌入页面、秒开，无需联网）。
+- 💡 **轻点任意方块**：查看说明与当前实时数值（如剑的当前威力与固定剑伤）；轻点 HUD 查看角色全部属性与职业详情。**长按商店/技能块**（治疗/炸弹/职业主动）弹出详细说明（含当前数值；置灰冷却时也能看）。**50 回合选职业时，长按职业卡**可预览它 100 回合锁定拿到的二阶被动。**点日志条**看本局完整日志；**点底部版本号**看最近更新日志（嵌入页面、秒开，无需联网）。
 - ⚡ **双击 盾 / 心 / 金 棋子**：自动划出一条过该棋子、尽量长的同类贪心连线，省去手动长拖（仅资源棋子，剑链与怪/Boss 不触发，需自己控制）。
 - 🩸 **低血预警**：生命越低，屏幕边缘越红；危急时呼吸闪烁，生命条同步闪烁。
 - ☠️ **死亡报告**：倒下时列出致命回合各伤害来源的占比。
@@ -296,7 +296,7 @@ Each race has **several** classes; every skill has a **5-turn cooldown** (except
 | 🎅 Dwarf | 💼 Guild Master | Buyout | **Pay gold equal to the total HP of all enemies** to bribe them all **into coins** (only if you can afford it; **no cooldown** — reuse it as long as you have gold; bosses unaffected; costs half once you have Cheapskate) |
 | 🎅 Dwarf | 🔫 Musketeer | Snipe | Prioritizes bosses; if there are multiple bosses, it shoots the one with the **lowest HP**. If there is no boss, it falls back to the current **highest-HP** monster/boss (bomb-type — hits sword-immune & special bosses; not the Overlord) for **2× your Bomb damage**; a kill grants **triple XP + triple gold** (CD 5; scales with Demolitionist) |
 | 🧌 Orc | 🔪 Berserker | Frenzy | Halve HP and become **Undying** (**this turn only**: keep ≥1 HP no matter the damage); also **permanently** enables low-HP scaling — lower HP means higher sword damage (up to +60%) |
-| 🧌 Orc | 🩸 Fighter | Bloodthirst | Heal 3 HP per enemy your sword chain hits this turn, **and your sword can hit sword-immune bosses (Ghost/Clown)** |
+| 🧌 Orc | 🩸 Fighter | Bloodthirst | **Drain 3 HP per monster / boss hit** by your sword chain this turn, **and your sword can hit sword-immune bosses (Ghost/Clown)** |
 | 🧌 Orc | 🧪 Witch Doctor | Hex | **Burns every red heart on the board into a black poison heart 🖤**; linking them heals nothing and poisons **all foes (incl. sword-immune; Overlord excluded)** instead (its signature passive "All is Poison" unlocks at level 100, see below) |
 | 🪦 Undead | 🪄 Necromancer | Soul Drain | Drain HP from 2 random targets (monsters or bosses — **including sword-immune ones, like the bomb**; Overlord excluded) to heal yourself; per-target drain = your max HP, so any target with HP ≤ your max HP dies |
 | 🪦 Undead | 💀 Skeleton King | Rebirth | If slain this turn, cheat death and refill to full HP; afterward Rebirth's own cooldown grows +2 (each actual revive) |
@@ -362,7 +362,7 @@ Clearing shows a story-flavored congratulations screen; the Release build report
 - 📲 **Add-to-home-screen shortcut**: a small top-left button now sits alongside the language toggle; browsers with an install prompt can launch it directly, while unsupported browsers show a short “Add to Home Screen / Install App” hint. The button hides itself automatically when the game is already running in standalone mode.
 - 💾 **Local save**: progress and best record are saved automatically; resume your last run anytime, with the RNG path restored too so refills / spawns / upgrade shuffles stay deterministic instead of quietly desyncing the recording.
 - 🔨 **Dwarf minimum damage**: Dwarf weapon damage still applies the `×0.85` penalty and rounds down overall, but any legal hammer-chain attack now deals at least 1 damage so a lone early hammer hit no longer lands for zero.
-- 💡 **Tap any tile**: see its description and current live stats (e.g. your current sword power and flat bonus); tap the HUD to view all your stats and class details. **Long-press a shop/skill block** (Heal/Bomb/class active) for a detailed popup (with current values; works even while greyed-out on cooldown).
+- 💡 **Tap any tile**: see its description and current live stats (e.g. your current sword power and flat bonus); tap the HUD to view all your stats and class details. **Long-press a shop/skill block** (Heal/Bomb/class active) for a detailed popup (with current values; works even while greyed-out on cooldown). **At the turn-50 class pick, long-press a class card** to preview its locked tier-2 passive before choosing.
 - ⚡ **Double-tap a Shield / Heart / Coin tile**: auto-draws a greedy longest same-type chain through it, no manual dragging (resource tiles only — sword chains and monsters/bosses are left for you to control).
 - 🩸 **Low-HP warning**: the screen edges redden as health drops, pulsing when critical, with the HP bar blinking too.
 - ☠️ **Death report**: when you fall, it lists each damage source's share of the killing turn.
