@@ -1,3 +1,10 @@
+## [v1.35.0]
+
+> Version-Impact: verify
+
+- 牧师二阶被动「神圣打击 Holy Strike」不再随机乱打：现在会像火枪手的「狙击」一样**优先攻击 Boss**，若场上有多个 Boss，则命中**生命最低**的那个；没有 Boss 时才回退到普通怪。并补了单点命中特效与更明确的日志，能直接看出这次神圣打击打到了谁、造成了多少伤害、有没有击杀。
+- Priest’s tier-2 passive “Holy Strike” no longer picks a random victim: it now **prioritizes bosses** like Musketeer’s Snipe, choosing the **lowest-HP boss** when multiple bosses are present and only falling back to normal enemies when no boss exists. It also now shows a single-target hit effect and clearer log text so you can tell exactly what was struck, how much damage landed, and whether it killed.
+
 ## [v1.34.3]
 
 - 澄清污染怪的毒心说明：不是“以后不再产生新毒心”，而是**炸掉污染怪后，场上的绿毒心会立刻复原成普通红心**。同步修正游戏内毒心说明卡与 README 中英描述，避免把光环复原机制理解成“只停产、不回红”。

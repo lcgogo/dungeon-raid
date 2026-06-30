@@ -173,7 +173,7 @@
 (()=>{
 //==================== 配置 ====================
 // 版本号 v主.次.修：不影响 verify/replay 兼容边界的小改动改"修"；凡是影响 verify/replay/版本分桶/release 验证语义的改动都改"次"；大版本变更需先确认。页面底部显示。
-const VERSION='v1.34.3';const CHANGELOG_LINES=[{"ver": "v1.34.1", "zh": "50 回合选职业时，长按职业卡现在会弹出预览，直接告诉你这个职业在 100 回合锁定拿到的二阶被动是什么、效果如何；这样不用背表，也不用等升到 100 才知道自己后面会拿到什么。", "en": "At the turn-50 class selection, long-pressing a class card now opens a preview that shows which locked tier-2 passive the class will gain at turn 100 and what it does, so you no longer have to memorize the table or wait until turn 100 to see the payoff."}, {"ver": "v1.34.0", "zh": "重做盗贼 Rogue：主动技能改为「妙手空空 Empty Pockets」——本回合用剑链攻击到的每个敌人，都会额外掉落其命中前血量 20% 的金币（向下取整，至少 1 金），连线会变金色；若这回合没用剑打到敌人，则白开。盗贼的锁定二阶被动改为「乾坤一掷 All-In」——买完炸弹后，再额外扣当前金币的 20%，并把这笔数额加到这次炸弹伤害上。", "en": "Redesign Rogue: its active skill becomes “Empty Pockets” — for this turn, every enemy hit by your sword chain drops extra gold equal to 20% of its pre-hit HP (rounded down, minimum 1), and the chain turns gold; if the turn ends without hitting anything, the buff is wasted. Rogue’s locked tier-2 passive becomes “All-In” — after buying a bomb, also spend 20% of your current gold and add exactly that amount to this bomb’s damage."}, {"ver": "v1.33.4", "zh": "澄清中文里治疗涨价的描述：把容易误读成“获得 1 金”的「耗金 +1 / +1 金」统一改成「下次多花 1 金」，明确表达是下次购买更贵，而不是返还金币。", "en": "Clarify the Chinese wording for potion price scaling: phrases that could be misread as “gain 1 gold” are now rewritten as “the next use costs 1 more gold,” making it explicit that the potion gets more expensive instead of refunding gold."}, {"ver": "v1.33.3", "zh": "修复矮人「一锤打出 0 伤」的违和边界：保留武器总伤 ×0.85 并继续向下取整，但只要这次连线是一次合法的武器攻击，就至少保底造成 1 点伤害，避免前期单锤命中怪物却完全不掉血。", "en": "Fix the awkward Dwarf “single hammer deals 0 damage” edge case: weapon damage still uses the ×0.85 penalty and still rounds down overall, but any legal weapon attack now deals at least 1 damage so an early one-hammer hit no longer lands for zero."}, {"ver": "v1.33.2", "zh": "把「📲 放到桌面」从开始页入口改成左上角小按钮，位置与右上角语言切换呼应；支持安装弹窗的浏览器可直接触发安装，iPhone / iPad Safari 与不支持一键安装的浏览器仍弹出简短指引。若已经从主屏模式启动，按钮会自动隐藏。", "en": "Move “📲 Add to Home Screen” from the start-screen entry into a small top-left button that mirrors the language toggle on the right; browsers with an install prompt can launch it directly, while iPhone / iPad Safari and unsupported browsers still show a short instruction sheet. The button hides itself automatically when the game is already running in standalone mode."}];   /* auto-injected by dr.sh embed-changelog（勿手改） */
+const VERSION='v1.35.0';const CHANGELOG_LINES=[{"ver": "v1.34.1", "zh": "50 回合选职业时，长按职业卡现在会弹出预览，直接告诉你这个职业在 100 回合锁定拿到的二阶被动是什么、效果如何；这样不用背表，也不用等升到 100 才知道自己后面会拿到什么。", "en": "At the turn-50 class selection, long-pressing a class card now opens a preview that shows which locked tier-2 passive the class will gain at turn 100 and what it does, so you no longer have to memorize the table or wait until turn 100 to see the payoff."}, {"ver": "v1.34.0", "zh": "重做盗贼 Rogue：主动技能改为「妙手空空 Empty Pockets」——本回合用剑链攻击到的每个敌人，都会额外掉落其命中前血量 20% 的金币（向下取整，至少 1 金），连线会变金色；若这回合没用剑打到敌人，则白开。盗贼的锁定二阶被动改为「乾坤一掷 All-In」——买完炸弹后，再额外扣当前金币的 20%，并把这笔数额加到这次炸弹伤害上。", "en": "Redesign Rogue: its active skill becomes “Empty Pockets” — for this turn, every enemy hit by your sword chain drops extra gold equal to 20% of its pre-hit HP (rounded down, minimum 1), and the chain turns gold; if the turn ends without hitting anything, the buff is wasted. Rogue’s locked tier-2 passive becomes “All-In” — after buying a bomb, also spend 20% of your current gold and add exactly that amount to this bomb’s damage."}, {"ver": "v1.33.4", "zh": "澄清中文里治疗涨价的描述：把容易误读成“获得 1 金”的「耗金 +1 / +1 金」统一改成「下次多花 1 金」，明确表达是下次购买更贵，而不是返还金币。", "en": "Clarify the Chinese wording for potion price scaling: phrases that could be misread as “gain 1 gold” are now rewritten as “the next use costs 1 more gold,” making it explicit that the potion gets more expensive instead of refunding gold."}, {"ver": "v1.33.3", "zh": "修复矮人「一锤打出 0 伤」的违和边界：保留武器总伤 ×0.85 并继续向下取整，但只要这次连线是一次合法的武器攻击，就至少保底造成 1 点伤害，避免前期单锤命中怪物却完全不掉血。", "en": "Fix the awkward Dwarf “single hammer deals 0 damage” edge case: weapon damage still uses the ×0.85 penalty and still rounds down overall, but any legal weapon attack now deals at least 1 damage so an early one-hammer hit no longer lands for zero."}, {"ver": "v1.33.2", "zh": "把「📲 放到桌面」从开始页入口改成左上角小按钮，位置与右上角语言切换呼应；支持安装弹窗的浏览器可直接触发安装，iPhone / iPad Safari 与不支持一键安装的浏览器仍弹出简短指引。若已经从主屏模式启动，按钮会自动隐藏。", "en": "Move “📲 Add to Home Screen” from the start-screen entry into a small top-left button that mirrors the language toggle on the right; browsers with an install prompt can launch it directly, while iPhone / iPad Safari and unsupported browsers still show a short instruction sheet. The button hides itself automatically when the game is already running in standalone mode."}];   /* auto-injected by dr.sh embed-changelog（勿手改） */
 const DEV=true;   // release build (DEV=false); dev build is dungeon-raid-dev.html (DEV=true)
 const REC_API='https://api.dungeonraid.win';   // 录像分享 API（Cloudflare Worker + KV）
 // 带种子随机数（mulberry32）：游戏全程用 rnd() 取代原生随机，配合录制种子可确定性重放
@@ -597,7 +597,7 @@ const TIER1={
 };
 // 二阶职业：被动
 const TIER2={
-  holystrike:{n:['神圣打击','Holy Strike'], d:['治疗溢出的部分随机攻击一个敌人','Healing overflow strikes a random enemy'], f:p=>{ p.holyStrike=true; }},
+  holystrike:{n:['神圣打击','Holy Strike'], d:['治疗溢出优先轰 Boss；多 Boss 取血最少','Healing overflow prioritizes bosses; lowest-HP boss first'], f:p=>{ p.holyStrike=true; }},
   general:{n:['将军','General'], d:['升级时四选一','Level-up offers 4 choices'], f:p=>{ p.upgradeChoices=4; }},
   sharpshooter:{n:['神射手','Sharpshooter'], d:['{WC}击杀怪 +2 经验','+2 XP per {W} kill'], f:p=>{ p.killXp=(p.killXp||0)+2; }},
   shadow:{n:['乾坤一掷','All-In'], d:['买炸弹后，再额外扣当前金币的 20%，并把这笔数额加到这次炸弹伤害上','After buying a bomb, also spend 20% of your current gold and add exactly that amount to this bomb’s damage'], f:p=>{ p.shadowBombGold=true; }},
@@ -1651,14 +1651,21 @@ function gainHeal(amount){
   if(player.holyStrike && over>0) holyStrikeDamage(over); // 神圣打击：溢出的治疗化为对随机敌人的攻击
   return space;
 }
-// 神圣打击（牧师二阶被动）：把溢出的治疗当伤害砸向随机一个敌人/Boss（排除终焉之主）
+// 神圣打击（牧师二阶被动）：把溢出的治疗当伤害优先砸向 Boss；多 Boss 取最低血（排除终焉之主）
 function holyStrikeDamage(amt){
-  const es=[]; for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const t=grid[r][c]; if(t&&(t.type==='enemy'||t.type==='boss')&&!t.finale) es.push([r,c,t]); }
-  if(!es.length) return;
-  const [r,c,t]=es[Math.floor(rnd()*es.length)];
+  let bossT=null, bossR=-1, bossC=-1, bossHP=Infinity, t=null, tr_=-1, tc=-1, best=-1;
+  for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){
+    const g=grid[r][c]; if(!g||g.finale) continue;
+    if(g.type==='boss'){ if(g.hp<bossHP){ bossT=g; bossHP=g.hp; bossR=r; bossC=c; } }
+    else if(g.type==='enemy' && g.hp>best){ t=g; best=g.hp; tr_=r; tc=c; }
+  }
+  if(bossT){ t=bossT; tr_=bossR; tc=bossC; }
+  if(!t) return;
+  const isBoss=t.type==='boss', name=isBoss?L(bossDef(t).name):tr('普通怪','enemy'), before=t.hp, dealt=Math.min(amt,before);
+  addBombFx(tr_,tc);
   t.hp-=amt;
-  if(t.hp<=0){ const isB=t.type==='boss'; grid[r][c]=null; if(isB){thiefRecover(t);player.xp+=15;player.gold+=20;onBossKilled();} else {player.xp+=3+(player.killXp||0);player.gold+=1;} }
-  log(tr(`✨ 神圣打击：溢出治疗化作 ${amt} 伤害`,`✨ Holy Strike: overflow heal deals ${amt}`));
+  if(t.hp<=0){ grid[tr_][tc]=null; if(isBoss){ thiefRecover(t); player.xp+=15; player.gold+=20; onBossKilled(); } else { player.xp+=3+(player.killXp||0); player.gold+=1; } }
+  log(tr(`✨ 神圣打击：优先命中 ${name}，造成 ${dealt} 伤害`+(t.hp<=0?`，击杀！`:''),`✨ Holy Strike: hit ${name} first for ${dealt} dmg`+(t.hp<=0?`, killed!`:'')));
 }
 
 function dealDamage(pool, targets, allFoes){

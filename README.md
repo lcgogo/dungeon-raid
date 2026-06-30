@@ -118,7 +118,7 @@
 | 种族 | 职业 → 锁定被动 | 效果 |
 |---|---|---|
 | 🧑 人族 | 骑士 → 将军 General | 升级时改为**四选一** |
-| 🧑 人族 | 牧师 → 神圣打击 Holy Strike | 治疗溢出的部分随机攻击一个敌人/Boss（终焉之主除外）|
+| 🧑 人族 | 牧师 → 神圣打击 Holy Strike | 治疗溢出会**优先攻击 Boss**；若有多个 Boss，则打**生命最低**的那个；没有 Boss 时再打普通怪（终焉之主除外）|
 | 🧑 人族 | 剑圣 → 皆可为剑 Anything a Blade | 每回合棋盘摆完后，把 3 个非敌/非剑棋子变成剑 |
 | 🧝 精灵 | 游侠 → 神射手 Sharpshooter | 剑链每击杀一只怪额外 +2 经验 |
 | 🧝 精灵 | 盗贼 → 乾坤一掷 All-In | 买完炸弹后，再额外扣当前金币的 20%，并把这笔数额加到这次炸弹伤害上 |
@@ -309,7 +309,7 @@ At **level 100 (Tier-2 Skill)** you automatically get the passive **locked to yo
 | Race | Class → Locked passive | Effect |
 |---|---|---|
 | 🧑 Human | Knight → General | Level-up offers 4 choices instead of 3 |
-| 🧑 Human | Priest → Holy Strike | Healing overflow strikes a random enemy/boss (Overlord excluded) |
+| 🧑 Human | Priest → Holy Strike | Healing overflow **prioritizes bosses**; with multiple bosses it hits the **lowest-HP** one first, and only falls back to normal enemies when no boss is present (Overlord excluded) |
 | 🧑 Human | Sword Saint → Anything a Blade | Each turn after the board settles, turn 3 non-enemy non-sword tiles into swords |
 | 🧝 Elf | Ranger → Sharpshooter | +2 extra XP per enemy killed by a sword chain |
 | 🧝 Elf | Rogue → All-In | After buying a bomb, also spend 20% of your current gold and add exactly that amount to this bomb’s damage |
