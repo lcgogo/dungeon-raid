@@ -1,3 +1,8 @@
+## [v1.34.3]
+
+- 澄清污染怪的毒心说明：不是“以后不再产生新毒心”，而是**炸掉污染怪后，场上的绿毒心会立刻复原成普通红心**。同步修正游戏内毒心说明卡与 README 中英描述，避免把光环复原机制理解成“只停产、不回红”。
+- Clarify the Corruptor poison-heart wording: it is not merely that “no new poison hearts are created” — **once the Corruptor is bombed away, the existing green poison hearts immediately revert to normal hearts**. Updated both the in-game poison-heart tooltip and the Chinese/English README text so the aura-reset behavior is no longer mistaken for “stop creating new ones only.”
+
 ## [v1.34.2]
 
 - 把「📲 放到桌面」按钮挪到首页左上角（正式版 / DEV 选择页），不再放在游戏页内部；支持安装弹窗的浏览器可直接拉起安装，不支持时仍会给出简短的“添加到主屏幕 / 安装应用”指引。主屏模式启动时继续自动隐藏。
