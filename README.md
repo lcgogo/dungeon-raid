@@ -140,7 +140,7 @@
 
 | Boss | 攻击方式 | 招数 |
 |---|---|---|
-| 👻 幽灵 Ghost | 仅炸弹 | 剑链对它无效；倒计时归零会对你重击 |
+| 👻 幽灵 Ghost | 仅炸弹 | 剑链对它无效；**血量与同级普通怪一致**；倒计时归零会对你重击 |
 | 🤡 小丑 Clown | 仅炸弹 | 每回合把若干非怪棋子重洗成别的资源（剑/盾/心/金），搅乱连线；不会变出新怪（出怪是召唤师的活） |
 | 🧛 吸血鬼 Vampire | 剑 / 炸弹 | 每回合吸取场上所有的心来回血——别把心留在场上；但**吸到毒心（污染绿心 / 巫医黑毒心）会反被毒、掉血甚至毒死**（可用巫医蛊毒反制）|
 | 🥷 刺客 Assassin | 剑 / 炸弹 | 属性同普通怪，但攻击是**真实伤害**，无视护甲直接掉血 |
@@ -331,7 +331,7 @@ Every **10 turns** a random boss is guaranteed to appear; **beating one by any m
 
 | Boss | How to hit | Gimmick |
 |---|---|---|
-| 👻 Ghost | Bomb only | Immune to sword chains; strikes you hard when its timer hits 0 |
+| 👻 Ghost | Bomb only | Immune to sword chains; **its HP matches same-tier normal enemies**; strikes you hard when its timer hits 0 |
 | 🤡 Clown | Bomb only | Re-rolls several non-monster tiles into other resources each turn, disrupting your chains; does NOT spawn monsters (that's the Summoner) |
 | 🧛 Vampire | Sword / Bomb | Drains every heart on the board each turn to heal — do not leave hearts out; but **drinking poison hearts (Corruptor green / Witch Doctor black) poisons it instead — it loses HP and can even die** (counter it with Hex) |
 | 🥷 Assassin | Sword / Bomb | Stats like a normal enemy, but its hits are **true damage** — ignore armor, straight to HP |

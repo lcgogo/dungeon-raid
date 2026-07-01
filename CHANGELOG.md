@@ -1,3 +1,10 @@
+## [v1.38.0]
+
+> Version-Impact: verify
+
+- 下调幽灵 Ghost 的血量模板：它现在不再吃通用 Boss 的高血成长，而是改为与同级普通怪同血量；保留「剑链无效、只能炸、倒计时重击」的定位，避免后期出现几百血却只能用 5 点炸弹慢慢磨的失衡体验。
+- Lower Ghost’s HP template: it no longer uses the generic high-HP boss scaling and instead matches same-tier normal-enemy HP, while keeping its identity as a bomb-only countdown threat. This avoids the late-game case where a Ghost can reach absurd HP totals even though the player is forced to chip it down with tiny bomb damage.
+
 ## [v1.36.1]
 
 - 把选种族页的文案收紧成两行：尽量一行只写「特性：…」，另一行只写「削弱：…」，并去掉句号收尾，让手机上一屏更好扫、重点更明确。
