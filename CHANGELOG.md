@@ -1,3 +1,15 @@
+## [v1.36.1]
+
+- 把选种族页的文案收紧成两行：尽量一行只写「特性：…」，另一行只写「削弱：…」，并去掉句号收尾，让手机上一屏更好扫、重点更明确。
+- Tighten the race-selection copy into two short lines: one for “Trait: …” and one for “Weakness: …”, while removing sentence-ending periods so the mobile screen scans more cleanly and the key info stands out faster.
+
+## [v1.37.0]
+
+> Version-Impact: verify
+
+- 补齐财阀 Tycoon 的经验触发口径：之前「获得金币时额外按一半转为经验」主要只覆盖了金币链，击杀赏金/抓小偷/盗贼额外掉金等来源不一定加经验。现在统一成**所有金币收入**都按一半转经验，而且守财奴囤金期间即使金币先进冻结池，这部分经验也会照常拿到。
+- Complete Tycoon’s XP trigger coverage: previously “gold gained also grants half as XP” mostly applied to coin chains, while kill rewards / thief recovery / Rogue bonus gold did not consistently grant XP. It now applies to **all gold income** uniformly, and the XP still arrives normally even when Miser’s Hoard stockpiles the gold instead of adding it to your wallet immediately.
+
 ## [v1.36.0]
 
 > Version-Impact: verify

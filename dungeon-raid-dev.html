@@ -173,7 +173,8 @@
 (()=>{
 //==================== 配置 ====================
 // 版本号 v主.次.修：不影响 verify/replay 兼容边界的小改动改"修"；凡是影响 verify/replay/版本分桶/release 验证语义的改动都改"次"；大版本变更需先确认。页面底部显示。
-const VERSION='v1.36.0';const CHANGELOG_LINES=[{"ver": "v1.34.1", "zh": "50 回合选职业时，长按职业卡现在会弹出预览，直接告诉你这个职业在 100 回合锁定拿到的二阶被动是什么、效果如何；这样不用背表，也不用等升到 100 才知道自己后面会拿到什么。", "en": "At the turn-50 class selection, long-pressing a class card now opens a preview that shows which locked tier-2 passive the class will gain at turn 100 and what it does, so you no longer have to memorize the table or wait until turn 100 to see the payoff."}, {"ver": "v1.34.0", "zh": "重做盗贼 Rogue：主动技能改为「妙手空空 Empty Pockets」——本回合用剑链攻击到的每个敌人，都会额外掉落其命中前血量 20% 的金币（向下取整，至少 1 金），连线会变金色；若这回合没用剑打到敌人，则白开。盗贼的锁定二阶被动改为「乾坤一掷 All-In」——买完炸弹后，再额外扣当前金币的 20%，并把这笔数额加到这次炸弹伤害上。", "en": "Redesign Rogue: its active skill becomes “Empty Pockets” — for this turn, every enemy hit by your sword chain drops extra gold equal to 20% of its pre-hit HP (rounded down, minimum 1), and the chain turns gold; if the turn ends without hitting anything, the buff is wasted. Rogue’s locked tier-2 passive becomes “All-In” — after buying a bomb, also spend 20% of your current gold and add exactly that amount to this bomb’s damage."}, {"ver": "v1.33.4", "zh": "澄清中文里治疗涨价的描述：把容易误读成“获得 1 金”的「耗金 +1 / +1 金」统一改成「下次多花 1 金」，明确表达是下次购买更贵，而不是返还金币。", "en": "Clarify the Chinese wording for potion price scaling: phrases that could be misread as “gain 1 gold” are now rewritten as “the next use costs 1 more gold,” making it explicit that the potion gets more expensive instead of refunding gold."}, {"ver": "v1.33.3", "zh": "修复矮人「一锤打出 0 伤」的违和边界：保留武器总伤 ×0.85 并继续向下取整，但只要这次连线是一次合法的武器攻击，就至少保底造成 1 点伤害，避免前期单锤命中怪物却完全不掉血。", "en": "Fix the awkward Dwarf “single hammer deals 0 damage” edge case: weapon damage still uses the ×0.85 penalty and still rounds down overall, but any legal weapon attack now deals at least 1 damage so an early one-hammer hit no longer lands for zero."}, {"ver": "v1.33.2", "zh": "把「📲 放到桌面」从开始页入口改成左上角小按钮，位置与右上角语言切换呼应；支持安装弹窗的浏览器可直接触发安装，iPhone / iPad Safari 与不支持一键安装的浏览器仍弹出简短指引。若已经从主屏模式启动，按钮会自动隐藏。", "en": "Move “📲 Add to Home Screen” from the start-screen entry into a small top-left button that mirrors the language toggle on the right; browsers with an install prompt can launch it directly, while iPhone / iPad Safari and unsupported browsers still show a short instruction sheet. The button hides itself automatically when the game is already running in standalone mode."}];   /* auto-injected by dr.sh embed-changelog（勿手改） */
+const VERSION='v1.37.0';
+const CHANGELOG_LINES=[{"ver": "v1.36.1", "zh": "把选种族页的文案收紧成两行：尽量一行只写「特性：…」，另一行只写「削弱：…」，并去掉句号收尾，让手机上一屏更好扫、重点更明确。", "en": "Tighten the race-selection copy into two short lines: one for “Trait: …” and one for “Weakness: …”, while removing sentence-ending periods so the mobile screen scans more cleanly and the key info stands out faster."}, {"ver": "v1.37.0", "zh": "补齐财阀 Tycoon 的经验触发口径：之前「获得金币时额外按一半转为经验」主要只覆盖了金币链，击杀赏金/抓小偷/盗贼额外掉金等来源不一定加经验。现在统一成所有金币收入都按一半转经验，而且守财奴囤金期间即使金币先进冻结池，这部分经验也会照常拿到。", "en": "Complete Tycoon’s XP trigger coverage: previously “gold gained also grants half as XP” mostly applied to coin chains, while kill rewards / thief recovery / Rogue bonus gold did not consistently grant XP. It now applies to all gold income uniformly, and the XP still arrives normally even when Miser’s Hoard stockpiles the gold instead of adding it to your wallet immediately."}, {"ver": "v1.36.0", "zh": "修复守财奴「囤金 Hoard」只冻结金币链收入、却放跑击杀赏金/偷回金币/盗贼额外掉金的问题。现在囤金期间的所有金币收入（连金币、击杀普通怪/Boss、抓小偷、妙手空空等）都会先转入冻结池，锁定结束后再统一按 2.5 倍返还，终于和技能描述一致。", "en": "Fix Miser’s “Hoard” so it no longer freezes only coin-chain income while letting kill rewards / recovered thief gold / Rogue bonus drops bypass the lock. During Hoard, all gold income (coin chains, normal/boss kill rewards, thief recovery, Empty Pockets bonus gold, etc.) is now routed into the frozen pool first and then returned at 2.5× when the lock ends, matching the skill description at last."}, {"ver": "v1.35.0", "zh": "牧师二阶被动「神圣打击 Holy Strike」不再随机乱打：现在会像火枪手的「狙击」一样优先攻击 Boss，若场上有多个 Boss，则命中生命最低的那个；没有 Boss 时才回退到普通怪。并补了单点命中特效与更明确的日志，能直接看出这次神圣打击打到了谁、造成了多少伤害、有没有击杀。", "en": "Priest’s tier-2 passive “Holy Strike” no longer picks a random victim: it now prioritizes bosses like Musketeer’s Snipe, choosing the lowest-HP boss when multiple bosses are present and only falling back to normal enemies when no boss exists. It also now shows a single-target hit effect and clearer log text so you can tell exactly what was struck, how much damage landed, and whether it killed."}, {"ver": "v1.34.3", "zh": "澄清污染怪的毒心说明：不是“以后不再产生新毒心”，而是炸掉污染怪后，场上的绿毒心会立刻复原成普通红心。同步修正游戏内毒心说明卡与 README 中英描述，避免把光环复原机制理解成“只停产、不回红”。", "en": "Clarify the Corruptor poison-heart wording: it is not merely that “no new poison hearts are created” — once the Corruptor is bombed away, the existing green poison hearts immediately revert to normal hearts. Updated both the in-game poison-heart tooltip and the Chinese/English README text so the aura-reset behavior is no longer mistaken for “stop creating new ones only.”"}];   /* auto-injected by dr.sh embed-changelog（勿手改） */
 const DEV=true;   // release build (DEV=false); dev build is dungeon-raid-dev.html (DEV=true)
 const REC_API='https://api.dungeonraid.win';   // 录像分享 API（Cloudflare Worker + KV）
 // 带种子随机数（mulberry32）：游戏全程用 rnd() 取代原生随机，配合录制种子可确定性重放
@@ -416,7 +417,8 @@ function gainGold(g, msgActive, msgFrozen, xpAmt){
   g=g|0; if(g<=0) return 0;
   if(player.goldLock>0){ player.goldFrozen+=g; if(msgFrozen) log(msgFrozen(g), 'buff'); }
   else { player.gold+=g; if(msgActive) log(msgActive(g), 'buff'); }
-  if(xpAmt&&player.goldXp) player.xp+=xpAmt;
+  const xp = xpAmt!=null ? xpAmt : Math.floor(g/2);
+  if(xp>0 && player.goldXp) player.xp+=xp;
   return g;
 }
 // 击败小偷：夺回它偷走的金币
@@ -533,11 +535,11 @@ function makeTile(type){
 //==================== 种族 / 转职职业 ====================
 // 开局选种族（特性≠通用升级，且各带削弱）；击败50回合Boss转一阶（主动），击败100回合Boss转二阶（被动）
 const RACES=[
-  {id:'human', e:'🧑', n:['人族','Human'], d:['全能基准：无特性、无削弱，适合新手。','Baseline: no trait, no weakness. Beginner-friendly.'], f:p=>{}},
-  {id:'elf',   e:'🧝', n:['精灵','Elf'],   d:['特性：连击加成翻倍（每多连1个 +30%）。削弱：「强化体魄」升级只 +3 上限。','Trait: combo bonus doubled (+30%/tile). Weakness: Fortify Body upgrade gives only +3 max HP.'], f:p=>{p.comboMult=2; p.maxHpUpMult=0.5;}},
-  {id:'dwarf', e:'🎅', n:['矮人','Dwarf'], d:['特性：护甲减伤翻倍（每点护甲抵 2 点）。削弱：{WC}总伤 ×0.85（含固定伤害一起算）。','Trait: armor counts double (each point blocks 2). Weakness: ×0.85 total {W} damage (flat included).'], f:p=>{p.armorMult=2; p.swordMult=0.85;}},
-  {id:'orc',   e:'🧌', n:['兽人','Orc'],   d:['特性：「强化体魄」升级时生命上限翻倍（每次 +12）。削弱：无甲——永远无法获得护甲。','Trait: Fortify Body upgrade gives double max HP (+12 each). Weakness: No Armor — can never gain armor.'], f:p=>{p.maxHpUpMult=2; p.noArmor=true;}},
-  {id:'undead',e:'🪦', n:['活死人','Undead'], d:['特性：迷惑——所有怪物（含 Boss）攻击倒计时 +1（更慢出手）。削弱：一切治疗效果减半（心/药水/吸魂；重生满血不受影响）+ 主动技能冷却 +1。','Trait: Confusion — all monsters (incl. bosses) attack 1 turn slower. Weakness: all healing halved (hearts/potion/drain; Rebirth full-heal unaffected) + active-skill cooldowns +1.'], f:p=>{p.foeCdBonus=1; p.skillCdMod=(p.skillCdMod||0)+1; p.healMult=0.5;}},
+  {id:'human', e:'🧑', n:['人族','Human'], d:['特性：无\n削弱：无','Trait: none\nWeakness: none'], f:p=>{}},
+  {id:'elf',   e:'🧝', n:['精灵','Elf'],   d:['特性：连击加成翻倍（每多连1个 +30%）\n削弱：「强化体魄」升级只 +3 上限','Trait: combo bonus doubled (+30%/tile)\nWeakness: Fortify Body upgrade gives only +3 max HP'], f:p=>{p.comboMult=2; p.maxHpUpMult=0.5;}},
+  {id:'dwarf', e:'🎅', n:['矮人','Dwarf'], d:['特性：护甲减伤翻倍（每点护甲抵 2 点）\n削弱：{WC}总伤 ×0.85（含固定伤害一起算）','Trait: armor counts double (each point blocks 2)\nWeakness: ×0.85 total {W} damage (flat included)'], f:p=>{p.armorMult=2; p.swordMult=0.85;}},
+  {id:'orc',   e:'🧌', n:['兽人','Orc'],   d:['特性：「强化体魄」升级时生命上限翻倍（每次 +12）\n削弱：无甲——永远无法获得护甲','Trait: Fortify Body upgrade gives double max HP (+12 each)\nWeakness: No Armor — can never gain armor'], f:p=>{p.maxHpUpMult=2; p.noArmor=true;}},
+  {id:'undead',e:'🪦', n:['活死人','Undead'], d:['特性：迷惑——所有怪物（含 Boss）攻击倒计时 +1（更慢出手）\n削弱：一切治疗效果减半（心/药水/吸魂；重生满血不受影响）+ 主动技能冷却 +1','Trait: Confusion — all monsters (incl. bosses) attack 1 turn slower\nWeakness: all healing halved (hearts/potion/drain; Rebirth full-heal unaffected) + active-skill cooldowns +1'], f:p=>{p.foeCdBonus=1; p.skillCdMod=(p.skillCdMod||0)+1; p.healMult=0.5;}},
 ];
 // 一阶职业：主动技能（f 返回 false 表示无效不发动；返回值表示自带日志）
 const TIER1={
@@ -735,7 +737,7 @@ function showRaceSelect(){
     <p style="font-size:12px;color:var(--dim);line-height:1.6">${tr('击败第 50 回合的 Boss 即可转职，解锁职业的主动技能；之后随着探险深入，还会解锁更强大的技能……','Beat the turn-50 boss to advance to a class and unlock its active skill; delve deeper to unlock ever more powerful skills…')}</p>`;
   RACES.forEach(rc=>{
     const b=document.createElement('button'); b.className='choice';
-    b.innerHTML=`<b>${rc.e} ${L(rc.n)}</b><small>${L(rc.d)}</small>`;
+    b.innerHTML=`<b>${rc.e} ${L(rc.n)}</b><small style="white-space:pre-line">${L(rc.d)}</small>`;
     b.onclick=()=>freshStart(rc);
     card.appendChild(b);
   });
@@ -1603,11 +1605,11 @@ function resolve(){
         if(healN>0){ const h=gainHeal(Math.round(healN*per)); parts.push(tr(`回复 ${h} 生命`,`+${h} HP`)); }
         mk = poisonN>0 ? '' : 'heal';   // 连黑/蛊毒心毒怪=攻击(白)，纯回血=绿
         msg=`${blackN?'🖤':d.emoji}×${count}${comboTxt} → `+(parts.join(tr('，',', '))||tr('（无效果）','(no effect)')); } }
-    else if(type==='coin'){ mk='buff'; const g=Math.round(count*player.goldPerCoin*combo), xp=(player.goldXp?Math.floor(g/2):0);
+    else if(type==='coin'){ mk='buff'; const g=Math.round(count*player.goldPerCoin*combo), xp=Math.floor(g/2);
       gainGold(g, null, null, xp);
       msg=`${d.emoji}×${count}${comboTxt} → `+(player.goldLock>0
-        ? tr(`囤金中，冻结 +${g}`,`hoarding, frozen +${g}`)
-        : tr(`获得 ${g} 金币`,`+${g} gold`)+(xp?tr(`（+${xp}经验）`,` (+${xp} XP)`):'')); }
+        ? tr(`囤金中，冻结 +${g}`,`hoarding, frozen +${g}`)+(player.goldXp&&xp?tr(`（+${xp}经验）`,` (+${xp} XP)`):'')
+        : tr(`获得 ${g} 金币`,`+${g} gold`)+(player.goldXp&&xp?tr(`（+${xp}经验）`,` (+${xp} XP)`):'')); }
   }
   log(msg, mk);
   if(player.pierceTurn) player.pierceTurn=false;   // 斗士嗜血穿透仅本回合
