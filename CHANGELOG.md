@@ -1,3 +1,10 @@
+## [v1.36.0]
+
+> Version-Impact: verify
+
+- 修复守财奴「囤金 Hoard」只冻结金币链收入、却放跑击杀赏金/偷回金币/盗贼额外掉金的问题。现在囤金期间的**所有金币收入**（连金币、击杀普通怪/Boss、抓小偷、妙手空空等）都会先转入冻结池，锁定结束后再统一按 2.5 倍返还，终于和技能描述一致。
+- Fix Miser’s “Hoard” so it no longer freezes only coin-chain income while letting kill rewards / recovered thief gold / Rogue bonus drops bypass the lock. During Hoard, **all gold income** (coin chains, normal/boss kill rewards, thief recovery, Empty Pockets bonus gold, etc.) is now routed into the frozen pool first and then returned at 2.5× when the lock ends, matching the skill description at last.
+
 ## [v1.35.0]
 
 > Version-Impact: verify

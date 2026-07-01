@@ -173,7 +173,7 @@
 (()=>{
 //==================== 配置 ====================
 // 版本号 v主.次.修：不影响 verify/replay 兼容边界的小改动改"修"；凡是影响 verify/replay/版本分桶/release 验证语义的改动都改"次"；大版本变更需先确认。页面底部显示。
-const VERSION='v1.35.0';const CHANGELOG_LINES=[{"ver": "v1.34.1", "zh": "50 回合选职业时，长按职业卡现在会弹出预览，直接告诉你这个职业在 100 回合锁定拿到的二阶被动是什么、效果如何；这样不用背表，也不用等升到 100 才知道自己后面会拿到什么。", "en": "At the turn-50 class selection, long-pressing a class card now opens a preview that shows which locked tier-2 passive the class will gain at turn 100 and what it does, so you no longer have to memorize the table or wait until turn 100 to see the payoff."}, {"ver": "v1.34.0", "zh": "重做盗贼 Rogue：主动技能改为「妙手空空 Empty Pockets」——本回合用剑链攻击到的每个敌人，都会额外掉落其命中前血量 20% 的金币（向下取整，至少 1 金），连线会变金色；若这回合没用剑打到敌人，则白开。盗贼的锁定二阶被动改为「乾坤一掷 All-In」——买完炸弹后，再额外扣当前金币的 20%，并把这笔数额加到这次炸弹伤害上。", "en": "Redesign Rogue: its active skill becomes “Empty Pockets” — for this turn, every enemy hit by your sword chain drops extra gold equal to 20% of its pre-hit HP (rounded down, minimum 1), and the chain turns gold; if the turn ends without hitting anything, the buff is wasted. Rogue’s locked tier-2 passive becomes “All-In” — after buying a bomb, also spend 20% of your current gold and add exactly that amount to this bomb’s damage."}, {"ver": "v1.33.4", "zh": "澄清中文里治疗涨价的描述：把容易误读成“获得 1 金”的「耗金 +1 / +1 金」统一改成「下次多花 1 金」，明确表达是下次购买更贵，而不是返还金币。", "en": "Clarify the Chinese wording for potion price scaling: phrases that could be misread as “gain 1 gold” are now rewritten as “the next use costs 1 more gold,” making it explicit that the potion gets more expensive instead of refunding gold."}, {"ver": "v1.33.3", "zh": "修复矮人「一锤打出 0 伤」的违和边界：保留武器总伤 ×0.85 并继续向下取整，但只要这次连线是一次合法的武器攻击，就至少保底造成 1 点伤害，避免前期单锤命中怪物却完全不掉血。", "en": "Fix the awkward Dwarf “single hammer deals 0 damage” edge case: weapon damage still uses the ×0.85 penalty and still rounds down overall, but any legal weapon attack now deals at least 1 damage so an early one-hammer hit no longer lands for zero."}, {"ver": "v1.33.2", "zh": "把「📲 放到桌面」从开始页入口改成左上角小按钮，位置与右上角语言切换呼应；支持安装弹窗的浏览器可直接触发安装，iPhone / iPad Safari 与不支持一键安装的浏览器仍弹出简短指引。若已经从主屏模式启动，按钮会自动隐藏。", "en": "Move “📲 Add to Home Screen” from the start-screen entry into a small top-left button that mirrors the language toggle on the right; browsers with an install prompt can launch it directly, while iPhone / iPad Safari and unsupported browsers still show a short instruction sheet. The button hides itself automatically when the game is already running in standalone mode."}];   /* auto-injected by dr.sh embed-changelog（勿手改） */
+const VERSION='v1.36.0';const CHANGELOG_LINES=[{"ver": "v1.34.1", "zh": "50 回合选职业时，长按职业卡现在会弹出预览，直接告诉你这个职业在 100 回合锁定拿到的二阶被动是什么、效果如何；这样不用背表，也不用等升到 100 才知道自己后面会拿到什么。", "en": "At the turn-50 class selection, long-pressing a class card now opens a preview that shows which locked tier-2 passive the class will gain at turn 100 and what it does, so you no longer have to memorize the table or wait until turn 100 to see the payoff."}, {"ver": "v1.34.0", "zh": "重做盗贼 Rogue：主动技能改为「妙手空空 Empty Pockets」——本回合用剑链攻击到的每个敌人，都会额外掉落其命中前血量 20% 的金币（向下取整，至少 1 金），连线会变金色；若这回合没用剑打到敌人，则白开。盗贼的锁定二阶被动改为「乾坤一掷 All-In」——买完炸弹后，再额外扣当前金币的 20%，并把这笔数额加到这次炸弹伤害上。", "en": "Redesign Rogue: its active skill becomes “Empty Pockets” — for this turn, every enemy hit by your sword chain drops extra gold equal to 20% of its pre-hit HP (rounded down, minimum 1), and the chain turns gold; if the turn ends without hitting anything, the buff is wasted. Rogue’s locked tier-2 passive becomes “All-In” — after buying a bomb, also spend 20% of your current gold and add exactly that amount to this bomb’s damage."}, {"ver": "v1.33.4", "zh": "澄清中文里治疗涨价的描述：把容易误读成“获得 1 金”的「耗金 +1 / +1 金」统一改成「下次多花 1 金」，明确表达是下次购买更贵，而不是返还金币。", "en": "Clarify the Chinese wording for potion price scaling: phrases that could be misread as “gain 1 gold” are now rewritten as “the next use costs 1 more gold,” making it explicit that the potion gets more expensive instead of refunding gold."}, {"ver": "v1.33.3", "zh": "修复矮人「一锤打出 0 伤」的违和边界：保留武器总伤 ×0.85 并继续向下取整，但只要这次连线是一次合法的武器攻击，就至少保底造成 1 点伤害，避免前期单锤命中怪物却完全不掉血。", "en": "Fix the awkward Dwarf “single hammer deals 0 damage” edge case: weapon damage still uses the ×0.85 penalty and still rounds down overall, but any legal weapon attack now deals at least 1 damage so an early one-hammer hit no longer lands for zero."}, {"ver": "v1.33.2", "zh": "把「📲 放到桌面」从开始页入口改成左上角小按钮，位置与右上角语言切换呼应；支持安装弹窗的浏览器可直接触发安装，iPhone / iPad Safari 与不支持一键安装的浏览器仍弹出简短指引。若已经从主屏模式启动，按钮会自动隐藏。", "en": "Move “📲 Add to Home Screen” from the start-screen entry into a small top-left button that mirrors the language toggle on the right; browsers with an install prompt can launch it directly, while iPhone / iPad Safari and unsupported browsers still show a short instruction sheet. The button hides itself automatically when the game is already running in standalone mode."}];   /* auto-injected by dr.sh embed-changelog（勿手改） */
 const DEV=true;   // release build (DEV=false); dev build is dungeon-raid-dev.html (DEV=true)
 const REC_API='https://api.dungeonraid.win';   // 录像分享 API（Cloudflare Worker + KV）
 // 带种子随机数（mulberry32）：游戏全程用 rnd() 取代原生随机，配合录制种子可确定性重放
@@ -300,7 +300,7 @@ const BOSSES=[
       const tot=n+pois; if(!tot) return;
       const per=2+(t.tier||1), delta=(n-pois)*per;   // 净效果：正常−毒心
       t.hp += delta;
-      if(t.hp<=0){ for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ if(grid[r][c]===t) grid[r][c]=null; } thiefRecover(t); player.xp+=15; player.gold+=20; onBossKilled(); applyGravity(); syncPositions(false); log(tr('🧛 吸血鬼吸到毒心，中毒身亡！','🧛 The Vampire drank poison hearts and died!')); }
+      if(t.hp<=0){ for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ if(grid[r][c]===t) grid[r][c]=null; } thiefRecover(t); player.xp+=15; gainGold(20); onBossKilled(); applyGravity(); syncPositions(false); log(tr('🧛 吸血鬼吸到毒心，中毒身亡！','🧛 The Vampire drank poison hearts and died!')); }
       else { if(t.hp>t.maxHp) t.hp=t.maxHp; applyGravity(); syncPositions(false);
         if(delta<0) log(tr(`🧛 吸血鬼吸到毒心，反中毒掉 ${-delta} 血（→${t.hp}）`,`🧛 Vampire drinks poison hearts: −${-delta} HP (→${t.hp})`));
         else log(tr(`🧛 吸血鬼吸取 ${tot} 颗心回血（→${t.hp}）`,`🧛 Vampire drains ${tot} hearts (→${t.hp})`), 'debuff'); } } },
@@ -412,8 +412,15 @@ function spawnFinale(){
 }
 function bossDef(t){ return BOSSES.find(b=>b.id===(t&&t.bossId)) || BOSSES[0]; }
 function isSwordTarget(t){ return !!t && !t.finale && (t.type==='enemy' || (t.type==='boss' && (bossDef(t).swordable || !!(player&&player.pierceTurn)))); }  // 斗士嗜血：本回合可攻击剑免疫 Boss；终焉之主(finale)永不可攻击
+function gainGold(g, msgActive, msgFrozen, xpAmt){
+  g=g|0; if(g<=0) return 0;
+  if(player.goldLock>0){ player.goldFrozen+=g; if(msgFrozen) log(msgFrozen(g), 'buff'); }
+  else { player.gold+=g; if(msgActive) log(msgActive(g), 'buff'); }
+  if(xpAmt&&player.goldXp) player.xp+=xpAmt;
+  return g;
+}
 // 击败小偷：夺回它偷走的金币
-function thiefRecover(t){ if(t&&t.bossId==='thief'&&t.stolen>0){ player.gold+=t.stolen; log(tr(`🦹 抓住小偷！夺回 ${t.stolen} 金币。`,`🦹 Caught the Thief! Recovered ${t.stolen} gold.`), 'buff'); t.stolen=0; } }
+function thiefRecover(t){ if(t&&t.bossId==='thief'&&t.stolen>0){ gainGold(t.stolen, g=>tr(`🦹 抓住小偷！夺回 ${g} 金币。`,`🦹 Caught the Thief! Recovered ${g} gold.`), g=>tr(`🦹 抓住小偷！夺回 ${g} 金币（已转入囤金）。`,`🦹 Caught the Thief! Recovered ${g} gold (stockpiled).`)); t.stolen=0; } }
 // 死亡报告：累计各来源对玩家造成的伤害
 function addDmg(key,amt){ if(player){ player.dmgBy=player.dmgBy||{}; player.dmgBy[key]=(player.dmgBy[key]||0)+amt; } }
 function dmgSourceLabel(key){
@@ -554,8 +561,8 @@ const TIER1={
     addBombFx(tr_,tc); t.hp-=D; statueReflect(t, dealt);   // 复用炸弹特效；石像会反弹
     let killed=false, lh=0;
     if(t.hp<=0){ killed=true; grid[tr_][tc]=null;
-      if(isBoss){ thiefRecover(t); p.xp+=15*3; p.gold+=20*3; onBossKilled(); }   // 击杀 3 倍奖励（Boss）
-      else { p.xp+=(3+(p.killXp||0))*3; p.gold+=1*3; if(p.rotflesh)p.maxHp++; }   // 击杀 3 倍奖励（普通怪）
+      if(isBoss){ thiefRecover(t); p.xp+=15*3; gainGold(20*3); onBossKilled(); }   // 击杀 3 倍奖励（Boss）
+      else { p.xp+=(3+(p.killXp||0))*3; gainGold(1*3); if(p.rotflesh)p.maxHp++; }   // 击杀 3 倍奖励（普通怪）
       lh=lifestealHeal(1); applyGravity(); syncPositions(false);
     }
     log(tr(`🎯 狙击：对最肥目标 −${dealt}`+(killed?`，击杀！3 倍奖励`:'')+(lh?`，吸血 +${lh}`:''),`🎯 Snipe: −${dealt} to the toughest foe`+(killed?`, killed! triple rewards`:'')+(lh?`, +${lh} lifesteal`:''))); return true; }}},
@@ -569,7 +576,7 @@ const TIER1={
     for(let i=foes.length-1;i>0;i--){ const j=Math.floor(rnd()*(i+1)); [foes[i],foes[j]]=[foes[j],foes[i]]; }
     let healed=0, kills=0; const pick=foes.slice(0,2); const splashes=[];
     for(const [r,c] of pick){ const t=grid[r][c]; const before=t.hp; const drain=Math.min(p.maxHp, before); t.hp-=drain; healed+=drain; statueReflect(t, drain);   // 石像：吸魂的伤害也会反弹
-      if(t.hp<=0){ const isB=t.type==='boss'; grid[r][c]=null; kills++; if(isB){thiefRecover(t);p.xp+=15;p.gold+=20;onBossKilled();} else {p.xp+=3+(p.killXp||0);p.gold+=1;}
+      if(t.hp<=0){ const isB=t.type==='boss'; grid[r][c]=null; kills++; if(isB){thiefRecover(t);p.xp+=15;gainGold(20);onBossKilled();} else {p.xp+=3+(p.killXp||0);gainGold(1);}
         if(p.splash && p.maxHp>before) splashes.push(p.maxHp-before); } }   // 溅射：吸魂的溢出（吸力上限−目标血量）也砸向剩余敌人
     soulDrainFx(pick);   // 特效：从每个被吸目标的格子画一条红线指向血条（纯视觉，不影响逻辑/重放）
     let splashK=0; for(const over of splashes){ splashK+=splashHit(over).kills; }   // 溅射独立结算（含剑免疫 Boss，排除终焉）
@@ -591,7 +598,7 @@ const TIER1={
     if(!any) return false;
     for(let r=ROWS-1;r>=0;r--)for(let c=0;c<COLS;c++){ const t=grid[r][c]; if(!isMon(t)) continue;
       const hit=Math.min(t.hp, hookBase*(ROWS-r)); t.hp-=hit; dmg+=hit; statueReflect(t, hit);
-      if(t.hp<=0){ const isB=t.type==='boss'; grid[r][c]=null; kills++; if(isB){ thiefRecover(t); player.xp+=15; player.gold+=20; onBossKilled(); } else { player.xp+=3+(player.killXp||0); player.gold+=1; if(player.rotflesh) player.maxHp++; } } }
+      if(t.hp<=0){ const isB=t.type==='boss'; grid[r][c]=null; kills++; if(isB){ thiefRecover(t); player.xp+=15; gainGold(20); onBossKilled(); } else { player.xp+=3+(player.killXp||0); gainGold(1); if(player.rotflesh) player.maxHp++; } } }
     const lh=lifestealHeal(kills); applyGravity(); syncPositions(false);   // 满盘时 applyGravity 为空操作、不消耗 RNG；纯重排，重放确定
     log(tr(`🪝 钩子：把全场怪/Boss 拉到底排，造成 ${dmg} 伤害`+(kills?`，击杀 ${kills}`:'')+(lh?`，吸血 +${lh}`:''),`🪝 Hook: dragged all foes down for ${dmg} damage`+(kills?`, ${kills} killed`:'')+(lh?`, +${lh} lifesteal`:'')), moved?'buff':''); return true; }}},
 };
@@ -1392,7 +1399,7 @@ const SHOP={
     for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const t=grid[r][c];
       if(t&&(t.type==='enemy'||t.type==='boss')){ if(t.finale) continue; addBombFx(r,c); const dd=Math.min(D,t.hp); t.hp-=D; statueReflect(t, dd);   // 终焉之主打不掉；石像反弹；每个命中格爆一下特效
         if(t.hp<=0){ const isBoss=t.type==='boss'; grid[r][c]=null;
-          if(isBoss){ thiefRecover(t); boss++; player.xp+=15; player.gold+=20; onBossKilled(); } else { kills++; player.xp+=3+(player.killXp||0); if(player.rotflesh) player.maxHp++; } } } }   // 屠夫·积累腐肉：炸弹击杀也 +1 上限
+          if(isBoss){ thiefRecover(t); boss++; player.xp+=15; gainGold(20); onBossKilled(); } else { kills++; player.xp+=3+(player.killXp||0); if(player.rotflesh) player.maxHp++; } } } }   // 屠夫·积累腐肉：炸弹击杀也 +1 上限
     const lifeHeal=lifestealHeal(kills+boss);   // 汲取生命：炸弹击杀也回血
     log(tr(`💥 投掷炸弹，全场 −${D}`+(extra?`（乾坤一掷 +${extra}）`:''),`💥 Bomb: all foes −${D}`+(extra?` (All-In +${extra})`:'')) + (kills?tr(`，击杀 ${kills} 只👹`,`, ${kills} killed`):'') + (lifeHeal?tr(`，吸血 +${lifeHeal}`,`, +${lifeHeal} lifesteal`):'') + (boss?tr(`，击败 ${boss} 个 Boss`,`, ${boss} boss(es) down`):''));   // Boss 奖励日志由 onBossKilled 统一报
     if(player.bombBoost) player.bombUses=(player.bombUses||0)+1;   // 爆破手：每用一次 → 下次 伤害+1、花费+5
@@ -1596,10 +1603,11 @@ function resolve(){
         if(healN>0){ const h=gainHeal(Math.round(healN*per)); parts.push(tr(`回复 ${h} 生命`,`+${h} HP`)); }
         mk = poisonN>0 ? '' : 'heal';   // 连黑/蛊毒心毒怪=攻击(白)，纯回血=绿
         msg=`${blackN?'🖤':d.emoji}×${count}${comboTxt} → `+(parts.join(tr('，',', '))||tr('（无效果）','(no effect)')); } }
-    else if(type==='coin'){ mk='buff'; const g=Math.round(count*player.goldPerCoin*combo);
-      if(player.goldLock>0){ player.goldFrozen+=g; msg=`${d.emoji}×${count}${comboTxt} → `+tr(`囤金中，冻结 +${g}`,`hoarding, frozen +${g}`); }
-      else { player.gold+=g; if(player.goldXp) player.xp+=Math.floor(g/2);
-        msg=`${d.emoji}×${count}${comboTxt} → `+tr(`获得 ${g} 金币`,`+${g} gold`)+(player.goldXp?tr(`（+${Math.floor(g/2)}经验）`,` (+${Math.floor(g/2)} XP)`):''); } }
+    else if(type==='coin'){ mk='buff'; const g=Math.round(count*player.goldPerCoin*combo), xp=(player.goldXp?Math.floor(g/2):0);
+      gainGold(g, null, null, xp);
+      msg=`${d.emoji}×${count}${comboTxt} → `+(player.goldLock>0
+        ? tr(`囤金中，冻结 +${g}`,`hoarding, frozen +${g}`)
+        : tr(`获得 ${g} 金币`,`+${g} gold`)+(xp?tr(`（+${xp}经验）`,` (+${xp} XP)`):'')); }
   }
   log(msg, mk);
   if(player.pierceTurn) player.pierceTurn=false;   // 斗士嗜血穿透仅本回合
@@ -1664,7 +1672,7 @@ function holyStrikeDamage(amt){
   const isBoss=t.type==='boss', name=isBoss?L(bossDef(t).name):tr('普通怪','enemy'), before=t.hp, dealt=Math.min(amt,before);
   addBombFx(tr_,tc);
   t.hp-=amt;
-  if(t.hp<=0){ grid[tr_][tc]=null; if(isBoss){ thiefRecover(t); player.xp+=15; player.gold+=20; onBossKilled(); } else { player.xp+=3+(player.killXp||0); player.gold+=1; } }
+  if(t.hp<=0){ grid[tr_][tc]=null; if(isBoss){ thiefRecover(t); player.xp+=15; gainGold(20); onBossKilled(); } else { player.xp+=3+(player.killXp||0); gainGold(1); } }
   log(tr(`✨ 神圣打击：优先命中 ${name}，造成 ${dealt} 伤害`+(t.hp<=0?`，击杀！`:''),`✨ Holy Strike: hit ${name} first for ${dealt} dmg`+(t.hp<=0?`, killed!`:'')));
 }
 
@@ -1687,12 +1695,12 @@ function dealDamage(pool, targets, allFoes){
     e.t.hp-=hit; dmg+=hit;
     statueReflect(e.t, hit);   // 石像：等量真实伤害反弹给玩家
     if(e.t.hp<=0){ grid[e.r][e.c]=null; kills++;
-      if(e.t.type==='boss'){ thiefRecover(e.t); player.xp+=15; player.gold+=20; onBossKilled(); }  // 剑杀 Boss：厚赏 + 可能触发转职
-      else { player.xp+=3+(player.killXp||0); player.gold += 1; if(player.rotflesh) player.maxHp++; }   // 神射手：击杀额外经验；屠夫·积累腐肉：+1 生命上限
+      if(e.t.type==='boss'){ thiefRecover(e.t); player.xp+=15; gainGold(20); onBossKilled(); }  // 剑杀 Boss：厚赏 + 可能触发转职
+      else { player.xp+=3+(player.killXp||0); gainGold(1); if(player.rotflesh) player.maxHp++; }   // 神射手：击杀额外经验；屠夫·积累腐肉：+1 生命上限
       if(player.splash && pool>before) splashes.push(pool-before);   // 溅射：本次击杀的溢出留待砸向其它敌人
     }
   }
-  if(bonusGold>0) player.gold+=bonusGold;
+  if(bonusGold>0) gainGold(bonusGold);
   // 溅射（骷髅王被动）：每份溢出随机砸到棋盘上剩余的一个敌人/Boss（含剑免疫，排除终焉之主）
   for(const over of splashes){ const r=splashHit(over); dmg+=r.dmg; kills+=r.kills; }
   return {dmg,kills,bonusGold};
@@ -1703,7 +1711,7 @@ function splashHit(over){
   if(!foes.length) return {dmg:0,kills:0};
   const [r,c]=foes[Math.floor(rnd()*foes.length)]; const t=grid[r][c];
   const hit=Math.min(over,t.hp); t.hp-=hit; statueReflect(t, hit); let kills=0;
-  if(t.hp<=0){ const isB=t.type==='boss'; grid[r][c]=null; kills=1; if(isB){thiefRecover(t);player.xp+=15;player.gold+=20;onBossKilled();} else {player.xp+=3+(player.killXp||0);player.gold+=1;if(player.rotflesh)player.maxHp++;} }   // 屠夫·积累腐肉：溅射击杀也 +1 上限
+  if(t.hp<=0){ const isB=t.type==='boss'; grid[r][c]=null; kills=1; if(isB){thiefRecover(t);player.xp+=15;gainGold(20);onBossKilled();} else {player.xp+=3+(player.killXp||0);gainGold(1);if(player.rotflesh)player.maxHp++;} }   // 屠夫·积累腐肉：溅射击杀也 +1 上限
   return {dmg:hit, kills};
 }
 
@@ -1773,7 +1781,7 @@ function deathCoilTick(){
   const dmg=Math.max(1, Math.floor(player.maxHp*0.3)); let kills=0, hit=0;
   for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const t=grid[r][c];
     if(t&&(t.type==='enemy'||(t.type==='boss'&&!t.finale))){ t.hp-=dmg; hit++;
-      if(t.hp<=0){ const isB=t.type==='boss'; grid[r][c]=null; kills++; if(isB){thiefRecover(t);player.xp+=15;player.gold+=20;onBossKilled();} else {player.xp+=3+(player.killXp||0);player.gold+=1;} } } }
+      if(t.hp<=0){ const isB=t.type==='boss'; grid[r][c]=null; kills++; if(isB){thiefRecover(t);player.xp+=15;gainGold(20);onBossKilled();} else {player.xp+=3+(player.killXp||0);gainGold(1);} } } }
   if(!hit) return;
   const lh=lifestealHeal(kills);
   log(tr(`🟢 蔓藤缠绕：全场怪 −${dmg}`+(kills?`，击杀 ${kills}`:'')+(lh?`，吸血 +${lh}`:''),`🟢 Vine Coil: all foes −${dmg}`+(kills?`, ${kills} killed`:'')+(lh?`, +${lh} lifesteal`:'')));
@@ -1786,7 +1794,7 @@ function reflectThorns(amt, atkr){
   if(!t){ const es=[]; for(let rr=0;rr<ROWS;rr++)for(let cc=0;cc<COLS;cc++){ const x=grid[rr][cc]; if(x&&(x.type==='enemy'||x.type==='boss')&&!x.finale) es.push([rr,cc,x]); }
     if(!es.length) return; [r,c,t]=es[Math.floor(rnd()*es.length)]; }   // 攻击者已不在场（如自身已死）→ 退回随机一个敌人
   t.hp-=amt; let lh=0;
-  if(t.hp<=0){ const isB=t.type==='boss'; grid[r][c]=null; if(isB){thiefRecover(t);player.xp+=15;player.gold+=20;onBossKilled();} else {player.xp+=3+(player.killXp||0);player.gold+=1;} lh=lifestealHeal(1); }   // 荆棘反杀也吸血
+  if(t.hp<=0){ const isB=t.type==='boss'; grid[r][c]=null; if(isB){thiefRecover(t);player.xp+=15;gainGold(20);onBossKilled();} else {player.xp+=3+(player.killXp||0);gainGold(1);} lh=lifestealHeal(1); }   // 荆棘反杀也吸血
   log(tr(`🌵 荆棘反弹 ${amt} 伤害`+(lh?`，吸血 +${lh}`:''),`🌵 Thorns reflect ${amt}`+(lh?`, +${lh} lifesteal`:'')));
 }
 

@@ -101,7 +101,7 @@
 | 🧝 精灵 | 💰 盗贼 Rogue | 妙手空空 Empty Pockets | 本回合用剑链攻击到的每个敌人，额外掉落其命中前血量 20% 的金币（向下取整，至少 1 金）；连线变金色 |
 | 🧝 精灵 | 🌿 森林长老 Forest Elder | 蔓藤缠绕 Vine Coil | 之后 3 回合，每回合让全场怪/Boss（含剑免疫，终焉除外）损失「你最大生命的 30%」；被缠绕期间敌人格变绿 |
 | 🎅 矮人 | 🔰 锻造师 Blacksmith | 锻甲 Forge Armor | 吞下全场的盾，全部转为护甲进度 |
-| 🎅 矮人 | 🔒 守财奴 Miser | 囤金 Hoard | 锁金 **4 回合**（期间不产/不花金币，到期返还 **2.5 倍**）|
+| 🎅 矮人 | 🔒 守财奴 Miser | 囤金 Hoard | 锁金 **4 回合**（期间**所有金币收入都先冻结、不直接进账**，也不能用商店/技能；到期把冻结金币一次性按 **2.5 倍**返还）|
 | 🎅 矮人 | 💼 会长 Guild Master | 收买 Buyout | **花掉「全场怪总血量」那么多金币**把它们全部买通**变成金币**（付得起才可发动；**无冷却**，有钱就能反复用；对 Boss 无效；学了小气鬼后花费减半）|
 | 🎅 矮人 | 🔫 火枪手 Musketeer | 狙击 Snipe | 优先狙击 Boss；若有多个 Boss，则打**生命最低**的那个。若场上没有 Boss，再打当前**生命最高**的怪/Boss（炸弹式攻击，含剑免疫与特殊 Boss，终焉之主除外），伤害 = 炸弹伤害 ×2；若击杀则得 **3 倍经验 + 3 倍金币**（CD 5；炸弹被爆破手强化时狙击同步增强）|
 | 🧌 兽人 | 🔪 狂战士 Berserker | 狂怒 Frenzy | 生命减半并进入**不屈**（仅**本回合**：无论受多少伤都保留 1 血）；并**永久**开启残血增伤——血越少剑伤越高（最高 +60%）|
@@ -292,7 +292,7 @@ Each race has **several** classes; every skill has a **5-turn cooldown** (except
 | 🧝 Elf | 💰 Rogue | Empty Pockets | For this turn, each enemy hit by your sword chain drops extra gold equal to 20% of its pre-hit HP (rounded down, minimum 1); the chain turns gold |
 | 🧝 Elf | 🌿 Forest Elder | Vine Coil | For the next 3 turns, all enemies/bosses (incl. sword-immune; Overlord excluded) lose 30% of your max HP each turn; cursed foes glow green |
 | 🎅 Dwarf | 🔰 Blacksmith | Forge Armor | Absorb all shields on the board into armor progress |
-| 🎅 Dwarf | 🔒 Miser | Hoard | Lock gold for **4 turns** (no gold in/out; **2.5×** payout at the end) |
+| 🎅 Dwarf | 🔒 Miser | Hoard | Lock gold for **4 turns** — during the lock, **all incoming gold is stockpiled instead of entering your wallet**; at the end, the frozen pile is paid back at **2.5×** |
 | 🎅 Dwarf | 💼 Guild Master | Buyout | **Pay gold equal to the total HP of all enemies** to bribe them all **into coins** (only if you can afford it; **no cooldown** — reuse it as long as you have gold; bosses unaffected; costs half once you have Cheapskate) |
 | 🎅 Dwarf | 🔫 Musketeer | Snipe | Prioritizes bosses; if there are multiple bosses, it shoots the one with the **lowest HP**. If there is no boss, it falls back to the current **highest-HP** monster/boss (bomb-type — hits sword-immune & special bosses; not the Overlord) for **2× your Bomb damage**; a kill grants **triple XP + triple gold** (CD 5; scales with Demolitionist) |
 | 🧌 Orc | 🔪 Berserker | Frenzy | Halve HP and become **Undying** (**this turn only**: keep ≥1 HP no matter the damage); also **permanently** enables low-HP scaling — lower HP means higher sword damage (up to +60%) |
