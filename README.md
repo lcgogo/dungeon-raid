@@ -125,7 +125,7 @@
 | 🧝 精灵 | 森林长老 → 荆棘 Thorns | 受到攻击时，把「当前护甲减伤量」反弹给攻击者本人（护甲越高反弹越多；尸毒/毒心反噬/石像反弹等非直接攻击不触发）|
 | 🎅 矮人 | 锻造师 → 盾击 Shield Bash | 把「护甲减伤量」加到固定剑伤上（护甲越厚、剑伤越高）|
 | 🎅 矮人 | 火枪手 → 爆破手 Demolitionist | 每用一次炸弹：伤害 +1、花费 +5 金（越炸越强、越炸越贵）|
-| 🎅 矮人 | 守财奴 → 财阀 Tycoon | **所有金币收入**都会额外按一半转为经验（连金币、击杀赏金、偷回金币、额外掉金都算） |
+| 🎅 矮人 | 守财奴 → 钱能买命 Money Buys Life | 囤金期间，受到的伤害优先扣**冻结金币**，不够再扣手头金币；金币仍不够时才继续掉血 |
 | 🎅 矮人 | 会长 → 小气鬼 Cheapskate | 消耗金币的主动（商店 💊治疗 / 💥炸弹、会长「收买」）花费减半 |
 | 🧌 兽人 | 狂战士 → 巨力 Titan | 最大生命越高，剑链固定伤害越高（每 12 点最大生命 +1）|
 | 🧌 兽人 | 斗士 → 血狂 Blood Frenzy | 吸血/嗜血回血超出生命上限时，把溢出的 **30%** 增为永久生命上限；但**每回合结束损失 5% 最大生命**（无视护甲） |
@@ -316,7 +316,7 @@ At **level 100 (Tier-2 Skill)** you automatically get the passive **locked to yo
 | 🧝 Elf | Forest Elder → Thorns | When hit, reflect your current armor (damage-reduction) back to the attacker (more armor → more reflect; DoT/poison-backlash/Statue reflection do NOT trigger it) |
 | 🎅 Dwarf | Blacksmith → Shield Bash | Adds your armor (damage-reduction) value to flat {W} damage — more armor, harder hits |
 | 🎅 Dwarf | Musketeer → Demolitionist | Each bomb use: +1 damage and +5 gold cost (stronger but pricier each time) |
-| 🎅 Dwarf | Miser → Tycoon | **All gold income** also grants half as much XP (coin chains, kill rewards, thief recovery, and bonus gold all count) |
+| 🎅 Dwarf | Miser → Money Buys Life | While Hoard is active, incoming damage is paid from **frozen gold first**, then wallet gold; only any remainder spills into HP |
 | 🎅 Dwarf | Guild Master → Cheapskate | Gold-spending actives (shop 💊Heal / 💥Bomb, Guild Master’s Buyout) cost half |
 | 🧌 Orc | Berserker → Titan | Higher max HP means higher flat sword damage (+1 per 12 max HP) |
 | 🧌 Orc | Fighter → Blood Frenzy | When Lifesteal/Bloodthirst healing exceeds max HP, **30%** of the overflow becomes permanent max HP; but at the **end of every turn you lose 5% of max HP** (ignores armor) |

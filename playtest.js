@@ -301,6 +301,7 @@ function resourceValue(type, len, state){
     if(state.boss && p.gold<G.shopCost('bomb')) score+=90;
     if(p.tier1==='guildmaster'&&p.cheapskate) score+=80;
     if(p.tier1==='miser'&&p.goldLock<=0) score+=60;
+    if(p.tier1==='miser'&&p.tier2==='tycoon'&&p.goldLock>0&&state.imminent>0) score-=120;
     return score;
   }
   return len;

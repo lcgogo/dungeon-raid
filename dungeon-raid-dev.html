@@ -173,8 +173,8 @@
 (()=>{
 //==================== 配置 ====================
 // 版本号 v主.次.修：不影响 verify/replay 兼容边界的小改动改"修"；凡是影响 verify/replay/版本分桶/release 验证语义的改动都改"次"；大版本变更需先确认。页面底部显示。
-const VERSION='v1.38.0';
-const CHANGELOG_LINES=[{"ver": "v1.38.0", "zh": "下调幽灵 Ghost 的血量模板：它现在不再吃通用 Boss 的高血成长，而是改为与同级普通怪同血量；保留「剑链无效、只能炸、倒计时重击」的定位，避免后期出现几百血却只能用 5 点炸弹慢慢磨的失衡体验。", "en": "Lower Ghost’s HP template: it no longer uses the generic high-HP boss scaling and instead matches same-tier normal-enemy HP, while keeping its identity as a bomb-only countdown threat. This avoids the late-game case where a Ghost can reach absurd HP totals even though the player is forced to chip it down with tiny bomb damage."}, {"ver": "v1.36.1", "zh": "把选种族页的文案收紧成两行：尽量一行只写「特性：…」，另一行只写「削弱：…」，并去掉句号收尾，让手机上一屏更好扫、重点更明确。", "en": "Tighten the race-selection copy into two short lines: one for “Trait: …” and one for “Weakness: …”, while removing sentence-ending periods so the mobile screen scans more cleanly and the key info stands out faster."}, {"ver": "v1.37.0", "zh": "补齐财阀 Tycoon 的经验触发口径：之前「获得金币时额外按一半转为经验」主要只覆盖了金币链，击杀赏金/抓小偷/盗贼额外掉金等来源不一定加经验。现在统一成所有金币收入都按一半转经验，而且守财奴囤金期间即使金币先进冻结池，这部分经验也会照常拿到。", "en": "Complete Tycoon’s XP trigger coverage: previously “gold gained also grants half as XP” mostly applied to coin chains, while kill rewards / thief recovery / Rogue bonus gold did not consistently grant XP. It now applies to all gold income uniformly, and the XP still arrives normally even when Miser’s Hoard stockpiles the gold instead of adding it to your wallet immediately."}, {"ver": "v1.36.0", "zh": "修复守财奴「囤金 Hoard」只冻结金币链收入、却放跑击杀赏金/偷回金币/盗贼额外掉金的问题。现在囤金期间的所有金币收入（连金币、击杀普通怪/Boss、抓小偷、妙手空空等）都会先转入冻结池，锁定结束后再统一按 2.5 倍返还，终于和技能描述一致。", "en": "Fix Miser’s “Hoard” so it no longer freezes only coin-chain income while letting kill rewards / recovered thief gold / Rogue bonus drops bypass the lock. During Hoard, all gold income (coin chains, normal/boss kill rewards, thief recovery, Empty Pockets bonus gold, etc.) is now routed into the frozen pool first and then returned at 2.5× when the lock ends, matching the skill description at last."}, {"ver": "v1.35.0", "zh": "牧师二阶被动「神圣打击 Holy Strike」不再随机乱打：现在会像火枪手的「狙击」一样优先攻击 Boss，若场上有多个 Boss，则命中生命最低的那个；没有 Boss 时才回退到普通怪。并补了单点命中特效与更明确的日志，能直接看出这次神圣打击打到了谁、造成了多少伤害、有没有击杀。", "en": "Priest’s tier-2 passive “Holy Strike” no longer picks a random victim: it now prioritizes bosses like Musketeer’s Snipe, choosing the lowest-HP boss when multiple bosses are present and only falling back to normal enemies when no boss exists. It also now shows a single-target hit effect and clearer log text so you can tell exactly what was struck, how much damage landed, and whether it killed."}];   /* auto-injected by dr.sh embed-changelog（勿手改） */
+const VERSION='v1.39.0';
+const CHANGELOG_LINES=[{"ver": "v1.39.0", "zh": "重做矮人守财奴的锁定二阶被动：财阀 Tycoon 改名为「钱能买命 Money Buys Life」，不再是“金币转经验”。新效果是：只要囤金 Hoard 还在生效，受到的伤害会优先扣冻结金币，不够再扣手头金币，金币仍不够时才继续掉血。这样守财奴的二阶被动终于和囤金本体直接联动，形成“用囤起来的钱挡刀”的明确流派。", "en": "Redesign the Dwarf Miser’s locked tier-2 passive: Tycoon is renamed to “Money Buys Life” and no longer converts gold into XP. Its new effect is: while Hoard is active, incoming damage is paid from frozen gold first, then wallet gold, and only any remainder spills into HP. This gives Miser a direct, coherent tier-2 synergy — stockpiled money now literally buys survival."}, {"ver": "v1.38.0", "zh": "下调幽灵 Ghost 的血量模板：它现在不再吃通用 Boss 的高血成长，而是改为与同级普通怪同血量；保留「剑链无效、只能炸、倒计时重击」的定位，避免后期出现几百血却只能用 5 点炸弹慢慢磨的失衡体验。", "en": "Lower Ghost’s HP template: it no longer uses the generic high-HP boss scaling and instead matches same-tier normal-enemy HP, while keeping its identity as a bomb-only countdown threat. This avoids the late-game case where a Ghost can reach absurd HP totals even though the player is forced to chip it down with tiny bomb damage."}, {"ver": "v1.36.1", "zh": "把选种族页的文案收紧成两行：尽量一行只写「特性：…」，另一行只写「削弱：…」，并去掉句号收尾，让手机上一屏更好扫、重点更明确。", "en": "Tighten the race-selection copy into two short lines: one for “Trait: …” and one for “Weakness: …”, while removing sentence-ending periods so the mobile screen scans more cleanly and the key info stands out faster."}, {"ver": "v1.37.0", "zh": "补齐财阀 Tycoon 的经验触发口径：之前「获得金币时额外按一半转为经验」主要只覆盖了金币链，击杀赏金/抓小偷/盗贼额外掉金等来源不一定加经验。现在统一成所有金币收入都按一半转经验，而且守财奴囤金期间即使金币先进冻结池，这部分经验也会照常拿到。", "en": "Complete Tycoon’s XP trigger coverage: previously “gold gained also grants half as XP” mostly applied to coin chains, while kill rewards / thief recovery / Rogue bonus gold did not consistently grant XP. It now applies to all gold income uniformly, and the XP still arrives normally even when Miser’s Hoard stockpiles the gold instead of adding it to your wallet immediately."}, {"ver": "v1.36.0", "zh": "修复守财奴「囤金 Hoard」只冻结金币链收入、却放跑击杀赏金/偷回金币/盗贼额外掉金的问题。现在囤金期间的所有金币收入（连金币、击杀普通怪/Boss、抓小偷、妙手空空等）都会先转入冻结池，锁定结束后再统一按 2.5 倍返还，终于和技能描述一致。", "en": "Fix Miser’s “Hoard” so it no longer freezes only coin-chain income while letting kill rewards / recovered thief gold / Rogue bonus drops bypass the lock. During Hoard, all gold income (coin chains, normal/boss kill rewards, thief recovery, Empty Pockets bonus gold, etc.) is now routed into the frozen pool first and then returned at 2.5× when the lock ends, matching the skill description at last."}];   /* auto-injected by dr.sh embed-changelog（勿手改） */
 const DEV=true;   // release build (DEV=false); dev build is dungeon-raid-dev.html (DEV=true)
 const REC_API='https://api.dungeonraid.win';   // 录像分享 API（Cloudflare Worker + KV）
 // 带种子随机数（mulberry32）：游戏全程用 rnd() 取代原生随机，配合录制种子可确定性重放
@@ -268,7 +268,7 @@ function newPlayer(){
     chosenPerks:[],                                                      // 本局已选技能名（按选择顺序，供录像/展示用）
     heartPoison:false, rogueStealTurn:false,                              // 巫医蛊毒：本回合连心改为毒怪；盗贼：本回合命中偷金
     foeCdBonus:0, skillCdMod:0, splash:false, rebirthTurn:false, rebirthSaves:0, healMult:1,  // 活死人：迷惑/技能冷却修正/溅射/重生/治疗减半
-    upgradeChoices:3, bombCd:3, goldLock:0, goldFrozen:0, healUses:0, bombUses:0, shadowBombGold:false, frozen:{},  // 转职被动相关；healUses：治疗递增；bombUses：爆破手炸弹递增；shadowBombGold：乾坤一掷；frozen：雪人冰封的主动剩余回合（skill/heal/bomb）
+    upgradeChoices:3, bombCd:3, goldLock:0, goldFrozen:0, healUses:0, bombUses:0, shadowBombGold:false, tycoonGoldShield:false, frozen:{},  // 转职被动相关；healUses：治疗递增；bombUses：爆破手炸弹递增；shadowBombGold：乾坤一掷；tycoonGoldShield：钱能买命；frozen：雪人冰封的主动剩余回合（skill/heal/bomb）
     finaleStarted:false, finaleWave:0, cleared:false};                      // 终局：终焉之主浪潮 / 破关
 }
 function xpNeeded(lv){ return 10 + lv*6; }
@@ -413,13 +413,20 @@ function spawnFinale(){
 }
 function bossDef(t){ return BOSSES.find(b=>b.id===(t&&t.bossId)) || BOSSES[0]; }
 function isSwordTarget(t){ return !!t && !t.finale && (t.type==='enemy' || (t.type==='boss' && (bossDef(t).swordable || !!(player&&player.pierceTurn)))); }  // 斗士嗜血：本回合可攻击剑免疫 Boss；终焉之主(finale)永不可攻击
-function gainGold(g, msgActive, msgFrozen, xpAmt){
+function gainGold(g, msgActive, msgFrozen){
   g=g|0; if(g<=0) return 0;
   if(player.goldLock>0){ player.goldFrozen+=g; if(msgFrozen) log(msgFrozen(g), 'buff'); }
   else { player.gold+=g; if(msgActive) log(msgActive(g), 'buff'); }
-  const xp = xpAmt!=null ? xpAmt : Math.floor(g/2);
-  if(xp>0 && player.goldXp) player.xp+=xp;
   return g;
+}
+function loseGoldForShield(g){
+  g=g|0; if(g<=0) return 0;
+  let left=g;
+  const fromFrozen=Math.min(left, player.goldFrozen||0);
+  player.goldFrozen-=fromFrozen; left-=fromFrozen;
+  const fromWallet=Math.min(left, player.gold||0);
+  player.gold-=fromWallet; left-=fromWallet;
+  return g-left;
 }
 // 击败小偷：夺回它偷走的金币
 function thiefRecover(t){ if(t&&t.bossId==='thief'&&t.stolen>0){ gainGold(t.stolen, g=>tr(`🦹 抓住小偷！夺回 ${g} 金币。`,`🦹 Caught the Thief! Recovered ${g} gold.`), g=>tr(`🦹 抓住小偷！夺回 ${g} 金币（已转入囤金）。`,`🦹 Caught the Thief! Recovered ${g} gold (stockpiled).`)); t.stolen=0; } }
@@ -612,7 +619,7 @@ const TIER2={
   shadow:{n:['乾坤一掷','All-In'], d:['买炸弹后，再额外扣当前金币的 20%，并把这笔数额加到这次炸弹伤害上','After buying a bomb, also spend 20% of your current gold and add exactly that amount to this bomb’s damage'], f:p=>{ p.shadowBombGold=true; }},
   demolitionist:{n:['爆破手','Demolitionist'], d:['每用一次炸弹：伤害 +1、花费 +5 金（越炸越强、越炸越贵）','Each bomb use: +1 damage and +5 gold cost (stronger but pricier each time)'], f:p=>{ p.bombBoost=true; }},
   shieldbash:{n:['盾击','Shield Bash'], d:['把「护甲减伤量」加到固定{WC}伤害上（护甲越厚、剑伤越高）','Adds your armor (damage-reduction) value to flat {W} damage — more armor, harder hits'], f:p=>{ p.shieldBash=true; }},
-  tycoon:{n:['财阀','Tycoon'], d:['获得金币时额外按一半转为经验','Gold gained also grants half as XP'], f:p=>{ p.goldXp=true; }},
+  tycoon:{n:['钱能买命','Money Buys Life'], d:['囤金期间，受到的伤害优先扣冻结金币，不够再扣手头金币；金币仍不够时才继续掉血','While Hoard is active, incoming damage is paid from frozen gold first, then wallet gold; only any remainder spills into HP'], f:p=>{ p.tycoonGoldShield=true; }},
   warlord:{n:['巨力','Titan'], d:['最大生命越高，{WC}固定伤害越高（每 12 点最大生命 +1）','Higher max HP = higher flat {W} damage (+1 per 12 max HP)'], f:p=>{ p.titan=true; }},
   thorns:{n:['荆棘','Thorns'], d:['受到攻击时，把「当前护甲减伤量」反弹给攻击者（护甲越高反弹越多）','When hit, reflect your current armor (damage-reduction) back to the attacker — more armor, more reflect'], f:p=>{ p.thorns=true; }},
   bloodfrenzy:{n:['血狂','Blood Frenzy'], d:['吸血/嗜血回血超出生命上限时，溢出的 30% 增为永久生命上限；但每回合结束损失 5% 最大生命（无视护甲）','Lifesteal/Bloodthirst healing past max HP: 30% of overflow becomes permanent max HP; but at end of every turn, lose 5% of max HP (ignores armor)'], f:p=>{ p.bloodFrenzy=true; }},
@@ -1756,8 +1763,13 @@ function advanceEnemies(){
 function hurtPlayer(atk, sourceKey, ignoreArmor, attacker){
   if(player.shieldTurn) return 0;
   const armorReducer = player.armor*(player.armorMult||1) + (player.toughness||0);
-  const dmg = ignoreArmor ? atk : Math.max(1, atk - armorReducer);
+  let dmg = ignoreArmor ? atk : Math.max(1, atk - armorReducer);
   if(!ignoreArmor) log(tr(`🛡️ 减伤计算：攻击${atk} - 护甲${player.armor}×(armorMult=${player.armorMult||1}) - 坚韧${player.toughness||0} = 受伤${dmg}`,`🛡️ DR: atk${atk} - arm or${player.armor}×(mult=${player.armorMult||1}) - tough${player.toughness||0} = dmg${dmg}`), 'debuff');
+  if(player.tycoonGoldShield && player.goldLock>0 && dmg>0){
+    const paid = loseGoldForShield(dmg), spill = dmg-paid;
+    if(paid>0) log(tr(`💸 钱能买命：花掉 ${paid} 金币挡住 ${paid} 伤害`,`💸 Money Buys Life: spend ${paid} gold to block ${paid} damage`), 'buff');
+    dmg = spill;
+  }
   player.hp -= dmg;
   if(player.undyingTurn && player.hp<1) player.hp=1; // 狂怒不屈：本回合最低保留 1 血
   if(player.rebirthTurn && player.hp<=0){ player.hp=player.maxHp; player.rebirthTurn=false; player.rebirthSaves=(player.rebirthSaves||0)+1; // 骷髅王重生：本回合致死则满血复活，此后重生冷却 +2
@@ -2302,7 +2314,7 @@ function tileInfo(t){
     desc:tr('连接 2 枚及以上的金币赚钱，用于商店购买。','Link 2+ coins to earn gold for the shop.'),
     rows:[ [tr('每枚金币','Gold per coin'), `+${p.goldPerCoin}`],
       [tr('当前金币','Current gold'), p.goldLock>0?tr(`囤金中（冻结${p.goldFrozen}）`,`hoarding (${p.goldFrozen})`):`${p.gold}`],
-      [tr('金币转经验(财阀)','Gold→XP (Tycoon)'), p.goldXp?tr('是','Yes'):'—'] ]};
+      [tr('钱能买命(财阀)','Money Buys Life (Tycoon)'), p.tycoonGoldShield?tr('囤金中生效','active during Hoard'):'—'] ]};
   if(t.type==='boss'){ const def=bossDef(t);
     const rows=[ [tr('血量','HP'), `${t.hp} / ${t.maxHp}`] ];
     if(def.special) rows.push([tr('特殊','Special'), L(def.special)]);
@@ -2362,7 +2374,7 @@ function showPlayerInfo(){
   if(p.regen) perks.push(tr(`每回合回复 +${p.regen}`,`Regen +${p.regen}`));
   if(p.holyStrike) perks.push(tr('神圣打击（溢出攻击）','Holy Strike'));
   if(p.killXp) perks.push(tr(`击杀+${p.killXp}经验`,`+${p.killXp} XP/kill`));
-  if(p.goldXp) perks.push(tr('金币转经验','Gold→XP'));
+  if(p.tycoonGoldShield) perks.push(tr('钱能买命','Money Buys Life'));
   const perkLine = perks.length ? `<div style="text-align:left;font-size:12px;color:var(--gold);margin:8px 0 0">${tr('✦ 特性：','✦ Perks: ')}${perks.join('　')}</div>` : '';
   const t1 = p.tier1?TIER1[p.tier1]:null, t2 = p.tier2?TIER2[p.tier2]:null;
   const t2b = p.tier2b?TIER2[p.tier2b]:null, s2 = p.skill2&&TIER1[p.skill2.id]?TIER1[p.skill2.id]:null;

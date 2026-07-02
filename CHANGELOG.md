@@ -1,3 +1,10 @@
+## [v1.39.0]
+
+> Version-Impact: verify
+
+- 重做矮人守财奴的锁定二阶被动：财阀 Tycoon 改名为「钱能买命 Money Buys Life」，不再是“金币转经验”。新效果是：只要囤金 Hoard 还在生效，受到的伤害会优先扣**冻结金币**，不够再扣手头金币，金币仍不够时才继续掉血。这样守财奴的二阶被动终于和囤金本体直接联动，形成“用囤起来的钱挡刀”的明确流派。
+- Redesign the Dwarf Miser’s locked tier-2 passive: Tycoon is renamed to “Money Buys Life” and no longer converts gold into XP. Its new effect is: while Hoard is active, incoming damage is paid from **frozen gold first**, then wallet gold, and only any remainder spills into HP. This gives Miser a direct, coherent tier-2 synergy — stockpiled money now literally buys survival.
+
 ## [v1.38.0]
 
 > Version-Impact: verify
