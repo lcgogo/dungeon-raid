@@ -1,0 +1,39 @@
+name: score-human-leaderboard
+# 定时给人类榜前 N 条录像打 AI 可疑度分，产出 artifact 供人工复核
+on:
+  schedule:
+    - cron: '17 */6 * * *'    # 每 6 小时一次，避开 verify 的 5 分钟节奏
+  workflow_dispatch:
+
+jobs:
+  score:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+
+      - name: Score top human leaderboard replays
+        run: |
+          mkdir -p .reports
+          node score-ai-suspicion.js --top-human 200 --top 200 --json > .reports/human-top200-suspicion.json
+          node score-ai-suspicion.js --top-human 200 --top 80 --min-score 25 > .reports/human-top200-suspicion.txt
+          {
+            echo "# Human leaderboard suspicion scan"
+            echo
+            echo "- Date (UTC): $(date -u '+%Y-%m-%d %H:%M:%S')"
+            echo "- Source: /top?agent=human&n=200"
+            echo "- Script: score-ai-suspicion.js"
+            echo
+            echo '```text'
+            cat .reports/human-top200-suspicion.txt
+            echo '```'
+          } > .reports/README.md
+
+      - name: Upload suspicion report artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: human-top200-suspicion
+          path: .reports/
+          if-no-files-found: error
