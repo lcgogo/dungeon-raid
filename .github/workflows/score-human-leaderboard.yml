@@ -31,6 +31,38 @@ jobs:
             echo '```'
           } > .reports/README.md
 
+      - name: Write job summary
+        run: |
+          python3 - <<'PY'
+          import json, pathlib
+          data = json.loads(pathlib.Path('.reports/human-top200-suspicion.json').read_text(encoding='utf-8'))
+          rows = [r for r in data if isinstance(r, dict) and r.get('score', -1) >= 0]
+          rows.sort(key=lambda r: r.get('score', 0), reverse=True)
+          buckets = {'Low':0, 'Medium':0, 'High':0, 'Very High':0, 'ERR':0}
+          for r in rows:
+            buckets[r.get('risk','ERR')] = buckets.get(r.get('risk','ERR'), 0) + 1
+          top = [r for r in rows if r.get('score', 0) >= 25][:10]
+          p = pathlib.Path('.reports/job-summary.md')
+          with p.open('w', encoding='utf-8') as f:
+            f.write('# Human leaderboard suspicion scan\n\n')
+            f.write('- Source: `/top?agent=human&n=200`\n')
+            f.write('- Script: `score-ai-suspicion.js`\n\n')
+            f.write('## Summary\n\n')
+            for k in ['Low','Medium','High','Very High','ERR']:
+              f.write(f'- **{k}**: {buckets.get(k,0)}\n')
+            if top:
+              f.write('\n## Top suspicious recordings (score ≥ 25)\n\n')
+              f.write('| score | risk | turns | race | version | id | reasons |\n')
+              f.write('|---:|---|---:|---|---|---|---|\n')
+              for r in top:
+                reasons = ' / '.join(r.get('reasons', []))[:180]
+                f.write(f"| {r.get('score',0)} | {r.get('risk','-')} | {r.get('turns','-')} | {r.get('race','-')} | {r.get('ver','-')} | {r.get('id','-')} | {reasons} |\n")
+            else:
+              f.write('\n## Top suspicious recordings\n\nNo recordings scored 25 or above in this run.\n')
+          print(p.read_text(encoding='utf-8'))
+          PY
+          cat .reports/job-summary.md >> "$GITHUB_STEP_SUMMARY"
+
       - name: Upload suspicion report artifact
         uses: actions/upload-artifact@v4
         with:
