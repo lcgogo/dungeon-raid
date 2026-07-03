@@ -1,3 +1,10 @@
+## [v1.40.0]
+
+> Version-Impact: verify
+
+- 把「钱能买命 Money Buys Life」再收紧成更纯粹的囤金联动：囤金期间，受到的伤害现在**只会优先扣冻结金币**，不再动手头现金；只有冻结金币不够时，剩余部分才继续掉血。这样更符合“囤起来的钱替你挡刀”的直觉，也避免把平时钱包一起卷进去。
+- Tighten “Money Buys Life” into a purer Hoard-only shield: while Hoard is active, incoming damage is now paid from **frozen gold only** and no longer drains wallet gold; only any remainder spills into HP once the stockpile is exhausted. This better matches the fantasy that only the hoarded stash buys survival, without dipping into your normal wallet.
+
 ## [v1.39.0]
 
 > Version-Impact: verify
