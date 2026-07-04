@@ -182,4 +182,5 @@ jobs:
         with:
           name: human-top200-suspicion
           path: .reports/
+          include-hidden-files: true
           if-no-files-found: error
