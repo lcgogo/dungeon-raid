@@ -55,22 +55,22 @@ function runOnce(playArgs) {
   return { out, id: post && post[2], endpoint: post && post[1], threshold: !!threshold, code: res.status || 0 };
 }
 
-async function pollBoard(version, endpoint, id, verifyPolls, waitMs) {
+async function pollBoard(version, endpoint, id, verifyPolls, waitMs, agent) {
   const path = endpoint === 'clear' ? 'clearboard' : 'top';
   for (let i = 1; i <= verifyPolls; i++) {
     await sleep(waitMs);
-    const url = `https://api.dungeonraid.win/${path}?agent=${opts.agent}&n=10&version=${encodeURIComponent(version)}`;
+    const url = `https://api.dungeonraid.win/${path}?agent=${agent}&n=10&version=${encodeURIComponent(version)}`;
     const res = await fetch(url);
     const json = await res.json();
     const rows = endpoint === 'clear' ? (json.clears || []) : (json.top || []);
     const hit = rows.find(r => r.id === id);
-    console.log(`\n[verify poll ${i}/${verifyPolls}] ${rows.length ? '已有${opts.agent}榜条目' : '${opts.agent}榜仍空'} ${url}`);
+    console.log(`\n[verify poll ${i}/${verifyPolls}] ${rows.length ? `已有${agent}榜条目` : `${agent}榜仍空`} ${url}`);
     if (hit) {
-      console.log(`✅ 已在${opts.agent}榜看到本次成绩：${id}`);
+      console.log(`✅ 已在${agent}榜看到本次成绩：${id}`);
       return true;
     }
   }
-  console.log(`⚠️ 已提交 ${id}，但在轮询窗口内还没出现在${opts.agent}榜；大概率仍在等待 verify。`);
+  console.log(`⚠️ 已提交 ${id}，但在轮询窗口内还没出现在${agent}榜；大概率仍在等待 verify。`);
   return false;
 }
 
@@ -89,7 +89,7 @@ async function pollBoard(version, endpoint, id, verifyPolls, waitMs) {
     const r = runOnce(build);
     if (r.id) {
       console.log(`✅ 已成功提交${opts.agent === 'human' ? '人类' : 'AI'}成绩：${r.id} (${r.endpoint})`);
-      await pollBoard(version, r.endpoint, r.id, opts.verifyPolls, opts.waitMs);
+      await pollBoard(version, r.endpoint, r.id, opts.verifyPolls, opts.waitMs, opts.agent);
       return;
     }
     if (!r.threshold) console.log('⚠️ 本次没有命中上传门槛，也没有检测到已提交；继续下一次。');

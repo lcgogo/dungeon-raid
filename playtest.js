@@ -370,17 +370,19 @@ function shouldUseSkill2(state){
   return false;
 }
 function maybeSkill(){
-  const state=boardState();
+  let acted=false;
+  let state=boardState();
   if(shouldUseSkill2(state)){
     const slot=state.player.skill2.slot;
     G.buyItem(slot);
     botTransform(); resolveLevels();
-    return true;
+    acted=true;
+    state=boardState();
   }
-  if(!shouldUseSkill(state)) return false;
+  if(!shouldUseSkill(state)) return acted;
   const ok=G.activateSkill();
   resolveLevels();
-  return ok;
+  return ok || acted;
 }
 // 机器人处理转职选择（resolve/buyItem 触发 showTierSelect/showSkillSwap 后，按 build-aware 方案选）
 function botTransform(){
