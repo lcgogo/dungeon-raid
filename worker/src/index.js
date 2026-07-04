@@ -22,6 +22,7 @@ const SEED_TTL = 259200;      // 服务端发放的种子 token 有效期（秒�
 const THRESH_SCOPE = 'recent5:human';
 const THRESH_RECENT = 5;
 const THRESH_DEFAULT = { scope: THRESH_SCOPE, recent: THRESH_RECENT, agent: 'human', versions: [], total: 0, upload_min_turns: 0, top1_turns: 0, p5: 0, p10: 0, p30: 0, p50: 0, p70: 0, p90: 0, computed: 0 };
+const AUTO_CLASSIFY_BATCH_MAX = 50;
 // 反作弊·服务端发种子：上榜成绩必须用服务端发的种子（防离线刷幸运种子）。
 // true = 强制：无 token 的提交一律拒收（v1.22.0 带 token 的正式版上线后开启）。
 const REQUIRE_TOKEN = true;
@@ -186,6 +187,55 @@ async function refreshThresholdSnapshot(env, recent = THRESH_RECENT, agent = 'hu
       upload_min_turns=excluded.upload_min_turns, top1_turns=excluded.top1_turns, p5=excluded.p5, p10=excluded.p10, p30=excluded.p30, p50=excluded.p50, p70=excluded.p70, p90=excluded.p90, computed=excluded.computed`)
     .bind(snap.scope, snap.recent, snap.agent, JSON.stringify(snap.versions), snap.total, snap.upload_min_turns, snap.top1_turns, snap.p5, snap.p10, snap.p30, snap.p50, snap.p70, snap.p90, snap.computed).run();
   return snap;
+}
+
+async function insertClassificationEvent(env, ev) {
+  const reasonsJson = ev.suspicion_reasons ? JSON.stringify(ev.suspicion_reasons) : '[]';
+  await env.DB.prepare(`INSERT INTO classification_events(
+      score_id, from_agent, to_agent, mode, reason, suspicion_score, suspicion_risk, suspicion_reasons_json,
+      workflow_run_id, workflow_run_url, workflow_sha, created
+    ) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)`)
+    .bind(
+      ev.score_id,
+      ev.from_agent,
+      ev.to_agent,
+      ev.mode,
+      ev.reason || '',
+      ev.suspicion_score == null ? null : (ev.suspicion_score | 0),
+      ev.suspicion_risk || '',
+      reasonsJson,
+      ev.workflow_run_id || '',
+      ev.workflow_run_url || '',
+      ev.workflow_sha || '',
+      Date.now()
+    ).run();
+}
+
+async function classifyScore(env, { id, targetAgent, mode, reason, suspicionScore, suspicionRisk, suspicionReasons, workflowRunId, workflowRunUrl, workflowSha }) {
+  const row = await env.DB.prepare("SELECT id, agent, verified FROM scores WHERE id=?").bind(id).first();
+  if (!row) return { id, ok: false, status: 'missing' };
+  if (targetAgent !== 'ai' && targetAgent !== 'human') return { id, ok: false, status: 'invalid-target' };
+  if (row.agent === targetAgent) return { id, ok: true, status: 'already-target', agent: row.agent };
+  if (mode === 'auto') {
+    if (targetAgent !== 'ai') return { id, ok: false, status: 'auto-target-must-be-ai', agent: row.agent };
+    if (row.agent !== 'human') return { id, ok: false, status: 'not-human', agent: row.agent };
+    if ((row.verified | 0) !== 1) return { id, ok: false, status: 'not-verified', agent: row.agent };
+  }
+  await env.DB.prepare("UPDATE scores SET agent=? WHERE id=?").bind(targetAgent, id).run();
+  await insertClassificationEvent(env, {
+    score_id: id,
+    from_agent: row.agent,
+    to_agent: targetAgent,
+    mode,
+    reason,
+    suspicion_score: suspicionScore,
+    suspicion_risk: suspicionRisk,
+    suspicion_reasons: suspicionReasons,
+    workflow_run_id: workflowRunId,
+    workflow_run_url: workflowRunUrl,
+    workflow_sha: workflowSha,
+  });
+  return { id, ok: true, status: 'applied', from: row.agent, agent: targetAgent };
 }
 
 async function loadThresholdSnapshot(env, scope = THRESH_SCOPE) {
@@ -378,8 +428,61 @@ export default {
       if (url.searchParams.get('k') !== env.ADMIN_SECRET) return json({ error: 'forbidden' }, 403);
       let d; try { d = JSON.parse(await req.text()); } catch { return json({ error: 'invalid json' }, 400); }
       if (!d || !d.id || (d.agent !== 'ai' && d.agent !== 'human')) return json({ error: 'invalid' }, 400);
-      await env.DB.prepare("UPDATE scores SET agent=? WHERE id=?").bind(d.agent, d.id).run();
-      return json({ ok: true, id: d.id, agent: d.agent });
+      const result = await classifyScore(env, {
+        id: d.id,
+        targetAgent: d.agent,
+        mode: 'manual',
+        reason: d.reason || 'manual classify',
+      });
+      const statusCode = result.ok ? 200 : result.status === 'missing' ? 404 : 400;
+      return json(result, statusCode);
+    }
+
+    // POST /classify-auto?k= —— GitHub Actions 自动把高可疑度人类榜成绩单向改判到 AI 榜。
+    if (req.method === 'POST' && p === '/classify-auto') {
+      const autoSecret = req.headers.get('x-classify-automation-secret') || url.searchParams.get('k');
+      if (autoSecret !== env.CLASSIFY_AUTOMATION_SECRET) return json({ error: 'forbidden' }, 403);
+      let d; try { d = JSON.parse(await req.text()); } catch { return json({ error: 'invalid json' }, 400); }
+      const candidates = d && Array.isArray(d.candidates) ? d.candidates : null;
+      if (!candidates || !candidates.length) return json({ error: 'invalid candidates' }, 400);
+      if (candidates.length > AUTO_CLASSIFY_BATCH_MAX) return json({ error: `too many candidates (max ${AUTO_CLASSIFY_BATCH_MAX})` }, 400);
+      const dryRun = !!(d && d.dryRun);
+      const meta = d && typeof d.meta === 'object' && d.meta ? d.meta : {};
+      const results = [];
+      for (const c of candidates) {
+        if (!c || !c.id) { results.push({ id: null, ok: false, status: 'invalid-candidate' }); continue; }
+        if (dryRun) {
+          const row = await env.DB.prepare("SELECT id, agent, verified FROM scores WHERE id=?").bind(c.id).first();
+          if (!row) { results.push({ id: c.id, ok: false, status: 'missing' }); continue; }
+          if (row.agent === 'ai') { results.push({ id: c.id, ok: true, status: 'already-target', agent: row.agent }); continue; }
+          if (row.agent !== 'human') { results.push({ id: c.id, ok: false, status: 'not-human', agent: row.agent }); continue; }
+          if ((row.verified | 0) !== 1) { results.push({ id: c.id, ok: false, status: 'not-verified', agent: row.agent }); continue; }
+          results.push({ id: c.id, ok: true, status: 'would-apply', from: row.agent, agent: 'ai' });
+          continue;
+        }
+        results.push(await classifyScore(env, {
+          id: c.id,
+          targetAgent: 'ai',
+          mode: 'auto',
+          reason: c.reason || 'auto suspicion classify',
+          suspicionScore: c.score,
+          suspicionRisk: c.risk,
+          suspicionReasons: c.reasons,
+          workflowRunId: meta.runId || '',
+          workflowRunUrl: meta.runUrl || '',
+          workflowSha: meta.sha || '',
+        }));
+      }
+      const summary = {
+        applied: results.filter(r => r.status === 'applied').length,
+        wouldApply: results.filter(r => r.status === 'would-apply').length,
+        alreadyTarget: results.filter(r => r.status === 'already-target').length,
+        missing: results.filter(r => r.status === 'missing').length,
+        notVerified: results.filter(r => r.status === 'not-verified').length,
+        notHuman: results.filter(r => r.status === 'not-human').length,
+        invalidCandidate: results.filter(r => r.status === 'invalid-candidate').length,
+      };
+      return json({ ok: true, dryRun, count: candidates.length, results, summary });
     }
 
     // POST /admin?k= —— 管理删除（仅管理密钥）：删单条 {op:'del',id}，或清空全部 {op:'wipe',confirm:'YES'}

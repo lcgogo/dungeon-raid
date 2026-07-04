@@ -49,11 +49,12 @@
 |---|---|---|
 | `VERIFY_SECRET` | Cloudflare Worker secret · GitHub Actions secret · render env | `/pending`·`/verify`·`/verify-now` 的访问口令 |
 | `ADMIN_SECRET` | Cloudflare Worker secret · 仅你本地运维环境 | `/admin`·`/classify` 的管理口令 |
+| `CLASSIFY_AUTOMATION_SECRET` | Cloudflare Worker secret · GitHub Actions secret | `score-human-leaderboard.yml` 调 Worker `/classify-auto` 的专用口令（走 `x-classify-automation-secret` 请求头，仅允许 verified=1 的 `human -> ai` 自动改判） |
 | `DEBUG_SEED_SECRET` | Cloudflare Worker secret · 仅你本地调试环境 | `/seed-debug` 的调试口令（签发可绕过上传门槛的 token） |
 | `VERIFY_PUSH_URL` | Cloudflare Worker secret | 验证器地址(填 `https://verify.dungeonraid.win`)；未设则不推送、靠轮询/cron 兜底 |
 | `RENDER_PING_URL` | GitHub Actions secret | keepalive ping 地址(同上) |
 
-> 都是「只写不可读」：Cloudflare/GitHub 都只能覆盖、看不到原值。`VERIFY_SECRET` 需在 Worker / render / GitHub Actions 三处同值；`ADMIN_SECRET` 与 `DEBUG_SEED_SECRET` 只应保存在 Worker 与你自己的本地运维/调试环境，不给 render / GitHub Actions。
+> 都是「只写不可读」：Cloudflare/GitHub 都只能覆盖、看不到原值。`VERIFY_SECRET` 需在 Worker / render / GitHub Actions 三处同值；`ADMIN_SECRET` 与 `DEBUG_SEED_SECRET` 只应保存在 Worker 与你自己的本地运维/调试环境，不给 render / GitHub Actions。`CLASSIFY_AUTOMATION_SECRET` 是唯一允许放进 GitHub Actions 的改判口令，权限比 `ADMIN_SECRET` 更窄：只能走 `/classify-auto`，只允许单向 `human -> ai`，并通过专用请求头传递而不是拼在 URL 查询串里。
 
 ## 运维速查
 
@@ -63,6 +64,7 @@
 - 看录像：`https://api.dungeonraid.win/rec/<id>`；列 KV：`npx wrangler kv key list --namespace-id <REC_ID>`。
 - 验证器状态：`https://verify.dungeonraid.win/`（看 engineVersion / last / lastErr）。
 - 手动验证一次：`API_BASE=https://api.dungeonraid.win VERIFY_SECRET=… node verify.js`。
+- 自动改判：GitHub Actions `score-human-leaderboard.yml` 每 6 小时扫描一次人类榜前 200 条录像；`risk=Very High`（`score >= 65`）的候选会经 Worker `/classify-auto` 自动改判到 AI 榜，并把候选/结果写入 `.reports/auto-classify-*.json` artifact。误判回滚仍走 `ADMIN_SECRET=… bash dr.sh classify <id> human`。
 
 ## 数据流向小结
 

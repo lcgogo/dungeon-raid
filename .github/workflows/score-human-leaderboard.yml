@@ -1,9 +1,24 @@
 name: score-human-leaderboard
-# 定时给人类榜前 N 条录像打 AI 可疑度分，产出 artifact 供人工复核
+# 定时给人类榜前 N 条录像打 AI 可疑度分，并把 Very High 项自动改判到 AI 榜。
 on:
   schedule:
     - cron: '17 */6 * * *'    # 每 6 小时一次，避开 verify 的 5 分钟节奏
   workflow_dispatch:
+    inputs:
+      dry_run:
+        description: '只演练候选筛选与接口调用，不实际改判'
+        required: false
+        default: true
+        type: boolean
+      max_auto:
+        description: '本次最多自动改判几条 Very High 录像（1-50）'
+        required: false
+        default: '10'
+        type: string
+
+concurrency:
+  group: score-human-leaderboard
+  cancel-in-progress: false
 
 jobs:
   score:
@@ -31,7 +46,88 @@ jobs:
             echo '```'
           } > .reports/README.md
 
+      - name: Prepare auto-classify candidates
+        env:
+          INPUT_DRY_RUN: ${{ github.event.inputs.dry_run || '' }}
+          INPUT_MAX_AUTO: ${{ github.event.inputs.max_auto || '' }}
+        run: |
+          python3 - <<'PY'
+          import json, os, pathlib
+          data = json.loads(pathlib.Path('.reports/human-top200-suspicion.json').read_text(encoding='utf-8'))
+          rows = [r for r in data if isinstance(r, dict) and r.get('score', -1) >= 0]
+          rows.sort(key=lambda r: r.get('score', 0), reverse=True)
+          dry_raw = (os.environ.get('INPUT_DRY_RUN') or '').strip().lower()
+          max_raw = (os.environ.get('INPUT_MAX_AUTO') or '').strip()
+          event_name = (os.environ.get('GITHUB_EVENT_NAME') or '').strip()
+          dry_run = (dry_raw != 'false') if event_name == 'workflow_dispatch' else False
+          max_auto = 10
+          try:
+            if max_raw:
+              max_auto = max(1, min(50, int(max_raw)))
+          except Exception:
+            max_auto = 10
+          candidates = []
+          for r in rows:
+            if r.get('risk') != 'Very High' or r.get('score', 0) < 65:
+              continue
+            candidates.append({
+              'id': r.get('id'),
+              'score': r.get('score', 0),
+              'risk': r.get('risk', ''),
+              'reasons': r.get('reasons', []),
+              'reason': 'auto classify very high suspicion',
+              'turns': r.get('turns'),
+              'race': r.get('race'),
+              'ver': r.get('ver'),
+            })
+          selected = candidates[:max_auto]
+          payload = {
+            'dryRun': dry_run,
+            'meta': {
+              'runId': os.environ.get('GITHUB_RUN_ID', ''),
+              'runUrl': f"{os.environ.get('GITHUB_SERVER_URL','https://github.com')}/{os.environ.get('GITHUB_REPOSITORY','')}/actions/runs/{os.environ.get('GITHUB_RUN_ID','')}",
+              'sha': os.environ.get('GITHUB_SHA', ''),
+            },
+            'candidates': selected,
+          }
+          pathlib.Path('.reports/auto-classify-candidates.json').write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding='utf-8')
+          with open(os.environ['GITHUB_ENV'], 'a', encoding='utf-8') as f:
+            f.write(f"AUTO_CLASSIFY_DRY_RUN={'true' if dry_run else 'false'}\nAUTO_CLASSIFY_SELECTED={len(selected)}\n")
+          print(json.dumps({'dryRun': dry_run, 'selected': len(selected), 'maxAuto': max_auto}, ensure_ascii=False))
+          PY
+
+      - name: Auto classify Very High human runs
+        if: always()
+        continue-on-error: true
+        env:
+          CLASSIFY_AUTOMATION_SECRET: ${{ secrets.CLASSIFY_AUTOMATION_SECRET }}
+        run: |
+          python3 - <<'PY'
+          import json, os, pathlib, urllib.request
+          payload_path = pathlib.Path('.reports/auto-classify-candidates.json')
+          payload = json.loads(payload_path.read_text(encoding='utf-8'))
+          out_path = pathlib.Path('.reports/auto-classify-results.json')
+          if not payload.get('candidates'):
+            out_path.write_text(json.dumps({'ok': True, 'dryRun': payload.get('dryRun', True), 'count': 0, 'results': [], 'summary': {'applied': 0, 'wouldApply': 0, 'alreadyTarget': 0, 'missing': 0, 'notVerified': 0, 'notHuman': 0, 'invalidCandidate': 0}}, ensure_ascii=False, indent=2), encoding='utf-8')
+            print('No Very High candidates; skipping classify call.')
+            raise SystemExit(0)
+          secret = os.environ.get('CLASSIFY_AUTOMATION_SECRET', '').strip()
+          try:
+            if not secret:
+              raise RuntimeError('Missing GitHub secret CLASSIFY_AUTOMATION_SECRET')
+            url = "https://api.dungeonraid.win/classify-auto"
+            req = urllib.request.Request(url, data=json.dumps(payload).encode('utf-8'), headers={'Content-Type': 'application/json', 'x-classify-automation-secret': secret})
+            with urllib.request.urlopen(req, timeout=60) as res:
+              body = res.read().decode('utf-8')
+            out_path.write_text(body, encoding='utf-8')
+            print(body)
+          except Exception as e:
+            out_path.write_text(json.dumps({'ok': False, 'dryRun': payload.get('dryRun', True), 'count': len(payload.get('candidates', [])), 'results': [], 'summary': {'applied': 0, 'wouldApply': 0, 'alreadyTarget': 0, 'missing': 0, 'notVerified': 0, 'notHuman': 0, 'invalidCandidate': 0}, 'error': str(e)}, ensure_ascii=False, indent=2), encoding='utf-8')
+            raise
+          PY
+
       - name: Write job summary
+        if: always()
         run: |
           python3 - <<'PY'
           import json, pathlib
@@ -42,6 +138,9 @@ jobs:
           for r in rows:
             buckets[r.get('risk','ERR')] = buckets.get(r.get('risk','ERR'), 0) + 1
           top = [r for r in rows if r.get('score', 0) >= 25][:10]
+          auto_candidates = json.loads(pathlib.Path('.reports/auto-classify-candidates.json').read_text(encoding='utf-8'))
+          auto_results = json.loads(pathlib.Path('.reports/auto-classify-results.json').read_text(encoding='utf-8'))
+          summary = auto_results.get('summary', {}) if isinstance(auto_results, dict) else {}
           p = pathlib.Path('.reports/job-summary.md')
           with p.open('w', encoding='utf-8') as f:
             f.write('# Human leaderboard suspicion scan\n\n')
@@ -59,6 +158,21 @@ jobs:
                 f.write(f"| {r.get('score',0)} | {r.get('risk','-')} | {r.get('turns','-')} | {r.get('race','-')} | {r.get('ver','-')} | {r.get('id','-')} | {reasons} |\n")
             else:
               f.write('\n## Top suspicious recordings\n\nNo recordings scored 25 or above in this run.\n')
+            f.write('\n## Auto classify (Very High only)\n\n')
+            f.write(f"- Dry run: **{auto_candidates.get('dryRun', True)}**\n")
+            f.write(f"- Selected candidates: **{len(auto_candidates.get('candidates', []))}**\n")
+            f.write(f"- Applied: **{summary.get('applied', 0)}**\n")
+            f.write(f"- Would apply: **{summary.get('wouldApply', 0)}**\n")
+            f.write(f"- Already AI: **{summary.get('alreadyTarget', 0)}**\n")
+            f.write(f"- Missing: **{summary.get('missing', 0)}**\n")
+            f.write(f"- Not verified: **{summary.get('notVerified', 0)}**\n")
+            f.write(f"- Not human: **{summary.get('notHuman', 0)}**\n")
+            results = auto_results.get('results', []) if isinstance(auto_results, dict) else []
+            if results:
+              f.write('\n| id | status | from | to |\n')
+              f.write('|---|---|---|---|\n')
+              for r in results[:20]:
+                f.write(f"| {r.get('id','-')} | {r.get('status','-')} | {r.get('from', r.get('agent','-'))} | {r.get('agent','-')} |\n")
           print(p.read_text(encoding='utf-8'))
           PY
           cat .reports/job-summary.md >> "$GITHUB_STEP_SUMMARY"
