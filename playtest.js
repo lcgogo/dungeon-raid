@@ -61,7 +61,7 @@ let G = loadGame();
 // ---------- 2.5) 命令行参数：可指定职业线 / Boss，便于和历史对比 ----------
 //   node playtest.js --race=orc --t1=berserker --t2=titan --boss=zombie --enemy=C2 --games=40
 const ARG = Object.fromEntries(process.argv.slice(2).map(s=>{ const m=s.match(/^--([^=]+)=?(.*)$/); return m?[m[1], m[2]]:[s,'']; }));
-const COMPETITIVE = 'competitive' in ARG || 'submit-ai' in ARG;
+const COMPETITIVE = 'competitive' in ARG || 'submit-ai' in ARG || 'submit-human' in ARG;
 const FOCUS = !!(ARG.race||ARG.boss||ARG.t1||ARG.t2||ARG.profile) || ('report' in ARG);
 // 把指定 Boss 固定为唯一会刷的 Boss（原地裁剪 BOSSES，spawnBoss 闭包引用同一数组）
 function applyBossFilter(g){
@@ -169,12 +169,13 @@ const UP_PROFILES={
   offense: ['磨利刀刃','淬炼锋芒','强化体魄','加固护甲','汲取生命','强化盾术','精研医术','凝聚生机'],   // 纯攻：先堆{W}伤害
   tank:    ['强化体魄','加固护甲','强化盾术','精研医术','凝聚生机','汲取生命','磨利刀刃','淬炼锋芒'],   // 纯肉：上限/护甲/续航
   sustain: ['汲取生命','凝聚生机','精研医术','强化体魄','加固护甲','磨利刀刃','强化盾术','淬炼锋芒'],   // 续航：吸血/回血/医术
+  elder_survival: ['强化体魄','加固护甲','汲取生命','凝聚生机','精研医术','磨利刀刃','强化盾术','淬炼锋芒'],   // 长老专精：最大生命优先（蔓藤伤害=30%最大生命）
 };
 let UP_PRIORITY=UP_PROFILES.balanced;   // 当前取向（默认均衡，与历史一致）；--upsweep 时逐套切换
 const upRank=n=>{const i=UP_PRIORITY.indexOf(n);return i<0?99:i;};
 const COMPETITIVE_BUILDS={
   human:{ t1:['knight','priest','swordsaint'], t3:['holystrike','bladeall','general'], profile:'sustain' },
-  elf:{ t1:['elder','ranger','rogue'], t3:['sharpshooter','shadow','thorns'], profile:'sustain' },
+  elf:{ t1:['elder','ranger','rogue'], t3:['sharpshooter','shadow','thorns'], profile:'elder_survival' },
   dwarf:{ t1:['guildmaster','miser','musketeer','blacksmith'], t3:['demolitionist','tycoon','cheapskate','shieldbash'], profile:'offense' },
   orc:{ t1:['fighter','berserker','witchdoctor'], t3:['titan','bloodfrenzy','allispoison'], profile:'offense' },
   undead:{ t1:['necromancer','butcher','skeletonking'], t3:['splash','rejuvenation','carrion'], profile:'sustain' },
@@ -208,6 +209,7 @@ function boardState(){
     coins:boardCoins(),
     swords:boardSwords(),
     lowHp:p.hp<=0.45*p.maxHp,
+    moderateHp:p.hp<=0.62*p.maxHp,
     criticalHp:p.hp<=0.28*p.maxHp,
   };
 }
@@ -264,6 +266,9 @@ function chooseTier3(p){
 }
 function chooseSwap(p){
   const boss=boardBoss();
+  if(p.tier1==='elder' || p.race==='elf'){
+    return { id:'knight', slot: 'heal' };   // 圣盾：本回合免伤——专克幽灵重击，CD独立于一阶蔓藤
+  }
   const keepBomb = !!(boss || p.bombBoost || p.cheapskate || p.tier1==='guildmaster' || p.race==='dwarf' || p.tier1==='elder');
   const ids=COMPETITIVE ? COMPETITIVE_SWAP_SKILLS : [p.tier1||Object.keys(G.TIER1)[0]];
   const skillId=(ids.find(id=>G.TIER1[id]) || p.tier1 || Object.keys(G.TIER1)[0]);
@@ -275,6 +280,7 @@ function scoreSwordCandidate(path, state){
   let score=ev.kills*killWeight + ev.threat*55 + ev.enemies*18 + ev.nS*8 + ev.len;
   if(state.criticalHp) score += ev.threat*25;
   if(state.immuneBoss) score -= 220;
+  if(state.immuneBoss && state.boss && state.boss.cd<=1) score -= 400;   // 幽灵即将重击：进一步降低剑链优先级，转向盾/心
   if(state.player.tier1==='fighter'&&state.immuneBoss) score += 260;
   return {path, score, ev};
 }
@@ -294,8 +300,9 @@ function bestSword(){
 }
 function resourceValue(type, len, state){
   const p=state.player;
-  if(type==='heart') return len*(state.criticalHp?120:state.lowHp?70:18) + (state.bossId==='pollution'?-9999:0);
-  if(type==='shield') return len*((p.race==='dwarf'?50:26) + (state.imminent>0?18:0));
+  const ghostImminent = state.immuneBoss && state.boss && state.boss.cd<=1;
+  if(type==='heart') return len*(state.criticalHp?120:state.lowHp?70:state.moderateHp?38:20) + (state.bossId==='pollution'?-9999:0) + (ghostImminent?30:0);
+  if(type==='shield') return len*((p.race==='dwarf'?50:26) + (state.imminent>0?18:0) + (ghostImminent?35:0));
   if(type==='coin'){
     let score=len*(state.boss||p.tier1==='guildmaster'||p.tier1==='miser'?42:20);
     if(state.boss && p.gold<G.shopCost('bomb')) score+=90;
@@ -332,7 +339,29 @@ function shouldUseSkill(state){
     const cost=p.cheapskate?Math.ceil(state.enemyHp/2):state.enemyHp;
     return state.enemyCount>=2 && cost>0 && p.gold>=cost;
   }
-  if(id==='elder') return !p.deathCoil && (!!state.boss || state.enemyCount>=2);
+  if(id==='elder') return !p.deathCoil && (state.immuneBoss || state.enemyCount>=3 || (!!state.boss && state.boss.cd<=2));   // 蔓藤留给幽灵/群怪/Boss临危，不浪费在单怪上
+  if(id==='butcher') return !!state.boss || state.enemyCount>=3;
+  if(id==='musketeer') return !!state.boss || state.enemyCount>=1;
+  if(id==='necromancer') return !!state.boss || state.enemyCount>=2 || state.lowHp;
+  if(id==='rogue') return (state.enemyCount>=2 && state.swords>=2) || (!!state.boss && state.swords>=1);
+  if(id==='swordsaint') return state.hearts+state.coins>=4;
+  return false;
+}
+function shouldUseSkill2(state){
+  const p=state.player; if(!p.skill2 || p.skill2Cd>0) return false;
+  const id=p.skill2.id;
+  if(p.frozen && p.frozen[p.skill2.slot]>0) return false;
+  if(id==='knight') return !!(state.boss || state.immuneBoss || state.criticalHp);   // 圣盾留给 Boss/幽灵/濒死，不浪费在普通怪上
+  if(id==='priest') return state.hearts>=2 && (state.lowHp || state.boss || p.level<8);
+  if(id==='ranger') return state.enemyCount>=2 || !!state.boss;
+  if(id==='blacksmith') return state.shields>=2 || (state.imminent>0 && state.shields>=1);
+  if(id==='fighter') return state.immuneBoss || state.enemyCount>=3 || state.lowHp;
+  if(id==='berserker') return state.imminent>0 && p.hp<=0.45*p.maxHp;
+  if(id==='guildmaster'){
+    const cost=p.cheapskate?Math.ceil(state.enemyHp/2):state.enemyHp;
+    return state.enemyCount>=2 && cost>0 && p.gold>=cost;
+  }
+  if(id==='elder') return !p.deathCoil && (state.immuneBoss || state.enemyCount>=3 || (!!state.boss && state.boss.cd<=2));   // 蔓藤留给幽灵/群怪/Boss临危，不浪费在单怪上
   if(id==='butcher') return !!state.boss || state.enemyCount>=3;
   if(id==='musketeer') return !!state.boss || state.enemyCount>=1;
   if(id==='necromancer') return !!state.boss || state.enemyCount>=2 || state.lowHp;
@@ -342,6 +371,12 @@ function shouldUseSkill(state){
 }
 function maybeSkill(){
   const state=boardState();
+  if(shouldUseSkill2(state)){
+    const slot=state.player.skill2.slot;
+    G.buyItem(slot);
+    botTransform(); resolveLevels();
+    return true;
+  }
   if(!shouldUseSkill(state)) return false;
   const ok=G.activateSkill();
   resolveLevels();
@@ -371,6 +406,7 @@ function playGame(rc, srv){   // srv={seed,token}：用服务端种子开局（-
     let state=boardState();
 
     if(state.criticalHp && p.gold>=G.shopCost('heal') && state.hearts<2){ G.buyItem('heal'); botTransform(); resolveLevels(); state=boardState(); }
+    else if(!(p.skill2&&p.skill2.slot==='heal') && state.lowHp && !state.boss && p.gold>=G.shopCost('heal')+10 && state.hearts===0 && state.enemyCount>=2){ G.buyItem('heal'); botTransform(); resolveLevels(); state=boardState(); }
     else if(state.boss && p.gold>=G.shopCost('bomb') && (state.immuneBoss || state.enemyCount>=3 || state.bossId==='pollution')){ G.buyItem('bomb'); botTransform(); resolveLevels(); state=boardState(); }
     else if(p.tier1==='guildmaster'){
       const buyCost=p.cheapskate?Math.ceil(state.enemyHp/2):state.enemyHp;
@@ -487,8 +523,9 @@ else if('survivors' in ARG){
   }}
   console.log(`\n共 ${hit}/${total} 局撑到 ≥${TH} 回合。`);
 }
-else if('submit-ai' in ARG){
-  // ---- 提交模式：跑竞技机器人 → 本地重放校验 → 把可验证录像以 agent=ai 提交到 AI 榜 ----
+else if('submit-ai' in ARG || 'submit-human' in ARG){
+  // ---- 提交模式：跑竞技机器人 → 本地重放校验 → 把可验证录像提交到 AI 榜或人类榜 ----
+  const AGENT = 'submit-human' in ARG ? 'human' : 'ai';
   G = loadGame(); applyBossFilter(G);
   const API = ARG.api || 'https://api.dungeonraid.win';
   const submitRace = ARG.race || 'elf';
@@ -539,7 +576,7 @@ else if('submit-ai' in ARG){
     for(const run of toPost){
       const clear = run.cleared || run.out.turns>=511;
       const ep = clear ? '/clear' : '/score';
-      const body = clear ? {level:run.out.level, rec:run.rec, agent:'ai'} : {level:run.out.level, gold:run.out.gold, rec:run.rec, agent:'ai'};
+      const body = clear ? {level:run.out.level, rec:run.rec, agent:AGENT} : {level:run.out.level, gold:run.out.gold, rec:run.rec, agent:AGENT};
       try{
         const res=await fetch(API+ep,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
         const j=await res.json().catch(()=>({}));
@@ -548,7 +585,7 @@ else if('submit-ai' in ARG){
       }catch(e){ failed++; console.log('✗ 提交出错', e.message); }
       await new Promise(r=>setTimeout(r, +ARG.gap||4200));   // 限流：避开写入端点 20次/60s（--gap 可调，单位 ms）
     }
-    console.log(`\n提交完成：${posted} 成功 / ${failed} 失败（agent=ai）。需等下一次每小时 verify 重放校验通过后才会出现在 AI 榜（榜单只显示 verified=1）。`);
+    console.log(`\n提交完成：${posted} 成功 / ${failed} 失败（agent=${AGENT}）。需等下一次每小时 verify 重放校验通过后才会出现在${AGENT==='ai'?'AI':'人类'}榜（榜单只显示 verified=1）。`);
   })();
 }
 else if(FOCUS){
