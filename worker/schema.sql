@@ -41,3 +41,27 @@ CREATE TABLE classification_events (
 );
 CREATE INDEX idx_classification_events_score_created ON classification_events (score_id, created DESC);
 CREATE INDEX idx_classification_events_created ON classification_events (created DESC);
+
+CREATE TABLE score_thresholds (
+  scope                    TEXT PRIMARY KEY,
+  recent                   INTEGER NOT NULL,
+  agent                    TEXT NOT NULL,
+  race                     TEXT NOT NULL DEFAULT 'all',
+  target_race              TEXT NOT NULL DEFAULT 'all',
+  version_bucket           TEXT NOT NULL DEFAULT '',
+  requested_version_bucket TEXT NOT NULL DEFAULT '',
+  scope_kind               TEXT NOT NULL DEFAULT 'recent3',
+  versions_json            TEXT NOT NULL DEFAULT '[]',
+  total                    INTEGER NOT NULL DEFAULT 0,
+  upload_min_turns         INTEGER NOT NULL DEFAULT 0,
+  top1_turns               INTEGER NOT NULL DEFAULT 0,
+  p5                       INTEGER NOT NULL DEFAULT 0,
+  p10                      INTEGER NOT NULL DEFAULT 0,
+  p30                      INTEGER NOT NULL DEFAULT 0,
+  p50                      INTEGER NOT NULL DEFAULT 0,
+  p70                      INTEGER NOT NULL DEFAULT 0,
+  p90                      INTEGER NOT NULL DEFAULT 0,
+  computed                 INTEGER NOT NULL
+);
+CREATE INDEX idx_score_thresholds_computed ON score_thresholds (computed DESC);
+CREATE INDEX idx_score_thresholds_agent_race_version_kind ON score_thresholds (agent, race, version_bucket, scope_kind, computed DESC);

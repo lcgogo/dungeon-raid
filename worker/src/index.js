@@ -19,10 +19,12 @@ const MIN_TURNS = 30;       // 分享门槛：少于 30 回合不接收
 const SHARE_VERIFY_FACTOR = 1.5;  // 分享回合数 > 榜首×1.5（且≥榜首+30）→ 标记待验证
 const SHARE_VERIFY_TURN_CAP = 511;  // 分享待验证阈值封顶：避免榜首抬到终局可达范围之外
 const SEED_TTL = 259200;      // 服务端发放的种子 token 有效期（秒）：现实时间 72 小时内可用于排行榜提交/补交
-const THRESH_SCOPE = 'recent3:human';
+const THRESH_SCOPE = 'upload:human:race=all:recent3';
 const THRESH_RECENT = 3;
 const THRESH_SURVIVAL_CAP = 350;
-const THRESH_DEFAULT = { scope: THRESH_SCOPE, recent: THRESH_RECENT, agent: 'human', versions: [], total: 0, upload_min_turns: 0, top1_turns: 0, p5: 0, p10: 0, p30: 0, p50: 0, p70: 0, p90: 0, computed: 0 };
+const THRESH_MIN_SAMPLE = 30;
+const PLAYABLE_RACES = ['human', 'elf', 'dwarf', 'orc', 'undead'];
+const THRESH_DEFAULT = { scope: THRESH_SCOPE, recent: THRESH_RECENT, agent: 'human', race: 'all', target_race: 'all', version_bucket: '', requested_version_bucket: '', scope_kind: `recent${THRESH_RECENT}`, versions: [], total: 0, upload_min_turns: 0, top1_turns: 0, p5: 0, p10: 0, p30: 0, p50: 0, p70: 0, p90: 0, computed: 0 };
 const AUTO_CLASSIFY_BATCH_MAX = 50;
 // 反作弊·服务端发种子：上榜成绩必须用服务端发的种子（防离线刷幸运种子）。
 // true = 强制：无 token 的提交一律拒收（v1.22.0 带 token 的正式版上线后开启）。
@@ -151,12 +153,22 @@ function quantileDesc(rows, pct) {
   const idx = Math.min(rows.length - 1, Math.max(0, Math.ceil(rows.length * pct) - 1));
   return rows[idx] ? rows[idx].turns | 0 : 0;
 }
-
-async function computeThresholdSnapshot(env, recent = THRESH_RECENT, agent = 'human') {
-  const versions = await recentVersions(env, recent);
-  const whereBase = "source='play' AND verified>=0 AND agent=?";
-  let where = `${whereBase} AND turns < 510`, binds = [agent];   // 终局/近终局成绩不参与上传门槛，避免 511/512 把生存榜门槛锁死
-  if (versions.length) { where += ` AND (${versions.map(() => 'version LIKE ?').join(' OR ')})`; binds.push(...versions.map(v => v + '.%')); }
+function thresholdScope({ agent = 'human', race = 'all', versionBucket = '', scopeKind = `recent${THRESH_RECENT}` }) {
+  return `upload:${agent}:race=${race}:${scopeKind}${versionBucket ? `=${versionBucket}` : ''}`;
+}
+function thresholdKinds(recent = THRESH_RECENT) {
+  return [`recent${recent}`];
+}
+async function computeThresholdSnapshot(env, { agent = 'human', race = 'all', versionBucket = '', scopeKind = `recent${THRESH_RECENT}`, recent = THRESH_RECENT, targetRace = race } = {}) {
+  const versions = scopeKind === 'minor' ? (versionBucket ? [versionBucket] : []) : await recentVersions(env, recent);
+  const whereParts = ["source='play'", 'verified>=0', 'agent=?', 'turns < 510'];
+  const binds = [agent];
+  if (race !== 'all') { whereParts.push('race=?'); binds.push(race); }
+  if (versions.length) {
+    whereParts.push(`(${versions.map(() => 'version LIKE ?').join(' OR ')})`);
+    binds.push(...versions.map(v => v + '.%'));
+  }
+  const where = whereParts.join(' AND ');
   const { results } = await env.DB.prepare(`SELECT turns FROM scores WHERE ${where} ORDER BY turns DESC`).bind(...binds).all();
   const rows = (results || []).map(r => ({ turns: r.turns | 0 }));
   const total = rows.length;
@@ -164,9 +176,14 @@ async function computeThresholdSnapshot(env, recent = THRESH_RECENT, agent = 'hu
   const top1Turns = total ? rows[top1Idx].turns : 0;
   const p30 = quantileDesc(rows, 0.30);
   return {
-    scope: THRESH_SCOPE,
+    scope: thresholdScope({ agent, race, versionBucket, scopeKind }),
     recent,
     agent,
+    race,
+    target_race: targetRace,
+    version_bucket: versionBucket || '',
+    requested_version_bucket: versionBucket || '',
+    scope_kind: scopeKind,
     versions,
     total,
     upload_min_turns: Math.min(p30, THRESH_SURVIVAL_CAP),   // 动态门槛再高也不超过硬上限，避免历史脏数据长期卡死新样本
@@ -181,14 +198,46 @@ async function computeThresholdSnapshot(env, recent = THRESH_RECENT, agent = 'hu
   };
 }
 
+async function storeThresholdSnapshot(env, snap) {
+  await env.DB.prepare(`INSERT INTO score_thresholds(scope,recent,agent,race,target_race,version_bucket,requested_version_bucket,scope_kind,versions_json,total,upload_min_turns,top1_turns,p5,p10,p30,p50,p70,p90,computed)
+    VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+    ON CONFLICT(scope) DO UPDATE SET recent=excluded.recent, agent=excluded.agent, race=excluded.race, target_race=excluded.target_race,
+      version_bucket=excluded.version_bucket, requested_version_bucket=excluded.requested_version_bucket, scope_kind=excluded.scope_kind,
+      versions_json=excluded.versions_json, total=excluded.total, upload_min_turns=excluded.upload_min_turns, top1_turns=excluded.top1_turns,
+      p5=excluded.p5, p10=excluded.p10, p30=excluded.p30, p50=excluded.p50, p70=excluded.p70, p90=excluded.p90, computed=excluded.computed`)
+    .bind(
+      snap.scope,
+      snap.recent,
+      snap.agent,
+      snap.race,
+      snap.target_race || snap.race,
+      snap.version_bucket || '',
+      snap.requested_version_bucket || snap.version_bucket || '',
+      snap.scope_kind,
+      JSON.stringify(snap.versions || []),
+      snap.total,
+      snap.upload_min_turns,
+      snap.top1_turns,
+      snap.p5,
+      snap.p10,
+      snap.p30,
+      snap.p50,
+      snap.p70,
+      snap.p90,
+      snap.computed
+    ).run();
+}
+
 async function refreshThresholdSnapshot(env, recent = THRESH_RECENT, agent = 'human') {
-  const snap = await computeThresholdSnapshot(env, recent, agent);
-  await env.DB.prepare(`INSERT INTO score_thresholds(scope,recent,agent,versions_json,total,upload_min_turns,top1_turns,p5,p10,p30,p50,p70,p90,computed)
-    VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)
-    ON CONFLICT(scope) DO UPDATE SET recent=excluded.recent, agent=excluded.agent, versions_json=excluded.versions_json, total=excluded.total,
-      upload_min_turns=excluded.upload_min_turns, top1_turns=excluded.top1_turns, p5=excluded.p5, p10=excluded.p10, p30=excluded.p30, p50=excluded.p50, p70=excluded.p70, p90=excluded.p90, computed=excluded.computed`)
-    .bind(snap.scope, snap.recent, snap.agent, JSON.stringify(snap.versions), snap.total, snap.upload_min_turns, snap.top1_turns, snap.p5, snap.p10, snap.p30, snap.p50, snap.p70, snap.p90, snap.computed).run();
-  return snap;
+  const versions = await recentVersions(env, recent);
+  const snaps = [];
+  for (const versionBucket of versions) {
+    snaps.push(await computeThresholdSnapshot(env, { agent, race: 'all', versionBucket, scopeKind: 'minor', recent, targetRace: 'all' }));
+    for (const race of PLAYABLE_RACES) snaps.push(await computeThresholdSnapshot(env, { agent, race, versionBucket, scopeKind: 'minor', recent, targetRace: race }));
+  }
+  for (const race of ['all', ...PLAYABLE_RACES]) snaps.push(await computeThresholdSnapshot(env, { agent, race, scopeKind: `recent${recent}`, recent, targetRace: race }));
+  for (const snap of snaps) await storeThresholdSnapshot(env, snap);
+  return { refreshed: snaps.length, versions, recent, agent };
 }
 
 async function insertClassificationEvent(env, ev) {
@@ -240,15 +289,56 @@ async function classifyScore(env, { id, targetAgent, mode, reason, suspicionScor
   return { id, ok: true, status: 'applied', from: row.agent, agent: targetAgent };
 }
 
-async function loadThresholdSnapshot(env, scope = THRESH_SCOPE) {
+function normalizeThresholdRow(row) {
+  if (!row) return { ...THRESH_DEFAULT };
+  let versions = [];
+  try { versions = JSON.parse(row.versions_json || '[]'); } catch (e) {}
+  return {
+    scope: row.scope,
+    recent: row.recent | 0,
+    agent: row.agent || 'human',
+    race: row.race || 'all',
+    target_race: row.target_race || row.race || 'all',
+    version_bucket: row.version_bucket || '',
+    requested_version_bucket: row.requested_version_bucket || row.version_bucket || '',
+    scope_kind: row.scope_kind || `recent${THRESH_RECENT}`,
+    versions,
+    total: row.total | 0,
+    upload_min_turns: row.upload_min_turns | 0,
+    top1_turns: row.top1_turns | 0,
+    p5: row.p5 | 0,
+    p10: row.p10 | 0,
+    p30: row.p30 | 0,
+    p50: row.p50 | 0,
+    p70: row.p70 | 0,
+    p90: row.p90 | 0,
+    computed: row.computed | 0,
+  };
+}
+async function loadThresholdSnapshot(env, { agent = 'human', race = 'all', version = '', scope = null } = {}) {
   try {
-    const row = await env.DB.prepare("SELECT scope,recent,agent,versions_json,total,upload_min_turns,top1_turns,p5,p10,p30,p50,p70,p90,computed FROM score_thresholds WHERE scope=?").bind(scope).first();
-    if (!row) return { ...THRESH_DEFAULT };
-    let versions = [];
-    try { versions = JSON.parse(row.versions_json || '[]'); } catch (e) {}
-    return { scope: row.scope, recent: row.recent | 0, agent: row.agent || 'human', versions, total: row.total | 0, upload_min_turns: row.upload_min_turns | 0, top1_turns: row.top1_turns | 0, p5: row.p5 | 0, p10: row.p10 | 0, p30: row.p30 | 0, p50: row.p50 | 0, p70: row.p70 | 0, p90: row.p90 | 0, computed: row.computed | 0 };
+    const versionBucket = minorKey(version || '');
+    if (scope) {
+      const row = await env.DB.prepare("SELECT scope,recent,agent,race,target_race,version_bucket,requested_version_bucket,scope_kind,versions_json,total,upload_min_turns,top1_turns,p5,p10,p30,p50,p70,p90,computed FROM score_thresholds WHERE scope=?").bind(scope).first();
+      return normalizeThresholdRow(row);
+    }
+    const ladder = [
+      thresholdScope({ agent, race, versionBucket, scopeKind: 'minor' }),
+      thresholdScope({ agent, race, scopeKind: `recent${THRESH_RECENT}` }),
+      thresholdScope({ agent, race: 'all', versionBucket, scopeKind: 'minor' }),
+      thresholdScope({ agent, race: 'all', scopeKind: `recent${THRESH_RECENT}` }),
+    ];
+    let fallback = null;
+    for (const key of ladder) {
+      const row = await env.DB.prepare("SELECT scope,recent,agent,race,target_race,version_bucket,requested_version_bucket,scope_kind,versions_json,total,upload_min_turns,top1_turns,p5,p10,p30,p50,p70,p90,computed FROM score_thresholds WHERE scope=?").bind(key).first();
+      const snap = normalizeThresholdRow(row);
+      if (snap.scope === THRESH_DEFAULT.scope || snap.total <= 0) continue;
+      fallback = { ...snap, target_race: race, requested_version_bucket: versionBucket };
+      if (snap.total >= THRESH_MIN_SAMPLE) return fallback;
+    }
+    return fallback || { ...THRESH_DEFAULT, target_race: race, requested_version_bucket: versionBucket };
   } catch (e) {
-    return { ...THRESH_DEFAULT };
+    return { ...THRESH_DEFAULT, target_race: race, requested_version_bucket: minorKey(version || '') };
   }
 }
 
@@ -288,7 +378,9 @@ export default {
     if (req.method === 'POST' && p === '/seed') {
       const seed = crypto.getRandomValues(new Uint32Array(1))[0] >>> 0;
       const token = shortId(16);
-      const threshold = await loadThresholdSnapshot(env);
+      const race = url.searchParams.get('race') || 'all';
+      const version = url.searchParams.get('version') || '';
+      const threshold = await loadThresholdSnapshot(env, { agent: 'human', race, version });
       if (env.REC) await env.REC.put('seed:' + token, JSON.stringify({ s: seed, u: 0, dbg: 0, gate: threshold }), { expirationTtl: SEED_TTL });
       return json({ seed, token, threshold, debug_bypass: false });
     }
@@ -298,7 +390,9 @@ export default {
       if (url.searchParams.get('k') !== env.DEBUG_SEED_SECRET) return json({ error: 'forbidden' }, 403);
       const seed = crypto.getRandomValues(new Uint32Array(1))[0] >>> 0;
       const token = shortId(16);
-      const threshold = await loadThresholdSnapshot(env);
+      const race = url.searchParams.get('race') || 'all';
+      const version = url.searchParams.get('version') || '';
+      const threshold = await loadThresholdSnapshot(env, { agent: 'human', race, version });
       if (env.REC) await env.REC.put('seed:' + token, JSON.stringify({ s: seed, u: 0, dbg: 1, gate: threshold }), { expirationTtl: SEED_TTL });
       return json({ seed, token, threshold, debug_bypass: true });
     }
@@ -344,9 +438,12 @@ export default {
       if (tkn && !tok.ok) return json({ error: 'invalid seed token: ' + tok.reason }, 422);
       if (!tkn && REQUIRE_TOKEN) return json({ error: 'ranked play requires a server seed' }, 422);
       const turns = turnCount(d.rec);                 // 回合以录像动作数为准，防止伪报
-      const threshold = tok.gate || await loadThresholdSnapshot(env);
+      const race = d.rec.race, version = d.rec.ver || '';
+      let threshold = tok.gate || null;
+      const thresholdBucket = threshold && threshold.requested_version_bucket ? threshold.requested_version_bucket : minorKey(version);
+      if (!threshold || threshold.target_race !== race || thresholdBucket !== minorKey(version)) threshold = await loadThresholdSnapshot(env, { agent: 'human', race, version });
       if (!tok.dbg && threshold.upload_min_turns > 0 && turns < threshold.upload_min_turns) return json({ error: 'below upload threshold', threshold, turns }, 422);
-      const level = d.level | 0, gold = d.gold | 0, race = d.rec.race, version = d.rec.ver || '';
+      const level = d.level | 0, gold = d.gold | 0;
       const agent = d.agent === 'ai' ? 'ai' : 'human';   // 自报，非 'ai' 一律按人类
       const name = subName(d, agent);   // 玩家展示名（alias）；AI 无名则随机起名
       const id = shortId();
@@ -369,9 +466,12 @@ export default {
       if (!tkn && REQUIRE_TOKEN) return json({ error: 'ranked play requires a server seed' }, 422);
       const turns = turnCount(d.rec);
       if (turns < 510) return json({ error: 'not a clear (need >=510 turns)' }, 422);
-      const threshold = tok.gate || await loadThresholdSnapshot(env);
+      const race = d.rec.race, version = d.rec.ver || '';
+      let threshold = tok.gate || null;
+      const thresholdBucket = threshold && threshold.requested_version_bucket ? threshold.requested_version_bucket : minorKey(version);
+      if (!threshold || threshold.target_race !== race || thresholdBucket !== minorKey(version)) threshold = await loadThresholdSnapshot(env, { agent: 'human', race, version });
       if (!tok.dbg && threshold.upload_min_turns > 0 && turns < threshold.upload_min_turns) return json({ error: 'below upload threshold', threshold, turns }, 422);
-      const level = d.level | 0, race = d.rec.race, version = d.rec.ver || '';
+      const level = d.level | 0;
       const agent = d.agent === 'ai' ? 'ai' : 'human';   // 自报，非 'ai' 一律按人类
       const name = subName(d, agent);
       const id = shortId();

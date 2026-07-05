@@ -176,8 +176,8 @@
 (()=>{
 //==================== 配置 ====================
 // 版本号 v主.次.修：不影响 verify/replay 兼容边界的小改动改"修"；凡是影响 verify/replay/版本分桶/release 验证语义的改动都改"次"；大版本变更需先确认。页面底部显示。
-const VERSION='v1.40.0';
-const CHANGELOG_LINES=[{"ver": "v1.40.0", "zh": "把「钱能买命 Money Buys Life」再收紧成更纯粹的囤金联动：囤金期间，受到的伤害现在只会优先扣冻结金币，不再动手头现金；只有冻结金币不够时，剩余部分才继续掉血。这样更符合“囤起来的钱替你挡刀”的直觉，也避免把平时钱包一起卷进去。", "en": "Tighten “Money Buys Life” into a purer Hoard-only shield: while Hoard is active, incoming damage is now paid from frozen gold only and no longer drains wallet gold; only any remainder spills into HP once the stockpile is exhausted. This better matches the fantasy that only the hoarded stash buys survival, without dipping into your normal wallet."}, {"ver": "v1.39.0", "zh": "重做矮人守财奴的锁定二阶被动：财阀 Tycoon 改名为「钱能买命 Money Buys Life」，不再是“金币转经验”。新效果是：只要囤金 Hoard 还在生效，受到的伤害会优先扣冻结金币，不够再扣手头金币，金币仍不够时才继续掉血。这样守财奴的二阶被动终于和囤金本体直接联动，形成“用囤起来的钱挡刀”的明确流派。", "en": "Redesign the Dwarf Miser’s locked tier-2 passive: Tycoon is renamed to “Money Buys Life” and no longer converts gold into XP. Its new effect is: while Hoard is active, incoming damage is paid from frozen gold first, then wallet gold, and only any remainder spills into HP. This gives Miser a direct, coherent tier-2 synergy — stockpiled money now literally buys survival."}, {"ver": "v1.38.0", "zh": "下调幽灵 Ghost 的血量模板：它现在不再吃通用 Boss 的高血成长，而是改为与同级普通怪同血量；保留「剑链无效、只能炸、倒计时重击」的定位，避免后期出现几百血却只能用 5 点炸弹慢慢磨的失衡体验。", "en": "Lower Ghost’s HP template: it no longer uses the generic high-HP boss scaling and instead matches same-tier normal-enemy HP, while keeping its identity as a bomb-only countdown threat. This avoids the late-game case where a Ghost can reach absurd HP totals even though the player is forced to chip it down with tiny bomb damage."}, {"ver": "v1.36.1", "zh": "把选种族页的文案收紧成两行：尽量一行只写「特性：…」，另一行只写「削弱：…」，并去掉句号收尾，让手机上一屏更好扫、重点更明确。", "en": "Tighten the race-selection copy into two short lines: one for “Trait: …” and one for “Weakness: …”, while removing sentence-ending periods so the mobile screen scans more cleanly and the key info stands out faster."}, {"ver": "v1.37.0", "zh": "补齐财阀 Tycoon 的经验触发口径：之前「获得金币时额外按一半转为经验」主要只覆盖了金币链，击杀赏金/抓小偷/盗贼额外掉金等来源不一定加经验。现在统一成所有金币收入都按一半转经验，而且守财奴囤金期间即使金币先进冻结池，这部分经验也会照常拿到。", "en": "Complete Tycoon’s XP trigger coverage: previously “gold gained also grants half as XP” mostly applied to coin chains, while kill rewards / thief recovery / Rogue bonus gold did not consistently grant XP. It now applies to all gold income uniformly, and the XP still arrives normally even when Miser’s Hoard stockpiles the gold instead of adding it to your wallet immediately."}];   /* auto-injected by dr.sh embed-changelog（勿手改） */
+const VERSION='v1.41.0';
+const CHANGELOG_LINES=[{"ver": "v1.41.0", "zh": "上传门槛快照改为按种族 + minor 版本桶分类，并加上固定回退链；正式版在选完种族后才向 /seed 申请服务端种子，因此服务器可把匹配该种族 / 版本桶的门槛快照直接固化进 token 与录像。", "en": "The upload-threshold snapshot is now classified by race + minor version bucket with a fixed fallback ladder; release runs now request /seed after race selection so the server can freeze the matching race/version-aware gate directly into the token and recording."}, {"ver": "v1.40.0", "zh": "把「钱能买命 Money Buys Life」再收紧成更纯粹的囤金联动：囤金期间，受到的伤害现在只会优先扣冻结金币，不再动手头现金；只有冻结金币不够时，剩余部分才继续掉血。这样更符合“囤起来的钱替你挡刀”的直觉，也避免把平时钱包一起卷进去。", "en": "Tighten “Money Buys Life” into a purer Hoard-only shield: while Hoard is active, incoming damage is now paid from frozen gold only and no longer drains wallet gold; only any remainder spills into HP once the stockpile is exhausted. This better matches the fantasy that only the hoarded stash buys survival, without dipping into your normal wallet."}, {"ver": "v1.39.0", "zh": "重做矮人守财奴的锁定二阶被动：财阀 Tycoon 改名为「钱能买命 Money Buys Life」，不再是“金币转经验”。新效果是：只要囤金 Hoard 还在生效，受到的伤害会优先扣冻结金币，不够再扣手头金币，金币仍不够时才继续掉血。这样守财奴的二阶被动终于和囤金本体直接联动，形成“用囤起来的钱挡刀”的明确流派。", "en": "Redesign the Dwarf Miser’s locked tier-2 passive: Tycoon is renamed to “Money Buys Life” and no longer converts gold into XP. Its new effect is: while Hoard is active, incoming damage is paid from frozen gold first, then wallet gold, and only any remainder spills into HP. This gives Miser a direct, coherent tier-2 synergy — stockpiled money now literally buys survival."}, {"ver": "v1.38.0", "zh": "下调幽灵 Ghost 的血量模板：它现在不再吃通用 Boss 的高血成长，而是改为与同级普通怪同血量；保留「剑链无效、只能炸、倒计时重击」的定位，避免后期出现几百血却只能用 5 点炸弹慢慢磨的失衡体验。", "en": "Lower Ghost’s HP template: it no longer uses the generic high-HP boss scaling and instead matches same-tier normal-enemy HP, while keeping its identity as a bomb-only countdown threat. This avoids the late-game case where a Ghost can reach absurd HP totals even though the player is forced to chip it down with tiny bomb damage."}, {"ver": "v1.37.0", "zh": "补齐财阀 Tycoon 的经验触发口径：之前「获得金币时额外按一半转为经验」主要只覆盖了金币链，击杀赏金/抓小偷/盗贼额外掉金等来源不一定加经验。现在统一成所有金币收入都按一半转经验，而且守财奴囤金期间即使金币先进冻结池，这部分经验也会照常拿到。", "en": "Complete Tycoon’s XP trigger coverage: previously “gold gained also grants half as XP” mostly applied to coin chains, while kill rewards / thief recovery / Rogue bonus gold did not consistently grant XP. It now applies to all gold income uniformly, and the XP still arrives normally even when Miser’s Hoard stockpiles the gold instead of adding it to your wallet immediately."}];   /* auto-injected by dr.sh embed-changelog（勿手改） */
 const DEV=true;   // release build (DEV=false); dev build is dungeon-raid-dev.html (DEV=true)
 const REC_API='https://api.dungeonraid.win';   // 录像分享 API（Cloudflare Worker + KV）
 // 带种子随机数（mulberry32）：游戏全程用 rnd() 取代原生随机，配合录制种子可确定性重放
@@ -736,7 +736,6 @@ function showClassSelect(){
 // 选种族页（点 START 后进入）
 function showRaceSelect(){
   busy=true;
-  prefetchSeed();   // 后台预取服务端种子，遮住弱网延迟（DEV/离线内部自跳过）
   const card=document.getElementById('card');
   const best=getBest();
   const bestLine = best ? `<p>${tr('🏆 最佳纪录：等级','🏆 Best: Level')} ${best.level} · 💰${best.gold}</p>` : '';
@@ -907,16 +906,16 @@ function onBossKilled(){
 
 //==================== 初始化 ====================
 let __seedCtr=0;
-// 预取服务端种子：进选种族页就后台起跑，把网络延迟藏在玩家挑种族的时间里（地铁等弱网下避免选完卡几秒）。
-let _seedPrefetch=null;
-function prefetchSeed(){
-  if(DEV) return;
-  if(typeof navigator!=='undefined' && navigator.onLine===false){ _seedPrefetch=Promise.resolve(null); return; }   // 明确离线：不发请求
-  _seedPrefetch=(async()=>{
-    try{ const r=await fetch(REC_API+'/seed',{method:'POST'});
-      if(r&&r.ok){ const x=await r.json(); if(typeof x.seed==='number'&&x.token) return {seed:x.seed>>>0, token:x.token, threshold:x.threshold||null}; }
-    }catch(e){} return null;
-  })();
+// 正式版开局向服务端申请一次性种子：在选完种族后再取，让上传门槛能按“种族 + 版本桶”返回准确快照。
+async function fetchServerSeed(rc){
+  if(DEV) return null;
+  if(typeof navigator!=='undefined' && navigator.onLine===false) return null;
+  try{
+    const qs = new URLSearchParams({ race: rc.id, version: VERSION });
+    const r=await fetch(REC_API+'/seed?'+qs.toString(),{method:'POST'});
+    if(r&&r.ok){ const x=await r.json(); if(typeof x.seed==='number'&&x.token) return {seed:x.seed>>>0, token:x.token, threshold:x.threshold||null}; }
+  }catch(e){}
+  return null;
 }
 // 顶部居中的临时提示条，数秒后淡出（纯 UI，不影响逻辑/重放）
 function toast(html, ms){
@@ -932,14 +931,12 @@ function offlineSeedNotice(){
   log(tr('⚠️ 没拿到服务端种子：本局本地随机，照常可玩，只是不计排行榜。','⚠️ No server seed: local random run — fully playable, just not ranked.'), 'debuff');
   toast(tr('⚠️ 没拿到服务端种子，本局用<b>本地随机</b>开局<br>照常可玩，<b>只是不计排行榜</b>','⚠️ No server seed — using a <b>local random</b> seed<br>fully playable, <b>just not ranked</b>'));
 }
-// 开新局入口：正式版先向服务端要一个种子+token（防离线刷幸运种子）；dev 或离线失败 → 本地随机（可玩，不计排名）
+// 开新局入口：正式版在选完种族后再向服务端要一个种子+token（防离线刷幸运种子），以便门槛快照能按“种族 + 版本桶”返回；dev 或离线失败 → 本地随机（可玩，不计排名）
 async function freshStart(rc){
   if(DEV){ startGame(rc); return; }
   if(typeof navigator!=='undefined' && navigator.onLine===false){ startGame(rc); offlineSeedNotice(); return; }   // 明确离线：秒开不等
-  if(!_seedPrefetch) prefetchSeed();   // 没在选种族页预取过（如直接进）就现取
   let srv=null;
-  try{ srv=await Promise.race([ _seedPrefetch, new Promise(res=>setTimeout(()=>res(null), 2500)) ]); }catch(e){}   // 预取通常此刻已就绪；最多再等 2.5s 回退本地
-  _seedPrefetch=null;   // 用过即弃，下局重取
+  try{ srv=await Promise.race([ fetchServerSeed(rc), new Promise(res=>setTimeout(()=>res(null), 2500)) ]); }catch(e){}
   startGame(rc, srv);
   if(!srv) offlineSeedNotice();
 }

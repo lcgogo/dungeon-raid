@@ -1,3 +1,12 @@
+## [v1.41.0]
+
+> Version-Impact: verify
+
+- 上传门槛快照改为按**种族 + minor 版本桶**分类，并加上固定回退链：同种族+当前 minor → 同种族+最近 3 个 minor → 全种族+当前 minor → 全种族+最近 3 个 minor。这样不同种族 / 版本不再被一条全局门槛粗暴混算，但样本过少时仍能自动回退到更稳定的范围。
+- 正式版开局改成在**选完种族后**再向 `/seed` 申请服务端种子，因此服务器可以把与该种族 / 版本桶匹配的上传门槛快照直接固化进 token 与录像；上传时若 token 里的门槛和当前录像不匹配，也会按同一套回退链重新解析。
+- The upload-threshold snapshot is now classified by **race + minor version bucket** with a fixed fallback ladder: same race + current minor → same race + recent 3 minors → all races + current minor → all races + recent 3 minors. This stops one global gate from crudely mixing unlike races/versions while still falling back to stable samples when a bucket is sparse.
+- Release runs now request `/seed` **after race selection**, letting the server freeze the correct race/version-aware upload-threshold snapshot directly into the seed token and recording; if the token’s stored gate no longer matches the submitted recording, the server re-resolves it through the same fallback ladder.
+
 ## [v1.40.0]
 
 > Version-Impact: verify

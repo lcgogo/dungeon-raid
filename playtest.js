@@ -550,9 +550,9 @@ else if('submit-ai' in ARG || 'submit-human' in ARG){
   (async()=>{
     const runs=[];
     for(const rc of races){ for(let i=0;i<N;i++){
-      // 上榜需服务端种子：每局先取一次性 /seed（与真人客户端同路径），用它的种子开局、录像带 token
+      // 上榜需服务端种子：每局先取一次性 /seed（与真人客户端同路径），带 race/version 以拿到匹配的上传门槛快照，用它的种子开局、录像带 token
       let srv=null;
-      try{ const r=await fetch(API+'/seed',{method:'POST'}); if(r.ok){ const x=await r.json(); if(typeof x.seed==='number'&&x.token) srv={seed:x.seed>>>0, token:x.token}; } }catch(e){}
+      try{ const qs=new URLSearchParams({race:rc.id, version:G.VERSION||''}); const r=await fetch(API+'/seed?'+qs.toString(),{method:'POST'}); if(r.ok){ const x=await r.json(); if(typeof x.seed==='number'&&x.token) srv={seed:x.seed>>>0, token:x.token, threshold:x.threshold||null}; } }catch(e){}
       if(!srv){ console.log('✗ 取服务端种子失败，跳过', rc.id); continue; }
       let out; try{ out=playGame(rc, srv); }catch(e){ console.log('✗ 跑局出错', rc.id, e.message); continue; }
       runs.push({race:rc.id, out, rec:JSON.parse(JSON.stringify(G.rec))});   // 深拷贝本局录像（含 token；下局 startGame 会覆盖 rec）
