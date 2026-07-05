@@ -1,3 +1,8 @@
+## [v1.41.1]
+
+- 死局判负时，死亡结算不再误把本回合零星伤害来源当成“致命回合伤害来源”；现在会直接显示「被怪物淹没，无路可走」或终局态的「被 Boss 淹没，无路可走」，更符合真实死因。
+- Deadlock losses no longer mislabel incidental damage from that turn as the “killing blow”; the result screen now explicitly says you were overrun with no way out (or overrun by bosses in the finale), which matches the actual cause of defeat.
+
 ## [v1.41.0]
 
 > Version-Impact: verify
