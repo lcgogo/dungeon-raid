@@ -65,6 +65,7 @@
 - 验证器状态：`https://verify.dungeonraid.win/`（看 engineVersion / last / lastErr）。
 - 手动验证一次：`API_BASE=https://api.dungeonraid.win VERIFY_SECRET=… node verify.js`。
 - 自动改判：GitHub Actions `score-human-leaderboard.yml` 每 6 小时扫描一次人类榜前 200 条录像；`risk=Very High`（`score >= 65`）的候选会经 Worker `/classify-auto` 自动改判到 AI 榜，并把候选/结果写入 `.reports/auto-classify-*.json` artifact。误判回滚仍走 `ADMIN_SECRET=… bash dr.sh classify <id> human`。
+- 上传门槛：`score_thresholds` 现只看最近 3 个有数据的 minor 桶；计算 upload gate 时排除 `turns >= 510` 的近终局成绩，并把最终门槛硬限制在 350 回合内，避免某个 bug 版本用 511/512 把后续正常版本长期锁死。
 
 ## 数据流向小结
 

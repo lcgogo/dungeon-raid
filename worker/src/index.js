@@ -19,8 +19,9 @@ const MIN_TURNS = 30;       // 分享门槛：少于 30 回合不接收
 const SHARE_VERIFY_FACTOR = 1.5;  // 分享回合数 > 榜首×1.5（且≥榜首+30）→ 标记待验证
 const SHARE_VERIFY_TURN_CAP = 511;  // 分享待验证阈值封顶：避免榜首抬到终局可达范围之外
 const SEED_TTL = 259200;      // 服务端发放的种子 token 有效期（秒）：现实时间 72 小时内可用于排行榜提交/补交
-const THRESH_SCOPE = 'recent5:human';
-const THRESH_RECENT = 5;
+const THRESH_SCOPE = 'recent3:human';
+const THRESH_RECENT = 3;
+const THRESH_SURVIVAL_CAP = 350;
 const THRESH_DEFAULT = { scope: THRESH_SCOPE, recent: THRESH_RECENT, agent: 'human', versions: [], total: 0, upload_min_turns: 0, top1_turns: 0, p5: 0, p10: 0, p30: 0, p50: 0, p70: 0, p90: 0, computed: 0 };
 const AUTO_CLASSIFY_BATCH_MAX = 50;
 // 反作弊·服务端发种子：上榜成绩必须用服务端发的种子（防离线刷幸运种子）。
@@ -154,24 +155,25 @@ function quantileDesc(rows, pct) {
 async function computeThresholdSnapshot(env, recent = THRESH_RECENT, agent = 'human') {
   const versions = await recentVersions(env, recent);
   const whereBase = "source='play' AND verified>=0 AND agent=?";
-  let where = whereBase, binds = [agent];
+  let where = `${whereBase} AND turns < 510`, binds = [agent];   // 终局/近终局成绩不参与上传门槛，避免 511/512 把生存榜门槛锁死
   if (versions.length) { where += ` AND (${versions.map(() => 'version LIKE ?').join(' OR ')})`; binds.push(...versions.map(v => v + '.%')); }
   const { results } = await env.DB.prepare(`SELECT turns FROM scores WHERE ${where} ORDER BY turns DESC`).bind(...binds).all();
   const rows = (results || []).map(r => ({ turns: r.turns | 0 }));
   const total = rows.length;
   const top1Idx = total ? Math.min(total - 1, Math.max(0, Math.ceil(total * 0.01) - 1)) : 0;
   const top1Turns = total ? rows[top1Idx].turns : 0;
+  const p30 = quantileDesc(rows, 0.30);
   return {
     scope: THRESH_SCOPE,
     recent,
     agent,
     versions,
     total,
-    upload_min_turns: quantileDesc(rows, 0.30),
+    upload_min_turns: Math.min(p30, THRESH_SURVIVAL_CAP),   // 动态门槛再高也不超过硬上限，避免历史脏数据长期卡死新样本
     top1_turns: top1Turns,
     p5: quantileDesc(rows, 0.05),
     p10: quantileDesc(rows, 0.10),
-    p30: quantileDesc(rows, 0.30),
+    p30,
     p50: quantileDesc(rows, 0.50),
     p70: quantileDesc(rows, 0.70),
     p90: quantileDesc(rows, 0.90),
