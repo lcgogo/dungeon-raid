@@ -44,7 +44,7 @@
 2. **跑回测、呈回测报告**（见 §4）。
 3. **等用户明确确认**（“发”）后才 `bash dr.sh release`。**绝不改完就自动推 prod。**
 4. 想让用户先在 dev 站实测：单独 `bash dr.sh deploy`（不动正式版）。
-- 固定顺序：**写完 CHANGELOG 新版本节，紧接着更新 README（中英两侧）**，再和代码一起提交——别只写 changelog 漏掉 readme。提交免确认、用多段 `-m`。
+- 固定顺序：**写完 CHANGELOG 新版本节，紧接着更新 README 两份语言文件（`README.zh-CN.md` / `README.en.md`）**；若入口摘要或导航有变化，再同步更新根 `README.md`。别只写 changelog 漏掉文档。提交免确认、用多段 `-m`。
 
 ---
 
