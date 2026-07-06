@@ -1631,7 +1631,7 @@ function resolve(){
   if(player.deathCoil>0){ deathCoilTick(); player.deathCoil--; }   // 蔓藤缠绕：未来 3 回合每回合全场怪流失 30% 最大生命
   advanceEnemies();
   if(player.cleared) return;   // 终焉第10波撑过 → onClear 已结算，停止后续处理
-  if(player.regen) gainHeal(player.regen);
+  if(player.regen){ const _h=gainHeal(player.regen); if(_h>0) log(tr(`💚 恢复 +${_h}（每回合）`,`💚 Regen +${_h} HP`), 'heal'); }
   if(player.turns===500 && !player.finaleStarted){ player.finaleStarted=true; player.finaleWave=0; spawnFinale(); }  // 第500回合：终局降临
   if(!player.finaleStarted){
     if(player.turns % 10 === 0) player.bossDue=true;          // 每 10 回合：该来 Boss
