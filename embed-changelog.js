@@ -21,7 +21,7 @@ try {
   console.error('无法读取 CHANGELOG.md:', e.message);
   process.exit(1);
 }
-lines = lines.slice(0, 40);
+lines = lines.slice(0, 5);
 
 const arr = 'const CHANGELOG_LINES=' + JSON.stringify(lines, null, 0) + ';  /* auto-injected by dr.ps1 embed-changelog */';
 let n = 0;
