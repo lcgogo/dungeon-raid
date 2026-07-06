@@ -24,7 +24,4 @@ public/
 dr_commit_msg.txt
 
 # 个人/临时脚本和文件
-COMMIT_MSG.txt
-*.bak
-*-submit.sh
-run-batches.sh
+temp/
