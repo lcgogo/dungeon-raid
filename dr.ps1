@@ -269,11 +269,12 @@ function cmd_release {
     cmd_embed_changelog @("dungeon-raid-dev.html")
 
     # 1) 同步 dev → 正式版（两文件仅 const DEV 一行不同）
+    # 用 .NET File 方法读/写 UTF-8，避免 PowerShell 5.1 Get-Content/Set-Content 的 BOM 和 ANSI 默认编码坑
+    $utf8nobom = New-Object System.Text.UTF8Encoding $false
     Copy-Item "dungeon-raid-dev.html" "dungeon-raid.html" -Force
-    # 把 DEV=true 改成 DEV=false
-    $content = Get-Content "dungeon-raid.html" -Raw
+    $content = [System.IO.File]::ReadAllText((Resolve-Path "dungeon-raid.html"), $utf8nobom)
     $content = $content -replace "const DEV=true;", "const DEV=false;   // release build (DEV=false); dev build is dungeon-raid-dev.html (DEV=true)"
-    Set-Content "dungeon-raid.html" $content -NoNewline -Encoding UTF8
+    [System.IO.File]::WriteAllText((Resolve-Path "dungeon-raid.html"), $content, $utf8nobom)
 
     Write-Host "两文件差异（应仅 DEV 一行）:"
     git diff --no-index dungeon-raid.html dungeon-raid-dev.html 2>$null
