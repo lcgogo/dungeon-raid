@@ -273,7 +273,7 @@ function cmd_release {
     # 把 DEV=true 改成 DEV=false
     $content = Get-Content "dungeon-raid.html" -Raw
     $content = $content -replace "const DEV=true;", "const DEV=false;   // release build (DEV=false); dev build is dungeon-raid-dev.html (DEV=true)"
-    Set-Content "dungeon-raid.html" $content -NoNewline
+    Set-Content "dungeon-raid.html" $content -NoNewline -Encoding UTF8
 
     Write-Host "两文件差异（应仅 DEV 一行）:"
     git diff --no-index dungeon-raid.html dungeon-raid-dev.html 2>$null
