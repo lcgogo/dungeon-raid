@@ -176,7 +176,7 @@
 (()=>{
 //==================== 配置 ====================
 // 版本号 v主.次.修：不影响 verify/replay 兼容边界的小改动改"修"；凡是影响 verify/replay/版本分桶/release 验证语义的改动都改"次"；大版本变更需先确认。页面底部显示。
-const VERSION='v1.41.2';
+const VERSION='v1.42.0';
 const CHANGELOG_LINES=["v1.27.4 — 修复回放跳转/步进后固定几格闪爆炸特效（addBossFx 补快进守卫 + 跳转清 bossFx）","v1.27.3 — 血狂溢出转永久生命上限比例 50%→100%（兽人斗士后期增强）","v1.27.2 — 精灵新职业改名 长老→森林长老、死亡缠绕→蔓藤缠绕（机制/id 不变）","v1.27.1 — 击败350回合Boss后弹警告 + 此后每10回合同时降临2个不同Boss（终局前压力升级）","v1.27.0 — 新精灵职业 长老(死亡缠绕：5回合每回合全场怪-10%你最大生命、敌人变绿) + 荆棘移精灵且反弹=护甲减伤量 + 兽人斗士改 血狂(吸血溢出半数升上限)"];  /* auto-injected by dr.ps1 embed-changelog */
 const DEV=true;   // release build (DEV=false); dev build is dungeon-raid-dev.html (DEV=true)
 const REC_API='https://api.dungeonraid.win';   // 录像分享 API（Cloudflare Worker + KV）
