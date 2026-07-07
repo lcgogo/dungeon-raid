@@ -3,7 +3,7 @@
 - 战斗日志新增每回合自动回血提示：恢复量会显示为「💚 恢复 +N（每回合）」，方便追踪 regen 来源的持续回血。
 - Combat log now shows per-turn regen ticks: each regen heal is logged as "💚 恢复 +N（每回合）" so ongoing life recovery is visible in the log.
 
-## [v1.42.0]
+## [v1.43.0]
 
 > Version-Impact: verify
 
