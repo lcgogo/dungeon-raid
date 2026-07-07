@@ -174,7 +174,7 @@ const UP_PROFILES={
 let UP_PRIORITY=UP_PROFILES.balanced;   // 当前取向（默认均衡，与历史一致）；--upsweep 时逐套切换
 const upRank=n=>{const i=UP_PRIORITY.indexOf(n);return i<0?99:i;};
 const COMPETITIVE_BUILDS={
-  human:{ t1:['knight','priest','swordsaint'], t3:['holystrike','bladeall','general'], profile:'sustain' },
+  human:{ t1:['firemage','knight','priest','swordsaint'], t3:['firewall','holystrike','bladeall','general'], profile:'offense' },
   elf:{ t1:['elder','ranger','rogue'], t3:['sharpshooter','shadow','thorns'], profile:'elder_survival' },
   dwarf:{ t1:['guildmaster','miser','musketeer','blacksmith'], t3:['demolitionist','tycoon','cheapskate','shieldbash'], profile:'offense' },
   orc:{ t1:['fighter','berserker','witchdoctor'], t3:['titan','bloodfrenzy','allispoison'], profile:'offense' },
@@ -331,6 +331,7 @@ function shouldUseSkill(state){
   const id=p.tier1;
   if(id==='knight') return !!(state.boss || state.imminent>0 || state.criticalHp);
   if(id==='priest') return state.hearts>=2 && (state.lowHp || state.boss || p.level<8);
+  if(id==='firemage') return state.enemyCount>=2 || !!state.boss;
   if(id==='ranger') return state.enemyCount>=2 || !!state.boss;
   if(id==='blacksmith') return state.shields>=2 || (state.imminent>0 && state.shields>=1);
   if(id==='fighter') return state.immuneBoss || state.enemyCount>=3 || state.lowHp;
@@ -353,6 +354,7 @@ function shouldUseSkill2(state){
   if(p.frozen && p.frozen[p.skill2.slot]>0) return false;
   if(id==='knight') return !!(state.boss || state.immuneBoss || state.criticalHp);   // 圣盾留给 Boss/幽灵/濒死，不浪费在普通怪上
   if(id==='priest') return state.hearts>=2 && (state.lowHp || state.boss || p.level<8);
+  if(id==='firemage') return state.enemyCount>=2 || !!state.boss;
   if(id==='ranger') return state.enemyCount>=2 || !!state.boss;
   if(id==='blacksmith') return state.shields>=2 || (state.imminent>0 && state.shields>=1);
   if(id==='fighter') return state.immuneBoss || state.enemyCount>=3 || state.lowHp;

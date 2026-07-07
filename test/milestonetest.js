@@ -34,17 +34,28 @@ killBossAt(100); ok(p.t2Pending,'100回合→t2Pending'); p.t2Pending=false;
 G.dispatchReplayAct(['t',2,'holystrike']); ok(p.tier2==='holystrike' && p.holyStrike===true,'二阶=神圣打击(被动生效)');
 
 killBossAt(200); ok(p.t3Pending,'200回合→t3Pending'); p.t3Pending=false;
-const remain=G.RACE_PATHS.human.t2.find(x=>x!==p.tier2);   // 人类剩余被动=general
-G.dispatchReplayAct(['t',3,remain]); ok(p.tier2b===remain && remain==='general' && p.upgradeChoices===4,'第二被动=本种族剩余(将军,四选一生效)');
+const remain=G.RACE_PATHS.human.t2.find(x=>x!==p.tier2);   // 人类剩余被动=general/firewall/bladeall 之一
+G.dispatchReplayAct(['t',3,remain]); ok(p.tier2b===remain,'第二被动=本种族剩余被动之一');
 
-killBossAt(350); ok(p.t4Pending,'350回合→t4Pending'); p.t4Pending=false;
-G.dispatchReplayAct(['t',4,'ranger','bomb']); ok(p.skill2 && p.skill2.id==='ranger' && p.skill2.slot==='bomb','换装=游侠替换炸弹槽');
+// 火法师链：100 回合锁定二阶 firewall
+G.replayRec={seed:13,race:'human',acts:[]}; G.replaying=true; G.startGame(G.raceById('human')); G.replaying=false;
+const f=G.player; f.hp=f.maxHp=999999; G.busy=false; G.pendingLevels=0;
+f.turns=50; G.onBossKilled(); ok(f.t1Pending,'火法师50回合→t1Pending'); f.t1Pending=false;
+G.dispatchReplayAct(['t',1,'firemage']); ok(f.tier1==='firemage','一阶=火法师');
+f.turns=100; G.onBossKilled(); ok(f.t2Pending,'火法师100回合→t2Pending'); f.t2Pending=false;
+G.dispatchReplayAct(['t',2,'firewall']); ok(f.tier2==='firewall' && f.firewall===true,'二阶=火墙(被动生效)');
+
+// 350 回合跨界链：单独起一局，补齐前置职业状态，验证 t4Pending 与换装主动
+G.replayRec={seed:17,race:'human',acts:[]}; G.replaying=true; G.startGame(G.raceById('human')); G.replaying=false;
+const h=G.player; h.hp=h.maxHp=999999; G.busy=false; G.pendingLevels=0;
+h.tier1='knight'; h.tier2='holystrike'; h.tier2b='general'; h.turns=350; G.onBossKilled(); ok(h.t4Pending,'350回合→t4Pending'); h.t4Pending=false;
+G.dispatchReplayAct(['t',4,'ranger','bomb']); ok(h.skill2 && h.skill2.id==='ranger' && h.skill2.slot==='bomb','换装=游侠替换炸弹槽');
 
 // 点炸弹槽 → 应施放游侠箭雨（进冷却），而非购买炸弹
-p.skill2Cd=0; G.busy=false; G.pendingLevels=0; const goldBefore=p.gold;
+h.skill2Cd=0; G.busy=false; G.pendingLevels=0; const goldBefore=h.gold;
 G.buyItem('bomb');
-ok(p.skill2Cd>0,'点炸弹槽→施放换装主动(进冷却 skill2Cd>0)');
-ok(p.gold===goldBefore,'施放主动不花金币(炸弹槽未被当消耗品买)');
+ok(h.skill2Cd>0,'点炸弹槽→施放换装主动(进冷却 skill2Cd>0)');
+ok(h.gold===goldBefore,'施放主动不花金币(炸弹槽未被当消耗品买)');
 
 // 盗贼链：100 回合锁定被动 shadow，现显示/生效为「乾坤一掷」
 G.replayRec={seed:11,race:'elf',acts:[]}; G.replaying=true; G.startGame(G.raceById('elf')); G.replaying=false;

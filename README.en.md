@@ -86,6 +86,7 @@ Each race has **several** classes; every skill has a **5-turn cooldown** (except
 |---|---|---|---|
 | 🧑 Human | 🛡️ Knight | Aegis | Immune to all damage this turn |
 | 🧑 Human | 💗 Priest | Blessing | Clear all hearts on the board; each becomes 3 XP **and also heals you (by your heal-per-heart)** |
+| 🧑 Human | 🔥 Fire Mage | Flame Chain | Every monster/boss your sword chain touches this turn (including sword-immune foes such as Ghosts) is ignited; afterward it loses **20% of the flat damage from the ignition turn** each turn (minimum 1) until it dies |
 | 🧑 Human | ⚔️ Sword Saint | Bladeshift | Turn every heart and coin into swords (its signature passive "Anything a Blade" unlocks at level 100, see below) |
 | 🧝 Elf | 🏹 Ranger | Arrow Rain | Deal "sword power ×2" damage to all enemies |
 | 🧝 Elf | 💰 Rogue | Empty Pockets | For this turn, each enemy hit by your sword chain drops extra gold equal to 20% of its pre-hit HP (rounded down, minimum 1); the chain turns gold |
@@ -109,6 +110,7 @@ At **level 100 (Tier-2 Skill)** you automatically get the passive **locked to yo
 |---|---|---|
 | 🧑 Human | Knight → General | Level-up offers 4 choices instead of 3 |
 | 🧑 Human | Priest → Holy Strike | Healing overflow **prioritizes bosses**; with multiple bosses it hits the **lowest-HP** one first, and only falls back to normal enemies when no boss is present (Overlord excluded) |
+| 🧑 Human | Fire Mage → Firewall | The bottom 3 rows become a visible firewall; monsters/bosses there (including sword-immune ones, excluding the Overlord) lose **10% of your current flat damage** each turn (minimum 1) |
 | 🧑 Human | Sword Saint → Anything a Blade | Each turn after the board settles, turn 3 non-enemy non-sword tiles into swords |
 | 🧝 Elf | Ranger → Sharpshooter | +2 extra XP per enemy killed by a sword chain |
 | 🧝 Elf | Rogue → All-In | After buying a bomb, also spend 20% of your current gold and add exactly that amount to this bomb’s damage |

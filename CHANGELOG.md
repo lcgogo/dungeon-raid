@@ -3,6 +3,15 @@
 - 战斗日志新增每回合自动回血提示：恢复量会显示为「💚 恢复 +N（每回合）」，方便追踪 regen 来源的持续回血。
 - Combat log now shows per-turn regen ticks: each regen heal is logged as "💚 恢复 +N（每回合）" so ongoing life recovery is visible in the log.
 
+## [v1.42.0]
+
+> Version-Impact: verify
+
+- 人类新增第 4 职业「火法师 Fire Mage」：一阶主动「火焰链 Flame Chain」开启后，本回合剑链划过的怪物 / Boss（含幽灵等剑免疫目标，终焉之主除外）都会被点燃；被点燃目标之后每回合掉“点燃当回合固定伤害的 20%”（最少 1 点），直到死亡。
+- 火法师锁定二阶被动为「火墙 Firewall」：棋盘最下方 3 行形成火墙红框；其中的怪物 / Boss（含幽灵等剑免疫目标，终焉之主除外）每回合掉“当前固定伤害的 10%”（最少 1 点）。
+- Human gains a new fourth class: **Fire Mage**. Its tier-1 active **Flame Chain** ignites every monster / boss your sword chain touches that turn (including sword-immune targets such as Ghosts, excluding the Overlord); ignited targets then lose **20% of the flat damage from the ignition turn** every turn (minimum 1) until they die.
+- Fire Mage’s locked tier-2 passive is **Firewall**: the bottom 3 rows become a visible red firewall, and monsters / bosses inside it (including sword-immune targets, excluding the Overlord) lose **10% of your current flat damage** every turn (minimum 1).
+
 ## [v1.41.1]
 
 - 死局判负时，死亡结算不再误把本回合零星伤害来源当成“致命回合伤害来源”；现在会直接显示「被怪物淹没，无路可走」或终局态的「被 Boss 淹没，无路可走」，更符合真实死因。

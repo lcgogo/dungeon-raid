@@ -269,7 +269,7 @@ function newPlayer(){
     skill2:null, skill2Cd:0, t4Pending:false,                              // 350回合：任选主动替换治疗/炸弹槽
     comboMult:1, swordMult:1, armorMult:1, maxHpUpMult:1, noArmor:false,
     chosenPerks:[],                                                      // 本局已选技能名（按选择顺序，供录像/展示用）
-    heartPoison:false, rogueStealTurn:false,                              // 巫医蛊毒：本回合连心改为毒怪；盗贼：本回合命中偷金
+    heartPoison:false, rogueStealTurn:false, fireChainTurn:false, firewall:false,   // 巫医蛊毒：本回合连心改为毒怪；盗贼：本回合命中偷金；火法师：火焰链 / 火墙
     foeCdBonus:0, skillCdMod:0, splash:false, rebirthTurn:false, rebirthSaves:0, healMult:1,  // 活死人：迷惑/技能冷却修正/溅射/重生/治疗减半
     upgradeChoices:3, bombCd:3, goldLock:0, goldFrozen:0, healUses:0, bombUses:0, shadowBombGold:false, tycoonGoldShield:false, frozen:{},  // 转职被动相关；healUses：治疗递增；bombUses：爆破手炸弹递增；shadowBombGold：乾坤一掷；tycoonGoldShield：钱能买命；frozen：雪人冰封的主动剩余回合（skill/heal/bomb）
     finaleStarted:false, finaleWave:0, cleared:false};                      // 终局：终焉之主浪潮 / 破关
@@ -416,11 +416,55 @@ function spawnFinale(){
 }
 function bossDef(t){ return BOSSES.find(b=>b.id===(t&&t.bossId)) || BOSSES[0]; }
 function isSwordTarget(t){ return !!t && !t.finale && (t.type==='enemy' || (t.type==='boss' && (bossDef(t).swordable || !!(player&&player.pierceTurn)))); }  // 斗士嗜血：本回合可攻击剑免疫 Boss；终焉之主(finale)永不可攻击
+function isFireChainTarget(t){ return !!(player&&player.fireChainTurn) && !!t && !t.finale && (t.type==='enemy' || t.type==='boss'); }   // 火法师：本回合剑链划过的所有怪/Boss（含幽灵等）都会被点燃
 function gainGold(g, msgActive, msgFrozen){
   g=g|0; if(g<=0) return 0;
   if(player.goldLock>0){ player.goldFrozen+=g; if(msgFrozen) log(msgFrozen(g), 'buff'); }
   else { player.gold+=g; if(msgActive) log(msgActive(g), 'buff'); }
   return g;
+}
+function currentSwordFlat(){ return player.swordFlat + (player.titan?Math.floor(player.maxHp/12):0) + shieldBashFlat(player); }
+function burnTickDamage(t){ return Math.max(1, Math.floor((t.burnFlat||0)*0.2)); }
+function firewallTickDamage(){ return Math.max(1, Math.floor(currentSwordFlat()*0.1)); }
+function fireWallRows(){ return { start: Math.max(0, ROWS-3), end: ROWS-1 }; }
+function igniteTarget(t, flat){
+  if(!t || t.finale || !(t.type==='enemy' || t.type==='boss')) return false;
+  t.burnFlat=Math.max(t.burnFlat||0, flat|0);
+  t.burnTurns=1;   // 仅作为可视状态标记；燃烧持续到死亡
+  return true;
+}
+function fireChainIgnite(selection){
+  if(!player.fireChainTurn) return 0;
+  const flat=Math.max(1, currentSwordFlat());
+  let n=0;
+  for(const s of selection){ const t=grid[s.r][s.c]; if(!t || t.finale) continue; if(t.type==='enemy' || t.type==='boss'){ if(igniteTarget(t, flat)) n++; } }
+  player.fireChainTurn=false;
+  if(n) log(tr(`🔥 火焰链：点燃 ${n} 个目标（每回合掉固定伤害的 20%）`,`🔥 Flame Chain: ignited ${n} targets (20% flat damage per turn)`), 'buff');
+  return n;
+}
+function burnTick(){
+  let hit=0, kills=0, total=0, lh=0;
+  for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){
+    const t=grid[r][c]; if(!t||!t.burnTurns) continue;
+    const dmg=burnTickDamage(t), before=t.hp;
+    t.hp-=dmg; hit++; total+=Math.min(dmg, before);
+    if(t.hp<=0){ const isB=t.type==='boss'; grid[r][c]=null; kills++; if(isB){ thiefRecover(t); player.xp+=15; gainGold(20); onBossKilled(); } else { player.xp+=3+(player.killXp||0); gainGold(1); } }
+  }
+  if(kills) lh=lifestealHeal(kills);
+  if(hit) log(tr(`🔥 点燃：${hit} 个目标共掉 ${total}`+(kills?`，击杀 ${kills}`:'')+(lh?`，吸血 +${lh}`:''),`🔥 Burn: ${hit} targets lose ${total}`+(kills?`, ${kills} killed`:'')+(lh?`, +${lh} lifesteal`:'')), 'bad');
+}
+function firewallTick(){
+  if(!player.firewall) return;
+  const zone=fireWallRows(), dmg=firewallTickDamage(); if(dmg<=0) return;
+  let hit=0, kills=0, total=0, lh=0;
+  for(let r=zone.start;r<=zone.end;r++)for(let c=0;c<COLS;c++){
+    const t=grid[r][c]; if(!t||t.finale||!(t.type==='enemy'||t.type==='boss')) continue;
+    const before=t.hp;
+    t.hp-=dmg; hit++; total+=Math.min(dmg, before);
+    if(t.hp<=0){ const isB=t.type==='boss'; grid[r][c]=null; kills++; if(isB){ thiefRecover(t); player.xp+=15; gainGold(20); onBossKilled(); } else { player.xp+=3+(player.killXp||0); gainGold(1); } }
+  }
+  if(kills) lh=lifestealHeal(kills);
+  if(hit) log(tr(`🧱 火墙：底部三行 ${hit} 个目标共掉 ${total}`+(kills?`，击杀 ${kills}`:'')+(lh?`，吸血 +${lh}`:''),`🧱 Firewall: ${hit} targets in the bottom rows lose ${total}`+(kills?`, ${kills} killed`:'')+(lh?`, +${lh} lifesteal`:'')), 'bad');
 }
 function loseGoldForShield(g){
   g=g|0; if(g<=0) return 0;
@@ -455,7 +499,7 @@ function hasAnyMove(){
     for(const [dr,dc] of [[0,1],[1,0],[1,1],[1,-1]]){ const nr=r+dr,nc=c+dc; if(nr<0||nr>=ROWS||nc<0||nc>=COLS) continue; const u=grid[nr][nc]; if(!u) continue;
       if(t.type===u.type && CONNECTABLE.includes(t.type)) return true;                 // 同类连接
       // 真正可打的剑链必须含一把「剑」格（怪-怪连线无剑会被判空挥取消，见 endDrag）：需「剑」紧邻可攻击目标
-      if((t.type==='sword' && isSwordTarget(u)) || (u.type==='sword' && isSwordTarget(t))) return true;
+      if((t.type==='sword' && (isSwordTarget(u)||isFireChainTarget(u))) || (u.type==='sword' && (isSwordTarget(t)||isFireChainTarget(t)))) return true;
     } }
   return false;
 }
@@ -553,6 +597,7 @@ const RACES=[
 const TIER1={
   knight:{n:['骑士','Knight'], quip:['盾举起来，伤害？不存在的。','Shield up. Damage? Never heard of it.'], skill:{name:['圣盾','Aegis'], short:['本回合免伤','No damage this turn'], desc:['本回合受到的所有伤害全部归 0——含 Boss 重击、无视护甲的真实伤害、石像反弹、毒心反噬等。只护本回合，下回合恢复正常。','All damage you take this turn becomes 0 — boss strikes, armor-piercing true damage, statue reflection, poison-heart backlash, everything. This turn only.'], cd:5, f:p=>{ p.shieldTurn=true; log(tr('🛡️ 圣盾：本回合免疫伤害','🛡️ Aegis: immune to damage this turn'), 'buff'); return true; }}},
   priest:{n:['牧师','Priest'], quip:['心给我，经验你拿，公平交易。','Hearts to me, XP to you. Fair deal.'], skill:{name:['祝福','Blessing'], short:['全场❤️转经验+回血','Hearts→XP & heal'], desc:['立即清空棋盘上所有的「心」：每颗转成 3 点经验，同时按每颗心的回复量给你回血。场上没有心时无效、不进冷却。','Instantly clears every heart on the board: each becomes 3 XP and also heals you (by your heal-per-heart). No effect — and no cooldown — if there are no hearts.'], cd:5, f:p=>{ let n=0; for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){const t=grid[r][c]; if(t&&t.type==='heart'){grid[r][c]=null;n++;}} if(!n)return false; player.xp+=n*3; const h=gainHeal(n*player.healPerHeart); applyGravity(); syncPositions(false); checkLevel(); log(tr(`💗 祝福：${n} 颗心 → ${n*3} 经验，回血 ${h}`,`💗 Blessing: ${n} hearts → ${n*3} XP, +${h} HP`), 'buff'); return n; }}},
+  firemage:{n:['火法师','Fire Mage'], quip:['让火先走一步，怪自己会追上结局。','Let the fire go first; the monsters will catch up to the ending themselves.'], skill:{name:['火焰链','Flame Chain'], short:['本回合划过怪物全部点燃','Ignite all foes touched this turn'], desc:['本回合你的剑链划过的每个怪物/Boss（含幽灵等剑免疫目标，终焉之主除外）都会被点燃。被点燃者以后每回合损失「点燃当回合固定伤害的 20%」（最少 1 点），直到死亡。若本回合没有用剑链划过任何怪物，就等于白开。','This turn, every monster/boss your sword chain touches (including sword-immune targets like Ghosts, but not the Overlord) is ignited. An ignited target loses 20% of the flat damage you had on the ignition turn (minimum 1) every turn until it dies. If your chain touches no foe this turn, the cast is wasted.'], cd:5, f:p=>{ p.fireChainTurn=true; log(tr('🔥 火焰链：本回合划过的怪物都会被点燃，持续烧到死亡','🔥 Flame Chain: every foe touched this turn is ignited until it dies'), 'buff'); return true; }}},
   ranger:{n:['游侠','Ranger'], quip:['抬头——那不是雨，是箭。','Heads up — those are not raindrops.'], skill:{name:['箭雨','Arrow Rain'], short:['全场怪受{W}威力×2','×2 {W} power to all'], desc:['对场上每一只可{W}攻击的怪/Boss 各打一发「{W}威力×2」的伤害（每只独立全额，不分摊）。{W}免疫的 Boss（幽灵/小丑等）不受影响——箭属武器攻击。','Hits every {W}-targetable foe for ×2 {W} power (full damage to each, not shared). {W}-immune bosses (Ghost/Clown…) are unaffected — arrows are a weapon attack.'], cd:5, f:p=>{ const titanFlat=(p.titan?Math.floor(p.maxHp/12):0)+shieldBashFlat(p); const pool=Math.floor((p.weaponPower*2 + p.swordFlat + titanFlat)*(p.swordMult||1)); const r=dealDamage(pool,null); const lh=lifestealHeal(r.kills); applyGravity(); syncPositions(false); log(tr(`🏹 箭雨：全场 ${r.dmg} 伤害`+(r.kills?`，击杀 ${r.kills}`:'')+(lh?`，吸血 +${lh}`:''),`🏹 Arrow Rain: ${r.dmg} dmg`+(r.kills?`, ${r.kills} killed`:'')+(lh?`, +${lh} lifesteal`:''))); return true; }}},
   rogue:{n:['盗贼','Rogue'], quip:['剑能砍人，钱要从刀口里拿。','If the blade lands, the purse opens.'], skill:{name:['妙手空空','Empty Pockets'], short:['本回合命中偷金','Hits steal bonus gold'], desc:['本回合你用{WC}攻击到的每个敌人，都会额外掉落它当前血量 20% 的金币（向下取整，至少 1 金）。连线会变成金色；若这回合没用{W}打到敌人，就等于白开。','For this turn, every enemy your {WC} hits drops extra gold equal to 20% of its current HP (rounded down, minimum 1). The chain turns gold; if your {W} fails to hit anything this turn, the buff is wasted.'], cd:5, f:p=>{ p.rogueStealTurn=true; log(tr(`📲 妙手空空：本回合用${wChain()}命中的敌人，会按命中前血量额外掉金币`,`💰 Empty Pockets: enemies hit by your ${wChain()} this turn drop bonus gold from their pre-hit HP`), 'buff'); return true; }}},
   elder:{n:['森林长老','Forest Elder'], quip:['生命有借有还——敌人先还。','Life is a loan; your enemies pay first.'], skill:{name:['蔓藤缠绕','Vine Coil'], short:['3回合内每回合全场怪 −30%你最大生命','3 turns: all foes −30% your max HP/turn'], desc:['发动后接下来 3 个回合，每回合让场上所有怪/Boss（含剑免疫，终焉之主除外）损失「你最大生命的 30%」。被缠绕期间敌人格变绿。','For the next 3 turns, every turn all enemies/bosses (incl. sword-immune; Overlord excluded) lose 30% of your max HP. Cursed foes glow green.'], cd:5, f:p=>{ p.deathCoil=3; log(tr('🟢 蔓藤缠绕：未来 3 回合，全场怪每回合流失你 30% 最大生命！','🟢 Vine Coil: for 3 turns, all foes lose 30% of your max HP each turn!'), 'buff'); return true; }}},
@@ -616,6 +661,7 @@ const TIER1={
 const TIER2={
   holystrike:{n:['神圣打击','Holy Strike'], d:['治疗溢出优先轰 Boss；多 Boss 取血最少','Healing overflow prioritizes bosses; lowest-HP boss first'], f:p=>{ p.holyStrike=true; }},
   general:{n:['将军','General'], d:['升级时四选一','Level-up offers 4 choices'], f:p=>{ p.upgradeChoices=4; }},
+  firewall:{n:['火墙','Firewall'], d:['底部 3 行形成火墙；其中怪物每回合掉当前固定伤害 10%（最少 1）','Bottom 3 rows become a firewall; foes there lose 10% of current flat damage each turn (minimum 1)'], f:p=>{ p.firewall=true; }},
   sharpshooter:{n:['神射手','Sharpshooter'], d:['{WC}击杀怪 +2 经验','+2 XP per {W} kill'], f:p=>{ p.killXp=(p.killXp||0)+2; }},
   shadow:{n:['乾坤一掷','All-In'], d:['买炸弹后，再额外扣当前金币的 20%，并把这笔数额加到这次炸弹伤害上','After buying a bomb, also spend 20% of your current gold and add exactly that amount to this bomb’s damage'], f:p=>{ p.shadowBombGold=true; }},
   demolitionist:{n:['爆破手','Demolitionist'], d:['每用一次炸弹：伤害 +1、花费 +5 金（越炸越强、越炸越贵）','Each bomb use: +1 damage and +5 gold cost (stronger but pricier each time)'], f:p=>{ p.bombBoost=true; }},
@@ -633,14 +679,14 @@ const TIER2={
 };
 // 二阶被动锁定到一阶职业（100 回合按此直接授予；200 回合再从同族其余被动里选另一个）
 const CLASS_T2={
-  knight:'general', priest:'holystrike', swordsaint:'bladeall',
+  knight:'general', priest:'holystrike', firemage:'firewall', swordsaint:'bladeall',
   ranger:'sharpshooter', rogue:'shadow', elder:'thorns',
   blacksmith:'shieldbash', miser:'tycoon', guildmaster:'cheapskate', musketeer:'demolitionist',
   necromancer:'rejuvenation', skeletonking:'splash', butcher:'rotflesh',
   berserker:'warlord', fighter:'bloodfrenzy', witchdoctor:'allpoison',
 };
 const RACE_PATHS={
-  human:{t1:['knight','priest','swordsaint'], t2:['general','holystrike','bladeall']},
+  human:{t1:['knight','priest','firemage','swordsaint'], t2:['general','holystrike','firewall','bladeall']},
   elf:  {t1:['ranger','rogue','elder'], t2:['sharpshooter','shadow','thorns']},
   dwarf:{t1:['blacksmith','miser','guildmaster','musketeer'], t2:['shieldbash','tycoon','cheapskate','demolitionist']},
   undead:{t1:['necromancer','skeletonking','butcher'], t2:['rejuvenation','splash','rotflesh']},
@@ -963,6 +1009,7 @@ function startGame(rc, srv){   // srv={seed,token}：服务端发的种子（正
              : pool[Math.floor(rnd()*pool.length)];
     grid[r][c]=makeTile(type);
   }}
+  player.fireChainTurn=false;
   if(firstGame) seedTutorialBoard();   // 新手第一局：保证棋盘里有一只怪、且能被多把剑连起来（剑-怪-剑）
   syncPositions(true);
   hideOverlay(); logClear();
@@ -1014,7 +1061,7 @@ function saveGame(){
       pendingLevels,
       rngState: __rngState>>>0,   // 恢复续局时也要续上同一条 RNG 轨迹，否则后续补格/刷怪会让 replay 漂移
       player:{...player},
-      grid: grid.map(row=>row.map(t=> t?{type:t.type,hp:t.hp,maxHp:t.maxHp,atk:t.atk,cd:t.cd,baseCd:t.baseCd,bossId:t.bossId,tier:t.tier,stolen:t.stolen,finale:t.finale,incub:t.incub,poison:t.poison}:null)),
+      grid: grid.map(row=>row.map(t=> t?{type:t.type,hp:t.hp,maxHp:t.maxHp,atk:t.atk,cd:t.cd,baseCd:t.baseCd,bossId:t.bossId,tier:t.tier,stolen:t.stolen,finale:t.finale,incub:t.incub,poison:t.poison,burnTurns:t.burnTurns,burnFlat:t.burnFlat}:null)),
     }));
   }catch(e){}
 }
@@ -1103,6 +1150,13 @@ function draw(){
   const chainType=selection.length?selection[0].type:null;
   const killSet=previewKills();
   const poisoned=pollutionActive();   // 污染怪在场时全场心显示为毒心（绿心）
+  const firewallZone = player && player.firewall ? fireWallRows() : null;
+  if(firewallZone){
+    ctx.save();
+    ctx.strokeStyle=hexA('#ff5a36', .75); ctx.lineWidth=3; ctx.shadowColor='#ff5a36'; ctx.shadowBlur=12;
+    for(let rr=firewallZone.start; rr<=firewallZone.end; rr++) ctx.strokeRect(PAD+2, cellY(rr)+2, COLS*TILE-4, TILE-4);
+    ctx.restore(); ctx.shadowBlur=0;
+  }
   for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){
     const t=grid[r][c]; if(!t) continue;
     const isPoisonHeart = t.type==='heart' && poisoned;
@@ -1111,10 +1165,11 @@ function draw(){
     const d=DEF[t.type], g=TILE-8;
     const picked=sel.has(t.r+','+t.c);
     const coiled = player && player.deathCoil>0 && (t.type==='enemy'||(t.type==='boss'&&!t.finale));   // 蔓藤缠绕中：敌人格变绿
-    // 能被剑攻击的（怪 / 可剑连的Boss，以及剑本身）统一红底，一眼看出可攻击；蔓藤缠绕中的怪改绿底
-    const baseCol = coiled ? '#27ae60' : (isSwordTarget(t) || t.type==='sword') ? DEF.sword.color : d.color;   // 黑毒心/绿毒心底色与普通心一致，只换 emoji（💚/🖤）
-    // 被剑链穿过的怪/可攻击Boss → 红色高亮（表示正被攻击）
-    const gl = (picked && chainType==='sword' && isSwordTarget(t)) ? DEF.sword.glow : coiled ? '#2ecc71' : d.glow;
+    const burning = !!t.burnTurns;
+    // 能被剑攻击的（怪 / 可剑连的Boss，以及剑本身）统一红底，一眼看出可攻击；蔓藤缠绕中的怪改绿底；燃烧中的怪改橙红底
+    const baseCol = burning ? '#ff6b2f' : coiled ? '#27ae60' : (isSwordTarget(t) || t.type==='sword') ? DEF.sword.color : d.color;   // 黑毒心/绿毒心底色与普通心一致，只换 emoji（💚/🖤）
+    // 被剑链穿过的怪/可攻击Boss → 红色高亮（表示正被攻击）；燃烧目标走橙色光晕
+    const gl = (picked && chainType==='sword' && (isSwordTarget(t) || isFireChainTarget(t))) ? '#ff8a3c' : burning ? '#ff9a52' : coiled ? '#2ecc71' : d.glow;
     // 背景
     ctx.save();
     roundRect(x+4,y+4,g,g,12);
@@ -1367,7 +1422,7 @@ function moveDrag(e){
   if(selection.some(s=>s.r===cell.r&&s.c===cell.c)) return; // 已选
   const base=selection[0].type;
   if(base!=='sword' && !CONNECTABLE.includes(base)) return;   // 'boss' 等不可成链的起手仅用于轻触查看信息，不可拖成多格
-  const ok = t.type===base || (base==='sword' && isSwordTarget(t)); // 剑链可穿怪/可攻击Boss
+  const ok = t.type===base || (base==='sword' && (isSwordTarget(t) || isFireChainTarget(t))); // 剑链可穿怪/可攻击Boss；火焰链开启时也可划过剑免疫 Boss 以点燃
   if(!ok) return;
   if(Math.abs(cell.r-last.r)<=1 && Math.abs(cell.c-last.c)<=1){ // 相邻8向
     selection.push({r:cell.r,c:cell.c,type:t.type}); dragExtended=true; }
@@ -1570,19 +1625,20 @@ function resolve(){
     const nS=swords.length;
     swords.forEach(s=>grid[s.r][s.c]=null);
     const combo=1+Math.max(0,nS-2)*0.15*(player.comboMult||1);   // 多连奖励（精灵翻倍）
-    const titanFlat=(player.titan?Math.floor(player.maxHp/12):0)+shieldBashFlat(player);  // 巨力 + 盾击(护甲减伤量→固定剑伤)
-    let pool=(nS*player.weaponPower+player.swordFlat+titanFlat)*combo*(player.swordMult||1);
+    const flat=currentSwordFlat();  // 巨力 + 盾击(护甲减伤量→固定剑伤)
+    let pool=(nS*player.weaponPower+flat)*combo*(player.swordMult||1);
     if(player.lowHpDmg) pool*=1+(1-player.hp/player.maxHp)*0.6;  // 狂战：越缺血越猛（最高+60%）
     pool=Math.floor(pool);
     if(targets.length && nS>0) pool=Math.max(1, pool);   // 矮人 ×0.85 等减伤仍按 floor；但合法武器攻击至少造成 1 点伤害，避免一锤打出 0 伤
     let dmg=0, kills=0, bonusGold=0;
     if(targets.length){ ({dmg,kills,bonusGold}=dealDamage(pool, targets)); }
+    const ignited = fireChainIgnite(selection);
     const lifeHeal=lifestealHeal(kills);   // 汲取生命：每杀一只回血（含溅射击杀，kills 已含）
     let blood=0;
     if(player.bloodthirst && targets.length){ blood=vampGain(targets.length*3); player.bloodthirst=0; } // 斗士嗜血（血狂时溢出转上限）
     const comboTxt=combo>1?tr(` 连击×${combo.toFixed(2)}`,` combo×${combo.toFixed(2)}`):'';
     msg=`${wE()}×${nS}${comboTxt}` + (targets.length
-      ? tr(` 直击 ${targets.length} 只怪 → ${dmg} 伤害`,` hit ${targets.length} → ${dmg} dmg`) + (kills?tr(`，击杀 ${kills} 只👹`,`, ${kills} killed`):'') + (bonusGold?tr(`，妙手空空 +${bonusGold} 金`,`，Empty Pockets +${bonusGold} gold`):'') + (lifeHeal?tr(`，吸血 +${lifeHeal}`,`, +${lifeHeal} lifesteal`):'') + (blood?tr(`，回血 ${blood}`,`, +${blood} HP`):'')
+      ? tr(` 直击 ${targets.length} 只怪 → ${dmg} 伤害`,` hit ${targets.length} → ${dmg} dmg`) + (kills?tr(`，击杀 ${kills} 只👹`,`, ${kills} killed`):'') + (bonusGold?tr(`，妙手空空 +${bonusGold} 金`,`，Empty Pockets +${bonusGold} gold`):'') + (ignited?tr(`，点燃 ${ignited} 个目标`,`，ignited ${ignited}`):'') + (lifeHeal?tr(`，吸血 +${lifeHeal}`,`, +${lifeHeal} lifesteal`):'') + (blood?tr(`，回血 ${blood}`,`, +${blood} HP`):'')
       : tr('（未串到怪）','(no enemy hit)'));
   } else {
     const count=selection.length;
@@ -1617,6 +1673,7 @@ function resolve(){
         : tr(`获得 ${g} 金币`,`+${g} gold`)); }
   }
   log(msg, mk);
+  if(player.fireChainTurn) player.fireChainTurn=false;   // 火焰链仅本回合（若本回合没划到怪，也在结算后失效）
   if(player.pierceTurn) player.pierceTurn=false;   // 斗士嗜血穿透仅本回合
   if(player.heartPoison) player.heartPoison=false; // 巫医蛊毒仅本回合（未连心则失效）
   if(player.rogueStealTurn) player.rogueStealTurn=false; // 妙手空空仅本回合（没打到也会失效）
@@ -1629,6 +1686,8 @@ function resolve(){
   if(player.frozen) for(const k in player.frozen){ if(player.frozen[k]>0) player.frozen[k]--; }   // 雪人冰封倒数解冻
   if(player.goldLock>0){ player.goldLock--; if(player.goldLock===0){ const pay=Math.round(player.goldFrozen*2.5); player.gold+=pay; player.goldFrozen=0; log(tr(`🔓 囤金到期：返还 ${pay} 金币`,`🔓 Hoard matured: +${pay} gold`), 'buff'); } } // 守财奴囤金到期（2.5 倍）
   if(player.deathCoil>0){ deathCoilTick(); player.deathCoil--; }   // 蔓藤缠绕：未来 3 回合每回合全场怪流失 30% 最大生命
+  burnTick();   // 火焰链：已点燃目标每回合持续灼烧，直到死亡
+  firewallTick();   // 火墙：底部三行的怪物每回合掉当前固定伤害 10%
   advanceEnemies();
   if(player.cleared) return;   // 终焉第10波撑过 → onClear 已结算，停止后续处理
   if(player.regen){ const _h=gainHeal(player.regen); if(_h>0) log(tr(`💚 恢复 +${_h}（每回合）`,`💚 Regen +${_h} HP`), 'heal'); }
@@ -2287,9 +2346,10 @@ document.querySelectorAll('#replayBar .rbSpd').forEach(b=>{ b.onclick=()=>{ repl
 function tileInfo(t){
   const p=player;
   if(t.type==='sword') return {icon:wE(), title:tr(`${wN()} · 攻击`,`${wN()} · Attack`),
-    desc:tr(`连接 2 个及以上的${wN()}攻击怪物。${wChain()}可直接拖过 👹，串到的怪各自独立吃满伤害。`,`Link 2+ ${wN()} tiles to attack. A ${wChain()} passes straight through 👹 — each linked enemy takes the full damage.`),
+    desc:tr(`连接 2 个及以上的${wN()}攻击怪物。${wChain()}可直接拖过 👹；若火法师已开启「火焰链」，本回合还可划过幽灵等剑免疫 Boss 把它们点燃。`,`Link 2+ ${wN()} tiles to attack. A ${wChain()} passes straight through 👹; if Fire Mage's Flame Chain is active, this turn it can also pass through sword-immune bosses such as Ghosts to ignite them.`),
     rows:[ [tr(`每个${wN()}威力`,`Power per ${wN()}`), `×${p.weaponPower}`],
       [tr('固定伤害','Flat damage'), `+${p.swordFlat}`],
+      [tr('火法固定伤害','Fire flat damage'), `${currentSwordFlat()}`],
       [tr('多连奖励','Combo bonus'), tr(`每超出 2 个 +${Math.round(15*(p.comboMult||1))}%`,`+${Math.round(15*(p.comboMult||1))}% per tile over 2`)],
       [tr('伤害加成','Damage bonus'), ((p.lowHpDmg?tr('越缺血越猛','low HP↑'):'')+(p.titan?tr(` ·巨力+${Math.floor(p.maxHp/12)}`,` ·Titan+${Math.floor(p.maxHp/12)}`):'')).trim()||'—'] ]};
   if(t.type==='shield') return {icon:'🔰', title:tr('盾 · 减伤','Shield · Armor'),
@@ -2317,6 +2377,10 @@ function tileInfo(t){
     rows:[ [tr('每枚金币','Gold per coin'), `+${p.goldPerCoin}`],
       [tr('当前金币','Current gold'), p.goldLock>0?tr(`囤金中（冻结${p.goldFrozen}）`,`hoarding (${p.goldFrozen})`):`${p.gold}`],
       [tr('钱能买命(财阀)','Money Buys Life (Tycoon)'), p.tycoonGoldShield?tr('囤金中：只扣冻结金币','during Hoard: frozen gold only'):'—'] ]};
+  if((t.type==='enemy'||t.type==='boss') && t.burnTurns) return {icon:'🔥', title:tr('点燃状态','Ignited'),
+    desc:tr('这个目标已被火焰链点燃，会在每回合持续掉血，直到死亡。','This target is ignited by Flame Chain and keeps taking burn damage every turn until it dies.'),
+    rows:[ [tr('每回合掉血','Burn / turn'), `${burnTickDamage(t)}`],
+      [tr('燃烧基准固定伤害','Stored flat damage'), `${t.burnFlat||0}`] ]};
   if(t.type==='boss'){ const def=bossDef(t);
     const rows=[ [tr('血量','HP'), `${t.hp} / ${t.maxHp}`] ];
     if(def.special) rows.push([tr('特殊','Special'), L(def.special)]);
@@ -2366,6 +2430,7 @@ function showPlayerInfo(){
     [tr('🔢 连击加成','🔢 Combo'), `+${Math.round(15*(p.comboMult||1))}%/${tr('个','tile')}`],
     [tr('💗 每心回复','💗 Heal/heart'), `+${p.healPerHeart}`],
     [tr('💰 每金币','💰 Gold/coin'), `+${p.goldPerCoin}`],
+    [tr('🔥 火墙伤害/回合','🔥 Firewall dmg/turn'), p.firewall?`${firewallTickDamage()}`:'—'],
   ].map(([k,v])=>rowItem(k,v)).join('');
   const perks=[];
   if(p.lowHpDmg) perks.push(tr(`狂怒：越缺血${wN()}伤越高`,'Frenzy: low HP, high dmg'));
