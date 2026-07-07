@@ -86,7 +86,7 @@ Each race has **several** classes; every skill has a **5-turn cooldown** (except
 |---|---|---|---|
 | 🧑 Human | 🛡️ Knight | Aegis | Immune to all damage this turn |
 | 🧑 Human | 💗 Priest | Blessing | Clear all hearts on the board; each becomes 3 XP **and also heals you (by your heal-per-heart)** |
-| 🧑 Human | 🔥 Fire Mage | Flame Chain | Every monster/boss your sword chain touches this turn (including sword-immune foes such as Ghosts) is ignited; afterward it loses **20% of the flat damage from the ignition turn** each turn (minimum 1) until it dies |
+| 🧑 Human | 🔥 Fire Mage | Flame Chain | Once activated, it behaves like Frenzy for targeting: eligible bosses turn fiery red and become chainable this turn; every monster/boss your sword chain touches (including sword-immune foes such as Ghosts) is then ignited and loses **20% of the flat damage from the ignition turn** each turn (minimum 1) until it dies |
 | 🧑 Human | ⚔️ Sword Saint | Bladeshift | Turn every heart and coin into swords (its signature passive "Anything a Blade" unlocks at level 100, see below) |
 | 🧝 Elf | 🏹 Ranger | Arrow Rain | Deal "sword power ×2" damage to all enemies |
 | 🧝 Elf | 💰 Rogue | Empty Pockets | For this turn, each enemy hit by your sword chain drops extra gold equal to 20% of its pre-hit HP (rounded down, minimum 1); the chain turns gold |

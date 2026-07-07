@@ -416,7 +416,7 @@ function spawnFinale(){
 }
 function bossDef(t){ return BOSSES.find(b=>b.id===(t&&t.bossId)) || BOSSES[0]; }
 function isSwordTarget(t){ return !!t && !t.finale && (t.type==='enemy' || (t.type==='boss' && (bossDef(t).swordable || !!(player&&player.pierceTurn)))); }  // 斗士嗜血：本回合可攻击剑免疫 Boss；终焉之主(finale)永不可攻击
-function isFireChainTarget(t){ return !!(player&&player.fireChainTurn) && !!t && !t.finale && (t.type==='enemy' || t.type==='boss'); }   // 火法师：本回合剑链划过的所有怪/Boss（含幽灵等）都会被点燃
+function isFireChainTarget(t){ return !!(player&&player.fireChainTurn) && !!t && !t.finale && (t.type==='enemy' || t.type==='boss'); }   // 火法师：本回合剑链划过的所有怪/Boss（含幽灵等）都会被点燃，且这些 Boss 视为可连目标
 function gainGold(g, msgActive, msgFrozen){
   g=g|0; if(g<=0) return 0;
   if(player.goldLock>0){ player.goldFrozen+=g; if(msgFrozen) log(msgFrozen(g), 'buff'); }
@@ -424,28 +424,27 @@ function gainGold(g, msgActive, msgFrozen){
   return g;
 }
 function currentSwordFlat(){ return player.swordFlat + (player.titan?Math.floor(player.maxHp/12):0) + shieldBashFlat(player); }
-function burnTickDamage(t){ return Math.max(1, Math.floor((t.burnFlat||0)*0.2)); }
-function firewallTickDamage(){ return Math.max(1, Math.floor(currentSwordFlat()*0.1)); }
+function burnTickDamage(t){ return Math.max(1, Math.floor(currentSwordFlat()*0.2)) * Math.max(1, t.burnStacks||0); }
+function firewallTickDamage(){ return Math.max(1, Math.floor(currentSwordFlat()*0.2)); }
 function fireWallRows(){ return { start: Math.max(0, ROWS-3), end: ROWS-1 }; }
-function igniteTarget(t, flat){
+function igniteTarget(t, stacks){
   if(!t || t.finale || !(t.type==='enemy' || t.type==='boss')) return false;
-  t.burnFlat=Math.max(t.burnFlat||0, flat|0);
+  t.burnStacks=(t.burnStacks||0) + Math.max(1, stacks|0);
   t.burnTurns=1;   // 仅作为可视状态标记；燃烧持续到死亡
   return true;
 }
 function fireChainIgnite(selection){
   if(!player.fireChainTurn) return 0;
-  const flat=Math.max(1, currentSwordFlat());
   let n=0;
-  for(const s of selection){ const t=grid[s.r][s.c]; if(!t || t.finale) continue; if(t.type==='enemy' || t.type==='boss'){ if(igniteTarget(t, flat)) n++; } }
+  for(const s of selection){ const t=grid[s.r][s.c]; if(!t || t.finale) continue; if(t.type==='enemy' || t.type==='boss'){ if(igniteTarget(t, 1)) n++; } }
   player.fireChainTurn=false;
-  if(n) log(tr(`🔥 火焰链：点燃 ${n} 个目标（每回合掉固定伤害的 20%）`,`🔥 Flame Chain: ignited ${n} targets (20% flat damage per turn)`), 'buff');
+  if(n) log(tr(`🔥 火焰链：点燃 ${n} 个目标（当前固定伤害 20%，可叠加）`,`🔥 Flame Chain: ignited ${n} targets (current flat damage ×20%, stackable)`), 'buff');
   return n;
 }
 function burnTick(){
   let hit=0, kills=0, total=0, lh=0;
   for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){
-    const t=grid[r][c]; if(!t||!t.burnTurns) continue;
+    const t=grid[r][c]; if(!t||!t.burnTurns||!(t.burnStacks>0)) continue;
     const dmg=burnTickDamage(t), before=t.hp;
     t.hp-=dmg; hit++; total+=Math.min(dmg, before);
     if(t.hp<=0){ const isB=t.type==='boss'; grid[r][c]=null; kills++; if(isB){ thiefRecover(t); player.xp+=15; gainGold(20); onBossKilled(); } else { player.xp+=3+(player.killXp||0); gainGold(1); } }
@@ -455,11 +454,12 @@ function burnTick(){
 }
 function firewallTick(){
   if(!player.firewall) return;
-  const zone=fireWallRows(), dmg=firewallTickDamage(); if(dmg<=0) return;
+  const zone=fireWallRows();
   let hit=0, kills=0, total=0, lh=0;
   for(let r=zone.start;r<=zone.end;r++)for(let c=0;c<COLS;c++){
     const t=grid[r][c]; if(!t||t.finale||!(t.type==='enemy'||t.type==='boss')) continue;
-    const before=t.hp;
+    igniteTarget(t, 1);
+    const dmg=firewallTickDamage(), before=t.hp;
     t.hp-=dmg; hit++; total+=Math.min(dmg, before);
     if(t.hp<=0){ const isB=t.type==='boss'; grid[r][c]=null; kills++; if(isB){ thiefRecover(t); player.xp+=15; gainGold(20); onBossKilled(); } else { player.xp+=3+(player.killXp||0); gainGold(1); } }
   }
@@ -1061,7 +1061,7 @@ function saveGame(){
       pendingLevels,
       rngState: __rngState>>>0,   // 恢复续局时也要续上同一条 RNG 轨迹，否则后续补格/刷怪会让 replay 漂移
       player:{...player},
-      grid: grid.map(row=>row.map(t=> t?{type:t.type,hp:t.hp,maxHp:t.maxHp,atk:t.atk,cd:t.cd,baseCd:t.baseCd,bossId:t.bossId,tier:t.tier,stolen:t.stolen,finale:t.finale,incub:t.incub,poison:t.poison,burnTurns:t.burnTurns,burnFlat:t.burnFlat}:null)),
+      grid: grid.map(row=>row.map(t=> t?{type:t.type,hp:t.hp,maxHp:t.maxHp,atk:t.atk,cd:t.cd,baseCd:t.baseCd,bossId:t.bossId,tier:t.tier,stolen:t.stolen,finale:t.finale,incub:t.incub,poison:t.poison,burnTurns:t.burnTurns,burnStacks:t.burnStacks}:null)),
     }));
   }catch(e){}
 }
@@ -1165,11 +1165,12 @@ function draw(){
     const d=DEF[t.type], g=TILE-8;
     const picked=sel.has(t.r+','+t.c);
     const coiled = player && player.deathCoil>0 && (t.type==='enemy'||(t.type==='boss'&&!t.finale));   // 蔓藤缠绕中：敌人格变绿
-    const burning = !!t.burnTurns;
-    // 能被剑攻击的（怪 / 可剑连的Boss，以及剑本身）统一红底，一眼看出可攻击；蔓藤缠绕中的怪改绿底；燃烧中的怪改橙红底
-    const baseCol = burning ? '#ff6b2f' : coiled ? '#27ae60' : (isSwordTarget(t) || t.type==='sword') ? DEF.sword.color : d.color;   // 黑毒心/绿毒心底色与普通心一致，只换 emoji（💚/🖤）
-    // 被剑链穿过的怪/可攻击Boss → 红色高亮（表示正被攻击）；燃烧目标走橙色光晕
-    const gl = (picked && chainType==='sword' && (isSwordTarget(t) || isFireChainTarget(t))) ? '#ff8a3c' : burning ? '#ff9a52' : coiled ? '#2ecc71' : d.glow;
+    const burning = !!(t.burnTurns && t.burnStacks>0);
+    const fireLinked = !!(player && player.fireChainTurn && t.type==='boss' && !t.finale);
+    // 能被剑攻击的（怪 / 可剑连的Boss，以及剑本身）统一红底，一眼看出可攻击；蔓藤缠绕中的怪改绿底；燃烧中的怪改橙红底；火焰链激活时的 Boss 改火红底
+    const baseCol = burning ? '#ff6b2f' : fireLinked ? '#ff5336' : coiled ? '#27ae60' : (isSwordTarget(t) || t.type==='sword') ? DEF.sword.color : d.color;   // 黑毒心/绿毒心底色与普通心一致，只换 emoji（💚/🖤）
+    // 被剑链穿过的怪/可攻击Boss → 红色高亮（表示正被攻击）；燃烧目标走橙色光晕；火焰链激活的 Boss 走更亮的火色
+    const gl = (picked && chainType==='sword' && (isSwordTarget(t) || isFireChainTarget(t))) ? '#ff8a3c' : burning ? '#ff9a52' : fireLinked ? '#ff7043' : coiled ? '#2ecc71' : d.glow;
     // 背景
     ctx.save();
     roundRect(x+4,y+4,g,g,12);
@@ -1194,6 +1195,13 @@ function draw(){
       ctx.fillStyle='#fff'; ctx.font='700 '+Math.floor(TILE*0.34)+'px system-ui';
       if(!t.finale) ctx.fillText(t.hp, cx, cy+TILE*0.10);
       else { ctx.fillStyle='#ffd54a'; ctx.fillText('∞', cx, cy+TILE*0.10); }
+      if(t.burnStacks>0){
+        const bx=x+g-4, by=y+g-4, br=TILE*0.16;
+        ctx.beginPath(); ctx.arc(bx,by,br,0,7);
+        ctx.fillStyle='#ff5a36'; ctx.fill(); ctx.strokeStyle='#000'; ctx.lineWidth=1; ctx.stroke();
+        ctx.fillStyle='#fff'; ctx.font='700 '+Math.floor(TILE*0.20)+'px system-ui';
+        ctx.fillText(t.burnStacks, bx, by+1);
+      }
       // 攻击力角标（左上）——特效/大招型 Boss（攻击力无意义）不显示；但有 shownAtk/dynAtk 的按展示值显示，避免漏看
       if(!isBoss || (!bdef.act && !bdef.cdAttack) || bdef.shownAtk || bdef.dynAtk){
         const av=(isBoss && (bdef.shownAtk||bdef.dynAtk)) ? (bdef.shownAtk?bdef.shownAtk(t):bdef.dynAtk(t)) : t.atk;
@@ -1225,7 +1233,9 @@ function draw(){
   // 连接线
   if(selection.length){
     const d=DEF[selection[0].type];
-    const lineGlow=(selection[0].type==='sword' && player && player.rogueStealTurn) ? DEF.coin.glow : d.glow;
+    const lineGlow=(selection[0].type==='sword' && player && player.rogueStealTurn) ? DEF.coin.glow
+      : (selection[0].type==='sword' && player && player.fireChainTurn) ? '#ff5a36'
+      : d.glow;
     ctx.lineWidth=TILE*0.16; ctx.lineCap='round'; ctx.lineJoin='round';
     ctx.strokeStyle=hexA(lineGlow,.9); ctx.shadowColor=lineGlow; ctx.shadowBlur=12;
     ctx.beginPath();
