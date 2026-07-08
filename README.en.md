@@ -90,7 +90,7 @@ Each race has **several** classes; every skill has a **5-turn cooldown** (except
 | 🧑 Human | ⚔️ Sword Saint | Bladeshift | Turn every heart and coin into swords (its signature passive "Anything a Blade" unlocks at level 100, see below) |
 | 🧝 Elf | 🏹 Ranger | Arrow Rain | Deal "sword power ×2" damage to all enemies |
 | 🧝 Elf | 💰 Rogue | Empty Pockets | For this turn, each enemy hit by your sword chain drops extra gold equal to 20% of its pre-hit HP (rounded down, minimum 1); the chain turns gold |
-| 🧝 Elf | 🌿 Forest Elder | Vine Coil | For the next 3 turns, all enemies/bosses (incl. sword-immune; Overlord excluded) lose 30% of your max HP each turn; cursed foes glow green |
+| 🧝 Elf | 🌿 Treant | Vine Coil | For the next 3 turns, all enemies/bosses (incl. sword-immune; Overlord excluded) lose 30% of your max HP each turn; cursed foes glow green |
 | 🎅 Dwarf | 🔰 Blacksmith | Forge Armor | Absorb all shields on the board into armor progress |
 | 🎅 Dwarf | 🔒 Miser | Hoard | Lock gold for **4 turns** — during the lock, **all incoming gold is stockpiled instead of entering your wallet**; at the end, the frozen pile is paid back at **2.5×** |
 | 🎅 Dwarf | 💼 Guild Master | Buyout | **Pay gold equal to the total HP of all enemies** to bribe them all **into coins** (only if you can afford it; **no cooldown** — reuse it as long as you have gold; bosses unaffected; costs half once you have Cheapskate) |
@@ -114,7 +114,7 @@ At **level 100 (Tier-2 Skill)** you automatically get the passive **locked to yo
 | 🧑 Human | Sword Saint → Anything a Blade | Each turn after the board settles, turn 3 non-enemy non-sword tiles into swords |
 | 🧝 Elf | Ranger → Sharpshooter | +2 extra XP per enemy killed by a sword chain |
 | 🧝 Elf | Rogue → All-In | After buying a bomb, also spend 20% of your current gold and add exactly that amount to this bomb’s damage |
-| 🧝 Elf | Forest Elder → Thorns | When hit, reflect your current armor (damage-reduction) back to the attacker (more armor → more reflect; DoT/poison-backlash/Statue reflection do NOT trigger it) |
+| 🧝 Elf | Treant → Thorns | When hit, reflect your current armor (damage-reduction) back to the attacker (more armor → more reflect; DoT/poison-backlash/Statue reflection do NOT trigger it) |
 | 🎅 Dwarf | Blacksmith → Shield Bash | Adds your armor (damage-reduction) value to flat {W} damage — more armor, harder hits |
 | 🎅 Dwarf | Musketeer → Demolitionist | Each bomb use: +1 damage and +5 gold cost (stronger but pricier each time) |
 | 🎅 Dwarf | Miser → Money Buys Life | While Hoard is active, incoming damage is paid from **frozen gold only**; any remainder spills into HP once the stockpile runs out |
@@ -190,7 +190,7 @@ Flags: `--race=` (human/elf/dwarf/orc), `--t1=`/`--t2=` (class-line id), `--boss
 
 ```bash
 node playtest.js --replay=run.json   # Replay a recording exported from the game (deterministic re-run); prints the outcome / cause of death — handy for analyzing real human play
-node submit-ai-until-posted.js       # Rotate through strong default builds (Elf Elder / Dwarf Guild Master / Human Knight, etc.) until at least one AI score is submitted, then poll until it appears on the current-version AI board
+node submit-ai-until-posted.js       # Rotate through strong default builds (Elf Treant / Dwarf Guild Master / Human Knight, etc.) until at least one AI score is submitted, then poll until it appears on the current-version AI board
 ```
 
 See [`TEST_REPORT.md`](./TEST_REPORT.md) for baseline data (versioned, for regression comparison) and [`CHANGELOG.md`](./CHANGELOG.md) for the change history.

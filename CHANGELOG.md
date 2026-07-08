@@ -1,3 +1,8 @@
+## [v1.43.2]
+
+- 精灵职业显示名由「森林长老 Forest Elder」更名为「树人 Treant」，用于统一当前游戏与文档中的职业称呼；内部职业 id `elder` 保持不变，因此不影响存档、回放与测试兼容。
+- Renamed the Elf class display name from “Forest Elder” to “Treant” across the current game/docs for naming consistency; the internal class id `elder` stays unchanged, so save/replay/test compatibility is unaffected.
+
 ## [v1.43.1]
 
 - 火法师「火焰链 Flame Chain」补齐点燃说明：点开被点燃目标时，现在会直接显示火焰层数、单层每回合掉血，以及当前总掉血（单层 × 层数）。
