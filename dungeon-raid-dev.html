@@ -176,8 +176,8 @@
 (()=>{
 //==================== 配置 ====================
 // 版本号 v主.次.修：不影响 verify/replay 兼容边界的小改动改"修"；凡是影响 verify/replay/版本分桶/release 验证语义的改动都改"次"；大版本变更需先确认。页面底部显示。
-const VERSION='v1.43.2';
-const CHANGELOG_LINES=[{"ver": "v1.43.2", "zh": "精灵职业显示名由「森林长老 Forest Elder」更名为「树人 Treant」，用于统一当前游戏与文档中的职业称呼；内部职业 id `elder` 保持不变，因此不影响存档、回放与测试兼容。", "en": "Renamed the Elf class display name from “Forest Elder” to “Treant” across the current game/docs for naming consistency; the internal class id `elder` stays unchanged, so save/replay/test compatibility is unaffected."}, {"ver": "v1.43.1", "zh": "火法师「火焰链 Flame Chain」补齐点燃说明：点开被点燃目标时，现在会直接显示火焰层数、单层每回合掉血，以及当前总掉血（单层 × 层数）。", "en": "修正火焰链对剑免疫 Boss 的表现：点燃后恢复原本的 Boss 底色，不再误显示成可被普通剑攻击的底色；但仍保留燃烧角标与光效提示。"}, {"ver": "v1.41.2", "zh": "战斗日志新增每回合自动回血提示：恢复量会显示为「💚 恢复 +N（每回合）」，方便追踪 regen 来源的持续回血。", "en": "Combat log now shows per-turn regen ticks: each regen heal is logged as \"💚 恢复 +N（每回合）\" so ongoing life recovery is visible in the log."}, {"ver": "v1.43.0", "zh": "人类新增第 4 职业「火法师 Fire Mage」：一阶主动「火焰链 Flame Chain」开启后，会像狂怒那样让本回合可划过的 Boss 变成火红色并视为可连；本回合剑链划过的怪物 / Boss（含幽灵等剑免疫目标，终焉之主除外）都会被点燃；被点燃目标之后每回合掉“点燃当回合固定伤害的 20%”（最少 1 点），直到死亡。", "en": "火法师锁定二阶被动为「火墙 Firewall」：棋盘最下方 3 行形成火墙红框；其中的怪物 / Boss（含幽灵等剑免疫目标，终焉之主除外）每回合掉“当前固定伤害的 10%”（最少 1 点）。"}, {"ver": "v1.41.1", "zh": "死局判负时，死亡结算不再误把本回合零星伤害来源当成“致命回合伤害来源”；现在会直接显示「被怪物淹没，无路可走」或终局态的「被 Boss 淹没，无路可走」，更符合真实死因。", "en": "Deadlock losses no longer mislabel incidental damage from that turn as the “killing blow”; the result screen now explicitly says you were overrun with no way out (or overrun by bosses in the finale), which matches the actual cause of defeat."}];   /* auto-injected by dr.sh embed-changelog（勿手改） */
+const VERSION='v1.43.3';
+const CHANGELOG_LINES=[{"ver": "v1.43.3", "zh": "修正火法师锁定被动「火墙 Firewall」的说明文案：实际效果一直是底部 3 行目标每回合掉“当前固定伤害的 20%”（最少 1 点），README 与游戏内被动描述之前误写成了 10%，现已统一更正。", "en": "Fixed the wording for Fire Mage’s locked passive Firewall: its actual effect has been 20% of your current flat damage per turn (minimum 1) on foes in the bottom 3 rows; the README and in-game passive text had incorrectly said 10%, and are now corrected."}, {"ver": "v1.43.2", "zh": "精灵职业显示名由「森林长老 Forest Elder」更名为「树人 Treant」，用于统一当前游戏与文档中的职业称呼；内部职业 id `elder` 保持不变，因此不影响存档、回放与测试兼容。", "en": "Renamed the Elf class display name from “Forest Elder” to “Treant” across the current game/docs for naming consistency; the internal class id `elder` stays unchanged, so save/replay/test compatibility is unaffected."}, {"ver": "v1.43.1", "zh": "火法师「火焰链 Flame Chain」补齐点燃说明：点开被点燃目标时，现在会直接显示火焰层数、单层每回合掉血，以及当前总掉血（单层 × 层数）。", "en": "修正火焰链对剑免疫 Boss 的表现：点燃后恢复原本的 Boss 底色，不再误显示成可被普通剑攻击的底色；但仍保留燃烧角标与光效提示。"}, {"ver": "v1.41.2", "zh": "战斗日志新增每回合自动回血提示：恢复量会显示为「💚 恢复 +N（每回合）」，方便追踪 regen 来源的持续回血。", "en": "Combat log now shows per-turn regen ticks: each regen heal is logged as \"💚 恢复 +N（每回合）\" so ongoing life recovery is visible in the log."}, {"ver": "v1.43.0", "zh": "人类新增第 4 职业「火法师 Fire Mage」：一阶主动「火焰链 Flame Chain」开启后，会像狂怒那样让本回合可划过的 Boss 变成火红色并视为可连；本回合剑链划过的怪物 / Boss（含幽灵等剑免疫目标，终焉之主除外）都会被点燃；被点燃目标之后每回合掉“点燃当回合固定伤害的 20%”（最少 1 点），直到死亡。", "en": "火法师锁定二阶被动为「火墙 Firewall」：棋盘最下方 3 行形成火墙红框；其中的怪物 / Boss（含幽灵等剑免疫目标，终焉之主除外）每回合掉“当前固定伤害的 10%”（最少 1 点）。"}];   /* auto-injected by dr.sh embed-changelog（勿手改） */
 const DEV=true;   // release build (DEV=false); dev build is dungeon-raid-dev.html (DEV=true)
 const REC_API='https://api.dungeonraid.win';   // 录像分享 API（Cloudflare Worker + KV）
 // 带种子随机数（mulberry32）：游戏全程用 rnd() 取代原生随机，配合录制种子可确定性重放
@@ -661,7 +661,7 @@ const TIER1={
 const TIER2={
   holystrike:{n:['神圣打击','Holy Strike'], d:['治疗溢出优先轰 Boss；多 Boss 取血最少','Healing overflow prioritizes bosses; lowest-HP boss first'], f:p=>{ p.holyStrike=true; }},
   general:{n:['将军','General'], d:['升级时四选一','Level-up offers 4 choices'], f:p=>{ p.upgradeChoices=4; }},
-  firewall:{n:['火墙','Firewall'], d:['底部 3 行形成火墙；其中怪物每回合掉当前固定伤害 10%（最少 1）','Bottom 3 rows become a firewall; foes there lose 10% of current flat damage each turn (minimum 1)'], f:p=>{ p.firewall=true; }},
+  firewall:{n:['火墙','Firewall'], d:['底部 3 行形成火墙；其中怪物每回合掉当前固定伤害 20%（最少 1）','Bottom 3 rows become a firewall; foes there lose 20% of current flat damage each turn (minimum 1)'], f:p=>{ p.firewall=true; }},
   sharpshooter:{n:['神射手','Sharpshooter'], d:['{WC}击杀怪 +2 经验','+2 XP per {W} kill'], f:p=>{ p.killXp=(p.killXp||0)+2; }},
   shadow:{n:['乾坤一掷','All-In'], d:['买炸弹后，再额外扣当前金币的 20%，并把这笔数额加到这次炸弹伤害上','After buying a bomb, also spend 20% of your current gold and add exactly that amount to this bomb’s damage'], f:p=>{ p.shadowBombGold=true; }},
   demolitionist:{n:['爆破手','Demolitionist'], d:['每用一次炸弹：伤害 +1、花费 +5 金（越炸越强、越炸越贵）','Each bomb use: +1 damage and +5 gold cost (stronger but pricier each time)'], f:p=>{ p.bombBoost=true; }},
@@ -1698,7 +1698,7 @@ function resolve(){
   if(player.goldLock>0){ player.goldLock--; if(player.goldLock===0){ const pay=Math.round(player.goldFrozen*2.5); player.gold+=pay; player.goldFrozen=0; log(tr(`🔓 囤金到期：返还 ${pay} 金币`,`🔓 Hoard matured: +${pay} gold`), 'buff'); } } // 守财奴囤金到期（2.5 倍）
   if(player.deathCoil>0){ deathCoilTick(); player.deathCoil--; }   // 蔓藤缠绕：未来 3 回合每回合全场怪流失 30% 最大生命
   burnTick();   // 火焰链：已点燃目标每回合持续灼烧，直到死亡
-  firewallTick();   // 火墙：底部三行的怪物每回合掉当前固定伤害 10%
+  firewallTick();   // 火墙：底部三行的怪物每回合掉当前固定伤害 20%
   advanceEnemies();
   if(player.cleared) return;   // 终焉第10波撑过 → onClear 已结算，停止后续处理
   if(player.regen){ const _h=gainHeal(player.regen); if(_h>0) log(tr(`💚 恢复 +${_h}（每回合）`,`💚 Regen +${_h} HP`), 'heal'); }

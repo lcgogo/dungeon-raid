@@ -1,3 +1,8 @@
+## [v1.43.3]
+
+- 修正火法师锁定被动「火墙 Firewall」的说明文案：实际效果一直是底部 3 行目标每回合掉“当前固定伤害的 20%”（最少 1 点），README 与游戏内被动描述之前误写成了 10%，现已统一更正。
+- Fixed the wording for Fire Mage’s locked passive **Firewall**: its actual effect has been 20% of your current flat damage per turn (minimum 1) on foes in the bottom 3 rows; the README and in-game passive text had incorrectly said 10%, and are now corrected.
+
 ## [v1.43.2]
 
 - 精灵职业显示名由「森林长老 Forest Elder」更名为「树人 Treant」，用于统一当前游戏与文档中的职业称呼；内部职业 id `elder` 保持不变，因此不影响存档、回放与测试兼容。

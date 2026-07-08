@@ -110,7 +110,7 @@ At **level 100 (Tier-2 Skill)** you automatically get the passive **locked to yo
 |---|---|---|
 | 🧑 Human | Knight → General | Level-up offers 4 choices instead of 3 |
 | 🧑 Human | Priest → Holy Strike | Healing overflow **prioritizes bosses**; with multiple bosses it hits the **lowest-HP** one first, and only falls back to normal enemies when no boss is present (Overlord excluded) |
-| 🧑 Human | Fire Mage → Firewall | The bottom 3 rows become a visible firewall; monsters/bosses there (including sword-immune ones, excluding the Overlord) lose **10% of your current flat damage** each turn (minimum 1) |
+| 🧑 Human | Fire Mage → Firewall | The bottom 3 rows become a visible firewall; monsters/bosses there (including sword-immune ones, excluding the Overlord) lose **20% of your current flat damage** each turn (minimum 1) |
 | 🧑 Human | Sword Saint → Anything a Blade | Each turn after the board settles, turn 3 non-enemy non-sword tiles into swords |
 | 🧝 Elf | Ranger → Sharpshooter | +2 extra XP per enemy killed by a sword chain |
 | 🧝 Elf | Rogue → All-In | After buying a bomb, also spend 20% of your current gold and add exactly that amount to this bomb’s damage |
