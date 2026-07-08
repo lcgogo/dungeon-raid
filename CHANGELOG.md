@@ -1,3 +1,12 @@
+## [v1.43.1]
+
+- 火法师「火焰链 Flame Chain」补齐点燃说明：点开被点燃目标时，现在会直接显示火焰层数、单层每回合掉血，以及当前总掉血（单层 × 层数）。
+- 修正火焰链对剑免疫 Boss 的表现：点燃后恢复原本的 Boss 底色，不再误显示成可被普通剑攻击的底色；但仍保留燃烧角标与光效提示。
+- 修正火焰链选链手感：开启后，剑免疫 Boss 现在可像狂怒/嗜血那样直接作为第一个连线目标，用于本回合点燃。
+- Fire Mage’s Flame Chain now shows complete burn details when you inspect an ignited target: burn stacks, burn per stack, and the current total burn per turn (per-stack × stacks).
+- Fixed Flame Chain visuals on sword-immune bosses: once ignited, they return to their original boss base color instead of looking normally sword-hittable, while still keeping burn badge/glow feedback.
+- Fixed Flame Chain targeting flow so sword-immune bosses can again serve as the first link target for the turn, matching Frenzy/Bloodthirst-style temporary targeting.
+
 ## [v1.41.2]
 
 - 战斗日志新增每回合自动回血提示：恢复量会显示为「💚 恢复 +N（每回合）」，方便追踪 regen 来源的持续回血。

@@ -176,8 +176,8 @@
 (()=>{
 //==================== 配置 ====================
 // 版本号 v主.次.修：不影响 verify/replay 兼容边界的小改动改"修"；凡是影响 verify/replay/版本分桶/release 验证语义的改动都改"次"；大版本变更需先确认。页面底部显示。
-const VERSION='v1.43.0';
-const CHANGELOG_LINES=[{"ver": "v1.41.2", "zh": "战斗日志新增每回合自动回血提示：恢复量会显示为「💚 恢复 +N（每回合）」，方便追踪 regen 来源的持续回血。", "en": "Combat log now shows per-turn regen ticks: each regen heal is logged as \"💚 恢复 +N（每回合）\" so ongoing life recovery is visible in the log."}, {"ver": "v1.43.0", "zh": "人类新增第 4 职业「火法师 Fire Mage」：一阶主动「火焰链 Flame Chain」开启后，会像狂怒那样让本回合可划过的 Boss 变成火红色并视为可连；本回合剑链划过的怪物 / Boss（含幽灵等剑免疫目标，终焉之主除外）都会被点燃；被点燃目标之后每回合掉“点燃当回合固定伤害的 20%”（最少 1 点），直到死亡。", "en": "火法师锁定二阶被动为「火墙 Firewall」：棋盘最下方 3 行形成火墙红框；其中的怪物 / Boss（含幽灵等剑免疫目标，终焉之主除外）每回合掉“当前固定伤害的 10%”（最少 1 点）。"}, {"ver": "v1.41.1", "zh": "死局判负时，死亡结算不再误把本回合零星伤害来源当成“致命回合伤害来源”；现在会直接显示「被怪物淹没，无路可走」或终局态的「被 Boss 淹没，无路可走」，更符合真实死因。", "en": "Deadlock losses no longer mislabel incidental damage from that turn as the “killing blow”; the result screen now explicitly says you were overrun with no way out (or overrun by bosses in the finale), which matches the actual cause of defeat."}, {"ver": "v1.41.0", "zh": "上传门槛快照改为按种族 + minor 版本桶分类，并加上固定回退链：同种族+当前 minor → 同种族+最近 3 个 minor → 全种族+当前 minor → 全种族+最近 3 个 minor。这样不同种族 / 版本不再被一条全局门槛粗暴混算，但样本过少时仍能自动回退到更稳定的范围。", "en": "正式版开局改成在选完种族后再向 `/seed` 申请服务端种子，因此服务器可以把与该种族 / 版本桶匹配的上传门槛快照直接固化进 token 与录像；上传时若 token 里的门槛和当前录像不匹配，也会按同一套回退链重新解析。"}, {"ver": "v1.40.0", "zh": "把「钱能买命 Money Buys Life」再收紧成更纯粹的囤金联动：囤金期间，受到的伤害现在只会优先扣冻结金币，不再动手头现金；只有冻结金币不够时，剩余部分才继续掉血。这样更符合“囤起来的钱替你挡刀”的直觉，也避免把平时钱包一起卷进去。", "en": "Tighten “Money Buys Life” into a purer Hoard-only shield: while Hoard is active, incoming damage is now paid from frozen gold only and no longer drains wallet gold; only any remainder spills into HP once the stockpile is exhausted. This better matches the fantasy that only the hoarded stash buys survival, without dipping into your normal wallet."}];   /* auto-injected by dr.sh embed-changelog（勿手改） */
+const VERSION='v1.43.1';
+const CHANGELOG_LINES=[{"ver": "v1.43.1", "zh": "火法师「火焰链 Flame Chain」补齐点燃说明：点开被点燃目标时，现在会直接显示火焰层数、单层每回合掉血，以及当前总掉血（单层 × 层数）。", "en": "修正火焰链对剑免疫 Boss 的表现：点燃后恢复原本的 Boss 底色，不再误显示成可被普通剑攻击的底色；但仍保留燃烧角标与光效提示。"}, {"ver": "v1.41.2", "zh": "战斗日志新增每回合自动回血提示：恢复量会显示为「💚 恢复 +N（每回合）」，方便追踪 regen 来源的持续回血。", "en": "Combat log now shows per-turn regen ticks: each regen heal is logged as \"💚 恢复 +N（每回合）\" so ongoing life recovery is visible in the log."}, {"ver": "v1.43.0", "zh": "人类新增第 4 职业「火法师 Fire Mage」：一阶主动「火焰链 Flame Chain」开启后，会像狂怒那样让本回合可划过的 Boss 变成火红色并视为可连；本回合剑链划过的怪物 / Boss（含幽灵等剑免疫目标，终焉之主除外）都会被点燃；被点燃目标之后每回合掉“点燃当回合固定伤害的 20%”（最少 1 点），直到死亡。", "en": "火法师锁定二阶被动为「火墙 Firewall」：棋盘最下方 3 行形成火墙红框；其中的怪物 / Boss（含幽灵等剑免疫目标，终焉之主除外）每回合掉“当前固定伤害的 10%”（最少 1 点）。"}, {"ver": "v1.41.1", "zh": "死局判负时，死亡结算不再误把本回合零星伤害来源当成“致命回合伤害来源”；现在会直接显示「被怪物淹没，无路可走」或终局态的「被 Boss 淹没，无路可走」，更符合真实死因。", "en": "Deadlock losses no longer mislabel incidental damage from that turn as the “killing blow”; the result screen now explicitly says you were overrun with no way out (or overrun by bosses in the finale), which matches the actual cause of defeat."}, {"ver": "v1.41.0", "zh": "上传门槛快照改为按种族 + minor 版本桶分类，并加上固定回退链：同种族+当前 minor → 同种族+最近 3 个 minor → 全种族+当前 minor → 全种族+最近 3 个 minor。这样不同种族 / 版本不再被一条全局门槛粗暴混算，但样本过少时仍能自动回退到更稳定的范围。", "en": "正式版开局改成在选完种族后再向 `/seed` 申请服务端种子，因此服务器可以把与该种族 / 版本桶匹配的上传门槛快照直接固化进 token 与录像；上传时若 token 里的门槛和当前录像不匹配，也会按同一套回退链重新解析。"}];   /* auto-injected by dr.sh embed-changelog（勿手改） */
 const DEV=true;   // release build (DEV=false); dev build is dungeon-raid-dev.html (DEV=true)
 const REC_API='https://api.dungeonraid.win';   // 录像分享 API（Cloudflare Worker + KV）
 // 带种子随机数（mulberry32）：游戏全程用 rnd() 取代原生随机，配合录制种子可确定性重放
@@ -1167,8 +1167,9 @@ function draw(){
     const coiled = player && player.deathCoil>0 && (t.type==='enemy'||(t.type==='boss'&&!t.finale));   // 蔓藤缠绕中：敌人格变绿
     const burning = !!(t.burnTurns && t.burnStacks>0);
     const fireLinked = !!(player && player.fireChainTurn && t.type==='boss' && !t.finale);
+    const immuneBossBurning = !!(burning && t.type==='boss' && !t.finale && !bossDef(t).swordable);   // 剑免疫 Boss 被点燃后，底色恢复成原 Boss 色，只保留燃烧光效/角标
     // 能被剑攻击的（怪 / 可剑连的Boss，以及剑本身）统一红底，一眼看出可攻击；蔓藤缠绕中的怪改绿底；燃烧中的怪改橙红底；火焰链激活时的 Boss 改火红底
-    const baseCol = burning ? '#ff6b2f' : fireLinked ? '#ff5336' : coiled ? '#27ae60' : (isSwordTarget(t) || t.type==='sword') ? DEF.sword.color : d.color;   // 黑毒心/绿毒心底色与普通心一致，只换 emoji（💚/🖤）
+    const baseCol = immuneBossBurning ? d.color : burning ? '#ff6b2f' : fireLinked ? '#ff5336' : coiled ? '#27ae60' : (isSwordTarget(t) || t.type==='sword') ? DEF.sword.color : d.color;   // 黑毒心/绿毒心底色与普通心一致，只换 emoji（💚/🖤）
     // 被剑链穿过的怪/可攻击Boss → 红色高亮（表示正被攻击）；燃烧目标走橙色光晕；火焰链激活的 Boss 走更亮的火色
     const gl = (picked && chainType==='sword' && (isSwordTarget(t) || isFireChainTarget(t))) ? '#ff8a3c' : burning ? '#ff9a52' : fireLinked ? '#ff7043' : coiled ? '#2ecc71' : d.glow;
     // 背景
@@ -1411,8 +1412,8 @@ function startDrag(e){
     if(t.type==='shield'||t.type==='heart'||t.type==='coin'){ e.preventDefault(); autoGreedyChain(cell.r,cell.c,t.type); return; }
   }
   if(tapInfoTimer){ clearTimeout(tapInfoTimer); tapInfoTimer=null; tapInfoCell=null; }   // 点了别处 → 取消上一个待弹信息
-  // 从怪物起手 → 视为剑攻击链
-  const base = isSwordTarget(t) ? 'sword' : t.type;   // 怪 / 可攻击Boss 起手 → 剑链
+  // 从怪物 / 火焰链可划过的 Boss 起手 → 视为剑攻击链
+  const base = (isSwordTarget(t) || isFireChainTarget(t)) ? 'sword' : t.type;   // 怪 / 可攻击Boss / 火焰链可点燃Boss 起手 → 剑链
   // 不可连的 Boss 仍允许轻触查看信息（连线不会扩展，松手即弹说明）
   if(t.type!=='boss' && !CONNECTABLE.includes(base)) return;
   dragging=true; dragExtended=false; selection=[{r:cell.r,c:cell.c,type:base}];
@@ -1432,7 +1433,7 @@ function moveDrag(e){
   if(selection.some(s=>s.r===cell.r&&s.c===cell.c)) return; // 已选
   const base=selection[0].type;
   if(base!=='sword' && !CONNECTABLE.includes(base)) return;   // 'boss' 等不可成链的起手仅用于轻触查看信息，不可拖成多格
-  const ok = t.type===base || (base==='sword' && (isSwordTarget(t) || isFireChainTarget(t))); // 剑链可穿怪/可攻击Boss；火焰链开启时也可划过剑免疫 Boss 以点燃
+  const ok = t.type===base || (base==='sword' && (isSwordTarget(t) || isFireChainTarget(t))); // 剑链可穿怪/可攻击Boss；火焰链开启时也可从剑免疫 Boss 起手并划过点燃
   if(!ok) return;
   if(Math.abs(cell.r-last.r)<=1 && Math.abs(cell.c-last.c)<=1){ // 相邻8向
     selection.push({r:cell.r,c:cell.c,type:t.type}); dragExtended=true; }
@@ -2389,8 +2390,9 @@ function tileInfo(t){
       [tr('钱能买命(财阀)','Money Buys Life (Tycoon)'), p.tycoonGoldShield?tr('囤金中：只扣冻结金币','during Hoard: frozen gold only'):'—'] ]};
   if((t.type==='enemy'||t.type==='boss') && t.burnTurns) return {icon:'🔥', title:tr('点燃状态','Ignited'),
     desc:tr('这个目标已被火焰链点燃，会在每回合持续掉血，直到死亡。','This target is ignited by Flame Chain and keeps taking burn damage every turn until it dies.'),
-    rows:[ [tr('每回合掉血','Burn / turn'), `${burnTickDamage(t)}`],
-      [tr('燃烧基准固定伤害','Stored flat damage'), `${t.burnFlat||0}`] ]};
+    rows:[ [tr('火焰层数','Burn stacks'), `${t.burnStacks||0}`],
+      [tr('单层每回合掉血','Burn / stack'), `${Math.max(1, Math.floor(currentSwordFlat()*0.2))}`],
+      [tr('当前总掉血','Total burn / turn'), `${Math.max(1, Math.floor(currentSwordFlat()*0.2))} × ${Math.max(1, t.burnStacks||0)} = ${burnTickDamage(t)}`] ]};
   if(t.type==='boss'){ const def=bossDef(t);
     const rows=[ [tr('血量','HP'), `${t.hp} / ${t.maxHp}`] ];
     if(def.special) rows.push([tr('特殊','Special'), L(def.special)]);
