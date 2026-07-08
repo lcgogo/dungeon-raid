@@ -28,9 +28,11 @@ function run(devFlag,label){
   const { S, store } = makeEngine(devFlag);
   S.busy=false;
   S.startGame(S.raceById('human'));   // 建立真实 player+grid
+  S.player.prophecyPending='coin';
   S.saveGame();                       // 写入存档（ver=当前版本）
   ok(S.hasSave(), `${label} 同版本存档有效`);
   ok(S.loadGame()===true, `${label} 同版本可继续`);
+  ok(S.player.prophecyPending==='coin', `${label} 神谕待补子状态可恢复`);
   // 篡改存档版本号 → 模拟“版本发生变化”
   const d = JSON.parse(store[S.SAVE_KEY]); d.ver='v0.0.0-old'; store[S.SAVE_KEY]=JSON.stringify(d);
   if(devFlag){

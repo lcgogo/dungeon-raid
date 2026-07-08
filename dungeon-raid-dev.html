@@ -176,8 +176,8 @@
 (()=>{
 //==================== 配置 ====================
 // 版本号 v主.次.修：不影响 verify/replay 兼容边界的小改动改"修"；凡是影响 verify/replay/版本分桶/release 验证语义的改动都改"次"；大版本变更需先确认。页面底部显示。
-const VERSION='v1.43.3';
-const CHANGELOG_LINES=[{"ver": "v1.43.3", "zh": "修正火法师锁定被动「火墙 Firewall」的说明文案：实际效果一直是底部 3 行目标每回合掉“当前固定伤害的 20%”（最少 1 点），README 与游戏内被动描述之前误写成了 10%，现已统一更正。", "en": "Fixed the wording for Fire Mage’s locked passive Firewall: its actual effect has been 20% of your current flat damage per turn (minimum 1) on foes in the bottom 3 rows; the README and in-game passive text had incorrectly said 10%, and are now corrected."}, {"ver": "v1.43.2", "zh": "精灵职业显示名由「森林长老 Forest Elder」更名为「树人 Treant」，用于统一当前游戏与文档中的职业称呼；内部职业 id `elder` 保持不变，因此不影响存档、回放与测试兼容。", "en": "Renamed the Elf class display name from “Forest Elder” to “Treant” across the current game/docs for naming consistency; the internal class id `elder` stays unchanged, so save/replay/test compatibility is unaffected."}, {"ver": "v1.43.1", "zh": "火法师「火焰链 Flame Chain」补齐点燃说明：点开被点燃目标时，现在会直接显示火焰层数、单层每回合掉血，以及当前总掉血（单层 × 层数）。", "en": "修正火焰链对剑免疫 Boss 的表现：点燃后恢复原本的 Boss 底色，不再误显示成可被普通剑攻击的底色；但仍保留燃烧角标与光效提示。"}, {"ver": "v1.41.2", "zh": "战斗日志新增每回合自动回血提示：恢复量会显示为「💚 恢复 +N（每回合）」，方便追踪 regen 来源的持续回血。", "en": "Combat log now shows per-turn regen ticks: each regen heal is logged as \"💚 恢复 +N（每回合）\" so ongoing life recovery is visible in the log."}, {"ver": "v1.43.0", "zh": "人类新增第 4 职业「火法师 Fire Mage」：一阶主动「火焰链 Flame Chain」开启后，会像狂怒那样让本回合可划过的 Boss 变成火红色并视为可连；本回合剑链划过的怪物 / Boss（含幽灵等剑免疫目标，终焉之主除外）都会被点燃；被点燃目标之后每回合掉“点燃当回合固定伤害的 20%”（最少 1 点），直到死亡。", "en": "火法师锁定二阶被动为「火墙 Firewall」：棋盘最下方 3 行形成火墙红框；其中的怪物 / Boss（含幽灵等剑免疫目标，终焉之主除外）每回合掉“当前固定伤害的 10%”（最少 1 点）。"}];   /* auto-injected by dr.sh embed-changelog（勿手改） */
+const VERSION='v1.44.0';
+const CHANGELOG_LINES=[{"ver": "v1.44.0", "zh": "精灵新增第 4 职业「先知 Seer」：主动「神谕 Prophecy」可弹框选择 金币 / 盾 / 心 / 剑 / 怪物，令下一次补子时新落下的所有棋子都变成所选类型；若本回合没有触发补子，则效果会保留到下一次补子发生。若选择怪物，则只生成普通怪物，不会生成 Boss。", "en": "先知锁定二阶被动为「命运回响 Echo of Fate」：当神谕真正生效并完成该次补子后，再额外把 3 个随机非 Boss 棋子改成所选类型（若选择怪物，则这 3 个也会变成普通怪物）。"}, {"ver": "v1.43.3", "zh": "修正火法师锁定被动「火墙 Firewall」的说明文案：实际效果一直是底部 3 行目标每回合掉“当前固定伤害的 20%”（最少 1 点），README 与游戏内被动描述之前误写成了 10%，现已统一更正。", "en": "Fixed the wording for Fire Mage’s locked passive Firewall: its actual effect has been 20% of your current flat damage per turn (minimum 1) on foes in the bottom 3 rows; the README and in-game passive text had incorrectly said 10%, and are now corrected."}, {"ver": "v1.43.2", "zh": "精灵职业显示名由「森林长老 Forest Elder」更名为「树人 Treant」，用于统一当前游戏与文档中的职业称呼；内部职业 id `elder` 保持不变，因此不影响存档、回放与测试兼容。", "en": "Renamed the Elf class display name from “Forest Elder” to “Treant” across the current game/docs for naming consistency; the internal class id `elder` stays unchanged, so save/replay/test compatibility is unaffected."}, {"ver": "v1.43.1", "zh": "火法师「火焰链 Flame Chain」补齐点燃说明：点开被点燃目标时，现在会直接显示火焰层数、单层每回合掉血，以及当前总掉血（单层 × 层数）。", "en": "修正火焰链对剑免疫 Boss 的表现：点燃后恢复原本的 Boss 底色，不再误显示成可被普通剑攻击的底色；但仍保留燃烧角标与光效提示。"}, {"ver": "v1.41.2", "zh": "战斗日志新增每回合自动回血提示：恢复量会显示为「💚 恢复 +N（每回合）」，方便追踪 regen 来源的持续回血。", "en": "Combat log now shows per-turn regen ticks: each regen heal is logged as \"💚 恢复 +N（每回合）\" so ongoing life recovery is visible in the log."}];   /* auto-injected by dr.sh embed-changelog（勿手改） */
 const DEV=true;   // release build (DEV=false); dev build is dungeon-raid-dev.html (DEV=true)
 const REC_API='https://api.dungeonraid.win';   // 录像分享 API（Cloudflare Worker + KV）
 // 带种子随机数（mulberry32）：游戏全程用 rnd() 取代原生随机，配合录制种子可确定性重放
@@ -259,6 +259,7 @@ let grid, player, selection, dragging, anim, busy=false, pendingLevels=0;
 let rec=null, replaying=false;   // rec=本局录像{v,seed,race,acts}；replaying=回放中（回放时不录、抑制弹窗）
 let replayResumeState=null;   // 进入回放前的 live 快照：退出回放时恢复，避免技能槽/职业/棋盘状态泄漏回实玩
 let headless=false;   // 无头机器人模式：抑制升级弹窗(及其抽池消耗RNG)，由机器人自行抽池+录制，保证录像可确定性重放
+let prophecySlotKey=null;   // 先知：当前弹框是来自一阶主动还是换装槽（heal/bomb），用于录制/进冷却
 
 function newPlayer(){
   return {hp:20,maxHp:20, armor:0, shieldXp:0, toughness:0, shopCd:{}, skillCd:0, dmgBy:{}, deathMode:'damage', bossDue:false, gold:0, xp:0, level:1,
@@ -269,7 +270,8 @@ function newPlayer(){
     skill2:null, skill2Cd:0, t4Pending:false,                              // 350回合：任选主动替换治疗/炸弹槽
     comboMult:1, swordMult:1, armorMult:1, maxHpUpMult:1, noArmor:false,
     chosenPerks:[],                                                      // 本局已选技能名（按选择顺序，供录像/展示用）
-    heartPoison:false, rogueStealTurn:false, fireChainTurn:false, firewall:false,   // 巫医蛊毒：本回合连心改为毒怪；盗贼：本回合命中偷金；火法师：火焰链 / 火墙
+    prophecyPending:null,                                                // 先知：下一次补子要强制落下的类型（本回合未补子则保留到下次）
+    heartPoison:false, rogueStealTurn:false, fireChainTurn:false, firewall:false, echoOfFate:false,   // 巫医蛊毒：本回合连心改为毒怪；盗贼：本回合命中偷金；火法师：火焰链 / 火墙；先知：命运回响
     foeCdBonus:0, skillCdMod:0, splash:false, rebirthTurn:false, rebirthSaves:0, healMult:1,  // 活死人：迷惑/技能冷却修正/溅射/重生/治疗减半
     upgradeChoices:3, bombCd:3, goldLock:0, goldFrozen:0, healUses:0, bombUses:0, shadowBombGold:false, tycoonGoldShield:false, frozen:{},  // 转职被动相关；healUses：治疗递增；bombUses：爆破手炸弹递增；shadowBombGold：乾坤一掷；tycoonGoldShield：钱能买命；frozen：雪人冰封的主动剩余回合（skill/heal/bomb）
     finaleStarted:false, finaleWave:0, cleared:false};                      // 终局：终焉之主浪潮 / 破关
@@ -601,6 +603,7 @@ const TIER1={
   ranger:{n:['游侠','Ranger'], quip:['抬头——那不是雨，是箭。','Heads up — those are not raindrops.'], skill:{name:['箭雨','Arrow Rain'], short:['全场怪受{W}威力×2','×2 {W} power to all'], desc:['对场上每一只可{W}攻击的怪/Boss 各打一发「{W}威力×2」的伤害（每只独立全额，不分摊）。{W}免疫的 Boss（幽灵/小丑等）不受影响——箭属武器攻击。','Hits every {W}-targetable foe for ×2 {W} power (full damage to each, not shared). {W}-immune bosses (Ghost/Clown…) are unaffected — arrows are a weapon attack.'], cd:5, f:p=>{ const titanFlat=(p.titan?Math.floor(p.maxHp/12):0)+shieldBashFlat(p); const pool=Math.floor((p.weaponPower*2 + p.swordFlat + titanFlat)*(p.swordMult||1)); const r=dealDamage(pool,null); const lh=lifestealHeal(r.kills); applyGravity(); syncPositions(false); log(tr(`🏹 箭雨：全场 ${r.dmg} 伤害`+(r.kills?`，击杀 ${r.kills}`:'')+(lh?`，吸血 +${lh}`:''),`🏹 Arrow Rain: ${r.dmg} dmg`+(r.kills?`, ${r.kills} killed`:'')+(lh?`, +${lh} lifesteal`:''))); return true; }}},
   rogue:{n:['盗贼','Rogue'], quip:['剑能砍人，钱要从刀口里拿。','If the blade lands, the purse opens.'], skill:{name:['妙手空空','Empty Pockets'], short:['本回合命中偷金','Hits steal bonus gold'], desc:['本回合你用{WC}攻击到的每个敌人，都会额外掉落它当前血量 20% 的金币（向下取整，至少 1 金）。连线会变成金色；若这回合没用{W}打到敌人，就等于白开。','For this turn, every enemy your {WC} hits drops extra gold equal to 20% of its current HP (rounded down, minimum 1). The chain turns gold; if your {W} fails to hit anything this turn, the buff is wasted.'], cd:5, f:p=>{ p.rogueStealTurn=true; log(tr(`📲 妙手空空：本回合用${wChain()}命中的敌人，会按命中前血量额外掉金币`,`💰 Empty Pockets: enemies hit by your ${wChain()} this turn drop bonus gold from their pre-hit HP`), 'buff'); return true; }}},
   elder:{n:['树人','Treant'], quip:['生命有借有还——敌人先还。','Life is a loan; your enemies pay first.'], skill:{name:['蔓藤缠绕','Vine Coil'], short:['3回合内每回合全场怪 −30%你最大生命','3 turns: all foes −30% your max HP/turn'], desc:['发动后接下来 3 个回合，每回合让场上所有怪/Boss（含剑免疫，终焉之主除外）损失「你最大生命的 30%」。被缠绕期间敌人格变绿。','For the next 3 turns, every turn all enemies/bosses (incl. sword-immune; Overlord excluded) lose 30% of your max HP. Cursed foes glow green.'], cd:5, f:p=>{ p.deathCoil=3; log(tr('🟢 蔓藤缠绕：未来 3 回合，全场怪每回合流失你 30% 最大生命！','🟢 Vine Coil: for 3 turns, all foes lose 30% of your max HP each turn!'), 'buff'); return true; }}},
+  seer:{n:['先知','Seer'], quip:['我命由我不由天','My fate is mine, not heaven\'s.'], skill:{name:['神谕','Prophecy'], short:['指定下次落下的棋子','Choose the next falling tiles'], desc:['发动后选择一种棋子：金币、盾、心、剑或怪物。下一次补子时，新落下的所有棋子都会变成该类型。若选择怪物，则只会生成普通怪物，不会生成 Boss。若本回合没有触发补子，则效果会保留到下一次补子发生。','Choose one tile type: coin, shield, heart, sword, or enemy. During the next refill, all newly falling tiles become that type. If enemy is chosen, only normal enemies are created, never bosses. If no refill happens this turn, the effect is kept until the next refill occurs.'], cd:5, f:p=>{ showProphecySelect(prophecySlotKey); return '__defer__'; }}},
   blacksmith:{n:['锻造师','Blacksmith'], quip:['盾别拿手里，焊身上才香。','Do not hold shields — wear them.'], skill:{name:['锻甲','Forge Armor'], short:['收全场盾→护甲','Absorb all shields'], desc:['吞下棋盘上所有的盾，按「每盾护甲进度」一次性转成护甲进度并立刻结算升甲。兽人无甲→无效；场上没盾→无效、不进冷却。','Devours every shield on the board, converting each into Armor XP at your per-shield rate and leveling armor at once. No effect for the armor-less Orc, or when there are no shields (no cooldown then).'], cd:5, f:p=>{ if(p.noArmor) return false; let n=0; for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){const t=grid[r][c]; if(t&&t.type==='shield'){grid[r][c]=null;n++;}} if(!n)return false; p.shieldXp+=n*p.armorPerShield; while(p.shieldXp>=armorNeeded(p.armor)){p.shieldXp-=armorNeeded(p.armor);p.armor++;} applyGravity(); syncPositions(false); log(tr(`🔰 锻甲：吞下 ${n} 盾（减伤 ${p.armor}）`,`🔰 Forge: ${n} shields (armor ${p.armor})`), 'buff'); return n; }}},
   miser:{n:['守财奴','Miser'], quip:['钱躺一会儿，利滚利。','Let the gold nap — it wakes up doubled.'], skill:{name:['囤金','Hoard'], short:['锁金生利','Lock gold for interest'], desc:['锁金 4 回合：期间金币不直接进账、也不能用商店/技能，而是先囤起来；4 回合后一次性按 2.5 倍返还囤积的金币。','Locks gold for 4 turns: coins are stockpiled (not banked or spent) and shop/skills are disabled; after 4 turns the stockpile is paid back at 2.5×.'], cd:5, f:p=>{ if(p.goldLock>0) return false; const n=4; p.goldLock=n; p.goldFrozen=0; log(tr(`🔒 囤金：锁定 ${n} 回合（期间不产/不花金币，到期返还 2.5 倍）`,`🔒 Hoard: locked ${n} turns (no gold in/out; 2.5× payout at end)`), 'buff'); return true; }}},
   guildmaster:{n:['会长','Guild Master'], quip:['有钱能使鬼推磨。','Money makes the world go round.'], skill:{name:['收买','Buyout'], short:['花「全怪血量」的金币把全场怪买通成金币','Pay gold = total enemy HP to bribe all enemies into coins'], desc:['花费「场上所有普通怪当前血量之和」那么多金币，把它们全部买通、原地变成金币（不影响 Boss）。金币不够则发动不了。无冷却，钱够就能反复用。学了「小气鬼」后花费减半。','Spend gold equal to the total current HP of all regular monsters to bribe them all into coins on the spot (bosses unaffected). Fails if you cannot afford it. No cooldown — reusable while you have the gold. Costs half once you have Cheapskate.'], cd:5, noCd:true, f:p=>{ let hp=0; const cells=[]; for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const t=grid[r][c]; if(t&&t.type==='enemy'){ hp+=t.hp; cells.push([r,c]); } } const cost=p.cheapskate?Math.ceil(hp/2):hp;   // 小气鬼：买通花费也减半（会长100回合必得小气鬼）
@@ -676,18 +679,19 @@ const TIER2={
   rotflesh:{n:['积累腐肉','Carrion Feast'], d:['每杀死一个敌人/Boss，生命上限永久 +1（腐肉越积越厚）','Each enemy/boss killed: +1 permanent max HP (carrion keeps piling up)'], f:p=>{ p.rotflesh=true; }},
   bladeall:{n:['皆可为剑','Anything a Blade'], d:['每回合棋盘摆完后，把 3 个非敌/非剑棋子变成剑','Each turn after the board settles, turns 3 non-enemy non-sword tiles into swords'], f:p=>{ p.swordConvert=true; }},
   allpoison:{n:['万物皆毒','All is Poison'], d:['每回合把 3 个非敌/非心棋子燃成黑毒心；连黑毒心只放毒灌全场怪、不回血','Each turn burns 3 non-enemy non-heart tiles into BLACK poison hearts; linking them poisons all foes (no heal)'], f:p=>{ p.poisonConvert=true; }},
+  echooffate:{n:['命运回响','Echo of Fate'], d:['神谕生效后，这次补子完成时，再额外把 3 个随机非 Boss 棋子改成所选类型','After Prophecy resolves, 3 random non-boss tiles are additionally transformed into the chosen type'], f:p=>{ p.echoOfFate=true; }},
 };
 // 二阶被动锁定到一阶职业（100 回合按此直接授予；200 回合再从同族其余被动里选另一个）
 const CLASS_T2={
   knight:'general', priest:'holystrike', firemage:'firewall', swordsaint:'bladeall',
-  ranger:'sharpshooter', rogue:'shadow', elder:'thorns',
+  ranger:'sharpshooter', rogue:'shadow', elder:'thorns', seer:'echooffate',
   blacksmith:'shieldbash', miser:'tycoon', guildmaster:'cheapskate', musketeer:'demolitionist',
   necromancer:'rejuvenation', skeletonking:'splash', butcher:'rotflesh',
   berserker:'warlord', fighter:'bloodfrenzy', witchdoctor:'allpoison',
 };
 const RACE_PATHS={
   human:{t1:['knight','priest','firemage','swordsaint'], t2:['general','holystrike','firewall','bladeall']},
-  elf:  {t1:['ranger','rogue','elder'], t2:['sharpshooter','shadow','thorns']},
+  elf:  {t1:['ranger','rogue','elder','seer'], t2:['sharpshooter','shadow','thorns','echooffate']},
   dwarf:{t1:['blacksmith','miser','guildmaster','musketeer'], t2:['shieldbash','tycoon','cheapskate','demolitionist']},
   undead:{t1:['necromancer','skeletonking','butcher'], t2:['rejuvenation','splash','rotflesh']},
   orc:  {t1:['berserker','fighter','witchdoctor'], t2:['warlord','bloodfrenzy','allpoison']},
@@ -1037,7 +1041,7 @@ const NM_ADJ_EN=['Brave','Sly','Fearless','Grumpy','Silent','Shining','Lucky','R
 const NM_NOUN_EN=['Knight','Ranger','Rogue','Warden','Butcher','Wanderer','Hunter','Ghost','King','Veteran','Saint','Gambler','Brute','Outlaw'];
 function genName(){ const pick=a=>a[Math.floor(Math.random()*a.length)]; return lang==='en' ? pick(NM_ADJ_EN)+' '+pick(NM_NOUN_EN) : pick(NM_ADJ_ZH)+'的'+pick(NM_NOUN_ZH); }
 const REC_KEY=DEV?'dr_rec_dev':'dr_rec', REC_LAST_KEY=DEV?'dr_rec_last_dev':'dr_rec_last';  // 进行中录像 / 上一局完整录像
-// 录制一个玩家动作（回放中不录）。动作：['m',cells,baseType] 连线 / ['b',key] 购买 / ['k'] 技能 / ['u',idx] 升级选择 / ['t',tier,id] 转职选择
+// 录制一个玩家动作（回放中不录）。动作：['m',cells,baseType] 连线 / ['b',key] 购买 / ['b',key,'seer',type] 换装先知选择 / ['k'] 技能 / ['k','seer',type] 先知选择 / ['u',idx] 升级选择 / ['t',tier,id] 转职选择
 // 每个动作末尾追加一个时间戳（epoch ms，相对开局可算操作间隔）——仅供离线分析（后续黑盒判定是否 AI 录像），回放/校验按固定下标取值，忽略该尾元素，旧录像无此字段也能正常回放。
 function recAct(a){ if(rec && !replaying){ a.push(Date.now()-(rec.t0||0)); rec.acts.push(a); saveRec(); } }
 // 本局游玩时长（毫秒）：实时对局取 now−t0；回放取录像最后一步的时间戳（相对开局 ms）
@@ -1512,9 +1516,11 @@ function buyItem(key){
 // 施放换装主动（占用 治疗/炸弹 槽）。走独立冷却 skill2Cd；录像用占用的槽位 key，回放经 buyItem 复现。
 function castSkill2(key){
   if(player.skill2Cd>0) return;
+  prophecySlotKey=key;
   const def=TIER1[player.skill2.id], sk=def&&def.skill; if(!sk) return;
   const r=sk.f(player);
   if(r===false) return;        // 技能无效（如对无甲用锻甲）：不进冷却、不刷日志
+  if(r==='__defer__') return;   // 先知换装：技能函数里已弹框，等待选择
   if(!sk.noCd) player.skill2Cd=effSkillCd(player.skill2.id);   // 无冷却技能（收买）不进冷却
   recAct(['b',key]);   // 录制（占用槽位 key）；回放 dispatchReplayAct('b',key)→buyItem→castSkill2
   if(r===undefined) log(tr(`✨ 【${L(sk.name)}】发动！`,`✨ ${L(sk.name)} activated!`), 'buff');
@@ -1573,7 +1579,7 @@ function shopInfoData(key){
   }
   if(key==='skill'){
     const t1=p.tier1&&TIER1[p.tier1]; if(!t1||!t1.skill) return null; const sk=t1.skill;
-    const st=(p.frozen&&p.frozen.skill>0)?`❄️${p.frozen.skill}${tr('回合','t')}`:(p.tier1==='miser'&&p.goldLock>0)?`🔒${p.goldLock}${tr('回合','t')}`:p.skillCd>0?`⏳${p.skillCd}${tr('回合','t')}`:tr('可发动','Ready');
+    const st=(p.frozen&&p.frozen.skill>0)?`❄️${p.frozen.skill}${tr('回合','t')}`:(p.tier1==='miser'&&p.goldLock>0)?`🔒${p.goldLock}${tr('回合','t')}`:p.skillCd>0?`⏳${p.skillCd}${tr('回合','t')}`:p.prophecyPending?`🔮${prophecyLabel(p.prophecyPending)}`:tr('可发动','Ready');
     let desc='';   // 俏皮话紧跟职业名（标题），技能描述/被动另起一行
     if(t1.quip) desc+=`<i style="color:#caa6e6">「${L(t1.quip)}」</i><br>`;
     desc+=`<b>${L(sk.short)}</b>`;
@@ -1607,13 +1613,50 @@ function effSkillCd(id){
   if(id==='skeletonking') cd+=2*(player.rebirthSaves||0);
   return Math.max(1, cd);
 }
+function prophecyLabel(type, en){
+  if(type==='coin') return en?'coins':tr('金币','coins');
+  if(type==='shield') return en?'shields':tr('盾','shields');
+  if(type==='heart') return en?'hearts':tr('心','hearts');
+  if(type==='sword') return en?'swords':tr('剑','swords');
+  if(type==='enemy') return en?'enemies':tr('怪物','enemies');
+  return type||'—';
+}
+function activateSeerSkill(type, fromReplay, slotKey){
+  if(!player) return false;
+  player.prophecyPending=type;
+  if(slotKey){ player.skill2Cd=effSkillCd(player.skill2.id); if(!fromReplay) recAct(['b',slotKey,'seer',type]); }
+  else { player.skillCd=effSkillCd(player.tier1); if(!fromReplay) recAct(['k','seer',type]); }
+  prophecySlotKey=null;
+  log(tr(`🔮 神谕已定：下一次补子将落下${prophecyLabel(type)}` ,`🔮 Prophecy set: the next refill will drop ${prophecyLabel(type,true)}`), 'buff');
+  checkLevel(); busy=false; hideOverlay(); updateHUD();
+  if(player.t3Pending){ player.t3Pending=false; showTierSelect(3); return true; }
+  if(player.t4Pending){ player.t4Pending=false; showSkillSwap(); return true; }
+  if(pendingLevels){ showLevelUp(); return true; }
+  checkDeadlock();
+  return true;
+}
+function showProphecySelect(slotKey){
+  prophecySlotKey=slotKey||null;
+  busy=true;
+  const card=document.getElementById('card');
+  card.innerHTML=`<h2>🔮 ${tr('神谕','Prophecy')}</h2><p style="font-size:12px;color:var(--dim);margin-bottom:8px">${tr('选择下一次补子要落下的棋子类型','Choose which tile type the next refill will drop')}</p>`;
+  [['coin','💰 '+tr('金币','Coin')],['shield','🔰 '+tr('盾','Shield')],['heart','💗 '+tr('心','Heart')],['sword','⚔️ '+tr('剑','Sword')],['enemy','👹 '+tr('怪物','Enemy')]].forEach(([type,label])=>{
+    const b=document.createElement('button'); b.className='choice';
+    b.innerHTML=`<b>${label}</b><small>${tr('下一次补子全部变成这种棋子','All newly falling tiles in the next refill become this type')}</small>`;
+    b.onclick=()=>activateSeerSkill(type, false, slotKey);
+    card.appendChild(b);
+  });
+  showOverlay();
+}
 function activateSkill(){
   if(busy||pendingLevels) return;
+  prophecySlotKey=null;
   const sk=player&&player.tier1&&TIER1[player.tier1]&&TIER1[player.tier1].skill; if(!sk) return;  // 一阶职业的主动
   if(player.frozen && player.frozen.skill>0) return;   // 雪人冰封了一阶主动
   if(player.skillCd>0) return;
   const r=sk.f(player);
   if(r===false) return;        // 技能判定无效（如锻甲场上没护甲）：不进冷却、不刷日志
+  if(r==='__defer__') return;  // 先知：等待弹框选择具体类型，提交后再进冷却/录像
   if(!sk.noCd) player.skillCd=effSkillCd(player.tier1);   // 无冷却技能（收买）不进冷却，有钱即可反复用
   recAct(['k']);   // 录制技能发动
   if(r===undefined) log(tr(`✨ 【${L(sk.name)}】发动！`,`✨ ${L(sk.name)} activated!`), 'buff'); // 技能没自带日志才用通用日志
@@ -1881,12 +1924,22 @@ function reflectThorns(amt, atkr){
 }
 
 function applyGravity(){
+  const prophecyType=player&&player.prophecyPending;
+  let spawned=0;
   for(let c=0;c<COLS;c++){
     let write=ROWS-1;
     for(let r=ROWS-1;r>=0;r--){ if(grid[r][c]){ const t=grid[r][c];
       if(write!==r){ grid[write][c]=t; grid[r][c]=null; } write--; } }
     let above=-1;
-    for(let r=write;r>=0;r--){ const t=makeTile(); t.curY=cellY(above); above--; grid[r][c]=t; }
+    for(let r=write;r>=0;r--){ const t=makeTile(prophecyType||undefined); t.curY=cellY(above); above--; grid[r][c]=t; spawned++; }
+  }
+  if(prophecyType && spawned>0){
+    player.prophecyPending=null;
+    log(tr(`🔮 神谕应验：本次补子全部变为${prophecyLabel(prophecyType)}` ,`🔮 Prophecy fulfilled: this refill became all ${prophecyLabel(prophecyType,true)}`), 'buff');
+    if(player.echoOfFate){
+      const n=convertTiles(3, prophecyType, ['sword','shield','heart','coin','enemy']);
+      if(n){ syncPositions(false); log(tr(`🌀 命运回响：额外改写 ${n} 个棋子`,`🌀 Echo of Fate: ${n} extra tiles transformed`), 'buff'); }
+    }
   }
 }
 
@@ -2217,7 +2270,7 @@ function startReplay(recObj){
   if(!recObj||!Array.isArray(recObj.acts)){ alert(tr('录像无效','Invalid recording')); return; }
   replayResumeState = player&&grid ? {
     player: JSON.parse(JSON.stringify(player)),
-    grid: grid.map(row=>row.map(t=> t?{type:t.type,hp:t.hp,maxHp:t.maxHp,atk:t.atk,cd:t.cd,baseCd:t.baseCd,bossId:t.bossId,tier:t.tier,stolen:t.stolen,finale:t.finale,incub:t.incub,poison:t.poison}:null)),
+    grid: grid.map(row=>row.map(t=> t?{type:t.type,hp:t.hp,maxHp:t.maxHp,atk:t.atk,cd:t.cd,baseCd:t.baseCd,bossId:t.bossId,tier:t.tier,stolen:t.stolen,finale:t.finale,incub:t.incub,poison:t.poison,burnTurns:t.burnTurns,burnStacks:t.burnStacks}:null)),
     pendingLevels, busy, dragging:!!dragging, selection:selection?selection.map(s=>({...s})):[], rec:rec?JSON.parse(JSON.stringify(rec)):null, ended
   } : null;
   replaying=true; replayRec=recObj; replayIdx=0; replaySpeed=1; replayPaused=false; replayAutoPaused=false; replayPending=null; rec=null;
@@ -2261,8 +2314,14 @@ function dispatchReplayAct(a){
     selection=cells.map(([r,c],i)=>({r,c,type:i===0?base:(grid[r][c]?grid[r][c].type:base)}));
     resolve();
     selection=[];   // 结算后立即清：连线由 replayStep 在「结算前」的棋盘上预显示（见两拍逻辑），绝不画在已重排的棋盘上
-  } else if(k==='b'){ buyItem(a[1]); }
-  else if(k==='k'){ activateSkill(); }
+  } else if(k==='b'){
+    if(a[2]==='seer'){ activateSeerSkill(a[3], true, a[1]); }
+    else buyItem(a[1]);
+  }
+  else if(k==='k'){
+    if(a[1]==='seer') activateSeerSkill(a[2], true);
+    else activateSkill();
+  }
   else if(k==='u'){ rollUpgradePool(); applyUpgrade(UPGRADES[a[1]]); updateHUD(); }   // 洗牌消耗等量 RNG（丢弃结果），按录像索引应用
   else if(k==='t'){ const tier=a[1], id=a[2];
     if(tier===1){ player.tier1=id; }
@@ -2547,6 +2606,7 @@ function updateHUD(){
     sb.querySelector('em').textContent = fzs ? `❄️${player.frozen.skill}${tr('回合','t')}`
       : hoarding ? `🔒${player.goldLock}${tr('回合','t')}`
       : player.skillCd>0 ? `⏳${player.skillCd}${tr('回合','t')}`
+      : player.prophecyPending ? `🔮${prophecyLabel(player.prophecyPending)}`
       : isBuyout ? `💰${buyCost}`                                         // 收买：显示当前花费（全怪血量），钱不够时按钮置灰
       : tr('可发动','Ready');
     sb.classList.toggle('off', busy || pendingLevels || player.skillCd>0 || hoarding || fzs || cantAfford);

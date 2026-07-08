@@ -64,8 +64,17 @@ e.turns=100; e.tier1='rogue'; G.onBossKilled(); ok(e.t2Pending,'盗贼100回合�
 G.dispatchReplayAct(['t',2,'shadow']);
 ok(e.tier2==='shadow' && e.shadowBombGold===true,'盗贼二阶=乾坤一掷(被动生效)');
 
+// 先知链：50/100 回合职业与锁定被动
+G.replayRec={seed:19,race:'elf',acts:[]}; G.replaying=true; G.startGame(G.raceById('elf')); G.replaying=false;
+const se=G.player; se.hp=se.maxHp=999999; G.busy=false; G.pendingLevels=0;
+se.turns=50; G.onBossKilled(); ok(se.t1Pending,'先知50回合→t1Pending'); se.t1Pending=false;
+G.dispatchReplayAct(['t',1,'seer']); ok(se.tier1==='seer','一阶=先知');
+se.turns=100; G.onBossKilled(); ok(se.t2Pending,'先知100回合→t2Pending'); se.t2Pending=false;
+G.dispatchReplayAct(['t',2,'echooffate']); ok(se.tier2==='echooffate' && se.echoOfFate===true,'二阶=命运回响(被动生效)');
+G.dispatchReplayAct(['k','seer','coin']); ok(se.prophecyPending==='coin','先知主动录像可记录选择类型');
+
 // onBossKilled 链：未到回合不应误触发
-const q=Object.assign({},{t1:e.t1Pending||p.t1Pending,t2:e.t2Pending||p.t2Pending,t3:e.t3Pending||p.t3Pending,t4:e.t4Pending||p.t4Pending});
+const q=Object.assign({},{t1:se.t1Pending||e.t1Pending||p.t1Pending,t2:se.t2Pending||e.t2Pending||p.t2Pending,t3:se.t3Pending||e.t3Pending||p.t3Pending,t4:se.t4Pending||e.t4Pending||p.t4Pending});
 ok(!q.t1&&!q.t2&&!q.t3&&!q.t4,'里程碑用尽后无残留 pending');
 
 console.log(fails?`\n❌ ${fails} 项未通过`:'\n✅ 里程碑链 + 换装主动 全部通过');

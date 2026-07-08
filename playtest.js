@@ -175,12 +175,12 @@ let UP_PRIORITY=UP_PROFILES.balanced;   // 当前取向（默认均衡，与历�
 const upRank=n=>{const i=UP_PRIORITY.indexOf(n);return i<0?99:i;};
 const COMPETITIVE_BUILDS={
   human:{ t1:['firemage','knight','priest','swordsaint'], t3:['firewall','holystrike','bladeall','general'], profile:'offense' },
-  elf:{ t1:['elder','ranger','rogue'], t3:['sharpshooter','shadow','thorns'], profile:'elder_survival' },
+  elf:{ t1:['seer','elder','ranger','rogue'], t3:['echooffate','sharpshooter','shadow','thorns'], profile:'elder_survival' },
   dwarf:{ t1:['guildmaster','miser','musketeer','blacksmith'], t3:['demolitionist','tycoon','cheapskate','shieldbash'], profile:'offense' },
   orc:{ t1:['fighter','berserker','witchdoctor'], t3:['titan','bloodfrenzy','allispoison'], profile:'offense' },
   undead:{ t1:['necromancer','butcher','skeletonking'], t3:['splash','rejuvenation','carrion'], profile:'sustain' },
 };
-const COMPETITIVE_SWAP_SKILLS=['guildmaster','elder','priest','knight','musketeer','rogue','ranger','necromancer'];
+const COMPETITIVE_SWAP_SKILLS=['guildmaster','elder','seer','priest','knight','musketeer','rogue','ranger','necromancer'];
 function countBoard(type){ const g=grid(); let n=0; for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){const t=g[r][c]; if(t&&t.type===type)n++;} return n; }
 function boardEnemies(){ const g=grid(),e=[]; for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){const t=g[r][c]; if(t&&t.type==='enemy')e.push(t);} return e; }
 function boardSwords(){ return countBoard('sword'); }
@@ -326,6 +326,14 @@ function bestSimple(type){
   }
   return best;
 }
+function chooseSeerProphecy(state){
+  if(state.lowHp && state.hearts<2) return 'heart';
+  if(state.boss && state.immuneBoss) return 'sword';
+  if(state.enemyCount>=4) return 'sword';
+  if(state.coins<2 && state.enemyCount>=2) return 'coin';
+  if(state.shields>=2 && state.imminent>0) return 'shield';
+  return 'sword';
+}
 function shouldUseSkill(state){
   const p=state.player; if(!p.tier1 || p.skillCd>0) return false;
   const id=p.tier1;
@@ -341,6 +349,7 @@ function shouldUseSkill(state){
     return state.enemyCount>=2 && cost>0 && p.gold>=cost;
   }
   if(id==='elder') return !p.deathCoil && (state.immuneBoss || state.enemyCount>=3 || (!!state.boss && state.boss.cd<=2));   // 蔓藤留给幽灵/群怪/Boss临危，不浪费在单怪上
+  if(id==='seer') return !p.prophecyPending && (!!chooseSeerProphecy(state));
   if(id==='butcher') return !!state.boss || state.enemyCount>=3;
   if(id==='musketeer') return !!state.boss || state.enemyCount>=1;
   if(id==='necromancer') return !!state.boss || state.enemyCount>=2 || state.lowHp;
@@ -364,6 +373,7 @@ function shouldUseSkill2(state){
     return state.enemyCount>=2 && cost>0 && p.gold>=cost;
   }
   if(id==='elder') return !p.deathCoil && (state.immuneBoss || state.enemyCount>=3 || (!!state.boss && state.boss.cd<=2));   // 蔓藤留给幽灵/群怪/Boss临危，不浪费在单怪上
+  if(id==='seer') return !p.prophecyPending && (!!chooseSeerProphecy(state));
   if(id==='butcher') return !!state.boss || state.enemyCount>=3;
   if(id==='musketeer') return !!state.boss || state.enemyCount>=1;
   if(id==='necromancer') return !!state.boss || state.enemyCount>=2 || state.lowHp;
@@ -378,10 +388,22 @@ function maybeSkill(){
     const slot=state.player.skill2.slot;
     G.buyItem(slot);
     botTransform(); resolveLevels();
+    if(P().prophecyPending==null && P().skill2 && P().skill2.id==='seer' && P().skill2Cd===0){
+      const choice=chooseSeerProphecy(state);
+      G.dispatchReplayAct(['b', slot, 'seer', choice]);
+      botTransform(); resolveLevels();
+    }
     acted=true;
     state=boardState();
   }
   if(!shouldUseSkill(state)) return acted;
+  if(state.player.tier1==='seer'){
+    G.activateSkill();
+    const choice=chooseSeerProphecy(state);
+    G.dispatchReplayAct(['k','seer',choice]);
+    resolveLevels();
+    return true;
+  }
   const ok=G.activateSkill();
   resolveLevels();
   return ok || acted;
@@ -534,7 +556,7 @@ else if('submit-ai' in ARG || 'submit-human' in ARG){
   const API = ARG.api || 'https://api.dungeonraid.win';
   const submitRace = ARG.race || 'elf';
   if(!ARG.race) ARG.race = submitRace;
-  if(!ARG.t1 && submitRace==='elf') ARG.t1='elder';
+  if(!ARG.t1 && submitRace==='elf') ARG.t1='seer';
   else if(!ARG.t1 && submitRace==='dwarf') ARG.t1='guildmaster';
   else if(!ARG.t1 && submitRace==='human') ARG.t1='knight';
   else if(!ARG.t1 && submitRace==='undead') ARG.t1='necromancer';

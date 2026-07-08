@@ -1,3 +1,12 @@
+## [v1.44.0]
+
+> Version-Impact: verify
+
+- 精灵新增第 4 职业「先知 Seer」：主动「神谕 Prophecy」可弹框选择 金币 / 盾 / 心 / 剑 / 怪物，令下一次补子时新落下的所有棋子都变成所选类型；若本回合没有触发补子，则效果会保留到下一次补子发生。若选择怪物，则只生成普通怪物，不会生成 Boss。
+- 先知锁定二阶被动为「命运回响 Echo of Fate」：当神谕真正生效并完成该次补子后，再额外把 3 个随机非 Boss 棋子改成所选类型（若选择怪物，则这 3 个也会变成普通怪物）。
+- Elf gains a new fourth class: **Seer**. Its active **Prophecy** lets you choose coin / shield / heart / sword / enemy in a modal, and the next refill makes every newly falling tile become that chosen type; if no refill happens this turn, the effect waits until the next refill. Choosing enemy creates only normal enemies, never bosses.
+- Seer’s locked tier-2 passive is **Echo of Fate**: after Prophecy actually resolves on a refill, 3 additional random non-boss tiles also transform into the chosen type (and if enemy was chosen, those 3 become normal enemies too).
+
 ## [v1.43.3]
 
 - 修正火法师锁定被动「火墙 Firewall」的说明文案：实际效果一直是底部 3 行目标每回合掉“当前固定伤害的 20%”（最少 1 点），README 与游戏内被动描述之前误写成了 10%，现已统一更正。
