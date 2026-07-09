@@ -1,3 +1,10 @@
+## [v1.45.1]
+
+- 回放/分享录像详情弹框新增「🏆 补交排行榜」按钮：只要录像仍带有效服务端种子 token，就能直接按原始成绩补交闯关榜或破关榜；若是离线录像，则仍只支持回放/分享、不支持上榜。
+- 游戏结束时会额外探测一次排行榜服务连通性；若当前无法连接 API，会明确提示“本局录像已保留，可稍后从回放详情里补交”，避免误以为过门槛却没自动上榜。
+- Replay/share detail popups now include a “🏆 Resubmit” button: if the recording still has a valid server-seed token, you can resubmit it directly to the survival or clear board using its original result; offline recordings remain replay/share only.
+- End-of-run result screens now probe leaderboard connectivity once; if the API is currently unreachable, the game explicitly tells you the recording was preserved and can be resubmitted later from replay details, instead of silently seeming to miss auto-upload.
+
 ## [v1.45.0]
 
 > Version-Impact: verify
