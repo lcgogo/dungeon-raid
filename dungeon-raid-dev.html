@@ -176,8 +176,8 @@
 (()=>{
 //==================== 配置 ====================
 // 版本号 v主.次.修：不影响 verify/replay 兼容边界的小改动改"修"；凡是影响 verify/replay/版本分桶/release 验证语义的改动都改"次"；大版本变更需先确认。页面底部显示。
-const VERSION='v1.44.0';
-const CHANGELOG_LINES=[{"ver": "v1.44.0", "zh": "精灵新增第 4 职业「先知 Seer」：主动「神谕 Prophecy」可弹框选择 金币 / 盾 / 心 / 剑 / 怪物，令下一次补子时新落下的所有棋子都变成所选类型；若本回合没有触发补子，则效果会保留到下一次补子发生。若选择怪物，则只生成普通怪物，不会生成 Boss。", "en": "先知锁定二阶被动为「命运回响 Echo of Fate」：当神谕真正生效并完成该次补子后，再额外把 3 个随机非 Boss 棋子改成所选类型（若选择怪物，则这 3 个也会变成普通怪物）。"}, {"ver": "v1.43.3", "zh": "修正火法师锁定被动「火墙 Firewall」的说明文案：实际效果一直是底部 3 行目标每回合掉“当前固定伤害的 20%”（最少 1 点），README 与游戏内被动描述之前误写成了 10%，现已统一更正。", "en": "Fixed the wording for Fire Mage’s locked passive Firewall: its actual effect has been 20% of your current flat damage per turn (minimum 1) on foes in the bottom 3 rows; the README and in-game passive text had incorrectly said 10%, and are now corrected."}, {"ver": "v1.43.2", "zh": "精灵职业显示名由「森林长老 Forest Elder」更名为「树人 Treant」，用于统一当前游戏与文档中的职业称呼；内部职业 id `elder` 保持不变，因此不影响存档、回放与测试兼容。", "en": "Renamed the Elf class display name from “Forest Elder” to “Treant” across the current game/docs for naming consistency; the internal class id `elder` stays unchanged, so save/replay/test compatibility is unaffected."}, {"ver": "v1.43.1", "zh": "火法师「火焰链 Flame Chain」补齐点燃说明：点开被点燃目标时，现在会直接显示火焰层数、单层每回合掉血，以及当前总掉血（单层 × 层数）。", "en": "修正火焰链对剑免疫 Boss 的表现：点燃后恢复原本的 Boss 底色，不再误显示成可被普通剑攻击的底色；但仍保留燃烧角标与光效提示。"}, {"ver": "v1.41.2", "zh": "战斗日志新增每回合自动回血提示：恢复量会显示为「💚 恢复 +N（每回合）」，方便追踪 regen 来源的持续回血。", "en": "Combat log now shows per-turn regen ticks: each regen heal is logged as \"💚 恢复 +N（每回合）\" so ongoing life recovery is visible in the log."}];   /* auto-injected by dr.sh embed-changelog（勿手改） */
+const VERSION='v1.45.0';
+const CHANGELOG_LINES=[{"ver": "v1.45.0", "zh": "上传门槛新增“种族前 10 放行”例外：除了原有 `upload_min_turns` 外，只要成绩进入同种族、同 agent、同当前 minor 版本口径下的前 10 名，也允许正式上传。该规则同时适用于闯关榜与破关榜。", "en": "`/seed` 下发的门槛快照新增了 score / clear 两套种族前 10 cutoff，前端结算页的本地预判与 Worker 最终裁决已同步；旧快照缺少这些字段时，会自动回退到原先只看 `upload_min_turns` 的逻辑。"}, {"ver": "v1.44.0", "zh": "精灵新增第 4 职业「先知 Seer」：主动「神谕 Prophecy」可弹框选择 金币 / 盾 / 心 / 剑 / 怪物，令下一次补子时新落下的所有棋子都变成所选类型；若本回合没有触发补子，则效果会保留到下一次补子发生。若选择怪物，则只生成普通怪物，不会生成 Boss。", "en": "先知锁定二阶被动为「命运回响 Echo of Fate」：当神谕真正生效并完成该次补子后，再额外把 3 个随机非 Boss 棋子改成所选类型（若选择怪物，则这 3 个也会变成普通怪物）。"}, {"ver": "v1.43.3", "zh": "修正火法师锁定被动「火墙 Firewall」的说明文案：实际效果一直是底部 3 行目标每回合掉“当前固定伤害的 20%”（最少 1 点），README 与游戏内被动描述之前误写成了 10%，现已统一更正。", "en": "Fixed the wording for Fire Mage’s locked passive Firewall: its actual effect has been 20% of your current flat damage per turn (minimum 1) on foes in the bottom 3 rows; the README and in-game passive text had incorrectly said 10%, and are now corrected."}, {"ver": "v1.43.2", "zh": "精灵职业显示名由「森林长老 Forest Elder」更名为「树人 Treant」，用于统一当前游戏与文档中的职业称呼；内部职业 id `elder` 保持不变，因此不影响存档、回放与测试兼容。", "en": "Renamed the Elf class display name from “Forest Elder” to “Treant” across the current game/docs for naming consistency; the internal class id `elder` stays unchanged, so save/replay/test compatibility is unaffected."}, {"ver": "v1.43.1", "zh": "火法师「火焰链 Flame Chain」补齐点燃说明：点开被点燃目标时，现在会直接显示火焰层数、单层每回合掉血，以及当前总掉血（单层 × 层数）。", "en": "修正火焰链对剑免疫 Boss 的表现：点燃后恢复原本的 Boss 底色，不再误显示成可被普通剑攻击的底色；但仍保留燃烧角标与光效提示。"}];   /* auto-injected by dr.sh embed-changelog（勿手改） */
 const DEV=true;   // release build (DEV=false); dev build is dungeon-raid-dev.html (DEV=true)
 const REC_API='https://api.dungeonraid.win';   // 录像分享 API（Cloudflare Worker + KV）
 // 带种子随机数（mulberry32）：游戏全程用 rnd() 取代原生随机，配合录制种子可确定性重放
@@ -2098,7 +2098,7 @@ async function submitClear(r, level){
   const box=document.getElementById('rankBox'); if(!box) return;
   if(!r.token){ box.innerHTML=`<div style="text-align:center;color:var(--dim);font-size:12px">${tr('🔌 本局未用服务端种子（离线），未计破关榜','🔌 Offline run (no server seed) — not on clear board')}</div>`; return; }
   box.innerHTML=`<div style="text-align:center;color:var(--dim);font-size:12px;margin-bottom:4px">${tr('🔏 服务端种子有效期：现实时间 72 小时（过期后不可补交）','🔏 Server seed valid for 72 real-time hours (cannot be resubmitted after expiry)')}</div>`;
-  if(r.threshold && r.threshold.upload_min_turns>0 && (r.turns||0) < r.threshold.upload_min_turns){ box.innerHTML+=`<div style="text-align:center;color:var(--dim);font-size:12px">${approxPctLine(r.threshold, r.turns||0)}</div>`; return; }
+  if(r.threshold && !((r.threshold.upload_min_turns<=0) || (((r.threshold.upload_min_turns>0) && (r.turns||0) >= r.threshold.upload_min_turns) || clearTop10Eligible(r.threshold, r.turns||0, level)))){ box.innerHTML+=`<div style="text-align:center;color:var(--dim);font-size:12px">${approxPctLine(r.threshold, r.turns||0, level, 0, true)}</div>`; return; }
   box.innerHTML+=`<div style="text-align:center;color:var(--dim);font-size:12px">🏆 ${tr('破关榜上传中…','Submitting clear…')}</div>`;
   try{
     const res=await fetch(REC_API+'/clear',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({level,rec:r,agent:'human',name:getName()})});   // 真人破关上报人类榜
@@ -2114,11 +2114,30 @@ function rankRow(label, o){
   return `<div style="display:flex;justify-content:space-between;gap:8px;padding:3px 6px;font-size:13px">
     <span>${label}</span><b style="color:var(--gold)">#${o.rank} / ${o.total} · ${tr('超过','beats')} ${o.pct}%</b></div>`;
 }
-function approxPctLine(th, turns){
+function scoreTop10Eligible(th, turns, level, gold){
+  if(!th || !th.score_top10_turns) return false;
+  if(turns>th.score_top10_turns) return true;
+  if(turns<th.score_top10_turns) return false;
+  if(level>th.score_top10_level) return true;
+  if(level<th.score_top10_level) return false;
+  return gold>=th.score_top10_gold;
+}
+function clearTop10Eligible(th, turns, level){
+  if(!th || !th.clear_total || !th.clear_top10_level) return false;
+  if(level<th.clear_top10_level) return true;
+  if(level>th.clear_top10_level) return false;
+  return turns<=th.clear_top10_turns;
+}
+function approxPctLine(th, turns, level, gold, cleared){
+  if(cleared){
+    if(clearTop10Eligible(th, turns, level)) return tr('🏆 本局虽低于基础上传门槛，但已进入当前口径的种族前10，仍可上传破关榜','🏆 This run is below the base gate, but it is still in the current race top 10, so it can upload to the clear board');
+  } else {
+    if(scoreTop10Eligible(th, turns, level, gold)) return tr('🏆 本局虽低于基础上传门槛，但已进入当前口径的种族前10，仍可上传正式榜单','🏆 This run is below the base gate, but it is still in the current race top 10, so it can upload to the ranked board');
+  }
   if(!th||!th.total) return tr('📊 本局未达上传门槛，未计入正式榜单','📊 Below upload threshold — not submitted to the ranked board');
   turns = turns || (player&&player.turns) || 0;
   const pct = turns>=th.p5?5 : turns>=th.p10?10 : turns>=th.p30?30 : turns>=th.p50?50 : turns>=th.p70?70 : turns>=th.p90?90 : 100;
-  return tr(`📊 本局未达上传门槛（需至少 ${th.upload_min_turns} 回合）；按开局快照估算，约超过 ${pct}% 对局`,`📊 Below upload threshold (need at least ${th.upload_min_turns} turns); launch-time snapshot estimates you beat about ${pct}% of runs`);
+  return tr(`📊 本局未达上传门槛（需至少 ${th.upload_min_turns} 回合，或进入当前口径种族前10）；按开局快照估算，约超过 ${pct}% 对局`,`📊 Below upload threshold (need at least ${th.upload_min_turns} turns, or a current-scope race top 10); launch-time snapshot estimates you beat about ${pct}% of runs`);
 }
 // ==================== 排行榜浏览（人类 / AI 切换） ====================
 let lbAgent='human', lbBoard='top', lbRace='';   // 当前查看：human|ai，top(闯关·按回合)|clear(破关·按最低等级)，lbRace=''为全部种族
@@ -2227,7 +2246,7 @@ async function submitScore(r, level, gold){
   const box=document.getElementById('rankBox'); if(!box) return;
   if(!r.token){ box.innerHTML=`<div style="text-align:center;color:var(--dim);font-size:12px">${tr('🔌 本局未用服务端种子（离线），未计排名','🔌 Offline run (no server seed) — not ranked')}</div>`; return; }   // 无 token：不计排名
   box.innerHTML=`<div style="text-align:center;color:var(--dim);font-size:12px;margin-bottom:4px">${tr('🔏 服务端种子有效期：现实时间 72 小时（过期后不可补交）','🔏 Server seed valid for 72 real-time hours (cannot be resubmitted after expiry)')}</div>`;
-  if(r.threshold && r.threshold.upload_min_turns>0 && (r.turns||0) < r.threshold.upload_min_turns){ box.innerHTML+=`<div style="text-align:center;color:var(--dim);font-size:12px">${approxPctLine(r.threshold, r.turns||0)}</div>`; return; }
+  if(r.threshold && !((r.threshold.upload_min_turns<=0) || (((r.threshold.upload_min_turns>0) && (r.turns||0) >= r.threshold.upload_min_turns) || scoreTop10Eligible(r.threshold, r.turns||0, level, gold)))){ box.innerHTML+=`<div style="text-align:center;color:var(--dim);font-size:12px">${approxPctLine(r.threshold, r.turns||0, level, gold, false)}</div>`; return; }
   box.innerHTML+=`<div style="text-align:center;color:var(--dim);font-size:12px">🏆 ${tr('排名上传中…','Submitting score…')}</div>`;
   try{
     const res=await fetch(REC_API+'/score',{method:'POST',headers:{'Content-Type':'application/json'},

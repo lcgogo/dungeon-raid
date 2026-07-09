@@ -1,3 +1,12 @@
+## [v1.45.0]
+
+> Version-Impact: verify
+
+- 上传门槛新增“种族前 10 放行”例外：除了原有 `upload_min_turns` 外，只要成绩进入同种族、同 agent、同当前 minor 版本口径下的前 10 名，也允许正式上传。该规则同时适用于闯关榜与破关榜。
+- `/seed` 下发的门槛快照新增了 score / clear 两套种族前 10 cutoff，前端结算页的本地预判与 Worker 最终裁决已同步；旧快照缺少这些字段时，会自动回退到原先只看 `upload_min_turns` 的逻辑。
+- Upload gates now allow a second path besides `upload_min_turns`: runs that reach the current race top 10 (same race, same agent, same current-minor bucket semantics) may also upload. This applies to both survival and clear submissions.
+- `/seed` threshold snapshots now include separate race-top10 cutoffs for score and clear submissions, and the result screen’s local pre-check now matches the Worker’s final gate; older snapshots without the new fields automatically fall back to the legacy `upload_min_turns`-only behavior.
+
 ## [v1.44.0]
 
 > Version-Impact: verify

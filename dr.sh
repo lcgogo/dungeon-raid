@@ -92,6 +92,8 @@ cmd_test(){
     printf "%-14s " "$t"
     if node "test/$t.js" >/dev/null 2>&1; then echo PASS; else echo FAIL; fail=1; fi
   done
+  printf "%-14s " "thresholdtest"
+  if node "worker/threshold-top10-smoketest.js" >/dev/null 2>&1; then echo PASS; else echo FAIL; fail=1; fi
   return $fail
 }
 

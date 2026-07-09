@@ -12,8 +12,8 @@ function parseArgs(argv) {
     verifyPolls: 18,
     agent: 'ai',
     buildSets: [
+      ['--submit-ai', '--games=1', '--gap=4200', '--min=0', '--race=elf', '--t1=seer', '--t2=echooffate'],
       ['--submit-ai', '--games=1', '--gap=4200', '--min=0', '--race=elf', '--t1=elder', '--t2=shadow'],
-      ['--submit-ai', '--games=1', '--gap=4200', '--min=0', '--race=elf', '--t1=elder', '--t2=sharpshooter'],
       ['--submit-ai', '--games=1', '--gap=4200', '--min=0', '--race=dwarf', '--t1=guildmaster', '--t2=demolitionist', '--boss=assassin'],
       ['--submit-ai', '--games=1', '--gap=4200', '--min=0', '--race=dwarf', '--t1=miser', '--t2=tycoon', '--boss=assassin'],
       ['--submit-ai', '--games=1', '--gap=4200', '--min=0', '--race=human', '--t1=knight', '--t2=holystrike'],
