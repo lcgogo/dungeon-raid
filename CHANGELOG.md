@@ -1,3 +1,10 @@
+## [v1.46.0]
+
+> Version-Impact: verify
+
+- 重做升级项「凝聚生机 Channel Vitality」的成长方式：不再是每次固定 +1 回血，而是按选择次数递增——第 1 次选择后每回合回 1，第 2 次再额外 +2（合计 3），第 3 次再额外 +3（合计 6），依此类推。这样它终于会随着投入次数显著变强，而不是一直停留在后期几乎没人会点的平缓档。
+- Reworked the upgrade **Channel Vitality** so it no longer gives a flat +1 regen every time. Instead it now scales by pick count: the 1st pick grants +1 per turn, the 2nd adds +2 more (total 3), the 3rd adds +3 more (total 6), and so on. This makes repeated investment meaningfully stronger instead of staying in the late-game “almost never worth taking” zone.
+
 ## [v1.45.3]
 
 - 清理误提交到仓库的本地回归报告 `.reports-local-scorer-regression.json`，并把 `.reports-local-*.json` 加入 `.gitignore`，避免这类本地产物再次随正式版一起进仓。
