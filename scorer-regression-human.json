@@ -1,0 +1,26 @@
+[
+  {
+    "id": "9w8a4rvf",
+    "file": "test/scorer-regression/human/9w8a4rvf.json",
+    "expectation": "human",
+    "maxScore": 64,
+    "forbidRisk": "Very High",
+    "notes": "人类高分样本，不应跨过自动改判边界"
+  },
+  {
+    "id": "l9gc02xy",
+    "file": "test/scorer-regression/human/l9gc02xy.json",
+    "expectation": "human",
+    "maxScore": 64,
+    "forbidRisk": "Very High",
+    "notes": "人类样本，保护自动改判边界不误伤"
+  },
+  {
+    "id": "oan40cg2",
+    "file": "test/scorer-regression/human/oan40cg2.json",
+    "expectation": "human",
+    "maxScore": 64,
+    "forbidRisk": "Very High",
+    "notes": "人类样本，验证新增机械节奏规则不过度扩散"
+  }
+]

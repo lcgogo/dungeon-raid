@@ -343,6 +343,11 @@ function extractContextMetrics(samples) {
 function scoreFromMetrics(m, c) {
   let score = 0;
   const reasons = [];
+  const dr = c && c.decisionPauseRatio;
+  const br = c && c.bossPauseRatio;
+  const xr = c && c.densePauseRatio;
+  const mechSignals = [dr, br, xr].filter(v => v != null && v <= 1.05).length;
+  const coarseMechanical = m.moveCount > 180 && m.p10 === 0 && m.p90 <= 2 && m.longChainRate >= 0.70 && m.meanChainLen >= 7 && mechSignals >= 2;
 
   if (m.cv < 0.08) { score += 28; reasons.push('节奏极稳'); }
   else if (m.cv < 0.12) { score += 22; reasons.push('节奏很稳'); }
@@ -374,7 +379,6 @@ function scoreFromMetrics(m, c) {
   }
 
   if (c) {
-    const dr = c.decisionPauseRatio, br = c.bossPauseRatio, xr = c.densePauseRatio;
     if (dr != null) {
       if (dr < 1.00) { score += 14; reasons.push('升级/转职几乎不停顿'); }
       else if (dr < 1.08) score += 10;
@@ -395,7 +399,15 @@ function scoreFromMetrics(m, c) {
     }
   }
 
-  if (m.cv > 0.35) { score -= 4; reasons.push('节奏波动较像真人'); }
+  if (coarseMechanical) {
+    score += 36;
+    reasons.push('离散时间戳下仍保持机械节奏');
+  } else if (mechSignals >= 3 && m.longChainRate >= 0.65 && m.meanChainLen >= 7) {
+    score += 8;
+    reasons.push('多类局面都近乎不停顿');
+  }
+
+  if (m.cv > 0.35 && !coarseMechanical) { score -= 4; reasons.push('节奏波动较像真人'); }
   if (m.lateEarlyRatio > 1.35) score -= 8;
   else if (m.lateEarlyRatio > 1.20) { score -= 5; reasons.push('后期明显变慢'); }
 
@@ -481,7 +493,18 @@ async function main() {
   }
 }
 
-main().catch(err => {
-  console.error(err);
-  process.exit(1);
-});
+module.exports = {
+  analyzeRecording,
+  extractTimingMetrics,
+  extractContextMetrics,
+  scoreFromMetrics,
+  loadRecordingById,
+  loadRecordings,
+};
+
+if (require.main === module) {
+  main().catch(err => {
+    console.error(err);
+    process.exit(1);
+  });
+}

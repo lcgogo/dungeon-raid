@@ -6,7 +6,9 @@
   "main": "verify-server.js",
   "scripts": {
     "start": "node verify-server.js",
-    "verify-once": "node verify.js"
+    "verify-once": "node verify.js",
+    "score-regression": "node check-scorer-regression.js",
+    "score-regression:json": "node check-scorer-regression.js --json"
   },
   "engines": {
     "node": ">=18"

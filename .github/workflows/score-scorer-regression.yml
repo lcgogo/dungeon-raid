@@ -1,0 +1,60 @@
+name: score-scorer-regression
+# 回归保护：已知 AI 样本必须继续命中自动改判阈值，已知真人样本不能误入 AI 自动改判。
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  regression:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+
+      - name: Run scorer regression
+        run: |
+          mkdir -p .reports
+          node check-scorer-regression.js --json > .reports/scorer-regression.json
+          node check-scorer-regression.js > .reports/scorer-regression.txt
+
+      - name: Write job summary
+        if: always()
+        run: |
+          python3 - <<'PY'
+          import json, pathlib
+          data = json.loads(pathlib.Path('.reports/scorer-regression.json').read_text(encoding='utf-8'))
+          summary = data.get('summary', {})
+          results = data.get('results', [])
+          p = pathlib.Path('.reports/scorer-regression-summary.md')
+          with p.open('w', encoding='utf-8') as f:
+            f.write('# Scorer regression\n\n')
+            f.write(f"- Overall: **{'PASS' if data.get('ok') else 'FAIL'}**\n")
+            f.write(f"- Total: **{summary.get('total', 0)}**\n")
+            f.write(f"- Passed: **{summary.get('passed', 0)}**\n")
+            f.write(f"- Failed: **{summary.get('failed', 0)}**\n")
+            ai = summary.get('ai', {})
+            human = summary.get('human', {})
+            f.write(f"- AI samples: **{ai.get('passed', 0)}/{ai.get('total', 0)}** passed\n")
+            f.write(f"- Human samples: **{human.get('passed', 0)}/{human.get('total', 0)}** passed\n")
+            failed = [r for r in results if not r.get('ok')]
+            if failed:
+              f.write('\n## Failures\n\n')
+              for r in failed:
+                f.write(f"- `{r.get('id','-')}` ({r.get('expectation','-')}): {'; '.join(r.get('failures', []))}\n")
+            else:
+              f.write('\n## Failures\n\nNone.\n')
+          print(p.read_text(encoding='utf-8'))
+          PY
+          cat .reports/scorer-regression-summary.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload regression artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: scorer-regression
+          path: .reports/
+          include-hidden-files: true
+          if-no-files-found: error

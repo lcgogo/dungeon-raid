@@ -1,3 +1,10 @@
+## [v1.45.2]
+
+- 兽人职业 `berserker` 的显示名调整为「牛头人 / Tauren」，用于统一当前游戏与文档中的称呼；内部职业 id `berserker`、种族 id `orc` 保持不变，因此不影响存档、回放与测试兼容。
+- 兽人斗士锁定被动「血狂 Blood Frenzy」的说明去掉“无视护甲”字样：兽人本身无甲，这里直接写成每回合结束损失 5% 最大生命，避免重复强调不会实际生效的护甲交互。
+- Renamed the display name of the Orc class `berserker` to “牛头人 / Tauren” across the current game/docs; the internal class id `berserker` and race id `orc` stay unchanged, so save/replay/test compatibility is unaffected.
+- Removed the “ignores armor” wording from the Orc Fighter passive **Blood Frenzy** in game/docs: Orcs are already armorless, so the description now simply says it loses 5% max HP each turn instead of restating a non-interaction.
+
 ## [v1.45.1]
 
 - 回放/分享录像详情弹框新增「🏆 补交排行榜」按钮：只要录像仍带有效服务端种子 token，就能直接按原始成绩补交闯关榜或破关榜；若是离线录像，则仍只支持回放/分享、不支持上榜。
