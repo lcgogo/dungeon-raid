@@ -197,7 +197,7 @@ node playtest.js --submit-ai --games=3   # 跑机器人 → 本地重放校验 �
 node submit-ai-until-posted.js           # 轮流尝试强势 build（默认精灵先知 / 矮人会长 / 人族骑士等），直到至少成功提交 1 条 AI 成绩，并轮询是否进入当前版本 AI 榜
 ```
 
-平衡基准数据见 [`TEST_REPORT.md`](TEST_REPORT.md)（带版本号，可作回归对比）；版本改动历史见 [`CHANGELOG.md`](CHANGELOG.md)。
+平衡基准数据见 [`TEST_REPORT.md`](TEST_REPORT.md)（带版本号，可作回归对比）；AI 榜自动改判的样本回归可用 `npm run score-regression` 检查（已知 AI 样本必须继续命中、已知真人样本不能误伤）；版本改动历史见 [`CHANGELOG.md`](CHANGELOG.md)。
 
 ---
 

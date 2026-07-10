@@ -25,3 +25,4 @@ dr_commit_msg.txt
 
 # 个人/临时脚本和文件
 temp/
+.reports-local-*.json

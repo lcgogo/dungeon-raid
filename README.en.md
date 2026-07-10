@@ -195,7 +195,7 @@ node playtest.js --replay=run.json   # Replay a recording exported from the game
 node submit-ai-until-posted.js       # Rotate through strong default builds (Elf Seer / Dwarf Guild Master / Human Knight, etc.) until at least one AI score is submitted, then poll until it appears on the current-version AI board
 ```
 
-See [`TEST_REPORT.md`](./TEST_REPORT.md) for baseline data (versioned, for regression comparison) and [`CHANGELOG.md`](./CHANGELOG.md) for the change history.
+See [`TEST_REPORT.md`](./TEST_REPORT.md) for baseline data (versioned, for regression comparison); for the AI-board auto-classifier, run `npm run score-regression` to ensure known AI samples still trigger and known human samples still stay below the auto-reclassify boundary; see [`CHANGELOG.md`](./CHANGELOG.md) for the change history.
 
 ---
 

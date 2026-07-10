@@ -1,3 +1,8 @@
+## [v1.45.3]
+
+- 清理误提交到仓库的本地回归报告 `.reports-local-scorer-regression.json`，并把 `.reports-local-*.json` 加入 `.gitignore`，避免这类本地产物再次随正式版一起进仓。
+- Cleaned up the accidentally committed local regression report `.reports-local-scorer-regression.json` and added `.reports-local-*.json` to `.gitignore`, so local report artifacts do not ride along with future releases.
+
 ## [v1.45.2]
 
 - 兽人职业 `berserker` 的显示名调整为「牛头人 / Tauren」，用于统一当前游戏与文档中的称呼；内部职业 id `berserker`、种族 id `orc` 保持不变，因此不影响存档、回放与测试兼容。
