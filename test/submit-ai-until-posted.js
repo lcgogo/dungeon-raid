@@ -1,7 +1,10 @@
 'use strict';
 
 const fs = require('fs');
+const path = require('path');
 const { spawnSync } = require('child_process');
+
+const PROJECT_ROOT = path.join(__dirname, '..');
 
 function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 
@@ -11,12 +14,27 @@ function parseArgs(argv) {
     waitMs: 8000,
     verifyPolls: 18,
     agent: 'ai',
+    // Builds ordered by strength (10-game test data, v1.49.0):
+    //   build                          median  max   race
+    //   human swordsaint + holystrike    222   441   human  🏆
+    //   human swordsaint + general       263   411   human  🏆
+    //   elf elder + sharpshooter         222   361   elf
+    //   elf elder + shadow               165   331   elf
+    //   dwarf musketeer + tycoon         176   304   dwarf
+    //   undead butcher + splash          138   218   undead
+    //   undead necromancer + rotflesh    144   206   undead
+    //   orc fighter + bloodfrenzy        120   172   orc
+    // NOTE: --boss filter is NOT used — server verify replays with full BOSSES array,
+    //   so filtering would cause replay mismatch and fail verification.
     buildSets: [
-      ['--submit-ai', '--games=1', '--gap=4200', '--min=0', '--race=elf', '--t1=seer', '--t2=echooffate'],
+      ['--submit-ai', '--games=1', '--gap=4200', '--min=0', '--race=human', '--t1=swordsaint', '--t2=holystrike'],
+      ['--submit-ai', '--games=1', '--gap=4200', '--min=0', '--race=human', '--t1=swordsaint', '--t2=general'],
+      ['--submit-ai', '--games=1', '--gap=4200', '--min=0', '--race=elf', '--t1=elder', '--t2=sharpshooter'],
       ['--submit-ai', '--games=1', '--gap=4200', '--min=0', '--race=elf', '--t1=elder', '--t2=shadow'],
-      ['--submit-ai', '--games=1', '--gap=4200', '--min=0', '--race=dwarf', '--t1=guildmaster', '--t2=demolitionist', '--boss=assassin'],
-      ['--submit-ai', '--games=1', '--gap=4200', '--min=0', '--race=dwarf', '--t1=miser', '--t2=tycoon', '--boss=assassin'],
-      ['--submit-ai', '--games=1', '--gap=4200', '--min=0', '--race=human', '--t1=knight', '--t2=holystrike'],
+      ['--submit-ai', '--games=1', '--gap=4200', '--min=0', '--race=dwarf', '--t1=musketeer', '--t2=tycoon'],
+      ['--submit-ai', '--games=1', '--gap=4200', '--min=0', '--race=undead', '--t1=butcher', '--t2=splash'],
+      ['--submit-ai', '--games=1', '--gap=4200', '--min=0', '--race=undead', '--t1=necromancer', '--t2=rotflesh'],
+      ['--submit-ai', '--games=1', '--gap=4200', '--min=0', '--race=orc', '--t1=fighter', '--t2=bloodfrenzy'],
     ],
     extraArgs: [],
   };
@@ -36,7 +54,7 @@ function parseArgs(argv) {
 }
 
 function formalVersion() {
-  const src = fs.readFileSync(__dirname + '/dungeon-raid.html', 'utf8');
+  const src = fs.readFileSync(path.join(PROJECT_ROOT, 'dungeon-raid.html'), 'utf8');
   const m = src.match(/const VERSION='(v\d+\.\d+\.\d+)'/);
   if (!m) throw new Error('无法解析 dungeon-raid.html 的 VERSION');
   return m[1];
@@ -44,7 +62,7 @@ function formalVersion() {
 
 function runOnce(playArgs) {
   const res = spawnSync('node', ['playtest.js', ...playArgs], {
-    cwd: __dirname,
+    cwd: PROJECT_ROOT,
     encoding: 'utf8',
     maxBuffer: 10 * 1024 * 1024,
   });
