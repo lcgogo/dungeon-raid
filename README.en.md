@@ -138,6 +138,7 @@ Every **10 turns** a random boss is guaranteed to appear; **beating one by any m
 |---|---|---|
 | 👻 Ghost | Bomb only | Immune to sword chains; **its HP matches same-tier normal enemies (without the extra boss-tier HP multiplier)**; strikes you hard when its timer hits 0 |
 | 🤡 Clown | Bomb only | Re-rolls several non-monster tiles into other resources each turn, disrupting your chains; does NOT spawn monsters (that's the Summoner) |
+| 🪢 Lashmaster | Bomb only | On spawn, all normal enemies get **-1 attack countdown**, and each turn after that they get **-1 attack countdown** again. It may not be the deadliest foe by itself, but it drags the whole board into a frenzy the longer it lives. |
 | 🧛 Vampire | Sword / Bomb | Drains every heart on the board each turn to heal — do not leave hearts out; but **drinking poison hearts (Corruptor green / Witch Doctor black) poisons it instead — it loses HP and can even die** (counter it with Hex) |
 | 🥷 Assassin | Sword / Bomb | Stats like a normal enemy, but its hits are **true damage** — ignore armor, straight to HP |
 | 🦖 Devourer | Sword / Bomb | Drains half the HP from every enemy each turn to grow; at 0 unleashes a hit worth 50% of its HP |

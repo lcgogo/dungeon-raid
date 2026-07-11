@@ -1,3 +1,10 @@
+## [v1.50.0]
+
+> Version-Impact: verify
+
+- 新增功能性 Boss「鞭笞者 Lashmaster」：它和小丑一样属于每回合生效型 Boss，本体只吃炸弹；出场时会先让场上所有普通怪物的攻击倒计时 -1，之后每回合再让所有普通怪物的攻击倒计时 -1。它自己未必最疼，但会把整盘普通怪一起抽进暴走节奏，尤其会对冲活死人的“迷惑 +1 倒计时”缓冲。
+- Added a new functional boss, **Lashmaster**. Like the Clown, it is a per-turn utility boss and is bomb-only itself; on spawn it immediately gives all normal enemies -1 attack countdown, then repeats that -1 countdown push every turn after that. It is not necessarily the hardest hitter on its own, but it whips the whole board into a much faster rhythm and partially cancels out the Undead race’s “+1 enemy countdown” buffer.
+
 ## [v1.49.0]
 
 > Version-Impact: verify
