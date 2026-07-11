@@ -176,8 +176,8 @@
 (()=>{
 //==================== 配置 ====================
 // 版本号 v主.次.修：不影响 verify/replay 兼容边界的小改动改"修"；凡是影响 verify/replay/版本分桶/release 验证语义的改动都改"次"；大版本变更需先确认。页面底部显示。
-const VERSION='v1.51.0';
-const CHANGELOG_LINES=[{"ver": "v1.51.0", "zh": "新增功能性 Boss「岩浆魔 Magmafiend」：它每回合都会从自己身上向场上所有盾牌发出熔热线，把这些盾牌全部融掉，并按当前“每盾护甲进度”把每面盾转成自己的回血；同时它还会吸收火焰，点燃与火墙本应造成的火伤都会改为为它回血。这样它不仅克制护甲/盾流，也会对火法师的持续灼烧形成针对。", "en": "Added a new functional boss, Magmafiend. Each turn it sends molten tethers from itself to every shield on the board, melts them all away, and converts each shield into HP using the current “armor XP per shield” value; on top of that, it feeds on fire, so burn and Firewall damage heal it instead. This makes it a clear counter not only to shield/armor lines, but also to Fire Mage’s sustained fire damage."}, {"ver": "v1.50.1", "zh": "种族显示名由「活死人 Undead」统一收紧为「亡灵 Undead」，用于贴合当前种族下死灵 / 骷髅王 / 屠夫等整条职业生态；内部种族 id `undead` 保持不变，因此不影响存档、回放与测试兼容。", "en": "Tightened the race display name from “活死人 Undead” to “亡灵 Undead” to better match the current class ecosystem under that race (Necromancer / Skeleton King / Butcher); the internal race id `undead` stays unchanged, so save/replay/test compatibility is unaffected."}, {"ver": "v1.50.0", "zh": "新增功能性 Boss「鞭笞者 Lashmaster」：它和小丑一样属于每回合生效型 Boss，本体只吃炸弹；出场时会先让场上所有普通怪物的攻击倒计时 -1，之后每回合再让所有普通怪物的攻击倒计时 -1。它自己未必最疼，但会把整盘普通怪一起抽进暴走节奏，尤其会对冲活死人的“迷惑 +1 倒计时”缓冲。", "en": "Added a new functional boss, Lashmaster. Like the Clown, it is a per-turn utility boss and is bomb-only itself; on spawn it immediately gives all normal enemies -1 attack countdown, then repeats that -1 countdown push every turn after that. It is not necessarily the hardest hitter on its own, but it whips the whole board into a much faster rhythm and partially cancels out the Undead race’s “+1 enemy countdown” buffer."}, {"ver": "v1.49.0", "zh": "修正幽灵 Ghost 的实际血量成长：实现上它之前虽然吃的是普通怪模板，却仍额外乘上了 Boss 档位倍率，和“血量与同级普通怪一致”的文案不符。现在给幽灵补上 `noTierScale`，让它终于真正按同级普通怪血量生成；仍保留剑免疫、仅能被炸弹/非武器手段处理、倒计时重击等定位。", "en": "Fixed Ghost’s actual HP scaling: although it already used the normal-enemy HP template, the runtime was still multiplying that HP by the boss tier, which contradicted the “same HP as same-tier normal enemies” wording. Ghost now has `noTierScale`, so it truly spawns with normal-enemy HP while keeping its sword immunity, bomb/non-weapon weakness, and countdown heavy strike identity."}, {"ver": "v1.48.0", "zh": "兽人新增第 4 职业「斧王 Axe Lord」：主动「嘲讽 Taunt」会把场上所有敌人/Boss（终焉之主除外）的攻击倒计时压到 1，也就是让它们在下回合立刻出手；而在这批攻击中，你受到的实际伤害的 50% 会转化为永久最大生命。", "en": "斧王锁定二阶被动为「越挫越勇 Unbroken」：每次你受到一次伤害时，永久获得 +1 最大生命。这条路线把兽人的“无甲高血”思路进一步推成“主动开团、挨打一轮、把伤害转成成长”的坦克型玩法。"}];   /* auto-injected by dr.sh embed-changelog（勿手改） */
+const VERSION='v1.51.1';
+const CHANGELOG_LINES=[{"ver": "v1.51.1", "zh": "吸血鬼每回合吸心现在新增更清楚的视觉反馈：普通心与毒心会分别用不同颜色的吸取线拉向血条，吸血鬼本体也会在吸血/反噬时给出对应颜色的短脉冲，更容易一眼分辨这次吸心是回血还是中毒。", "en": "Vampire heart-drain turns now have clearer visuals: normal hearts and poison hearts use different-colored drain lines toward the HP bar, and the Vampire itself emits a matching short pulse on successful drain vs poisonous backlash, making the result of each drain much easier to read at a glance."}, {"ver": "v1.51.0", "zh": "新增功能性 Boss「岩浆魔 Magmafiend」：它每回合都会从自己身上向场上所有盾牌发出熔热线，把这些盾牌全部融掉，并按当前“每盾护甲进度”把每面盾转成自己的回血；同时它还会吸收火焰，点燃与火墙本应造成的火伤都会改为为它回血。这样它不仅克制护甲/盾流，也会对火法师的持续灼烧形成针对。", "en": "Added a new functional boss, Magmafiend. Each turn it sends molten tethers from itself to every shield on the board, melts them all away, and converts each shield into HP using the current “armor XP per shield” value; on top of that, it feeds on fire, so burn and Firewall damage heal it instead. This makes it a clear counter not only to shield/armor lines, but also to Fire Mage’s sustained fire damage."}, {"ver": "v1.50.1", "zh": "种族显示名由「活死人 Undead」统一收紧为「亡灵 Undead」，用于贴合当前种族下死灵 / 骷髅王 / 屠夫等整条职业生态；内部种族 id `undead` 保持不变，因此不影响存档、回放与测试兼容。", "en": "Tightened the race display name from “活死人 Undead” to “亡灵 Undead” to better match the current class ecosystem under that race (Necromancer / Skeleton King / Butcher); the internal race id `undead` stays unchanged, so save/replay/test compatibility is unaffected."}, {"ver": "v1.50.0", "zh": "新增功能性 Boss「鞭笞者 Lashmaster」：它和小丑一样属于每回合生效型 Boss，本体只吃炸弹；出场时会先让场上所有普通怪物的攻击倒计时 -1，之后每回合再让所有普通怪物的攻击倒计时 -1。它自己未必最疼，但会把整盘普通怪一起抽进暴走节奏，尤其会对冲活死人的“迷惑 +1 倒计时”缓冲。", "en": "Added a new functional boss, Lashmaster. Like the Clown, it is a per-turn utility boss and is bomb-only itself; on spawn it immediately gives all normal enemies -1 attack countdown, then repeats that -1 countdown push every turn after that. It is not necessarily the hardest hitter on its own, but it whips the whole board into a much faster rhythm and partially cancels out the Undead race’s “+1 enemy countdown” buffer."}, {"ver": "v1.49.0", "zh": "修正幽灵 Ghost 的实际血量成长：实现上它之前虽然吃的是普通怪模板，却仍额外乘上了 Boss 档位倍率，和“血量与同级普通怪一致”的文案不符。现在给幽灵补上 `noTierScale`，让它终于真正按同级普通怪血量生成；仍保留剑免疫、仅能被炸弹/非武器手段处理、倒计时重击等定位。", "en": "Fixed Ghost’s actual HP scaling: although it already used the normal-enemy HP template, the runtime was still multiplying that HP by the boss tier, which contradicted the “same HP as same-tier normal enemies” wording. Ghost now has `noTierScale`, so it truly spawns with normal-enemy HP while keeping its sword immunity, bomb/non-weapon weakness, and countdown heavy strike identity."}];   /* auto-injected by dr.sh embed-changelog（勿手改） */
 const DEV=true;   // release build (DEV=false); dev build is dungeon-raid-dev.html (DEV=true)
 const REC_API='https://api.dungeonraid.win';   // 录像分享 API（Cloudflare Worker + KV）
 // 带种子随机数（mulberry32）：游戏全程用 rnd() 取代原生随机，配合录制种子可确定性重放
@@ -317,13 +317,14 @@ const BOSSES=[
   { id:'vampire', emoji:'🧛', name:['吸血鬼','Vampire'], quip:['你的心留着也浪费，我喝了。','Those hearts are wasted on you. Mine now.'], perTurn:true, swordable:true,
     special:['每回合吸取场上的 ❤️ 回血','Drains ❤️ each turn to heal'],
     desc:['可以用{W}攻击它。但它【每回合】会吸取棋盘上所有的心来回血——别把心留在场上！','You CAN hit it with a {WC}. But every turn it drains all hearts on the board to heal — do not leave hearts on the board!'],
-    act(t){ let n=0, pois=0; const polluted=pollutionActive();   // 正常心回血；毒心(污染光环 或 巫医黑毒心)反害它
-      for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const x=grid[r][c]; if(x&&x.type==='heart'){ if(polluted||x.poison) pois++; else n++; grid[r][c]=null; } }
+    act(t){ let n=0, pois=0; const normalCells=[], poisonCells=[]; const polluted=pollutionActive();   // 正常心回血；毒心(污染光环 或 巫医黑毒心)反害它
+      for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const x=grid[r][c]; if(x&&x.type==='heart'){ if(polluted||x.poison){ pois++; poisonCells.push([r,c]); } else { n++; normalCells.push([r,c]); } grid[r][c]=null; } }
       const tot=n+pois; if(!tot) return;
+      vampireDrainFx(normalCells, poisonCells);
       const per=2+(t.tier||1), delta=(n-pois)*per;   // 净效果：正常−毒心
       t.hp += delta;
       if(t.hp<=0){ for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ if(grid[r][c]===t) grid[r][c]=null; } thiefRecover(t); player.xp+=15; gainGold(20); onBossKilled(); applyGravity(); syncPositions(false); log(tr('🧛 吸血鬼吸到毒心，中毒身亡！','🧛 The Vampire drank poison hearts and died!')); }
-      else { if(t.hp>t.maxHp) t.hp=t.maxHp; applyGravity(); syncPositions(false);
+      else { if(t.hp>t.maxHp) t.hp=t.maxHp; let rr=-1, cc=-1; for(let r=0;r<ROWS&&rr<0;r++)for(let c=0;c<COLS;c++){ if(grid[r][c]===t){ rr=r; cc=c; break; } } if(rr>=0) addBossFx(rr,cc,false,delta<0?'#66d17a':'#ff4d6d'); applyGravity(); syncPositions(false);
         if(delta<0) log(tr(`🧛 吸血鬼吸到毒心，反中毒掉 ${-delta} 血（→${t.hp}）`,`🧛 Vampire drinks poison hearts: −${-delta} HP (→${t.hp})`));
         else log(tr(`🧛 吸血鬼吸取 ${tot} 颗心回血（→${t.hp}）`,`🧛 Vampire drains ${tot} hearts (→${t.hp})`), 'debuff'); } } },
   { id:'assassin', emoji:'🥷', name:['刺客','Assassin'], quip:['护甲？那只是好看的装饰。','Armor? Cute. Purely decorative.'], monster:true, swordable:true, trueDmg:true, noTierScale:true,
@@ -1284,17 +1285,17 @@ function hexA(hex,a){ const n=parseInt(hex.slice(1),16);
 
 //==================== Boss 入场特效 ====================
 // Boss 降临时从该格爆出扩散冲击环 + 闪光，让"有 Boss 入场"一眼可辨（区别于普通小怪刷新）。纯帧驱动、可重放无关。
-const bossFx=[];           // {tile,c,r,life,max,gold}：锚定到 Boss 棋子对象，跟随其下落动画
+const bossFx=[];           // {tile,c,r,life,max,gold,pulseCol?}：锚定到 Boss 棋子对象，跟随其下落动画
 const FX_LIFE=46;          // 帧数（约 0.75s @60fps）
 // 锚定到刚放下的 Boss 棋子本身：之后 applyGravity 会让它沿列下落，特效需跟随，否则会落在掉进原格的别的棋子上。
-function addBossFx(r,c,gold){ if(headless||jumping) return; bossFx.push({tile:grid[r][c],c,r,life:FX_LIFE,max:FX_LIFE,gold:!!gold}); }   // 无头/快进(跳转·步进)不放，否则整局的 Boss 入场闪一股脑堆出来
+function addBossFx(r,c,gold,pulseCol){ if(headless||jumping) return; bossFx.push({tile:grid[r][c],c,r,life:FX_LIFE,max:FX_LIFE,gold:!!gold,pulseCol:pulseCol||null}); }   // 无头/快进(跳转·步进)不放，否则整局的 Boss 入场闪一股脑堆出来
 function drawBossFx(){
   for(const f of bossFx){
     const p=1-f.life/f.max;                          // 0→1 进度
     const t=f.tile;
     const cx=cellX(f.c)+TILE/2;                       // 列在重力下不变
     const cy=((t&&t.curY!==undefined)?t.curY:cellY(f.r))+TILE/2;   // 跟随 Boss 当前（下落中的）y
-    const col=f.gold?'#ffd54a':'#ff5252';            // 终焉之主金，普通 Boss 红
+    const col=f.gold?'#ffd54a':(f.pulseCol||'#ff5252');            // 终焉之主金，普通 Boss 红；可选自定义脉冲色
     ctx.save();
     if(p<0.35){ ctx.beginPath(); ctx.arc(cx,cy,TILE*0.56,0,7); ctx.fillStyle=hexA(col,0.5*(1-p/0.35)); ctx.fill(); }   // 起手闪光
     for(let k=0;k<2;k++){ const pp=p-k*0.22; if(pp<=0||pp>=1) continue;   // 双层扩散环
@@ -1389,6 +1390,10 @@ function absorbLinesFx(cells, opt){
 // 吸魂大法特效：从每个被吸目标的格子画一条发光红线指向 ❤️ 血条（纯 UI，不进录像；无头/桩件环境自动跳过）
 function soulDrainFx(cells){
   absorbLinesFx((cells||[]).map(([r,c])=>({r,c})), { targetId:'hpBar', stroke:'#ff2d2d', glow:'#ff3b3b' });
+}
+function vampireDrainFx(normalCells, poisonCells){
+  if(normalCells&&normalCells.length) absorbLinesFx(normalCells.map(([r,c])=>({r,c})), { targetId:'hpBar', stroke:'#ff4d6d', glow:'#ff99aa' });
+  if(poisonCells&&poisonCells.length) absorbLinesFx(poisonCells.map(([r,c])=>({r,c})), { targetId:'hpBar', stroke:'#66d17a', glow:'#c08bff' });
 }
 function magmaShieldFx(src, cells){
   if(headless || jumping || !src || !cells || !cells.length) return;

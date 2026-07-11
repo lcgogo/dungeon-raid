@@ -1,3 +1,8 @@
+## [v1.51.1]
+
+- 吸血鬼每回合吸心现在新增更清楚的视觉反馈：普通心与毒心会分别用不同颜色的吸取线拉向血条，吸血鬼本体也会在吸血/反噬时给出对应颜色的短脉冲，更容易一眼分辨这次吸心是回血还是中毒。
+- Vampire heart-drain turns now have clearer visuals: normal hearts and poison hearts use different-colored drain lines toward the HP bar, and the Vampire itself emits a matching short pulse on successful drain vs poisonous backlash, making the result of each drain much easier to read at a glance.
+
 ## [v1.51.0]
 
 > Version-Impact: verify
