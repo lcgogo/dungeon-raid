@@ -1,3 +1,8 @@
+## [v1.50.1]
+
+- 种族显示名由「活死人 Undead」统一收紧为「亡灵 Undead」，用于贴合当前种族下死灵 / 骷髅王 / 屠夫等整条职业生态；内部种族 id `undead` 保持不变，因此不影响存档、回放与测试兼容。
+- Tightened the race display name from “活死人 Undead” to “亡灵 Undead” to better match the current class ecosystem under that race (Necromancer / Skeleton King / Butcher); the internal race id `undead` stays unchanged, so save/replay/test compatibility is unaffected.
+
 ## [v1.50.0]
 
 > Version-Impact: verify
