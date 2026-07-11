@@ -1,3 +1,10 @@
+## [v1.51.0]
+
+> Version-Impact: verify
+
+- 新增功能性 Boss「岩浆魔 Magmafiend」：它每回合都会从自己身上向场上所有盾牌发出熔热线，把这些盾牌全部融掉，并按当前“每盾护甲进度”把每面盾转成自己的回血；同时它还会吸收火焰，点燃与火墙本应造成的火伤都会改为为它回血。这样它不仅克制护甲/盾流，也会对火法师的持续灼烧形成针对。
+- Added a new functional boss, **Magmafiend**. Each turn it sends molten tethers from itself to every shield on the board, melts them all away, and converts each shield into HP using the current “armor XP per shield” value; on top of that, it feeds on fire, so burn and Firewall damage heal it instead. This makes it a clear counter not only to shield/armor lines, but also to Fire Mage’s sustained fire damage.
+
 ## [v1.50.1]
 
 - 种族显示名由「活死人 Undead」统一收紧为「亡灵 Undead」，用于贴合当前种族下死灵 / 骷髅王 / 屠夫等整条职业生态；内部种族 id `undead` 保持不变，因此不影响存档、回放与测试兼容。

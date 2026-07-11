@@ -176,8 +176,8 @@
 (()=>{
 //==================== 配置 ====================
 // 版本号 v主.次.修：不影响 verify/replay 兼容边界的小改动改"修"；凡是影响 verify/replay/版本分桶/release 验证语义的改动都改"次"；大版本变更需先确认。页面底部显示。
-const VERSION='v1.50.1';
-const CHANGELOG_LINES=[{"ver": "v1.50.1", "zh": "种族显示名由「活死人 Undead」统一收紧为「亡灵 Undead」，用于贴合当前种族下死灵 / 骷髅王 / 屠夫等整条职业生态；内部种族 id `undead` 保持不变，因此不影响存档、回放与测试兼容。", "en": "Tightened the race display name from “活死人 Undead” to “亡灵 Undead” to better match the current class ecosystem under that race (Necromancer / Skeleton King / Butcher); the internal race id `undead` stays unchanged, so save/replay/test compatibility is unaffected."}, {"ver": "v1.50.0", "zh": "新增功能性 Boss「鞭笞者 Lashmaster」：它和小丑一样属于每回合生效型 Boss，本体只吃炸弹；出场时会先让场上所有普通怪物的攻击倒计时 -1，之后每回合再让所有普通怪物的攻击倒计时 -1。它自己未必最疼，但会把整盘普通怪一起抽进暴走节奏，尤其会对冲活死人的“迷惑 +1 倒计时”缓冲。", "en": "Added a new functional boss, Lashmaster. Like the Clown, it is a per-turn utility boss and is bomb-only itself; on spawn it immediately gives all normal enemies -1 attack countdown, then repeats that -1 countdown push every turn after that. It is not necessarily the hardest hitter on its own, but it whips the whole board into a much faster rhythm and partially cancels out the Undead race’s “+1 enemy countdown” buffer."}, {"ver": "v1.49.0", "zh": "修正幽灵 Ghost 的实际血量成长：实现上它之前虽然吃的是普通怪模板，却仍额外乘上了 Boss 档位倍率，和“血量与同级普通怪一致”的文案不符。现在给幽灵补上 `noTierScale`，让它终于真正按同级普通怪血量生成；仍保留剑免疫、仅能被炸弹/非武器手段处理、倒计时重击等定位。", "en": "Fixed Ghost’s actual HP scaling: although it already used the normal-enemy HP template, the runtime was still multiplying that HP by the boss tier, which contradicted the “same HP as same-tier normal enemies” wording. Ghost now has `noTierScale`, so it truly spawns with normal-enemy HP while keeping its sword immunity, bomb/non-weapon weakness, and countdown heavy strike identity."}, {"ver": "v1.48.0", "zh": "兽人新增第 4 职业「斧王 Axe Lord」：主动「嘲讽 Taunt」会把场上所有敌人/Boss（终焉之主除外）的攻击倒计时压到 1，也就是让它们在下回合立刻出手；而在这批攻击中，你受到的实际伤害的 50% 会转化为永久最大生命。", "en": "斧王锁定二阶被动为「越挫越勇 Unbroken」：每次你受到一次伤害时，永久获得 +1 最大生命。这条路线把兽人的“无甲高血”思路进一步推成“主动开团、挨打一轮、把伤害转成成长”的坦克型玩法。"}, {"ver": "v1.47.0", "zh": "活死人死灵的锁定二阶被动由「回春 Rejuvenation」重做为「竭心光环 Wither Aura」：不再提供主动技能冷却 -1，而是改为按你每回合恢复量（受治疗减半影响）先扣自己同等生命，再让全场敌人/Boss 各损失同等生命。也就是说，活死人会先把 regen 按减疗折算，再用这个折算后的数值同时结算自损与光环伤害；即使满血导致本回合实际没回上来，光环也仍按这档恢复量工作。顺手修正了录像在击败里程碑 Boss 后的状态快照：现在会在 `onBossKilled()` 后立刻更新并保存 `rec.maxHp/level/gold/turns`，避免像竭心光环这类“击败 Boss 才获得的新被动”被结算页继续沿用旧录像快照、导致提交时少算新效果。", "en": "Reworked the Undead Necromancer’s locked tier-2 passive from Rejuvenation into Wither Aura: instead of reducing active-skill cooldowns by 1, it now first drains the player for the regen amount after healing modifiers, then deals that same amount to all enemies/bosses. In practice, Undead first applies its healing penalty to regen, then uses that reduced value for both self-drain and aura damage; even when you were already full and healed 0 in practice, the aura still uses that modified regen value. Also fixed the recording snapshot after milestone-boss kills: `onBossKilled()` now immediately refreshes and saves `rec.maxHp/level/gold/turns`, preventing newly unlocked effects such as Wither Aura from being evaluated against a stale run snapshot on the result screen."}];   /* auto-injected by dr.sh embed-changelog（勿手改） */
+const VERSION='v1.51.0';
+const CHANGELOG_LINES=[{"ver": "v1.51.0", "zh": "新增功能性 Boss「岩浆魔 Magmafiend」：它每回合都会从自己身上向场上所有盾牌发出熔热线，把这些盾牌全部融掉，并按当前“每盾护甲进度”把每面盾转成自己的回血；同时它还会吸收火焰，点燃与火墙本应造成的火伤都会改为为它回血。这样它不仅克制护甲/盾流，也会对火法师的持续灼烧形成针对。", "en": "Added a new functional boss, Magmafiend. Each turn it sends molten tethers from itself to every shield on the board, melts them all away, and converts each shield into HP using the current “armor XP per shield” value; on top of that, it feeds on fire, so burn and Firewall damage heal it instead. This makes it a clear counter not only to shield/armor lines, but also to Fire Mage’s sustained fire damage."}, {"ver": "v1.50.1", "zh": "种族显示名由「活死人 Undead」统一收紧为「亡灵 Undead」，用于贴合当前种族下死灵 / 骷髅王 / 屠夫等整条职业生态；内部种族 id `undead` 保持不变，因此不影响存档、回放与测试兼容。", "en": "Tightened the race display name from “活死人 Undead” to “亡灵 Undead” to better match the current class ecosystem under that race (Necromancer / Skeleton King / Butcher); the internal race id `undead` stays unchanged, so save/replay/test compatibility is unaffected."}, {"ver": "v1.50.0", "zh": "新增功能性 Boss「鞭笞者 Lashmaster」：它和小丑一样属于每回合生效型 Boss，本体只吃炸弹；出场时会先让场上所有普通怪物的攻击倒计时 -1，之后每回合再让所有普通怪物的攻击倒计时 -1。它自己未必最疼，但会把整盘普通怪一起抽进暴走节奏，尤其会对冲活死人的“迷惑 +1 倒计时”缓冲。", "en": "Added a new functional boss, Lashmaster. Like the Clown, it is a per-turn utility boss and is bomb-only itself; on spawn it immediately gives all normal enemies -1 attack countdown, then repeats that -1 countdown push every turn after that. It is not necessarily the hardest hitter on its own, but it whips the whole board into a much faster rhythm and partially cancels out the Undead race’s “+1 enemy countdown” buffer."}, {"ver": "v1.49.0", "zh": "修正幽灵 Ghost 的实际血量成长：实现上它之前虽然吃的是普通怪模板，却仍额外乘上了 Boss 档位倍率，和“血量与同级普通怪一致”的文案不符。现在给幽灵补上 `noTierScale`，让它终于真正按同级普通怪血量生成；仍保留剑免疫、仅能被炸弹/非武器手段处理、倒计时重击等定位。", "en": "Fixed Ghost’s actual HP scaling: although it already used the normal-enemy HP template, the runtime was still multiplying that HP by the boss tier, which contradicted the “same HP as same-tier normal enemies” wording. Ghost now has `noTierScale`, so it truly spawns with normal-enemy HP while keeping its sword immunity, bomb/non-weapon weakness, and countdown heavy strike identity."}, {"ver": "v1.48.0", "zh": "兽人新增第 4 职业「斧王 Axe Lord」：主动「嘲讽 Taunt」会把场上所有敌人/Boss（终焉之主除外）的攻击倒计时压到 1，也就是让它们在下回合立刻出手；而在这批攻击中，你受到的实际伤害的 50% 会转化为永久最大生命。", "en": "斧王锁定二阶被动为「越挫越勇 Unbroken」：每次你受到一次伤害时，永久获得 +1 最大生命。这条路线把兽人的“无甲高血”思路进一步推成“主动开团、挨打一轮、把伤害转成成长”的坦克型玩法。"}];   /* auto-injected by dr.sh embed-changelog（勿手改） */
 const DEV=true;   // release build (DEV=false); dev build is dungeon-raid-dev.html (DEV=true)
 const REC_API='https://api.dungeonraid.win';   // 录像分享 API（Cloudflare Worker + KV）
 // 带种子随机数（mulberry32）：游戏全程用 rnd() 取代原生随机，配合录制种子可确定性重放
@@ -303,6 +303,17 @@ const BOSSES=[
     desc:['{WC}对它无效，只能用 💥炸弹 炸。它一出场就会让场上所有普通怪物的攻击倒计时 -1，之后【每回合】再让所有普通怪物的攻击倒计时 -1。它自己未必最疼，但会把整盘怪一起抽进暴走节奏——拖得越久，怪就越快出手。','Immune to {WC} — only the 💥 Bomb works. On spawn it reduces the attack countdown of all normal enemies on the board by 1, then does so again every turn after that. It may not hit the hardest by itself, but it drives the whole board into a frenzy — the longer it lives, the faster everything else attacks.'],
     onSpawn(t){ let n=0; for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const x=grid[r][c]; if(x&&x.type==='enemy'){ x.cd=Math.max(1,x.cd-1); n++; } } if(n) log(tr(`🪢 鞭笞者现身，${n} 只怪物立刻被驱赶向前！`,`🪢 Lashmaster arrives — ${n} enemies are driven forward at once!`), 'debuff'); },
     act(t){ let n=0; for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const x=grid[r][c]; if(x&&x.type==='enemy'){ x.cd=Math.max(1,x.cd-1); n++; } } if(n) log(tr(`🪢 鞭笞者鞭策全场，${n} 只怪物变得更暴躁！`,`🪢 Lashmaster drives the horde forward — ${n} enemies speed up!`), 'debuff'); } },
+  { id:'magmafiend', emoji:'♨️', name:['岩浆魔','Magmafiend'], quip:['别想用你那纸糊的盾牌保护你。','Do not hide behind those paper shields.'], perTurn:true, swordable:true,
+    special:['每回合融化场上所有盾牌并回血；吸收火焰回血','Melts all shields each turn to heal; feeds on fire'],
+    desc:['可以用{W}攻击它。但它【每回合】都会融化棋盘上所有的盾牌，每面盾都会为它回血——别想靠攒盾慢慢磨。它不会直接拆掉你已经有的护甲值，却会让你很难继续靠盾链续上防线；此外它【吸收火焰】——不会被点燃，火墙与点燃本应造成的火焰伤害反而会为它回血。','You CAN hit it with a {WC}. But【every turn】it melts all shields on the board, and each shield restores its HP — so do not expect to turtle behind a growing wall of shields. It does not directly strip the armor you already have, but it makes it much harder to keep feeding a shield-based defense; in addition, it【feeds on fire】— it cannot be ignited, and any damage it would have taken from burn or Firewall instead heals it.'],
+    act(t){ const cells=[]; for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const x=grid[r][c]; if(x&&x.type==='shield') cells.push({r,c}); }
+      if(!cells.length) return; let rr=-1, cc=-1; for(let r=0;r<ROWS&&rr<0;r++)for(let c=0;c<COLS;c++){ if(grid[r][c]===t){ rr=r; cc=c; break; } }
+      if(rr>=0) magmaShieldFx({r:rr,c:cc}, cells);
+      const per=player.armorPerShield||1, heal=cells.length*per;
+      for(const cell of cells) grid[cell.r][cell.c]=null;
+      t.hp=Math.min(t.maxHp, t.hp+heal);
+      applyGravity(); syncPositions(false);
+      log(tr(`♨️ 岩浆魔融化了 ${cells.length} 面盾，按每盾护甲进度 ${per} 回复 ${heal} 生命（→${t.hp}）`,`♨️ Magmafiend melts ${cells.length} shields and heals ${heal} HP at ${per} per shield (→${t.hp})`), 'debuff'); } },
   { id:'vampire', emoji:'🧛', name:['吸血鬼','Vampire'], quip:['你的心留着也浪费，我喝了。','Those hearts are wasted on you. Mine now.'], perTurn:true, swordable:true,
     special:['每回合吸取场上的 ❤️ 回血','Drains ❤️ each turn to heal'],
     desc:['可以用{W}攻击它。但它【每回合】会吸取棋盘上所有的心来回血——别把心留在场上！','You CAN hit it with a {WC}. But every turn it drains all hearts on the board to heal — do not leave hearts on the board!'],
@@ -449,29 +460,31 @@ function fireChainIgnite(selection){
   return n;
 }
 function burnTick(){
-  let hit=0, kills=0, total=0, lh=0;
+  let hit=0, kills=0, total=0, lh=0, healHit=0, healTotal=0;
   for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){
     const t=grid[r][c]; if(!t||!t.burnTurns||!(t.burnStacks>0)) continue;
     const dmg=burnTickDamage(t), before=t.hp;
+    if(t.type==='boss' && t.bossId==='magmafiend'){ t.hp=Math.min(t.maxHp, t.hp+dmg); hit++; healHit++; healTotal+=dmg; continue; }
     t.hp-=dmg; hit++; total+=Math.min(dmg, before);
     if(t.hp<=0){ const isB=t.type==='boss'; grid[r][c]=null; kills++; if(isB){ thiefRecover(t); player.xp+=15; gainGold(20); onBossKilled(); } else { player.xp+=3+(player.killXp||0); gainGold(1); } }
   }
   if(kills) lh=lifestealHeal(kills);
-  if(hit) log(tr(`🔥 点燃：${hit} 个目标共掉 ${total}`+(kills?`，击杀 ${kills}`:'')+(lh?`，吸血 +${lh}`:''),`🔥 Burn: ${hit} targets lose ${total}`+(kills?`, ${kills} killed`:'')+(lh?`, +${lh} lifesteal`:'')), 'bad');
+  if(hit) log(tr(`🔥 点燃：${hit} 个目标结算`+(total?`，共掉 ${total}`:'')+(healHit?`，岩浆魔回血 ${healTotal}`:'')+(kills?`，击杀 ${kills}`:'')+(lh?`，吸血 +${lh}`:''),`🔥 Burn: ${hit} targets resolved`+(total?`, ${total} damage`:'')+(healHit?`, Magmafiend heals ${healTotal}`:'')+(kills?`, ${kills} killed`:'')+(lh?`, +${lh} lifesteal`:'')), 'bad');
 }
 function firewallTick(){
   if(!player.firewall) return;
   const zone=fireWallRows();
-  let hit=0, kills=0, total=0, lh=0;
+  let hit=0, kills=0, total=0, lh=0, healHit=0, healTotal=0;
   for(let r=zone.start;r<=zone.end;r++)for(let c=0;c<COLS;c++){
     const t=grid[r][c]; if(!t||t.finale||!(t.type==='enemy'||t.type==='boss')) continue;
-    igniteTarget(t, 1);
+    if(!(t.type==='boss' && t.bossId==='magmafiend')) igniteTarget(t, 1);
     const dmg=firewallTickDamage(), before=t.hp;
+    if(t.type==='boss' && t.bossId==='magmafiend'){ t.hp=Math.min(t.maxHp, t.hp+dmg); hit++; healHit++; healTotal+=dmg; continue; }
     t.hp-=dmg; hit++; total+=Math.min(dmg, before);
     if(t.hp<=0){ const isB=t.type==='boss'; grid[r][c]=null; kills++; if(isB){ thiefRecover(t); player.xp+=15; gainGold(20); onBossKilled(); } else { player.xp+=3+(player.killXp||0); gainGold(1); } }
   }
   if(kills) lh=lifestealHeal(kills);
-  if(hit) log(tr(`🧱 火墙：底部三行 ${hit} 个目标共掉 ${total}`+(kills?`，击杀 ${kills}`:'')+(lh?`，吸血 +${lh}`:''),`🧱 Firewall: ${hit} targets in the bottom rows lose ${total}`+(kills?`, ${kills} killed`:'')+(lh?`, +${lh} lifesteal`:'')), 'bad');
+  if(hit) log(tr(`🧱 火墙：底部三行 ${hit} 个目标结算`+(total?`，共掉 ${total}`:'')+(healHit?`，岩浆魔回血 ${healTotal}`:'')+(kills?`，击杀 ${kills}`:'')+(lh?`，吸血 +${lh}`:''),`🧱 Firewall: ${hit} targets in the bottom rows resolved`+(total?`, ${total} damage`:'')+(healHit?`, Magmafiend heals ${healTotal}`:'')+(kills?`, ${kills} killed`:'')+(lh?`, +${lh} lifesteal`:'')), 'bad');
 }
 function loseGoldForShield(g){
   g=g|0; if(g<=0) return 0;
@@ -1376,6 +1389,33 @@ function absorbLinesFx(cells, opt){
 // 吸魂大法特效：从每个被吸目标的格子画一条发光红线指向 ❤️ 血条（纯 UI，不进录像；无头/桩件环境自动跳过）
 function soulDrainFx(cells){
   absorbLinesFx((cells||[]).map(([r,c])=>({r,c})), { targetId:'hpBar', stroke:'#ff2d2d', glow:'#ff3b3b' });
+}
+function magmaShieldFx(src, cells){
+  if(headless || jumping || !src || !cells || !cells.length) return;
+  try{
+    if(!document.createElementNS) return;
+    const cv0=document.getElementById('board');
+    if(!cv0||!cv0.getBoundingClientRect) return;
+    const r=cv0.getBoundingClientRect();
+    if(!r.width) return;
+    const sx=r.width/cv0.width, sy=r.height/cv0.height;
+    const x1=r.left+(cellX(src.c)+TILE/2)*sx, y1=r.top+(cellY(src.r)+TILE/2)*sy;
+    const NS='http://www.w3.org/2000/svg';
+    const svg=document.createElementNS(NS,'svg');
+    svg.style.cssText='position:fixed;inset:0;width:100vw;height:100vh;pointer-events:none;z-index:45';
+    cells.forEach(cell=>{
+      const x2=r.left+(cellX(cell.c)+TILE/2)*sx, y2=r.top+(cellY(cell.r)+TILE/2)*sy;
+      const ln=document.createElementNS(NS,'line');
+      ln.setAttribute('x1',x1); ln.setAttribute('y1',y1); ln.setAttribute('x2',x2); ln.setAttribute('y2',y2);
+      ln.setAttribute('stroke','#ff6b2f'); ln.setAttribute('stroke-width','3'); ln.setAttribute('stroke-linecap','round');
+      ln.style.filter='drop-shadow(0 0 6px #ffb347)';
+      const len=Math.hypot(x2-x1,y2-y1); ln.setAttribute('stroke-dasharray',len); ln.setAttribute('stroke-dashoffset',len);
+      svg.appendChild(ln);
+      if(ln.animate) ln.animate([{strokeDashoffset:len,opacity:1},{strokeDashoffset:0,opacity:1,offset:.5},{strokeDashoffset:0,opacity:0}],{duration:620,easing:'ease-out',fill:'forwards'});
+    });
+    document.body.appendChild(svg);
+    setTimeout(()=>{ try{ svg.remove(); }catch(e){} }, 680);
+  }catch(e){}
 }
 
 function loop(){
