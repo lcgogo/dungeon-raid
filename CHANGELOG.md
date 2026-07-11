@@ -1,3 +1,10 @@
+## [v1.49.0]
+
+> Version-Impact: verify
+
+- 修正幽灵 Ghost 的实际血量成长：实现上它之前虽然吃的是普通怪模板，却仍额外乘上了 Boss 档位倍率，和“血量与同级普通怪一致”的文案不符。现在给幽灵补上 `noTierScale`，让它终于真正按同级普通怪血量生成；仍保留剑免疫、仅能被炸弹/非武器手段处理、倒计时重击等定位。
+- Fixed Ghost’s actual HP scaling: although it already used the normal-enemy HP template, the runtime was still multiplying that HP by the boss tier, which contradicted the “same HP as same-tier normal enemies” wording. Ghost now has `noTierScale`, so it truly spawns with normal-enemy HP while keeping its sword immunity, bomb/non-weapon weakness, and countdown heavy strike identity.
+
 ## [v1.48.0]
 
 > Version-Impact: verify
