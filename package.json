@@ -7,8 +7,9 @@
   "scripts": {
     "start": "node verify-server.js",
     "verify-once": "node verify.js",
-    "score-regression": "node check-scorer-regression.js",
-    "score-regression:json": "node check-scorer-regression.js --json"
+    "score-regression": "node test/tools/check-scorer-regression.js",
+    "score-regression:json": "node test/tools/check-scorer-regression.js --json",
+    "playtest": "node test/tools/playtest.js"
   },
   "engines": {
     "node": ">=18"

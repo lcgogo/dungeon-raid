@@ -1,10 +1,12 @@
 'use strict';
 // 无头玩法机器人：加载 dungeon-raid.html 里的真实脚本（桩件顶替 DOM），自动玩并统计平衡。
 const fs = require('fs');
+const path = require('path');
 
 // ---------- 1) 取出真实脚本，并在 IIFE 末尾注入导出钩子 ----------
+const ROOT = path.resolve(__dirname, '..', '..');
 const HTML_FILE = process.argv.includes('--dev') ? 'dungeon-raid-dev.html' : 'dungeon-raid.html';   // --dev：用开发版跑（测未发布的平衡改动）
-const html = fs.readFileSync(__dirname + '/' + HTML_FILE, 'utf8');
+const html = fs.readFileSync(path.join(ROOT, HTML_FILE), 'utf8');
 let script = html.match(/<script>([\s\S]*?)<\/script>/)[1];
 
 const EXPORT = `globalThis.__G={RACES,RACE_PATHS,TIER1,TIER2,CLASS_T2,UPGRADES,BOSSES,startGame,resolve,buyItem,shopCost,SHOP,activateSkill,isSwordTarget,

@@ -21,6 +21,7 @@
 #   help                显示本说明
 
 $ErrorActionPreference = "Stop"
+Set-Location (Split-Path -Parent $PSScriptRoot)
 
 $PROJ = "dungeon-raid"
 $ACCT = "5f2bcd334702a2c76245d5832c0cf767"
@@ -174,6 +175,14 @@ function cmd_test {
             Write-Host "FAIL" -ForegroundColor Red
             $fail = 1
         }
+    }
+    Write-Host ("{0,-14}" -f "thresholdtest") -NoNewline
+    node "test\worker\threshold-top10-smoketest.js" > $null 2>&1
+    if ($LASTEXITCODE -eq 0) {
+        Write-Host "PASS" -ForegroundColor Green
+    } else {
+        Write-Host "FAIL" -ForegroundColor Red
+        $fail = 1
     }
     exit $fail
 }

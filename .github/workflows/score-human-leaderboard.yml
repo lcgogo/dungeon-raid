@@ -32,14 +32,14 @@ jobs:
       - name: Score top human leaderboard replays
         run: |
           mkdir -p .reports
-          node score-ai-suspicion.js --top-human 200 --top 200 --json > .reports/human-top200-suspicion.json
-          node score-ai-suspicion.js --top-human 200 --top 80 --min-score 25 > .reports/human-top200-suspicion.txt
+          node test/tools/score-ai-suspicion.js --top-human 200 --top 200 --json > .reports/human-top200-suspicion.json
+          node test/tools/score-ai-suspicion.js --top-human 200 --top 80 --min-score 25 > .reports/human-top200-suspicion.txt
           {
             echo "# Human leaderboard suspicion scan"
             echo
             echo "- Date (UTC): $(date -u '+%Y-%m-%d %H:%M:%S')"
             echo "- Source: /top?agent=human&n=200"
-            echo "- Script: score-ai-suspicion.js"
+            echo "- Script: test/tools/score-ai-suspicion.js"
             echo
             echo '```text'
             cat .reports/human-top200-suspicion.txt
@@ -145,7 +145,7 @@ jobs:
           with p.open('w', encoding='utf-8') as f:
             f.write('# Human leaderboard suspicion scan\n\n')
             f.write('- Source: `/top?agent=human&n=200`\n')
-            f.write('- Script: `score-ai-suspicion.js`\n\n')
+            f.write('- Script: `test/tools/score-ai-suspicion.js`\n\n')
             f.write('## Summary\n\n')
             for k in ['Low','Medium','High','Very High','ERR']:
               f.write(f'- **{k}**: {buckets.get(k,0)}\n')

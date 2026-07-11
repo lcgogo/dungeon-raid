@@ -12,7 +12,7 @@
 - 版本号 `v主.次.修`：**不影响 verify / replay 兼容边界**的小改/修 bug/调参/UI 文案 → 修；任何会影响 **verify / replay / 版本分桶 / release 验证语义** 的改动 → 次（包括新 Boss/职业/机制，以及其他会开启新兼容期的变更）；大重构 → 主（大版本先问用户）。页面 `const VERSION` 与 CHANGELOG 同步。
 - 凡是 verify / replay 影响改动，都要在对应 CHANGELOG 版本节正文加入一行 `> Version-Impact: verify`；未标记时默认按 patch 处理，release 脚本会据此拒绝“应升次版本却只升修订号”的发版。
 - **两个 HTML，仅 `const DEV` 一行不同**：开发版 `dungeon-raid-dev.html`（DEV=true），正式版 `dungeon-raid.html`（DEV=false）。
-- **所有脚本合到 `dr.sh`，用子命令控制**：`bash dr.sh <命令>`——`test`/`deploy`（单独发 dev，正式版不变）/`release`（晋级正式版）/`gh-release [vX.Y.Z]`/`integrity`（核对正式版 sha256）/`backfill-releases`/`bind-domains`。`bash dr.sh help` 看说明。
+- **部署脚本统一放在 `deploy/`**。当前入口为 `bash deploy/dr.sh <命令>`——`test`/`deploy`（单独发 dev，正式版不变）/`release`（晋级正式版）/`gh-release [vX.Y.Z]`/`integrity`（核对正式版 sha256）/`backfill-releases`/`bind-domains`。`bash deploy/dr.sh help` 看说明。
 - **版本标识 = 显式 `const VERSION`（人类标签）+ `engines.json` 里的引擎 sha256（完整性）**：`dr.sh release` 自动把正式版文件的 sha256 写进 `engines.json`；verify.js 读运行时 `VERSION`（不靠正则、minify 无关）并核对 sha256。哈希只用于「校验这份文件是不是该版本」，不用来反推版本。
 - **默认只改开发版**；正式版晋级需用户明确指示，用 `bash dr.sh release`（同步 dev→prod + 提交 + push + 部署 Pages + **创建/更新 GitHub Release**，提交说明读 `/tmp/dr_commit_msg.txt`）。
 - **发正式版要二次确认**：所有改动先进 dev（可 commit）→ **跑回测、呈回测报告** → **等用户明确确认**后才 `bash dr.sh release`。不要改完就自动推 prod。想让用户先在 dev 站实测，可单独 `bash dr.sh deploy`（不动正式版）。

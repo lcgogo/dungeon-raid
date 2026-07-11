@@ -179,26 +179,26 @@
 
 ## 🛠️ 开发 / 平衡测试
 
-`playtest.js` 是一个**无头玩法机器人**：它加载 `dungeon-raid.html` 里的真实游戏逻辑（用桩件顶替 DOM/Canvas），用贪心策略自动游玩，统计各种族/职业线的存活回合与到达等级，用于数值平衡回归测试。
+`test/tools/playtest.js` 是一个**无头玩法机器人**：它加载 `dungeon-raid.html` 里的真实游戏逻辑（用桩件顶替 DOM/Canvas），用贪心策略自动游玩，统计各种族/职业线的存活回合与到达等级，用于数值平衡回归测试。
 
 ```bash
-node playtest.js                  # 扫描模式：各种族 × 多套敌人数值，找最接近目标回合的一套
+node test/tools/playtest.js                  # 扫描模式：各种族 × 多套敌人数值，找最接近目标回合的一套
 
 # 定向模式：固定某条职业线或某个 Boss，跑详细统计，便于和历史对比
-node playtest.js --race=orc --t1=axelord --t2=unbroken   # 测斧王线
-node playtest.js --race=human --t1=knight --t2=immortal   # 指定一阶/二阶
-node playtest.js --boss=zombie                       # 只刷僵尸（隔离单个 Boss 的影响）
-node playtest.js --race=elf --boss=assassin --games=40    # 组合 + 自定局数
-node playtest.js --race=dwarf --enemy=C2             # 指定敌人数值候选（默认用文件实时值）
+node test/tools/playtest.js --race=orc --t1=axelord --t2=unbroken   # 测斧王线
+node test/tools/playtest.js --race=human --t1=knight --t2=immortal   # 指定一阶/二阶
+node test/tools/playtest.js --boss=zombie                       # 只刷僵尸（隔离单个 Boss 的影响）
+node test/tools/playtest.js --race=elf --boss=assassin --games=40    # 组合 + 自定局数
+node test/tools/playtest.js --race=dwarf --enemy=C2             # 指定敌人数值候选（默认用文件实时值）
 ```
 
 参数：`--race=`（human/elf/dwarf/orc）、`--t1=`/`--t2=`（转职线 id）、`--boss=`（固定唯一会刷的 Boss）、`--enemy=`（敌人数值候选名，默认实时文件值）、`--games=`（每配置局数）、`--report`（全种族详细表）。定向模式额外输出：回合均值/最高、达一阶/二阶比例、致命回合主要死因占比。
 
 ```bash
-node playtest.js --replay=run.json   # 回放一份游戏导出的录像（确定性重演），输出结局/死因，便于分析真实人类玩法
-node playtest.js --dev               # 用开发版（dungeon-raid-dev.html）跑，验证未发布的数值改动
-node playtest.js --submit-ai --games=3   # 跑机器人 → 本地重放校验 → 把可验证录像以 agent=ai 提交到 AI 榜（加 --dry 只校验不提交）
-node submit-ai-until-posted.js           # 轮流尝试强势 build（默认精灵先知 / 矮人会长 / 人族骑士等），直到至少成功提交 1 条 AI 成绩，并轮询是否进入当前版本 AI 榜
+node test/tools/playtest.js --replay=run.json   # 回放一份游戏导出的录像（确定性重演），输出结局/死因，便于分析真实人类玩法
+node test/tools/playtest.js --dev               # 用开发版（dungeon-raid-dev.html）跑，验证未发布的数值改动
+node test/tools/playtest.js --submit-ai --games=3   # 跑机器人 → 本地重放校验 → 把可验证录像以 agent=ai 提交到 AI 榜（加 --dry 只校验不提交）
+node test/tools/submit-ai-until-posted.js           # 轮流尝试强势 build（默认精灵先知 / 矮人会长 / 人族骑士等），直到至少成功提交 1 条 AI 成绩，并轮询是否进入当前版本 AI 榜
 ```
 
 平衡基准数据见 [`TEST_REPORT.md`](TEST_REPORT.md)（带版本号，可作回归对比）；AI 榜自动改判的样本回归可用 `npm run score-regression` 检查（已知 AI 样本必须继续命中、已知真人样本不能误伤）；版本改动历史见 [`CHANGELOG.md`](CHANGELOG.md)。

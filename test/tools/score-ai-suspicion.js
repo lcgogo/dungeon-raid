@@ -2,7 +2,7 @@
 
 const fs = require('fs');
 const path = require('path');
-const { resolveEnginePath, API } = require('./verify.js');
+const { resolveEnginePath, API } = require('../../verify.js');
 
 function parseArgs(argv) {
   const opts = {

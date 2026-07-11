@@ -4,10 +4,10 @@ const fs = require('fs');
 const path = require('path');
 const { analyzeRecording } = require('./score-ai-suspicion.js');
 
-const ROOT = __dirname;
+const ROOT = path.resolve(__dirname, '..', '..');
 const DEFAULT_MANIFESTS = [
-  path.join(ROOT, 'scorer-regression-ai.json'),
-  path.join(ROOT, 'scorer-regression-human.json'),
+  path.join(ROOT, 'test', 'scorer-regression', 'scorer-regression-ai.json'),
+  path.join(ROOT, 'test', 'scorer-regression', 'scorer-regression-human.json'),
 ];
 
 function parseArgs(argv) {

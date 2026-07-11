@@ -1,6 +1,6 @@
 'use strict';
 const fs = require('fs');
-const src = fs.readFileSync(__dirname + '/src/index.js', 'utf8');
+const src = fs.readFileSync(__dirname + '/../../worker/src/index.js', 'utf8');
 function grab(name){
   const sig = `function ${name}`;
   const start = src.indexOf(sig);

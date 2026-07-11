@@ -8,8 +8,8 @@
 
 | 组件 | 平台 | 作用 | 代码/位置 |
 |---|---|---|---|
-| 游戏静态页 | **Cloudflare Pages** | `dungeon-raid.html`(正式版)/ `dungeon-raid-dev.html`(开发版)/ `index.html` | 仓库根；`dr.sh deploy/release` 部署 |
-| 榜单 API | **Cloudflare Worker** (`api.dungeonraid.win`) | 收成绩、存档、算名次、`/pending`·`/verify`、推送验证 | `worker/src/index.js`；`wrangler deploy` |
+| 游戏静态页 | **Cloudflare Pages** | `dungeon-raid.html`(正式版)/ `dungeon-raid-dev.html`(开发版)/ `index.html` | 仓库根；`deploy/dr.sh deploy/release` 部署 |
+| 榜单 API | **Cloudflare Worker** (`api.dungeonraid.win`) | 收成绩、存档、算名次、`/pending`·`/verify`、推送验证 | `worker/src/index.js`；`cd deploy/worker && npx wrangler deploy` |
 | 录像存储 | **Cloudflare KV**(`REC` 命名空间) | key=8位id，value=录像 JSON（种子+操作序列 ≈2–4KB） | — |
 | 成绩元数据 | **Cloudflare D1**(`dungeon-raid-scores`) | turns/level/gold/version/verified/source… | `worker/migrations/` |
 | 重放验证器 | **render**（藏在 `verify.dungeonraid.win` Cloudflare 橙云后） | 确定性重放录像、比对、回写 verified | `verify-server.js`（常驻）/ `verify.js`（核心） |
@@ -58,8 +58,8 @@
 
 ## 运维速查
 
-- 发版（游戏）：`bash dr.sh release`（dev→正式版同步 + 提交 + push + 部署 Pages + GitHub Release）；只发 dev：`bash dr.sh deploy`；完整性核对：`bash dr.sh integrity`。
-- 部署 Worker：`cd worker && npx wrangler deploy`。
+- 发版（游戏）：`bash deploy/dr.sh release`（dev→正式版同步 + 提交 + push + 部署 Pages + GitHub Release）；只发 dev：`bash deploy/dr.sh deploy`；完整性核对：`bash deploy/dr.sh integrity`。
+- 部署 Worker：`cd deploy/worker && npx wrangler deploy`。
 - render：从本仓库部署 `node verify-server.js`（`render.yaml` 蓝图 / `Procfile` 通用）；自定义域 `verify.dungeonraid.win`（Cloudflare 橙云 + SSL 模式 **Full**，非 strict）。验证器现会优先按 `engines/<version>.html` 选精确引擎；`dr.sh release` / `dr.ps1 release` 会自动归档正式版快照到 `engines/`，供旧版本录像重放。
 - 看录像：`https://api.dungeonraid.win/rec/<id>`；列 KV：`npx wrangler kv key list --namespace-id <REC_ID>`。
 - 验证器状态：`https://verify.dungeonraid.win/`（看 engineVersion / last / lastErr）。

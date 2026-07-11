@@ -17,7 +17,9 @@
 #   bind-domains        把自定义域名绑定到 Pages 项目
 #   help                显示本说明
 set -e
-cd "$(dirname "$0")"
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+ROOT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
+cd "$ROOT_DIR"
 
 PROJ=dungeon-raid
 ACCT=5f2bcd334702a2c76245d5832c0cf767
@@ -93,7 +95,7 @@ cmd_test(){
     if node "test/$t.js" >/dev/null 2>&1; then echo PASS; else echo FAIL; fail=1; fi
   done
   printf "%-14s " "thresholdtest"
-  if node "worker/threshold-top10-smoketest.js" >/dev/null 2>&1; then echo PASS; else echo FAIL; fail=1; fi
+  if node "test/worker/threshold-top10-smoketest.js" >/dev/null 2>&1; then echo PASS; else echo FAIL; fail=1; fi
   return $fail
 }
 
@@ -155,7 +157,7 @@ pathlib.Path('public').mkdir(exist_ok=True)
 pathlib.Path('public/index.html').write_text(text, encoding='utf-8')
 PY
   cp dungeon-raid.html dungeon-raid-dev.html apple-touch-icon.png icon-192.png icon-512.png manifest.webmanifest public/
-  cp pages/functions/_middleware.js public/functions/
+  cp deploy/pages/functions/_middleware.js public/functions/
   echo "public/ 内容（应只有网页文件，无私钥）："; ls -R public
   npx --yes wrangler pages project create "$PROJ" --production-branch=main 2>/dev/null || true
   npx --yes wrangler pages deploy public --project-name="$PROJ" --branch=main --commit-dirty=true

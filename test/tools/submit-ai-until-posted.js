@@ -1,6 +1,7 @@
 'use strict';
 
 const fs = require('fs');
+const path = require('path');
 const { spawnSync } = require('child_process');
 
 function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
@@ -36,15 +37,15 @@ function parseArgs(argv) {
 }
 
 function formalVersion() {
-  const src = fs.readFileSync(__dirname + '/dungeon-raid.html', 'utf8');
+  const src = fs.readFileSync(path.resolve(__dirname, '..', '..', 'dungeon-raid.html'), 'utf8');
   const m = src.match(/const VERSION='(v\d+\.\d+\.\d+)'/);
   if (!m) throw new Error('无法解析 dungeon-raid.html 的 VERSION');
   return m[1];
 }
 
 function runOnce(playArgs) {
-  const res = spawnSync('node', ['playtest.js', ...playArgs], {
-    cwd: __dirname,
+  const res = spawnSync('node', ['test/tools/playtest.js', ...playArgs], {
+    cwd: path.resolve(__dirname, '..', '..'),
     encoding: 'utf8',
     maxBuffer: 10 * 1024 * 1024,
   });

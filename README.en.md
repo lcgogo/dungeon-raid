@@ -179,24 +179,24 @@ Clearing shows a story-flavored congratulations screen; the Release build report
 
 ## 🛠️ Development / Balance Testing
 
-`playtest.js` is a **headless bot** that loads the real game logic from `dungeon-raid.html` (with DOM/Canvas stubbed out), plays automatically with a greedy strategy, and reports survival turns and levels reached per race/class line — handy for balance regression testing.
+`test/tools/playtest.js` is a **headless bot** that loads the real game logic from `dungeon-raid.html` (with DOM/Canvas stubbed out), plays automatically with a greedy strategy, and reports survival turns and levels reached per race/class line — handy for balance regression testing.
 
 ```bash
-node playtest.js                  # scan mode: all races × several enemy-stat sets, find the closest to the target turn
+node test/tools/playtest.js                  # scan mode: all races × several enemy-stat sets, find the closest to the target turn
 
 # Targeted mode: pin a class line or a single boss, run detailed stats for comparison
-node playtest.js --race=orc --t1=axelord --t2=unbroken   # test the Axe Lord line
-node playtest.js --race=human --t1=knight --t2=immortal   # pin tier-1 / tier-2
-node playtest.js --boss=zombie                       # only spawn the Zombie (isolate one boss)
-node playtest.js --race=elf --boss=assassin --games=40    # combine + custom game count
-node playtest.js --race=dwarf --enemy=C2             # pick an enemy-stat candidate (defaults to live file values)
+node test/tools/playtest.js --race=orc --t1=axelord --t2=unbroken   # test the Axe Lord line
+node test/tools/playtest.js --race=human --t1=knight --t2=immortal   # pin tier-1 / tier-2
+node test/tools/playtest.js --boss=zombie                       # only spawn the Zombie (isolate one boss)
+node test/tools/playtest.js --race=elf --boss=assassin --games=40    # combine + custom game count
+node test/tools/playtest.js --race=dwarf --enemy=C2             # pick an enemy-stat candidate (defaults to live file values)
 ```
 
 Flags: `--race=` (human/elf/dwarf/orc), `--t1=`/`--t2=` (class-line id), `--boss=` (the only boss that spawns), `--enemy=` (enemy-stat candidate, defaults to live file values), `--games=` (games per config), `--report` (full per-race table). Targeted mode also prints: mean/max turns, tier-1/tier-2 reach rate, and the killing turn's main cause-of-death share.
 
 ```bash
-node playtest.js --replay=run.json   # Replay a recording exported from the game (deterministic re-run); prints the outcome / cause of death — handy for analyzing real human play
-node submit-ai-until-posted.js       # Rotate through strong default builds (Elf Seer / Dwarf Guild Master / Human Knight, etc.) until at least one AI score is submitted, then poll until it appears on the current-version AI board
+node test/tools/playtest.js --replay=run.json   # Replay a recording exported from the game (deterministic re-run); prints the outcome / cause of death — handy for analyzing real human play
+node test/tools/submit-ai-until-posted.js       # Rotate through strong default builds (Elf Seer / Dwarf Guild Master / Human Knight, etc.) until at least one AI score is submitted, then poll until it appears on the current-version AI board
 ```
 
 See [`TEST_REPORT.md`](./TEST_REPORT.md) for baseline data (versioned, for regression comparison); for the AI-board auto-classifier, run `npm run score-regression` to ensure known AI samples still trigger and known human samples still stay below the auto-reclassify boundary; see [`CHANGELOG.md`](./CHANGELOG.md) for the change history.

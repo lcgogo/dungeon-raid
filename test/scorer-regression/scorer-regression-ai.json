@@ -1,7 +1,7 @@
 [
   {
     "id": "hhctliry",
-    "file": "test/scorer-regression/ai/hhctliry.json",
+    "file": "ai/hhctliry.json",
     "expectation": "ai",
     "minScore": 65,
     "expectedRisk": "Very High",
@@ -9,7 +9,7 @@
   },
   {
     "id": "00f636vf",
-    "file": "test/scorer-regression/ai/00f636vf.json",
+    "file": "ai/00f636vf.json",
     "expectation": "ai",
     "minScore": 65,
     "expectedRisk": "Very High",

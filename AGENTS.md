@@ -54,7 +54,9 @@
   - `test/finaletest.js` 终局/破关烟测（也验证脚本能解析）。
   - `test/milestonetest.js` 50/100/200/350 转职链 + 跨界技能 + 重放一致。
   - `test/savetest.js` 存档版本兼容。
-- **平衡相关改动**（新职业/数值/机制）还要跑 `node playtest.js [--report]`（读正式版；`--dev` 读开发版；`--clearsweep [--upsweep]` 全职业线扫描），并把报告呈给用户。
+- **测试相关文件统一放入 `test/` 体系**：新增 smoke test、回测脚本、排行榜分析/回归工具、Worker 侧测试时，优先放进 `test/` 及其子目录（如 `test/tools/`、`test/worker/`），不要再散落到仓库根目录。
+- **部署相关文件统一放入 `deploy/` 体系**：新增发布脚本、Pages/Worker 部署配置、运维辅助脚本时，优先放进 `deploy/` 及其子目录，不要继续散落在仓库根目录。
+- **平衡相关改动**（新职业/数值/机制）还要跑 `node test/tools/playtest.js [--report]`（读正式版；`--dev` 读开发版；`--clearsweep [--upsweep]` 全职业线扫描），并把报告呈给用户。
 
 ---
 
