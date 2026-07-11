@@ -126,10 +126,10 @@
     <div class="row"><span class="lbl" id="lblHp">生命</span>
       <div class="bar" style="flex:1"><i id="hpBar" style="background:var(--hp)"></i><span id="hpTxt"></span></div>
     </div>
-    <div class="row"><span class="lbl" id="lblAr">护甲进度</span>
+    <div class="row"><span class="lbl" id="lblAr">护甲</span>
       <div class="bar" style="flex:1"><i id="arBar" style="background:var(--armor)"></i><span id="arTxt"></span></div>
     </div>
-    <div class="row"><span class="lbl" id="lblXp">等级经验</span>
+    <div class="row"><span class="lbl" id="lblXp">经验</span>
       <div class="bar" style="flex:1"><i id="xpBar" style="background:var(--xp)"></i><span id="xpTxt"></span></div>
     </div>
     <div class="stats">
@@ -176,8 +176,8 @@
 (()=>{
 //==================== 配置 ====================
 // 版本号 v主.次.修：不影响 verify/replay 兼容边界的小改动改"修"；凡是影响 verify/replay/版本分桶/release 验证语义的改动都改"次"；大版本变更需先确认。页面底部显示。
-const VERSION='v1.46.0';
-const CHANGELOG_LINES=[{"ver": "v1.46.0", "zh": "重做升级项「凝聚生机 Channel Vitality」的成长方式：不再是每次固定 +1 回血，而是按选择次数递增——第 1 次选择后每回合回 1，第 2 次再额外 +2（合计 3），第 3 次再额外 +3（合计 6），依此类推。这样它终于会随着投入次数显著变强，而不是一直停留在后期几乎没人会点的平缓档。", "en": "Reworked the upgrade Channel Vitality so it no longer gives a flat +1 regen every time. Instead it now scales by pick count: the 1st pick grants +1 per turn, the 2nd adds +2 more (total 3), the 3rd adds +3 more (total 6), and so on. This makes repeated investment meaningfully stronger instead of staying in the late-game “almost never worth taking” zone."}, {"ver": "v1.45.3", "zh": "清理误提交到仓库的本地回归报告 `.reports-local-scorer-regression.json`，并把 `.reports-local-*.json` 加入 `.gitignore`，避免这类本地产物再次随正式版一起进仓。", "en": "Cleaned up the accidentally committed local regression report `.reports-local-scorer-regression.json` and added `.reports-local-*.json` to `.gitignore`, so local report artifacts do not ride along with future releases."}, {"ver": "v1.45.2", "zh": "兽人职业 `berserker` 的显示名调整为「牛头人 / Tauren」，用于统一当前游戏与文档中的称呼；内部职业 id `berserker`、种族 id `orc` 保持不变，因此不影响存档、回放与测试兼容。", "en": "兽人斗士锁定被动「血狂 Blood Frenzy」的说明去掉“无视护甲”字样：兽人本身无甲，这里直接写成每回合结束损失 5% 最大生命，避免重复强调不会实际生效的护甲交互。"}, {"ver": "v1.45.1", "zh": "回放/分享录像详情弹框新增「🏆 补交排行榜」按钮：只要录像仍带有效服务端种子 token，就能直接按原始成绩补交闯关榜或破关榜；若是离线录像，则仍只支持回放/分享、不支持上榜。", "en": "游戏结束时会额外探测一次排行榜服务连通性；若当前无法连接 API，会明确提示“本局录像已保留，可稍后从回放详情里补交”，避免误以为过门槛却没自动上榜。"}, {"ver": "v1.45.0", "zh": "上传门槛新增“种族前 10 放行”例外：除了原有 `upload_min_turns` 外，只要成绩进入同种族、同 agent、同当前 minor 版本口径下的前 10 名，也允许正式上传。该规则同时适用于闯关榜与破关榜。", "en": "`/seed` 下发的门槛快照新增了 score / clear 两套种族前 10 cutoff，前端结算页的本地预判与 Worker 最终裁决已同步；旧快照缺少这些字段时，会自动回退到原先只看 `upload_min_turns` 的逻辑。"}];   /* auto-injected by dr.sh embed-changelog（勿手改） */
+const VERSION='v1.48.0';
+const CHANGELOG_LINES=[{"ver": "v1.48.0", "zh": "兽人新增第 4 职业「斧王 Axe Lord」：主动「嘲讽 Taunt」会把场上所有敌人/Boss（终焉之主除外）的攻击倒计时压到 1，也就是让它们在下回合立刻出手；而在这批攻击中，你受到的实际伤害的 50% 会转化为永久最大生命。", "en": "斧王锁定二阶被动为「越挫越勇 Unbroken」：每次你受到一次伤害时，永久获得 +1 最大生命。这条路线把兽人的“无甲高血”思路进一步推成“主动开团、挨打一轮、把伤害转成成长”的坦克型玩法。"}, {"ver": "v1.47.0", "zh": "活死人死灵的锁定二阶被动由「回春 Rejuvenation」重做为「竭心光环 Wither Aura」：不再提供主动技能冷却 -1，而是改为按你每回合恢复量（受治疗减半影响）先扣自己同等生命，再让全场敌人/Boss 各损失同等生命。也就是说，活死人会先把 regen 按减疗折算，再用这个折算后的数值同时结算自损与光环伤害；即使满血导致本回合实际没回上来，光环也仍按这档恢复量工作。顺手修正了录像在击败里程碑 Boss 后的状态快照：现在会在 `onBossKilled()` 后立刻更新并保存 `rec.maxHp/level/gold/turns`，避免像竭心光环这类“击败 Boss 才获得的新被动”被结算页继续沿用旧录像快照、导致提交时少算新效果。", "en": "Reworked the Undead Necromancer’s locked tier-2 passive from Rejuvenation into Wither Aura: instead of reducing active-skill cooldowns by 1, it now first drains the player for the regen amount after healing modifiers, then deals that same amount to all enemies/bosses. In practice, Undead first applies its healing penalty to regen, then uses that reduced value for both self-drain and aura damage; even when you were already full and healed 0 in practice, the aura still uses that modified regen value. Also fixed the recording snapshot after milestone-boss kills: `onBossKilled()` now immediately refreshes and saves `rec.maxHp/level/gold/turns`, preventing newly unlocked effects such as Wither Aura from being evaluated against a stale run snapshot on the result screen."}, {"ver": "v1.46.0", "zh": "重做升级项「凝聚生机 Channel Vitality」的成长方式：不再是每次固定 +1 回血，而是按选择次数递增——第 1 次选择后每回合回 1，第 2 次再额外 +2（合计 3），第 3 次再额外 +3（合计 6），依此类推。这样它终于会随着投入次数显著变强，而不是一直停留在后期几乎没人会点的平缓档。", "en": "活死人种族说明文案收紧：把「攻击倒计时 +1（更慢出手）」精简成「攻击倒计时 +1」，并删去治疗减半里的「重生满血不受影响」补充说明，避免和技能自身描述重复。"}, {"ver": "v1.45.3", "zh": "清理误提交到仓库的本地回归报告 `.reports-local-scorer-regression.json`，并把 `.reports-local-*.json` 加入 `.gitignore`，避免这类本地产物再次随正式版一起进仓。", "en": "Cleaned up the accidentally committed local regression report `.reports-local-scorer-regression.json` and added `.reports-local-*.json` to `.gitignore`, so local report artifacts do not ride along with future releases."}, {"ver": "v1.45.2", "zh": "兽人职业 `berserker` 的显示名调整为「牛头人 / Tauren」，用于统一当前游戏与文档中的称呼；内部职业 id `berserker`、种族 id `orc` 保持不变，因此不影响存档、回放与测试兼容。", "en": "兽人斗士锁定被动「血狂 Blood Frenzy」的说明去掉“无视护甲”字样：兽人本身无甲，这里直接写成每回合结束损失 5% 最大生命，避免重复强调不会实际生效的护甲交互。"}];   /* auto-injected by dr.sh embed-changelog（勿手改） */
 const DEV=true;   // release build (DEV=false); dev build is dungeon-raid-dev.html (DEV=true)
 const REC_API='https://api.dungeonraid.win';   // 录像分享 API（Cloudflare Worker + KV）
 // 带种子随机数（mulberry32）：游戏全程用 rnd() 取代原生随机，配合录制种子可确定性重放
@@ -271,8 +271,8 @@ function newPlayer(){
     comboMult:1, swordMult:1, armorMult:1, maxHpUpMult:1, noArmor:false,
     chosenPerks:[],                                                      // 本局已选技能名（按选择顺序，供录像/展示用）
     prophecyPending:null,                                                // 先知：下一次补子要强制落下的类型（本回合未补子则保留到下次）
-    heartPoison:false, rogueStealTurn:false, fireChainTurn:false, firewall:false, echoOfFate:false,   // 巫医蛊毒：本回合连心改为毒怪；盗贼：本回合命中偷金；火法师：火焰链 / 火墙；先知：命运回响
-    foeCdBonus:0, skillCdMod:0, splash:false, rebirthTurn:false, rebirthSaves:0, healMult:1,  // 活死人：迷惑/技能冷却修正/溅射/重生/治疗减半
+    heartPoison:false, rogueStealTurn:false, fireChainTurn:false, firewall:false, echoOfFate:false, tauntWindow:false,   // 巫医蛊毒：本回合连心改为毒怪；盗贼：本回合命中偷金；火法师：火焰链 / 火墙；先知：命运回响；斧王：下一轮受伤转上限
+    foeCdBonus:0, skillCdMod:0, splash:false, rebirthTurn:false, rebirthSaves:0, healMult:1, witherAura:false, unbroken:false,  // 活死人：迷惑/技能冷却修正/溅射/重生/治疗减半/竭心；斧王：越挫越勇
     upgradeChoices:3, bombCd:3, goldLock:0, goldFrozen:0, healUses:0, bombUses:0, shadowBombGold:false, tycoonGoldShield:false, frozen:{},  // 转职被动相关；healUses：治疗递增；bombUses：爆破手炸弹递增；shadowBombGold：乾坤一掷；tycoonGoldShield：钱能买命；frozen：雪人冰封的主动剩余回合（skill/heal/bomb）
     finaleStarted:false, finaleWave:0, cleared:false};                      // 终局：终焉之主浪潮 / 破关
 }
@@ -593,7 +593,7 @@ const RACES=[
   {id:'elf',   e:'🧝', n:['精灵','Elf'],   d:['特性：连击加成翻倍（每多连1个 +30%）\n削弱：「强化体魄」升级只 +3 上限','Trait: combo bonus doubled (+30%/tile)\nWeakness: Fortify Body upgrade gives only +3 max HP'], f:p=>{p.comboMult=2; p.maxHpUpMult=0.5;}},
   {id:'dwarf', e:'🎅', n:['矮人','Dwarf'], d:['特性：护甲减伤翻倍（每点护甲抵 2 点）\n削弱：{WC}总伤 ×0.85（含固定伤害一起算）','Trait: armor counts double (each point blocks 2)\nWeakness: ×0.85 total {W} damage (flat included)'], f:p=>{p.armorMult=2; p.swordMult=0.85;}},
   {id:'orc',   e:'🧌', n:['兽人','Orc'],   d:['特性：「强化体魄」升级时生命上限翻倍（每次 +12）\n削弱：无甲——永远无法获得护甲','Trait: Fortify Body upgrade gives double max HP (+12 each)\nWeakness: No Armor — can never gain armor'], f:p=>{p.maxHpUpMult=2; p.noArmor=true;}},
-  {id:'undead',e:'🪦', n:['活死人','Undead'], d:['特性：迷惑——所有怪物（含 Boss）攻击倒计时 +1（更慢出手）\n削弱：一切治疗效果减半（心/药水/吸魂；重生满血不受影响）+ 主动技能冷却 +1','Trait: Confusion — all monsters (incl. bosses) attack 1 turn slower\nWeakness: all healing halved (hearts/potion/drain; Rebirth full-heal unaffected) + active-skill cooldowns +1'], f:p=>{p.foeCdBonus=1; p.skillCdMod=(p.skillCdMod||0)+1; p.healMult=0.5;}},
+  {id:'undead',e:'🪦', n:['活死人','Undead'], d:['特性：迷惑——所有怪物（含 Boss）攻击倒计时 +1\n削弱：一切治疗效果减半（心/药水/吸魂）+ 主动技能冷却 +1','Trait: Confusion — all monsters (incl. bosses) get +1 attack countdown\nWeakness: all healing halved (hearts/potion/drain) + active-skill cooldowns +1'], f:p=>{p.foeCdBonus=1; p.skillCdMod=(p.skillCdMod||0)+1; p.healMult=0.5;}},
 ];
 // 一阶职业：主动技能（f 返回 false 表示无效不发动；返回值表示自带日志）
 const TIER1={
@@ -624,7 +624,8 @@ const TIER1={
       lh=lifestealHeal(1); applyGravity(); syncPositions(false);
     }
     log(tr(`🎯 狙击：对最肥目标 −${dealt}`+(killed?`，击杀！3 倍奖励`:'')+(lh?`，吸血 +${lh}`:''),`🎯 Snipe: −${dealt} to the toughest foe`+(killed?`, killed! triple rewards`:'')+(lh?`, +${lh} lifesteal`:''))); return true; }}},
-  berserker:{n:['牛头人','Tauren'], quip:['疼？疼说明这刀还能更快。','Pain just means I can swing faster.'], skill:{name:['狂怒','Frenzy'], short:['本回合不死+残血增伤','Undying this turn + low-HP dmg'], desc:['立即把当前生命减半，本回合进入「不屈」：无论受到多少伤害都至少保留 1 血；且本回合血越少{W}伤害越高（最多 +60%）。只持续本回合。','Halves your current HP and grants Undying this turn: you keep ≥1 HP no matter the damage, and the lower your HP the higher your {W} damage (up to +60%). This turn only.'], cd:5, f:p=>{ p.hp=Math.max(1,Math.floor(p.hp/2)); p.lowHpDmg=true; p.undyingTurn=true; log(tr(`${wE()} 狂怒！生命减半并进入不屈（本回合无论受多少伤都保留 1 血），血越少${wN()}伤越高`,`${wE()} Frenzy! HP halved and Undying this turn (keep ≥1 HP no matter the damage); lower HP, higher ${wN()} damage`), 'buff'); return true; }}},
+  berserker:{n:['牛头人','Tauren'], quip:['疼？疼说明这刀还能更快。','Pain just means I can swing faster.'], skill:{name:['狂怒','Frenzy'], short:['本回合不死+残血增伤','Undying this turn + low-HP dmg'], desc:['立即把当前生命减半，本回合进入「不屈」：无论受到多少伤害都至少保留 1 血；且本回合血越少{W}伤害越高（最多 +60%）。只持续本回合。','Halves your current HP and grants Undying this turn: you keep ≥1 HP no matter the damage, and the lower your HP the higher your {W} damage (up to +60%). This turn only.'], cd:5, f:p=>{ p.hp=Math.max(1,Math.floor(p.hp/2)); p.lowHpDmg=true; p.undyingTurn=true; log(tr(`${wE()} 狂怒！生命减半并进入不屈（本回合无论受多少伤都保留 1 血），血越少${wN()}伤越高`,`${wE()} Frenzy! HP halved and Undying this turn (keep ≥1 HP no matter the damage); lower HP, higher ${wN()} damage`), 'buff'); return true; }}} ,
+  axelord:{n:['斧王','Axe Lord'], quip:['群殴？一起上吧。','All at once? Come on, then.'], skill:{name:['嘲讽','Taunt'], short:['全场敌人下回合立刻攻击','All foes attack next turn'], desc:['使场上所有敌人/Boss（终焉之主除外）的攻击倒计时变为 1，也就是它们会在下回合立刻攻击。接下来这批攻击中，你受到的实际伤害有 50% 会转化为永久最大生命。','Sets the attack countdown of all enemies/bosses on the board (excluding the Overlord) to 1, so they will attack on the next turn. During those attacks, 50% of the actual damage you take is converted into permanent max HP.'], cd:5, f:p=>{ let hit=0; for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const t=grid[r][c]; if(t&&(t.type==='enemy'||(t.type==='boss'&&!t.finale))){ t.cd=1; hit++; } } if(!hit) return false; p.tauntWindow=true; log(tr('🪓 嘲讽：全场敌人下回合立刻攻击，你受到的实际伤害有 50% 会转化为永久最大生命','🪓 Taunt: all foes attack next turn, and 50% of the actual damage you take becomes permanent max HP'), 'buff'); return true; }}},
   fighter:{n:['斗士','Fighter'], quip:['越打越精神，血是我的能量饮料。','The more I fight, the better I feel.'], skill:{name:['嗜血','Bloodthirst'], short:['每命中吸3血+本回合可攻击{W}免疫怪','+3 HP per hit + pierce {W}-immunity'], desc:['本回合的{W}攻击附带两个效果：① 每命中一只怪/Boss 回复 3 点生命（按命中数算，不是击杀数）；② 可以打到平时{W}免疫的 Boss（幽灵/小丑/雪人/污染怪等，终焉之主除外）。只持续本回合，本回合不出{W}就浪费。','This turn your {W} attack gains two effects: (1) heal 3 HP per foe you hit (by hits, not kills); (2) it can strike normally {W}-immune bosses (Ghost/Clown/Snowman/Corruptor…; not the Overlord). This turn only — wasted if you make no {W} attack.'], cd:5, f:p=>{ p.bloodthirst=1; p.pierceTurn=true; log(tr(`🩸 嗜血：本回合${wChain()}每击中一只怪回 3 血，且可用${wN()}攻击${wN()}免疫的 Boss（幽灵/小丑）`,`🩸 Bloodthirst: heal 3 per enemy hit this turn, and your ${wN()} can hit ${wN()}-immune bosses (Ghost/Clown)`), 'buff'); return true; }}},
   witchdoctor:{n:['巫医','Witch Doctor'], quip:['你的心意我收下，怪替你喝。','Your love? The monsters drink it for you.'], skill:{name:['蛊毒','Hex'], short:['全场心燃成黑毒心','Burn hearts → black poison'], desc:['把棋盘上所有的红心当场燃成黑毒心（🖤）。之后连接黑毒心不回血，而是把这些生命当毒灌给场上所有怪/Boss（含{W}免疫的，终焉之主除外，与炸弹同口径）。毒伤 = 心数 × 每颗心回复量 × 连击。场上没有心时无效、不进冷却。','Burns every red heart on the board into a black poison heart (🖤) on the spot. Linking a black heart heals nothing — it poisons every foe instead (incl. {W}-immune; not the Overlord, same reach as the Bomb). Poison = hearts × heal-per-heart × combo. No effect — and no cooldown — if there are no hearts.'], cd:5, f:p=>{ let n=0; for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const t=grid[r][c]; if(t&&t.type==='heart'&&!t.poison){ t.poison=true; n++; } } if(!n) return false; syncPositions(false); log(tr(`🧪 蛊毒：${n} 颗心燃成黑毒心（连它们毒灌全场怪、不回血）`,`🧪 Hex: ${n} hearts burned into black poison (link them to poison all foes, no heal)`), 'buff'); return n; }}},
   swordsaint:{n:['剑圣','Sword Saint'], quip:['在我眼里，万物皆可开刃。','In my eyes, anything can be a blade.'], skill:{name:['化剑','Bladeshift'], short:['全场心/金币→剑','Hearts & coins → swords'], desc:['把棋盘上所有的心和金币都变成{W}，便于接出更长的{W}链打出爆发。场上没有心/金币时无效、不进冷却。','Turns every heart and coin on the board into {W}s so you can chain longer for a burst. No effect — and no cooldown — if there are none.'], cd:5, f:p=>{ let n=0; for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const t=grid[r][c]; if(t&&(t.type==='heart'||t.type==='coin')){ t.type='sword'; n++; } } if(!n) return false; log(tr(`⚔️ 化剑：${n} 个心/金币化为剑`,`⚔️ Bladeshift: ${n} hearts/coins → swords`), 'buff'); return n; }}},
@@ -674,7 +675,8 @@ const TIER2={
   thorns:{n:['荆棘','Thorns'], d:['受到攻击时，把「当前护甲减伤量」反弹给攻击者（护甲越高反弹越多）','When hit, reflect your current armor (damage-reduction) back to the attacker — more armor, more reflect'], f:p=>{ p.thorns=true; }},
   bloodfrenzy:{n:['血狂','Blood Frenzy'], d:['吸血/嗜血回血超出生命上限时，溢出的 30% 增为永久生命上限；但每回合结束损失 5% 最大生命','Lifesteal/Bloodthirst healing past max HP: 30% of overflow becomes permanent max HP; but at end of every turn, lose 5% of max HP'], f:p=>{ p.bloodFrenzy=true; }},
   cheapskate:{n:['小气鬼','Cheapskate'], d:['消耗金币的主动（商店治疗/炸弹、会长「收买」）花费减半','Gold-spending actives (shop Heal/Bomb, Guild Master’s Buyout) cost half'], f:p=>{ p.cheapskate=true; }},
-  rejuvenation:{n:['回春','Rejuvenation'], d:['所有主动技能冷却 -1','All active-skill cooldowns -1'], f:p=>{ p.skillCdMod=(p.skillCdMod||0)-1; }},
+  witheraura:{n:['竭心光环','Wither Aura'], d:['按你每回合恢复量（受治疗减半影响）先扣自己同等生命，再让全场敌人/Boss 各掉同等生命','Each turn, lose HP equal to your regen amount after healing modifiers, then deal that same amount to all enemies/bosses'], f:p=>{ p.witherAura=true; }},
+  unbroken:{n:['越挫越勇','Unbroken'], d:['每次你受到一次伤害时，永久获得 +1 最大生命','Whenever you take damage, gain +1 permanent max HP'], f:p=>{ p.unbroken=true; }},
   splash:{n:['溅射','Splash'], d:['攻击溢出伤害随机溅到剩余敌人（含{W}免疫 Boss）','Overflow damage splashes to a random remaining foe (incl. {W}-immune bosses)'], f:p=>{ p.splash=true; }},
   rotflesh:{n:['积累腐肉','Carrion Feast'], d:['每杀死一个敌人/Boss，生命上限永久 +1（腐肉越积越厚）','Each enemy/boss killed: +1 permanent max HP (carrion keeps piling up)'], f:p=>{ p.rotflesh=true; }},
   bladeall:{n:['皆可为剑','Anything a Blade'], d:['每回合棋盘摆完后，把 3 个非敌/非剑棋子变成剑','Each turn after the board settles, turns 3 non-enemy non-sword tiles into swords'], f:p=>{ p.swordConvert=true; }},
@@ -686,15 +688,15 @@ const CLASS_T2={
   knight:'general', priest:'holystrike', firemage:'firewall', swordsaint:'bladeall',
   ranger:'sharpshooter', rogue:'shadow', elder:'thorns', seer:'echooffate',
   blacksmith:'shieldbash', miser:'tycoon', guildmaster:'cheapskate', musketeer:'demolitionist',
-  necromancer:'rejuvenation', skeletonking:'splash', butcher:'rotflesh',
-  berserker:'warlord', fighter:'bloodfrenzy', witchdoctor:'allpoison',
+  necromancer:'witheraura', skeletonking:'splash', butcher:'rotflesh',
+  berserker:'warlord', fighter:'bloodfrenzy', witchdoctor:'allpoison', axelord:'unbroken',
 };
 const RACE_PATHS={
   human:{t1:['knight','priest','firemage','swordsaint'], t2:['general','holystrike','firewall','bladeall']},
   elf:  {t1:['ranger','rogue','elder','seer'], t2:['sharpshooter','shadow','thorns','echooffate']},
   dwarf:{t1:['blacksmith','miser','guildmaster','musketeer'], t2:['shieldbash','tycoon','cheapskate','demolitionist']},
-  undead:{t1:['necromancer','skeletonking','butcher'], t2:['rejuvenation','splash','rotflesh']},
-  orc:  {t1:['berserker','fighter','witchdoctor'], t2:['warlord','bloodfrenzy','allpoison']},
+  undead:{t1:['necromancer','skeletonking','butcher'], t2:['witheraura','splash','rotflesh']},
+  orc:  {t1:['berserker','fighter','witchdoctor','axelord'], t2:['warlord','bloodfrenzy','allpoison','unbroken']},
 };
 function raceById(id){ return RACES.find(r=>r.id===id)||RACES[0]; }
 let __bootHandled=false;
@@ -949,6 +951,7 @@ function chooseSwapSlot(skillId){
 function onBossKilled(){
   log(tr('🏆 击败 Boss！厚赏 💰+20、经验 +15','🏆 Boss defeated! 💰+20, XP+15'), 'buff');   // 统一奖励日志：所有击杀路径（剑/炸弹/荆棘/吸魂/吸血鬼中毒）都会报
   if(player.rotflesh) player.maxHp++;   // 屠夫·积累腐肉：击败 Boss 也 +1 生命上限
+  if(!replaying){ if(rec){ rec.maxHp=player.maxHp; rec.level=player.level; rec.gold=player.gold; rec.turns=player.turns; } saveRec(); }
   if(!player.tier1 && player.turns>=50) player.t1Pending=true;
   else if(player.tier1 && !player.tier2 && player.turns>=100) player.t2Pending=true;
   else if(player.tier2 && !player.tier2b && player.turns>=200) player.t3Pending=true;     // 200回合：本种族第二被动
@@ -964,7 +967,16 @@ async function fetchServerSeed(rc){
   try{
     const qs = new URLSearchParams({ race: rc.id, version: VERSION });
     const r=await fetch(REC_API+'/seed?'+qs.toString(),{method:'POST'});
-    if(r&&r.ok){ const x=await r.json(); if(typeof x.seed==='number'&&x.token) return {seed:x.seed>>>0, token:x.token, threshold:x.threshold||null}; }
+    if(r&&r.ok){ const x=await r.json(); if(typeof x.seed==='number'&&x.token) return {seed:x.seed>>>0, token:x.token}; }
+  }catch(e){}
+  return null;
+}
+
+async function fetchThresholdSnapshot(race, version, agent){
+  try{
+    const qs = new URLSearchParams({ race, version, agent: agent||'human' });
+    const r = await fetch(REC_API+'/threshold?'+qs.toString());
+    if(r&&r.ok){ const x = await r.json(); return x && x.threshold ? x.threshold : null; }
   }catch(e){}
   return null;
 }
@@ -1000,7 +1012,6 @@ function startGame(rc, srv){   // srv={seed,token}：服务端发的种子（正
     const seed = (srv && typeof srv.seed==='number') ? (srv.seed>>>0) : (((Date.now()>>>0)^(__seedCtr++*0x9E3779B9))>>>0); srand(seed);
     rec={v:1,seed,ver:VERSION,race:rc.id,t0:Date.now(),acts:[]};        // ver：版本分桶；t0：开局时刻
     if(srv && srv.token) rec.token=srv.token;                          // 服务端种子 token：提交时随录像带上、供 worker 校验
-    if(srv && srv.threshold) rec.threshold=srv.threshold;              // 服务器下发的上传门槛快照：完局时决定是否值得正式上传
     if(firstGame){ rec.tut=1; try{ localStorage.setItem(TUT_KEY,'1'); }catch(e){} }
     saveRec();
   }
@@ -1615,7 +1626,7 @@ function showShopInfo(key){
 document.querySelectorAll('.shopBtn[data-buy]').forEach(b=>attachLongPress(b, b.dataset.buy));
 
 //==================== 职业主动技能 ====================
-// 实际冷却 = 技能基础冷却 + 全局修正（活死人迷惑 +1 / 回春 -1），最低 1；骷髅王「重生」每实际复活一次再 +2（递增）。
+// 实际冷却 = 技能基础冷却 + 全局修正（如活死人迷惑 +1），最低 1；骷髅王「重生」每实际复活一次再 +2（递增）。
 function effSkillCd(id){
   const sk=id&&TIER1[id]&&TIER1[id].skill; if(!sk) return 5;
   let cd=sk.cd+(player.skillCdMod||0);
@@ -1753,7 +1764,7 @@ function resolve(){
   firewallTick();   // 火墙：底部三行的怪物每回合掉当前固定伤害 20%
   advanceEnemies();
   if(player.cleared) return;   // 终焉第10波撑过 → onClear 已结算，停止后续处理
-  if(player.regen){ const _h=gainHeal(player.regen); if(_h>0) log(tr(`💗 恢复 +${_h}（每回合）`,`💗 Regen +${_h} HP`), 'heal'); }
+  if(player.regen){ const aura=Math.max(0, Math.round(player.regen*((player.healMult!=null)?player.healMult:1))); const _h=gainHeal(player.regen); if(_h>0) log(tr(`💗 恢复 +${_h}（每回合）`,`💗 Regen +${_h} HP`), 'heal'); if(player.witherAura && aura>0){ const self= hurtPlayer(aura, 'witheraura', true); if(self>0) log(tr(`🪦 竭心光环：失去 ${self} 生命`,`🪦 Wither Aura: lose ${self} HP`), 'bad'); witherAuraTick(aura); } }
   if(player.turns===500 && !player.finaleStarted){ player.finaleStarted=true; player.finaleWave=0; spawnFinale(); }  // 第500回合：终局降临
   if(!player.finaleStarted){
     if(player.turns % 10 === 0) player.bossDue=true;          // 每 10 回合：该来 Boss
@@ -1878,6 +1889,7 @@ function advanceEnemies(){
   if(player.shieldTurn) player.shieldTurn=false;   // 圣盾仅护本回合
   if(player.undyingTurn) player.undyingTurn=false; // 狂怒不屈仅本回合
   if(player.rebirthTurn) player.rebirthTurn=false; // 骷髅王重生仅护本回合（未触发则失效）
+  if(player.tauntWindow) player.tauntWindow=false; // 斧王嘲讽：只覆盖被拉成 cd=1 的这一轮敌人动作
 }
 // 玩家受伤的统一入口：圣盾免伤 / 狂怒不屈保命 / 矮人护甲翻倍 / 荆棘反弹 / 伤害统计
 function hurtPlayer(atk, sourceKey, ignoreArmor, attacker){
@@ -1895,6 +1907,8 @@ function hurtPlayer(atk, sourceKey, ignoreArmor, attacker){
   if(player.rebirthTurn && player.hp<=0){ player.hp=player.maxHp; player.rebirthTurn=false; player.rebirthSaves=(player.rebirthSaves||0)+1; // 骷髅王重生：本回合致死则满血复活，此后重生冷却 +2
     log(tr('💀 骷髅王重生！生命恢复至满（重生冷却 +2）','💀 Skeleton King reborn! Full HP (Rebirth cooldown +2)'), 'heal'); }
   addDmg(sourceKey, dmg);
+  if(dmg>0 && player.tauntWindow){ const grow=Math.max(1, Math.floor(dmg*0.5)); player.maxHp+=grow; log(tr(`🪓 嘲讽吸收：永久最大生命 +${grow}`,`🪓 Taunt converts into +${grow} max HP`), 'buff'); }
+  if(dmg>0 && player.unbroken){ player.maxHp+=1; log(tr('🪓 越挫越勇：永久最大生命 +1','🪓 Unbroken: +1 permanent max HP'), 'buff'); }
   if(player.thorns && dmg>0 && attacker){ const refl=Math.round(player.armor*(player.armorMult||1)+(player.toughness||0)); if(refl>0) reflectThorns(refl, attacker); }   // 荆棘：受到「真·攻击」时把当前护甲减伤量反弹给攻击者（非攻击不传 attacker→不反弹）
   return dmg;
 }
@@ -1919,6 +1933,21 @@ function deathCoilTick(){
   if(!hit) return;
   const lh=lifestealHeal(kills);
   log(tr(`🟢 蔓藤缠绕：全场怪 −${dmg}`+(kills?`，击杀 ${kills}`:'')+(lh?`，吸血 +${lh}`:''),`🟢 Vine Coil: all foes −${dmg}`+(kills?`, ${kills} killed`:'')+(lh?`, +${lh} lifesteal`:'')));
+}
+// 竭心光环（死灵二阶被动）：按本回合恢复量（受治疗减半影响）让全场敌人/Boss（排除终焉）各掉同等生命；可击杀（给奖励+吸血）
+function witherAuraTick(healed){
+  if(!healed || healed<=0) return;
+  let kills=0, hit=0;
+  for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){
+    const t=grid[r][c];
+    if(t&&(t.type==='enemy'||(t.type==='boss'&&!t.finale))){
+      t.hp-=healed; hit++;
+      if(t.hp<=0){ const isB=t.type==='boss'; grid[r][c]=null; kills++; if(isB){ thiefRecover(t); player.xp+=15; gainGold(20); onBossKilled(); } else { player.xp+=3+(player.killXp||0); gainGold(1); } }
+    }
+  }
+  if(!hit) return;
+  const lh=lifestealHeal(kills);
+  log(tr(`🪦 竭心光环：全场敌人 −${healed}`+(kills?`，击杀 ${kills}`:'')+(lh?`，吸血 +${lh}`:''),`🪦 Wither Aura: all foes −${healed}`+(kills?`, ${kills} killed`:'')+(lh?`, +${lh} lifesteal`:'')));
 }
 function reflectThorns(amt, atkr){
   let r=-1,c=-1,t=null;
@@ -2131,6 +2160,7 @@ async function submitClear(r, level){
   const box=document.getElementById('rankBox'); if(!box) return;
   if(!r.token){ box.innerHTML=`<div style="text-align:center;color:var(--dim);font-size:12px">${tr('🔌 本局未用服务端种子（离线），未计破关榜','🔌 Offline run (no server seed) — not on clear board')}</div>`; return; }
   box.innerHTML=`<div style="text-align:center;color:var(--dim);font-size:12px;margin-bottom:4px">${tr('🔏 服务端种子有效期：现实时间 72 小时（过期后不可补交）','🔏 Server seed valid for 72 real-time hours (cannot be resubmitted after expiry)')}</div>`;
+  if(!r.threshold) r.threshold = await fetchThresholdSnapshot(r.race, r.ver||VERSION, 'human');
   if(r.threshold && !((r.threshold.upload_min_turns<=0) || (((r.threshold.upload_min_turns>0) && (r.turns||0) >= r.threshold.upload_min_turns) || clearTop10Eligible(r.threshold, r.turns||0, level)))){ box.innerHTML+=`<div style="text-align:center;color:var(--dim);font-size:12px">${approxPctLine(r.threshold, r.turns||0, level, 0, true)}</div>`; return; }
   box.innerHTML+=`<div style="text-align:center;color:var(--dim);font-size:12px">🏆 ${tr('破关榜上传中…','Submitting clear…')}</div>`;
   try{
@@ -2284,6 +2314,7 @@ async function submitScore(r, level, gold){
   const box=document.getElementById('rankBox'); if(!box) return;
   if(!r.token){ box.innerHTML=`<div style="text-align:center;color:var(--dim);font-size:12px">${tr('🔌 本局未用服务端种子（离线），未计排名','🔌 Offline run (no server seed) — not ranked')}</div>`; return; }   // 无 token：不计排名
   box.innerHTML=`<div style="text-align:center;color:var(--dim);font-size:12px;margin-bottom:4px">${tr('🔏 服务端种子有效期：现实时间 72 小时（过期后不可补交）','🔏 Server seed valid for 72 real-time hours (cannot be resubmitted after expiry)')}</div>`;
+  if(!r.threshold) r.threshold = await fetchThresholdSnapshot(r.race, r.ver||VERSION, 'human');
   if(r.threshold && !((r.threshold.upload_min_turns<=0) || (((r.threshold.upload_min_turns>0) && (r.turns||0) >= r.threshold.upload_min_turns) || scoreTop10Eligible(r.threshold, r.turns||0, level, gold)))){ box.innerHTML+=`<div style="text-align:center;color:var(--dim);font-size:12px">${approxPctLine(r.threshold, r.turns||0, level, gold, false)}</div>`; return; }
   box.innerHTML+=`<div style="text-align:center;color:var(--dim);font-size:12px">🏆 ${tr('排名上传中…','Submitting score…')}</div>`;
   try{
@@ -2558,7 +2589,6 @@ function showPlayerInfo(){
     [tr('🔢 连击加成','🔢 Combo'), `+${Math.round(15*(p.comboMult||1))}%/${tr('个','tile')}`],
     [tr('💗 每心回复','💗 Heal/heart'), `+${p.healPerHeart}`],
     [tr('💰 每金币','💰 Gold/coin'), `+${p.goldPerCoin}`],
-    [tr('🔥 火墙伤害/回合','🔥 Firewall dmg/turn'), p.firewall?`${firewallTickDamage()}`:'—'],
   ].map(([k,v])=>rowItem(k,v)).join('');
   const perks=[];
   if(p.lowHpDmg) perks.push(tr(`狂怒：越缺血${wN()}伤越高`,'Frenzy: low HP, high dmg'));
@@ -2570,6 +2600,7 @@ function showPlayerInfo(){
   if(p.holyStrike) perks.push(tr('神圣打击（溢出攻击）','Holy Strike'));
   if(p.killXp) perks.push(tr(`击杀+${p.killXp}经验`,`+${p.killXp} XP/kill`));
   if(p.tycoonGoldShield) perks.push(tr('钱能买命','Money Buys Life'));
+  if(p.firewall) perks.push(tr(`火墙：每回合 ${firewallTickDamage()} 伤害`,`Firewall: ${firewallTickDamage()} dmg/turn`));
   const perkLine = perks.length ? `<div style="text-align:left;font-size:12px;color:var(--gold);margin:8px 0 0">${tr('✦ 特性：','✦ Perks: ')}${perks.join('　')}</div>` : '';
   const t1 = p.tier1?TIER1[p.tier1]:null, t2 = p.tier2?TIER2[p.tier2]:null;
   const t2b = p.tier2b?TIER2[p.tier2b]:null, s2 = p.skill2&&TIER1[p.skill2.id]?TIER1[p.skill2.id]:null;

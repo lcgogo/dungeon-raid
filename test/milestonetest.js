@@ -5,7 +5,7 @@ const path = require('path');
 const file = fs.existsSync('dungeon-raid-dev.html') ? 'dungeon-raid-dev.html' : path.join('..', 'dungeon-raid-dev.html');
 let s = fs.readFileSync(file, 'utf8').match(/<script>([\s\S]*?)<\/script>/)[1];
 const EXPORT = `globalThis.__G={startGame,raceById,onBossKilled,dispatchReplayAct,buyItem,resolve,applyGravity,
-  TIER1,TIER2,RACE_PATHS,
+  TIER1,TIER2,RACE_PATHS, CLASS_T2, gainHeal, witherAuraTick, hurtPlayer,
   get player(){return player}, get grid(){return grid},
   set busy(v){busy=v}, set pendingLevels(v){pendingLevels=v}, set replaying(v){replaying=v}, set replayRec(v){replayRec=v}};`;
 s = s.replace('resize(); showClassSelect(); loop();', EXPORT);
@@ -72,6 +72,48 @@ G.dispatchReplayAct(['t',1,'seer']); ok(se.tier1==='seer','一阶=先知');
 se.turns=100; G.onBossKilled(); ok(se.t2Pending,'先知100回合→t2Pending'); se.t2Pending=false;
 G.dispatchReplayAct(['t',2,'echooffate']); ok(se.tier2==='echooffate' && se.echoOfFate===true,'二阶=命运回响(被动生效)');
 G.dispatchReplayAct(['k','seer','coin']); ok(se.prophecyPending==='coin','先知主动录像可记录选择类型');
+
+// 活死人死灵：100回合锁定被动改为竭心光环
+ok(G.CLASS_T2.necromancer==='witheraura','死灵锁定被动=竭心光环');
+G.replayRec={seed:23,race:'undead',acts:[]}; G.replaying=true; G.startGame(G.raceById('undead')); G.replaying=false;
+const u=G.player; u.hp=10; u.maxHp=20; u.regen=5; u.tier1='necromancer'; G.busy=false; G.pendingLevels=0;
+u.turns=100; G.onBossKilled(); ok(u.t2Pending,'死灵100回合→t2Pending'); u.t2Pending=false;
+G.dispatchReplayAct(['t',2,'witheraura']); ok(u.tier2==='witheraura' && u.witherAura===true,'二阶=竭心光环(被动生效)');
+G.grid[0][0]={type:'enemy', hp:3, maxHp:3, atk:1, cd:9, baseCd:9};
+G.grid[0][1]={type:'boss', bossId:'ghost', hp:3, maxHp:3, atk:1, cd:9, baseCd:9, tier:1};
+const healed=G.gainHeal(u.regen);
+ok(healed===3,'活死人每回合回血减半后，实际回血=3');
+const aura=Math.round(u.regen*(u.healMult||1));
+const selfLoss=G.hurtPlayer(aura,'witheraura',true);
+ok(selfLoss===3,'竭心光环按折算后的恢复量先扣自己3血');
+G.witherAuraTick(aura);
+ok(!G.grid[0][0] && !G.grid[0][1],'竭心光环按折算后的每回合恢复量同时击杀普通怪与Boss');
+
+// 满血时实际回血为0，但竭心光环仍按折算后的恢复量自损并伤敌
+G.replayRec={seed:29,race:'undead',acts:[]}; G.replaying=true; G.startGame(G.raceById('undead')); G.replaying=false;
+const uf=G.player; uf.hp=20; uf.maxHp=20; uf.regen=5; G.busy=false; G.pendingLevels=0;
+G.grid[0][0]={type:'enemy', hp:4, maxHp:4, atk:1, cd:9, baseCd:9};
+G.grid[0][1]={type:'boss', bossId:'ghost', hp:4, maxHp:4, atk:1, cd:9, baseCd:9, tier:1};
+const healed0=G.gainHeal(uf.regen);
+ok(healed0===0,'满血时实际回血=0');
+const aura0=Math.round(uf.regen*(uf.healMult||1));
+const selfLoss0=G.hurtPlayer(aura0,'witheraura',true);
+ok(selfLoss0===3 && uf.hp===17,'满血时竭心光环仍按折算后的恢复量扣自己3血');
+G.witherAuraTick(aura0);
+ok(G.grid[0][0] && G.grid[0][0].hp===1 && G.grid[0][1] && G.grid[0][1].hp===1,'满血时竭心光环仍按折算后的恢复量结算伤害');
+
+// 兽人斧王：100回合锁定被动改为越挫越勇
+ok(G.CLASS_T2.axelord==='unbroken','斧王锁定被动=越挫越勇');
+G.replayRec={seed:31,race:'orc',acts:[]}; G.replaying=true; G.startGame(G.raceById('orc')); G.replaying=false;
+const ax=G.player; ax.hp=ax.maxHp=40; ax.tier1='axelord'; G.busy=false; G.pendingLevels=0;
+ax.turns=100; G.onBossKilled(); ok(ax.t2Pending,'斧王100回合→t2Pending'); ax.t2Pending=false;
+G.dispatchReplayAct(['t',2,'unbroken']); ok(ax.tier2==='unbroken' && ax.unbroken===true,'二阶=越挫越勇(被动生效)');
+ax.tauntWindow=true;
+const beforeMax=ax.maxHp, beforeHp=ax.hp;
+const dmg=G.hurtPlayer(7,'enemy',true,{type:'enemy'});
+ok(dmg===7,'斧王受伤按实际伤害结算');
+ok(ax.maxHp===beforeMax+4,'嘲讽窗口把50%实际伤害转为永久最大生命（7→+3）且越挫越勇额外+1');
+ok(ax.hp===beforeHp-7,'斧王受伤仍正常掉血');
 
 // onBossKilled 链：未到回合不应误触发
 const q=Object.assign({},{t1:se.t1Pending||e.t1Pending||p.t1Pending,t2:se.t2Pending||e.t2Pending||p.t2Pending,t3:se.t3Pending||e.t3Pending||p.t3Pending,t4:se.t4Pending||e.t4Pending||p.t4Pending});

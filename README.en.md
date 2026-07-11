@@ -64,7 +64,7 @@ Pick a race at the start. Each has a unique **trait** and a matching **weakness*
 | 🧝 Elf | Combo bonus doubled (+30% per extra tile) | Fortify Body upgrade gives only +3 max HP |
 | 🎅 Dwarf | Armor counts double (each point blocks 2) | ×0.85 total sword damage (flat included) |
 | 🧌 Orc | Fortify Body upgrade gives double max HP (+12 each) | **No Armor** — can never gain armor (shields removed from the board) |
-| 🪦 Undead | **Confusion**: all monsters (incl. bosses) attack 1 turn slower | All healing halved (hearts/potion/drain; Rebirth full-heal unaffected) + active-skill cooldowns +1 |
+| 🪦 Undead | **Confusion**: all monsters (incl. bosses) get +1 attack countdown | All healing halved (hearts/potion/drain) + active-skill cooldowns +1 |
 
 ## 🌟 Progression Path
 
@@ -99,13 +99,14 @@ Each race has **several** classes; every skill has a **5-turn cooldown** (except
 | 🧌 Orc | 🔪 Tauren | Frenzy | Halve HP and become **Undying** (**this turn only**: keep ≥1 HP no matter the damage); also **permanently** enables low-HP scaling — lower HP means higher sword damage (up to +60%) |
 | 🧌 Orc | 🩸 Fighter | Bloodthirst | **Drain 3 HP per monster / boss hit** by your sword chain this turn, **and your sword can hit sword-immune bosses (Ghost/Clown)** |
 | 🧌 Orc | 🧪 Witch Doctor | Hex | **Burns every red heart on the board into a black poison heart 🖤**; linking them heals nothing and poisons **all foes (incl. sword-immune; Overlord excluded)** instead (its signature passive "All is Poison" unlocks at level 100, see below) |
+| 🧌 Orc | 🪓 Axe Lord | Taunt | Set all enemies/bosses on the board (excluding the Overlord) to attack on the **next turn** by forcing their countdown to **1**; during that volley, **50% of the actual damage you take** becomes **permanent max HP** |
 | 🪦 Undead | 🪄 Necromancer | Soul Drain | Drain HP from 2 random targets (monsters or bosses — **including sword-immune ones, like the bomb**; Overlord excluded) to heal yourself; per-target drain = your max HP, so any target with HP ≤ your max HP dies |
 | 🪦 Undead | 💀 Skeleton King | Rebirth | If slain this turn, cheat death and refill to full HP; afterward Rebirth's own cooldown grows +2 (each actual revive) |
 | 🪦 Undead | 🪝 Butcher | Hook | Drags every monster/boss (incl. sword-immune; Overlord excluded) down to the bottom of its column while other tiles float up; then deals damage by **distance from the bottom**: bottom row takes 1× flat damage, second-from-bottom takes 2×, and so on (CD 5) |
 
 ## 🎖️ Tier-2 Skill / Race Skill · Passives (locked to class)
 
-At **level 100 (Tier-2 Skill)** you automatically get the passive **locked to your class** (the "Class → Passive" mapping below — not a free pick); at **level 200 (Race Skill)** you **pick one** of your race's remaining passives:
+At **level 100 (Tier-2 Skill)** you automatically get the passive **locked to your class** (the "Class → Passive" mapping below — not a free pick); at **level 200 (Race Skill)** you **pick one** of your race's remaining passives, with the candidate count naturally following however many class paths that race has.
 
 | Race | Class → Locked passive | Effect |
 |---|---|---|
@@ -124,7 +125,8 @@ At **level 100 (Tier-2 Skill)** you automatically get the passive **locked to yo
 | 🧌 Orc | Tauren → Titan | Higher max HP means higher flat sword damage (+1 per 12 max HP) |
 | 🧌 Orc | Fighter → Blood Frenzy | When Lifesteal/Bloodthirst healing exceeds max HP, **30%** of the overflow becomes permanent max HP; but at the **end of every turn you lose 5% of max HP** |
 | 🧌 Orc | Witch Doctor → All is Poison | Each turn burns 3 non-enemy non-heart tiles into 🖤 **black poison hearts**; linking them **only poisons all foes (no heal)** — red hearts still heal, your choice |
-| 🪦 Undead | Necromancer → Rejuvenation | All active-skill cooldowns −1 (exactly offsets Confusion's +1) |
+| 🧌 Orc | Axe Lord → Unbroken | Whenever you take damage, gain **+1 permanent max HP**. Scars are a warrior's medals. |
+| 🪦 Undead | Necromancer → Wither Aura | Each turn, you first lose HP equal to your regen amount after healing modifiers, then all enemies/bosses lose that same amount; even at full HP, the aura still uses that modified regen value |
 | 🪦 Undead | Skeleton King → Splash | Overflow damage splashes to a random remaining foe (**including sword-immune bosses**); triggers from sword chains, Arrow Rain, and Soul Drain overflow |
 | 🪦 Undead | Butcher → Carrion Feast | Each enemy/boss killed: +1 permanent max HP (carrion keeps piling up) |
 
@@ -181,7 +183,7 @@ Clearing shows a story-flavored congratulations screen; the Release build report
 node playtest.js                  # scan mode: all races × several enemy-stat sets, find the closest to the target turn
 
 # Targeted mode: pin a class line or a single boss, run detailed stats for comparison
-node playtest.js --race=orc                          # test Orc only
+node playtest.js --race=orc --t1=axelord --t2=unbroken   # test the Axe Lord line
 node playtest.js --race=human --t1=knight --t2=immortal   # pin tier-1 / tier-2
 node playtest.js --boss=zombie                       # only spawn the Zombie (isolate one boss)
 node playtest.js --race=elf --boss=assassin --games=40    # combine + custom game count

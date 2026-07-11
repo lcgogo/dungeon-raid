@@ -1,9 +1,27 @@
+## [v1.48.0]
+
+> Version-Impact: verify
+
+- 兽人新增第 4 职业「斧王 Axe Lord」：主动「嘲讽 Taunt」会把场上所有敌人/Boss（终焉之主除外）的攻击倒计时压到 1，也就是让它们在下回合立刻出手；而在这批攻击中，你受到的**实际伤害的 50%** 会转化为**永久最大生命**。
+- 斧王锁定二阶被动为「越挫越勇 Unbroken」：每次你受到一次伤害时，永久获得 **+1 最大生命**。这条路线把兽人的“无甲高血”思路进一步推成“主动开团、挨打一轮、把伤害转成成长”的坦克型玩法。
+- Added a fourth Orc class, **Axe Lord**. Its active **Taunt** forces all enemies/bosses on the board (excluding the Overlord) to attack on the next turn by setting their countdown to 1, and during that volley **50% of the actual damage you take** becomes **permanent max HP**.
+- Axe Lord’s locked tier-2 passive is **Unbroken**: whenever you take damage, gain **+1 permanent max HP**. This pushes Orc further toward a proactive “start the brawl, eat a round, and turn that pain into growth” tank line.
+
+## [v1.47.0]
+
+> Version-Impact: verify
+
+- 活死人死灵的锁定二阶被动由「回春 Rejuvenation」重做为「竭心光环 Wither Aura」：不再提供主动技能冷却 -1，而是改为按你每回合恢复量（受治疗减半影响）先扣自己同等生命，再让全场敌人/Boss 各损失同等生命。也就是说，活死人会先把 regen 按减疗折算，再用这个折算后的数值同时结算自损与光环伤害；即使满血导致本回合实际没回上来，光环也仍按这档恢复量工作。顺手修正了录像在击败里程碑 Boss 后的状态快照：现在会在 `onBossKilled()` 后立刻更新并保存 `rec.maxHp/level/gold/turns`，避免像竭心光环这类“击败 Boss 才获得的新被动”被结算页继续沿用旧录像快照、导致提交时少算新效果。
+- Reworked the Undead Necromancer’s locked tier-2 passive from **Rejuvenation** into **Wither Aura**: instead of reducing active-skill cooldowns by 1, it now first drains the player for the regen amount after healing modifiers, then deals that same amount to all enemies/bosses. In practice, Undead first applies its healing penalty to regen, then uses that reduced value for both self-drain and aura damage; even when you were already full and healed 0 in practice, the aura still uses that modified regen value. Also fixed the recording snapshot after milestone-boss kills: `onBossKilled()` now immediately refreshes and saves `rec.maxHp/level/gold/turns`, preventing newly unlocked effects such as Wither Aura from being evaluated against a stale run snapshot on the result screen.
+
 ## [v1.46.0]
 
 > Version-Impact: verify
 
 - 重做升级项「凝聚生机 Channel Vitality」的成长方式：不再是每次固定 +1 回血，而是按选择次数递增——第 1 次选择后每回合回 1，第 2 次再额外 +2（合计 3），第 3 次再额外 +3（合计 6），依此类推。这样它终于会随着投入次数显著变强，而不是一直停留在后期几乎没人会点的平缓档。
+- 活死人种族说明文案收紧：把「攻击倒计时 +1（更慢出手）」精简成「攻击倒计时 +1」，并删去治疗减半里的「重生满血不受影响」补充说明，避免和技能自身描述重复。
 - Reworked the upgrade **Channel Vitality** so it no longer gives a flat +1 regen every time. Instead it now scales by pick count: the 1st pick grants +1 per turn, the 2nd adds +2 more (total 3), the 3rd adds +3 more (total 6), and so on. This makes repeated investment meaningfully stronger instead of staying in the late-game “almost never worth taking” zone.
+- Tightened the Undead race wording: “attack countdown +1” now stands on its own without the extra “attack 1 turn slower” gloss, and the healing penalty no longer repeats the separate Rebirth exception that is already explained on the skill itself.
 
 ## [v1.45.3]
 

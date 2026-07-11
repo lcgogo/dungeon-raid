@@ -177,8 +177,8 @@ const COMPETITIVE_BUILDS={
   human:{ t1:['firemage','knight','priest','swordsaint'], t3:['firewall','holystrike','bladeall','general'], profile:'offense' },
   elf:{ t1:['seer','elder','ranger','rogue'], t3:['echooffate','sharpshooter','shadow','thorns'], profile:'elder_survival' },
   dwarf:{ t1:['guildmaster','miser','musketeer','blacksmith'], t3:['demolitionist','tycoon','cheapskate','shieldbash'], profile:'offense' },
-  orc:{ t1:['fighter','berserker','witchdoctor'], t3:['titan','bloodfrenzy','allispoison'], profile:'offense' },
-  undead:{ t1:['necromancer','butcher','skeletonking'], t3:['splash','rejuvenation','carrion'], profile:'sustain' },
+  orc:{ t1:['fighter','axelord','berserker','witchdoctor'], t3:['unbroken','titan','bloodfrenzy','allispoison'], profile:'offense' },
+  undead:{ t1:['necromancer','butcher','skeletonking'], t3:['witheraura','splash','carrion'], profile:'sustain' },
 };
 const COMPETITIVE_SWAP_SKILLS=['guildmaster','elder','seer','priest','knight','musketeer','rogue','ranger','necromancer'];
 function countBoard(type){ const g=grid(); let n=0; for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){const t=g[r][c]; if(t&&t.type===type)n++;} return n; }
@@ -343,6 +343,7 @@ function shouldUseSkill(state){
   if(id==='ranger') return state.enemyCount>=2 || !!state.boss;
   if(id==='blacksmith') return state.shields>=2 || (state.imminent>0 && state.shields>=1);
   if(id==='fighter') return state.immuneBoss || state.enemyCount>=3 || state.lowHp;
+  if(id==='axelord') return state.enemyCount>=3 && state.imminent>0 && p.hp>0.35*p.maxHp;
   if(id==='berserker') return state.imminent>0 && p.hp<=0.45*p.maxHp;
   if(id==='guildmaster'){
     const cost=p.cheapskate?Math.ceil(state.enemyHp/2):state.enemyHp;
@@ -367,6 +368,7 @@ function shouldUseSkill2(state){
   if(id==='ranger') return state.enemyCount>=2 || !!state.boss;
   if(id==='blacksmith') return state.shields>=2 || (state.imminent>0 && state.shields>=1);
   if(id==='fighter') return state.immuneBoss || state.enemyCount>=3 || state.lowHp;
+  if(id==='axelord') return state.enemyCount>=3 && state.imminent>0 && p.hp>0.35*p.maxHp;
   if(id==='berserker') return state.imminent>0 && p.hp<=0.45*p.maxHp;
   if(id==='guildmaster'){
     const cost=p.cheapskate?Math.ceil(state.enemyHp/2):state.enemyHp;
@@ -560,12 +562,12 @@ else if('submit-ai' in ARG || 'submit-human' in ARG){
   else if(!ARG.t1 && submitRace==='dwarf') ARG.t1='guildmaster';
   else if(!ARG.t1 && submitRace==='human') ARG.t1='knight';
   else if(!ARG.t1 && submitRace==='undead') ARG.t1='necromancer';
-  else if(!ARG.t1 && submitRace==='orc') ARG.t1='fighter';
+  else if(!ARG.t1 && submitRace==='orc') ARG.t1='axelord';
   if(!ARG.t2 && submitRace==='elf') ARG.t2='sharpshooter';
   else if(!ARG.t2 && submitRace==='dwarf') ARG.t2='demolitionist';
   else if(!ARG.t2 && submitRace==='human') ARG.t2='holystrike';
   else if(!ARG.t2 && submitRace==='undead') ARG.t2='splash';
-  else if(!ARG.t2 && submitRace==='orc') ARG.t2='titan';
+  else if(!ARG.t2 && submitRace==='orc') ARG.t2='unbroken';
   if(!ARG.profile){ const cfg=COMPETITIVE_BUILDS[submitRace]; if(cfg) ARG.profile=cfg.profile; }
   UP_PRIORITY = competitiveProfile();
   const races = G.RACES.filter(r=>r.id===submitRace);

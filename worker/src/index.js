@@ -434,15 +434,21 @@ export default {
       if (!success) return json({ error: 'too many requests, slow down' }, 429);
     }
 
-    // POST /seed —— 发放一次性服务端种子 + token（上榜成绩须用它，防离线刷种子）+ 当前上传门槛快照。已被上方按 IP 限流。
+    // POST /seed —— 发放一次性服务端种子 + token（上榜成绩须用它，防离线刷种子）。门槛快照延后到真正需要预判/上传时再取，避免把 D1 查找压在开局路径上。已被上方按 IP 限流。
     if (req.method === 'POST' && p === '/seed') {
       const seed = crypto.getRandomValues(new Uint32Array(1))[0] >>> 0;
       const token = shortId(16);
+      if (env.REC) await env.REC.put('seed:' + token, JSON.stringify({ s: seed, u: 0, dbg: 0, gate: null }), { expirationTtl: SEED_TTL });
+      return json({ seed, token, debug_bypass: false });
+    }
+
+    // GET /threshold?race=&version=&agent= —— 读取当前门槛快照（前端结果页按需懒加载，不再绑在 /seed 上）。
+    if (req.method === 'GET' && p === '/threshold') {
       const race = url.searchParams.get('race') || 'all';
       const version = url.searchParams.get('version') || '';
-      const threshold = await loadThresholdSnapshot(env, { agent: 'human', race, version });
-      if (env.REC) await env.REC.put('seed:' + token, JSON.stringify({ s: seed, u: 0, dbg: 0, gate: threshold }), { expirationTtl: SEED_TTL });
-      return json({ seed, token, threshold, debug_bypass: false });
+      const agent = url.searchParams.get('agent') === 'ai' ? 'ai' : 'human';
+      const threshold = await loadThresholdSnapshot(env, { agent, race, version });
+      return json({ threshold, race, version, agent });
     }
 
     // POST /seed-debug?k= —— 调试专用 seed：允许绕过上传门槛，但仍复用正常 token / 排名 / 验证链。
@@ -450,11 +456,8 @@ export default {
       if (url.searchParams.get('k') !== env.DEBUG_SEED_SECRET) return json({ error: 'forbidden' }, 403);
       const seed = crypto.getRandomValues(new Uint32Array(1))[0] >>> 0;
       const token = shortId(16);
-      const race = url.searchParams.get('race') || 'all';
-      const version = url.searchParams.get('version') || '';
-      const threshold = await loadThresholdSnapshot(env, { agent: 'human', race, version });
-      if (env.REC) await env.REC.put('seed:' + token, JSON.stringify({ s: seed, u: 0, dbg: 1, gate: threshold }), { expirationTtl: SEED_TTL });
-      return json({ seed, token, threshold, debug_bypass: true });
+      if (env.REC) await env.REC.put('seed:' + token, JSON.stringify({ s: seed, u: 0, dbg: 1, gate: null }), { expirationTtl: SEED_TTL });
+      return json({ seed, token, debug_bypass: true });
     }
 
     // GET /rec/:id
