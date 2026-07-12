@@ -18,8 +18,8 @@ function parseArgs(argv) {
     //   build                          median  max   race
     //   human swordsaint + holystrike    222   441   human  🏆
     //   human swordsaint + general       263   411   human  🏆
-    //   elf elder + sharpshooter         222   361   elf
-    //   elf elder + shadow               165   331   elf
+    //   elf treant + sharpshooter        222   361   elf
+    //   elf treant + shadow              165   331   elf
     //   dwarf musketeer + tycoon         176   304   dwarf
     //   undead butcher + splash          138   218   undead
     //   undead necromancer + rotflesh    144   206   undead
@@ -29,8 +29,8 @@ function parseArgs(argv) {
     buildSets: [
       ['--submit-ai', '--games=1', '--gap=4200', '--min=0', '--race=human', '--t1=swordsaint', '--t2=holystrike'],
       ['--submit-ai', '--games=1', '--gap=4200', '--min=0', '--race=human', '--t1=swordsaint', '--t2=general'],
-      ['--submit-ai', '--games=1', '--gap=4200', '--min=0', '--race=elf', '--t1=elder', '--t2=sharpshooter'],
-      ['--submit-ai', '--games=1', '--gap=4200', '--min=0', '--race=elf', '--t1=elder', '--t2=shadow'],
+      ['--submit-ai', '--games=1', '--gap=4200', '--min=0', '--race=elf', '--t1=treant', '--t2=sharpshooter'],
+      ['--submit-ai', '--games=1', '--gap=4200', '--min=0', '--race=elf', '--t1=treant', '--t2=shadow'],
       ['--submit-ai', '--games=1', '--gap=4200', '--min=0', '--race=dwarf', '--t1=musketeer', '--t2=tycoon'],
       ['--submit-ai', '--games=1', '--gap=4200', '--min=0', '--race=undead', '--t1=butcher', '--t2=splash'],
       ['--submit-ai', '--games=1', '--gap=4200', '--min=0', '--race=undead', '--t1=necromancer', '--t2=rotflesh'],

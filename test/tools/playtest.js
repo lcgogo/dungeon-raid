@@ -59,10 +59,19 @@ function loadGame(transform){
   return globalThis.__G;
 }
 let G = loadGame();
+const normalizeClassArg = id => {
+  if(!id) return id;
+  if(G.TIER1[id]) return id;
+  if(id==='treant' && G.TIER1.elder) return 'elder';
+  if(id==='elder' && G.TIER1.treant) return 'treant';
+  return id;
+};
 
 // ---------- 2.5) 命令行参数：可指定职业线 / Boss，便于和历史对比 ----------
 //   node playtest.js --race=orc --t1=berserker --t2=titan --boss=zombie --enemy=C2 --games=40
 const ARG = Object.fromEntries(process.argv.slice(2).map(s=>{ const m=s.match(/^--([^=]+)=?(.*)$/); return m?[m[1], m[2]]:[s,'']; }));
+if(ARG.t1) ARG.t1=normalizeClassArg(ARG.t1);
+if(ARG.t2) ARG.t2=normalizeClassArg(ARG.t2);
 const COMPETITIVE = 'competitive' in ARG || 'submit-ai' in ARG || 'submit-human' in ARG;
 const FOCUS = !!(ARG.race||ARG.boss||ARG.t1||ARG.t2||ARG.profile) || ('report' in ARG);
 // 把指定 Boss 固定为唯一会刷的 Boss（原地裁剪 BOSSES，spawnBoss 闭包引用同一数组）
@@ -171,18 +180,18 @@ const UP_PROFILES={
   offense: ['磨利刀刃','淬炼锋芒','强化体魄','加固护甲','汲取生命','强化盾术','精研医术','凝聚生机'],   // 纯攻：先堆{W}伤害
   tank:    ['强化体魄','加固护甲','强化盾术','精研医术','凝聚生机','汲取生命','磨利刀刃','淬炼锋芒'],   // 纯肉：上限/护甲/续航
   sustain: ['汲取生命','凝聚生机','精研医术','强化体魄','加固护甲','磨利刀刃','强化盾术','淬炼锋芒'],   // 续航：吸血/回血/医术
-  elder_survival: ['强化体魄','加固护甲','汲取生命','凝聚生机','精研医术','磨利刀刃','强化盾术','淬炼锋芒'],   // 长老专精：最大生命优先（蔓藤伤害=30%最大生命）
+  treant_survival: ['强化体魄','加固护甲','汲取生命','凝聚生机','精研医术','磨利刀刃','强化盾术','淬炼锋芒'],   // 树人专精：最大生命优先（蔓藤伤害=30%最大生命）
 };
 let UP_PRIORITY=UP_PROFILES.balanced;   // 当前取向（默认均衡，与历史一致）；--upsweep 时逐套切换
 const upRank=n=>{const i=UP_PRIORITY.indexOf(n);return i<0?99:i;};
 const COMPETITIVE_BUILDS={
   human:{ t1:['firemage','knight','priest','swordsaint'], t3:['firewall','holystrike','bladeall','general'], profile:'offense' },
-  elf:{ t1:['seer','elder','ranger','rogue'], t3:['echooffate','sharpshooter','shadow','thorns'], profile:'elder_survival' },
+  elf:{ t1:['seer','treant','ranger','rogue'], t3:['echooffate','sharpshooter','shadow','thorns'], profile:'treant_survival' },
   dwarf:{ t1:['guildmaster','miser','musketeer','blacksmith'], t3:['demolitionist','tycoon','cheapskate','shieldbash'], profile:'offense' },
   orc:{ t1:['fighter','axelord','berserker','witchdoctor'], t3:['unbroken','titan','bloodfrenzy','allispoison'], profile:'offense' },
   undead:{ t1:['lich','necromancer','butcher','skeletonking'], t3:['icearmor','witheraura','splash','carrion'], profile:'sustain' },
 };
-const COMPETITIVE_SWAP_SKILLS=['guildmaster','elder','seer','priest','knight','musketeer','rogue','ranger','necromancer'];
+const COMPETITIVE_SWAP_SKILLS=['guildmaster','treant','seer','priest','knight','musketeer','rogue','ranger','necromancer'];
 function countBoard(type){ const g=grid(); let n=0; for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){const t=g[r][c]; if(t&&t.type===type)n++;} return n; }
 function boardEnemies(){ const g=grid(),e=[]; for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){const t=g[r][c]; if(t&&t.type==='enemy')e.push(t);} return e; }
 function boardSwords(){ return countBoard('sword'); }
@@ -268,10 +277,10 @@ function chooseTier3(p){
 }
 function chooseSwap(p){
   const boss=boardBoss();
-  if(p.tier1==='elder' || p.race==='elf'){
+  if(p.tier1==='treant' || p.race==='elf'){
     return { id:'knight', slot: 'heal' };   // 圣盾：本回合免伤——专克幽灵重击，CD独立于一阶蔓藤
   }
-  const keepBomb = !!(boss || p.bombBoost || p.cheapskate || p.tier1==='guildmaster' || p.race==='dwarf' || p.tier1==='elder');
+  const keepBomb = !!(boss || p.bombBoost || p.cheapskate || p.tier1==='guildmaster' || p.race==='dwarf' || p.tier1==='treant');
   const ids=COMPETITIVE ? COMPETITIVE_SWAP_SKILLS : [p.tier1||Object.keys(G.TIER1)[0]];
   const skillId=(ids.find(id=>G.TIER1[id]) || p.tier1 || Object.keys(G.TIER1)[0]);
   return { id:skillId, slot: keepBomb ? 'heal' : 'bomb' };
@@ -351,7 +360,7 @@ function shouldUseSkill(state){
     const cost=p.cheapskate?Math.ceil(state.enemyHp/2):state.enemyHp;
     return state.enemyCount>=2 && cost>0 && p.gold>=cost;
   }
-  if(id==='elder') return !p.deathCoil && (state.immuneBoss || state.enemyCount>=3 || (!!state.boss && state.boss.cd<=2));   // 蔓藤留给幽灵/群怪/Boss临危，不浪费在单怪上
+  if(id==='treant') return !p.deathCoil && (state.immuneBoss || state.enemyCount>=3 || (!!state.boss && state.boss.cd<=2));   // 蔓藤留给幽灵/群怪/Boss临危，不浪费在单怪上
   if(id==='seer') return !p.prophecyPending && (!!chooseSeerProphecy(state));
   if(id==='butcher') return !!state.boss || state.enemyCount>=3;
   if(id==='musketeer') return !!state.boss || state.enemyCount>=1;
@@ -377,7 +386,7 @@ function shouldUseSkill2(state){
     const cost=p.cheapskate?Math.ceil(state.enemyHp/2):state.enemyHp;
     return state.enemyCount>=2 && cost>0 && p.gold>=cost;
   }
-  if(id==='elder') return !p.deathCoil && (state.immuneBoss || state.enemyCount>=3 || (!!state.boss && state.boss.cd<=2));   // 蔓藤留给幽灵/群怪/Boss临危，不浪费在单怪上
+  if(id==='treant') return !p.deathCoil && (state.immuneBoss || state.enemyCount>=3 || (!!state.boss && state.boss.cd<=2));   // 蔓藤留给幽灵/群怪/Boss临危，不浪费在单怪上
   if(id==='seer') return !p.prophecyPending && (!!chooseSeerProphecy(state));
   if(id==='butcher') return !!state.boss || state.enemyCount>=3;
   if(id==='musketeer') return !!state.boss || state.enemyCount>=1;

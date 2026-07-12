@@ -1,3 +1,27 @@
+## [v1.54.0]
+
+> Version-Impact: verify
+
+- 树人职业的当前内部 canonical id 由 `elder` 迁到 `treant`，并补上旧 id `elder → treant` 的兼容归一化：旧录像里的转职动作、旧存档里的 `player.tier1`、以及开发工具传入的 `--t1=elder` 仍然会被自动解析到树人，不会因为这次内部更名而失效。对玩家可见的职业显示仍然继续是「树人 Treant」，只是代码和工具入口终于与当前名称一致。
+- Migrated the Treant class’s active canonical internal id from `elder` to `treant`, while adding legacy normalization for `elder → treant`. Old replay tier-choice actions, old saves containing `player.tier1`, and developer tooling inputs such as `--t1=elder` still resolve to Treant automatically, so the internal cleanup does not strand existing data. Player-facing naming remains “Treant” — the code and tooling now finally match it.
+
+## [v1.53.1]
+
+- 给饕餮（Devourer）的“吞怪涨血”补上了更直观的吸取线特效：每当它从普通怪身上吸血时，会从被吸的怪格子拉线回到饕餮本体，方便一眼看清它这回合到底吃了谁。这是纯视觉增强，不改数值、不改顺序，也不影响录像 / verify 兼容。
+- Added clearer siphon-line feedback to the Devourer growth step: whenever it drains HP from regular enemies, animated tethers now pull from those enemies back into the Devourer so you can immediately see what it fed on that turn. This is visual-only polish — no stat, turn-order, replay, or verify behavior changes.
+
+## [v1.53.0]
+
+> Version-Impact: verify
+
+- 调整饕餮（Devourer）的结算顺序：当它倒计时归零时，现在会先按【当前血量的 50%】释放强击，再在这一下结算完后吞场上普通怪涨血。这样玩家眼前看到的“当前攻击”就是它马上要打出来的数值，不会再出现“上一拍看到 52，真正出手前又被抬高到 58”这种不直观体验；同时同步更新了饕餮的游戏内说明与文档描述。
+- Fixed a readability problem in the Devourer turn order: when its countdown hits 0, it now attacks first for【50% of its current HP】and only then devours regular enemies to grow. That makes the on-screen “Attack now” value match the hit the player is actually about to take, instead of jumping upward right before impact; the in-game tooltip and docs now describe that sequence explicitly.
+
+## [v1.52.1]
+
+- 修正吸血鬼每回合吸心的回归问题：上一版把“先消失一拍再落子”的判定抽到通用吸取线函数后，把“宽高为 0 的点目标”也误判成无效目标，导致吸血鬼本体作为吸取终点时整条吸取线直接不画。现在恢复为：吸血鬼吸心时，普通心 / 毒心都会继续分别拉向吸血鬼本体，同时仍保留“先消失一拍、再开始落子”的节奏。
+- Fixed a Vampire heart-drain regression: when the vanish-before-fall pacing check was generalized in the shared drain-line helper, it also rejected valid point targets with zero width/height, so the Vampire itself stopped qualifying as a drain destination and the tether never rendered. Vampire drains now correctly draw back into the boss again for both normal and poison hearts, while keeping the brief vanish-before-refill beat.
+
 ## [v1.52.0]
 
 > Version-Impact: verify
