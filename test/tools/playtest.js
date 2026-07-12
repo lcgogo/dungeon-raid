@@ -441,8 +441,9 @@ function playGame(rc, srv){   // srv={seed,token}：用服务端种子开局（-
   let turn=0;
   for(; turn<4000; turn++){
     const p=P();
-    if(p.hp<=0) break;
+    if(p.hp<=0 || p.cleared) break;
     botTransform();   // 处理上一步触发的转职
+    if(P().cleared) break;   // 终焉第10波已结算破关：机器人立刻停手，别再多打一拍把 turns 继续抬高
     G.busy=false;
     let state=boardState();
 
@@ -475,9 +476,11 @@ function playGame(rc, srv){   // srv={seed,token}：用服务端种子开局（-
 
     G.selection=pick.sel;
     G.resolve();
-    if(P().hp<=0){ turn++; break; }
+    if(P().hp<=0 || P().cleared){ turn++; break; }
     botTransform();   // resolve 可能触发转职
+    if(P().cleared) break;
     resolveLevels();
+    if(P().cleared) break;
   }
   const p=P();
   const db=p.dmgBy||{}; let deathSrc=null,mx=0; for(const k in db){ if(db[k]>mx){mx=db[k];deathSrc=k;} }  // 致命回合主要死因

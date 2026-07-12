@@ -1,3 +1,13 @@
+## [v1.54.2]
+
+- 修正吸血鬼吸心与饕餮吞怪吸取线在部分移动浏览器上的显示回归：此前即使目标坐标已恢复为有效点位，若浏览器本身不支持 SVG 线段的 `element.animate()`，吸取线仍会因初始 `stroke-dashoffset=len` 而一直保持全隐藏，直到整层 SVG 被移除。现在这类浏览器会回退为“直接显示一小拍”的兼容路径，因此吸血鬼吸心、饕餮吞怪，以及共用这套吸取线 helper 的相关吸取特效都会重新可见。这仍是纯视觉修复，不改数值、顺序，也不影响录像 / verify 兼容。
+- Fixed a mobile-browser regression affecting Vampire heart-drains and Devourer growth tethers: even after point targets were accepted again, browsers that do not support `element.animate()` on SVG lines still kept the tether fully hidden because it started at `stroke-dashoffset=len` and never advanced before the whole SVG layer was removed. Those browsers now fall back to showing the line directly for a brief beat, so Vampire drains, Devourer siphons, and the related shared drain-line effects are visible again. This remains a visual-only fix — no stat, turn-order, replay, or verify behavior changes.
+
+## [v1.54.1]
+
+- 修正饕餮（Devourer）吞怪涨血特效的回归问题：此前共用吸取线函数把「宽高为 0、但 left/top 有效」的点目标也误判成无效，结果拉线终点若是饕餮本体格心，整条吸取线就会直接不画。现在恢复为：饕餮每次从普通怪身上吸血时，都会继续把吸取线拉回自身，方便看清它这回合到底吃了谁。这是纯视觉修复，不改数值、顺序，也不影响录像 / verify 兼容。
+- Fixed a Devourer growth-line regression: the shared drain-line helper was still rejecting valid point targets whose width/height were 0 even when their left/top coordinates were real, so if the tether was meant to end at the Devourer’s own board-center point the whole line was skipped. Devourer drains now correctly draw back into the boss again whenever it siphons regular enemies, making it clear what it fed on that turn. This is a visual-only fix — no stat, turn-order, replay, or verify behavior changes.
+
 ## [v1.54.0]
 
 > Version-Impact: verify
