@@ -103,6 +103,7 @@ Each race has **several** classes; every skill has a **5-turn cooldown** (except
 | 🪦 Undead | 🪄 Necromancer | Soul Drain | Drain HP from 2 random targets (monsters or bosses — **including sword-immune ones, like the bomb**; Overlord excluded) to heal yourself; per-target drain = your max HP, so any target with HP ≤ your max HP dies |
 | 🪦 Undead | 💀 Skeleton King | Rebirth | If slain this turn, cheat death and refill to full HP; afterward Rebirth's own cooldown grows +2 (each actual revive) |
 | 🪦 Undead | 🪝 Butcher | Hook | Drags every monster/boss (incl. sword-immune; Overlord excluded) down to the bottom of its column while other tiles float up; then deals damage by **distance from the bottom**: bottom row takes 1× flat damage, second-from-bottom takes 2×, and so on (CD 5) |
+| 🪦 Undead | 🧊 Lich | Frost Orb | Deal your **current flat damage** once to all monsters/bosses on the board (excluding the Overlord), then add **+1 to their current attack countdown** so their next attack is delayed by one extra turn |
 
 ## 🎖️ Tier-2 Skill / Race Skill · Passives (locked to class)
 
@@ -129,6 +130,7 @@ At **level 100 (Tier-2 Skill)** you automatically get the passive **locked to yo
 | 🪦 Undead | Necromancer → Wither Aura | Each turn, you first lose HP equal to your regen amount after healing modifiers, then all enemies/bosses lose that same amount; even at full HP, the aura still uses that modified regen value |
 | 🪦 Undead | Skeleton King → Splash | Overflow damage splashes to a random remaining foe (**including sword-immune bosses**); triggers from sword chains, Arrow Rain, and Soul Drain overflow |
 | 🪦 Undead | Butcher → Carrion Feast | Each enemy/boss killed: +1 permanent max HP (carrion keeps piling up) |
+| 🪦 Undead | Lich → Ice Armor | Whenever a monster/boss hits you, deal **50% of your current flat damage** back to that attacker (minimum 1) and add **+1 to its current attack countdown** |
 
 ## 👹 Bestiary
 
@@ -169,7 +171,7 @@ Clearing shows a story-flavored congratulations screen; the Release build report
 - 📲 **Add-to-home-screen shortcut**: the entry now lives at the top-left corner of the landing page (the Release / Dev chooser); browsers with an install prompt can launch it directly, while unsupported browsers show a short “Add to Home Screen / Install App” hint. The button hides itself automatically when the game is already running in standalone mode.
 - 💾 **Local save**: progress and best record are saved automatically; resume your last run anytime, with the RNG path restored too so refills / spawns / upgrade shuffles stay deterministic instead of quietly desyncing the recording.
 - 🔨 **Dwarf minimum damage**: Dwarf weapon damage still applies the `×0.85` penalty and rounds down overall, but any legal hammer-chain attack now deals at least 1 damage so a lone early hammer hit no longer lands for zero.
-- 💡 **Tap any tile**: see its description and current live stats (e.g. your current sword power and flat bonus); tap the HUD to view all your stats and class details. **Long-press a shop/skill block** (Heal/Bomb/class active) for a detailed popup (with current values; works even while greyed-out on cooldown). **At the turn-50 class pick, long-press a class card** to preview its locked tier-2 passive before choosing.
+- 💡 **Tap any tile**: see its description and current live stats (e.g. your current sword power and flat bonus); tap the HUD to view all your stats and class details. **Long-press a shop/skill block** (Heal/Bomb/class active) for a detailed popup (with current values; works even while greyed-out on cooldown). **At the turn-50 class pick, long-press a class card** to preview its locked tier-2 passive before choosing. Soul Drain, Vampire heart-drain, and Magmafiend shield-melt turns now leave emptied cells hanging for a brief beat before refill begins, so the drain/melt line effect and the later falling tiles are easier to read separately.
 - ⚡ **Double-tap a Shield / Heart / Coin tile**: auto-draws a greedy longest same-type chain through it, no manual dragging (resource tiles only — sword chains and monsters/bosses are left for you to control).
 - 🩸 **Low-HP warning**: the screen edges redden as health drops, pulsing when critical, with the HP bar blinking too.
 - ☠️ **Death report**: when you fall from damage, it lists each source's share of the killing turn; if you are **overrun with no way out**, the result screen now says so directly instead of pretending a stray 1-damage peck was the true cause.

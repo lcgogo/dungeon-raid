@@ -180,7 +180,7 @@ const COMPETITIVE_BUILDS={
   elf:{ t1:['seer','elder','ranger','rogue'], t3:['echooffate','sharpshooter','shadow','thorns'], profile:'elder_survival' },
   dwarf:{ t1:['guildmaster','miser','musketeer','blacksmith'], t3:['demolitionist','tycoon','cheapskate','shieldbash'], profile:'offense' },
   orc:{ t1:['fighter','axelord','berserker','witchdoctor'], t3:['unbroken','titan','bloodfrenzy','allispoison'], profile:'offense' },
-  undead:{ t1:['necromancer','butcher','skeletonking'], t3:['witheraura','splash','carrion'], profile:'sustain' },
+  undead:{ t1:['lich','necromancer','butcher','skeletonking'], t3:['icearmor','witheraura','splash','carrion'], profile:'sustain' },
 };
 const COMPETITIVE_SWAP_SKILLS=['guildmaster','elder','seer','priest','knight','musketeer','rogue','ranger','necromancer'];
 function countBoard(type){ const g=grid(); let n=0; for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){const t=g[r][c]; if(t&&t.type===type)n++;} return n; }
@@ -356,6 +356,7 @@ function shouldUseSkill(state){
   if(id==='butcher') return !!state.boss || state.enemyCount>=3;
   if(id==='musketeer') return !!state.boss || state.enemyCount>=1;
   if(id==='necromancer') return !!state.boss || state.enemyCount>=2 || state.lowHp;
+  if(id==='lich') return state.enemyCount>=2 || !!state.boss || state.imminent>0;
   if(id==='rogue') return (state.enemyCount>=2 && state.swords>=2) || (!!state.boss && state.swords>=1);
   if(id==='swordsaint') return state.hearts+state.coins>=4;
   return false;
@@ -381,6 +382,7 @@ function shouldUseSkill2(state){
   if(id==='butcher') return !!state.boss || state.enemyCount>=3;
   if(id==='musketeer') return !!state.boss || state.enemyCount>=1;
   if(id==='necromancer') return !!state.boss || state.enemyCount>=2 || state.lowHp;
+  if(id==='lich') return state.enemyCount>=2 || !!state.boss || state.imminent>0;
   if(id==='rogue') return (state.enemyCount>=2 && state.swords>=2) || (!!state.boss && state.swords>=1);
   if(id==='swordsaint') return state.hearts+state.coins>=4;
   return false;
@@ -568,7 +570,7 @@ else if('submit-ai' in ARG || 'submit-human' in ARG){
   if(!ARG.t2 && submitRace==='elf') ARG.t2='sharpshooter';
   else if(!ARG.t2 && submitRace==='dwarf') ARG.t2='demolitionist';
   else if(!ARG.t2 && submitRace==='human') ARG.t2='holystrike';
-  else if(!ARG.t2 && submitRace==='undead') ARG.t2='splash';
+  else if(!ARG.t2 && submitRace==='undead') ARG.t2='icearmor';
   else if(!ARG.t2 && submitRace==='orc') ARG.t2='unbroken';
   if(!ARG.profile){ const cfg=COMPETITIVE_BUILDS[submitRace]; if(cfg) ARG.profile=cfg.profile; }
   UP_PRIORITY = competitiveProfile();

@@ -176,8 +176,8 @@
 (()=>{
 //==================== 配置 ====================
 // 版本号 v主.次.修：不影响 verify/replay 兼容边界的小改动改"修"；凡是影响 verify/replay/版本分桶/release 验证语义的改动都改"次"；大版本变更需先确认。页面底部显示。
-const VERSION='v1.51.1';
-const CHANGELOG_LINES=[{"ver": "v1.51.1", "zh": "吸血鬼每回合吸心现在新增更清楚的视觉反馈：普通心与毒心会分别用不同颜色的吸取线拉向血条，吸血鬼本体也会在吸血/反噬时给出对应颜色的短脉冲，更容易一眼分辨这次吸心是回血还是中毒。", "en": "Vampire heart-drain turns now have clearer visuals: normal hearts and poison hearts use different-colored drain lines toward the HP bar, and the Vampire itself emits a matching short pulse on successful drain vs poisonous backlash, making the result of each drain much easier to read at a glance."}, {"ver": "v1.51.0", "zh": "新增功能性 Boss「岩浆魔 Magmafiend」：它每回合都会从自己身上向场上所有盾牌发出熔热线，把这些盾牌全部融掉，并按当前“每盾护甲进度”把每面盾转成自己的回血；同时它还会吸收火焰，点燃与火墙本应造成的火伤都会改为为它回血。这样它不仅克制护甲/盾流，也会对火法师的持续灼烧形成针对。", "en": "Added a new functional boss, Magmafiend. Each turn it sends molten tethers from itself to every shield on the board, melts them all away, and converts each shield into HP using the current “armor XP per shield” value; on top of that, it feeds on fire, so burn and Firewall damage heal it instead. This makes it a clear counter not only to shield/armor lines, but also to Fire Mage’s sustained fire damage."}, {"ver": "v1.50.1", "zh": "种族显示名由「活死人 Undead」统一收紧为「亡灵 Undead」，用于贴合当前种族下死灵 / 骷髅王 / 屠夫等整条职业生态；内部种族 id `undead` 保持不变，因此不影响存档、回放与测试兼容。", "en": "Tightened the race display name from “活死人 Undead” to “亡灵 Undead” to better match the current class ecosystem under that race (Necromancer / Skeleton King / Butcher); the internal race id `undead` stays unchanged, so save/replay/test compatibility is unaffected."}, {"ver": "v1.50.0", "zh": "新增功能性 Boss「鞭笞者 Lashmaster」：它和小丑一样属于每回合生效型 Boss，本体只吃炸弹；出场时会先让场上所有普通怪物的攻击倒计时 -1，之后每回合再让所有普通怪物的攻击倒计时 -1。它自己未必最疼，但会把整盘普通怪一起抽进暴走节奏，尤其会对冲活死人的“迷惑 +1 倒计时”缓冲。", "en": "Added a new functional boss, Lashmaster. Like the Clown, it is a per-turn utility boss and is bomb-only itself; on spawn it immediately gives all normal enemies -1 attack countdown, then repeats that -1 countdown push every turn after that. It is not necessarily the hardest hitter on its own, but it whips the whole board into a much faster rhythm and partially cancels out the Undead race’s “+1 enemy countdown” buffer."}, {"ver": "v1.49.0", "zh": "修正幽灵 Ghost 的实际血量成长：实现上它之前虽然吃的是普通怪模板，却仍额外乘上了 Boss 档位倍率，和“血量与同级普通怪一致”的文案不符。现在给幽灵补上 `noTierScale`，让它终于真正按同级普通怪血量生成；仍保留剑免疫、仅能被炸弹/非武器手段处理、倒计时重击等定位。", "en": "Fixed Ghost’s actual HP scaling: although it already used the normal-enemy HP template, the runtime was still multiplying that HP by the boss tier, which contradicted the “same HP as same-tier normal enemies” wording. Ghost now has `noTierScale`, so it truly spawns with normal-enemy HP while keeping its sword immunity, bomb/non-weapon weakness, and countdown heavy strike identity."}];   /* auto-injected by dr.sh embed-changelog（勿手改） */
+const VERSION='v1.52.0';
+const CHANGELOG_LINES=[{"ver": "v1.52.0", "zh": "亡灵新增第 4 职业「巫妖 Lich」：主动「冰封球 Frost Orb」会对全场怪物/Boss（终焉之主除外）造成一次当前固定伤害，并让它们的当前攻击倒计时 +1；锁定二阶被动为「冰甲 Ice Armor」，每次你受到怪物/Boss 攻击后会对攻击者反弹 50% 当前固定伤害（至少 1），并让它当前攻击倒计时 +1。与此同时，吸魂、吸血鬼吸心、岩浆魔融盾这几类“棋子先消失再补位”的特效，现在会让空格先短暂停留一拍，再开始落子，手机上更容易看清哪些棋子先被吸走或融掉。", "en": "Added a fourth Undead class, Lich. Its active Frost Orb deals your current flat damage once to all monsters/bosses on the board (excluding the Overlord) and adds +1 to their current attack countdown, while its locked tier-2 passive Ice Armor reflects 50% of your current flat damage back to attackers (minimum 1) and slows their next attack by +1 countdown. At the same time, Soul Drain, Vampire heart-drain, and Magmafiend shield-melt turns now briefly hold emptied cells before refill begins, making it much easier on mobile to read which pieces vanished before the falling tiles start."}, {"ver": "v1.51.1", "zh": "吸血鬼每回合吸心现在新增更清楚的视觉反馈：普通心与毒心会分别用不同颜色的吸取线拉向血条，吸血鬼本体也会在吸血/反噬时给出对应颜色的短脉冲，更容易一眼分辨这次吸心是回血还是中毒。", "en": "Vampire heart-drain turns now have clearer visuals: normal hearts and poison hearts use different-colored drain lines toward the HP bar, and the Vampire itself emits a matching short pulse on successful drain vs poisonous backlash, making the result of each drain much easier to read at a glance."}, {"ver": "v1.51.0", "zh": "新增功能性 Boss「岩浆魔 Magmafiend」：它每回合都会从自己身上向场上所有盾牌发出熔热线，把这些盾牌全部融掉，并按当前“每盾护甲进度”把每面盾转成自己的回血；同时它还会吸收火焰，点燃与火墙本应造成的火伤都会改为为它回血。这样它不仅克制护甲/盾流，也会对火法师的持续灼烧形成针对。", "en": "Added a new functional boss, Magmafiend. Each turn it sends molten tethers from itself to every shield on the board, melts them all away, and converts each shield into HP using the current “armor XP per shield” value; on top of that, it feeds on fire, so burn and Firewall damage heal it instead. This makes it a clear counter not only to shield/armor lines, but also to Fire Mage’s sustained fire damage."}, {"ver": "v1.50.1", "zh": "种族显示名由「活死人 Undead」统一收紧为「亡灵 Undead」，用于贴合当前种族下死灵 / 骷髅王 / 屠夫等整条职业生态；内部种族 id `undead` 保持不变，因此不影响存档、回放与测试兼容。", "en": "Tightened the race display name from “活死人 Undead” to “亡灵 Undead” to better match the current class ecosystem under that race (Necromancer / Skeleton King / Butcher); the internal race id `undead` stays unchanged, so save/replay/test compatibility is unaffected."}, {"ver": "v1.50.0", "zh": "新增功能性 Boss「鞭笞者 Lashmaster」：它和小丑一样属于每回合生效型 Boss，本体只吃炸弹；出场时会先让场上所有普通怪物的攻击倒计时 -1，之后每回合再让所有普通怪物的攻击倒计时 -1。它自己未必最疼，但会把整盘普通怪一起抽进暴走节奏，尤其会对冲活死人的“迷惑 +1 倒计时”缓冲。", "en": "Added a new functional boss, Lashmaster. Like the Clown, it is a per-turn utility boss and is bomb-only itself; on spawn it immediately gives all normal enemies -1 attack countdown, then repeats that -1 countdown push every turn after that. It is not necessarily the hardest hitter on its own, but it whips the whole board into a much faster rhythm and partially cancels out the Undead race’s “+1 enemy countdown” buffer."}];   /* auto-injected by dr.sh embed-changelog（勿手改） */
 const DEV=true;   // release build (DEV=false); dev build is dungeon-raid-dev.html (DEV=true)
 const REC_API='https://api.dungeonraid.win';   // 录像分享 API（Cloudflare Worker + KV）
 // 带种子随机数（mulberry32）：游戏全程用 rnd() 取代原生随机，配合录制种子可确定性重放
@@ -260,6 +260,9 @@ let rec=null, replaying=false;   // rec=本局录像{v,seed,race,acts}；replayi
 let replayResumeState=null;   // 进入回放前的 live 快照：退出回放时恢复，避免技能槽/职业/棋盘状态泄漏回实玩
 let headless=false;   // 无头机器人模式：抑制升级弹窗(及其抽池消耗RNG)，由机器人自行抽池+录制，保证录像可确定性重放
 let prophecySlotKey=null;   // 先知：当前弹框是来自一阶主动还是换装槽（heal/bomb），用于录制/进冷却
+const FX_FALL_HOLD=11;   // 特殊吸取/融化类效果：棋子先消失一小拍，再开始下落，避免和特效同时发生显得太突兀
+let gravityFxHold=0;     // 下一次 applyGravity 要给下落棋子的起落前停顿（按帧计，纯视觉，不进录像）
+function holdNextGravity(frames=FX_FALL_HOLD){ if(headless||jumping) return; gravityFxHold=Math.max(gravityFxHold, frames|0); }
 
 function newPlayer(){
   return {hp:20,maxHp:20, armor:0, shieldXp:0, toughness:0, shopCd:{}, skillCd:0, dmgBy:{}, deathMode:'damage', bossDue:false, gold:0, xp:0, level:1,
@@ -271,8 +274,8 @@ function newPlayer(){
     comboMult:1, swordMult:1, armorMult:1, maxHpUpMult:1, noArmor:false,
     chosenPerks:[],                                                      // 本局已选技能名（按选择顺序，供录像/展示用）
     prophecyPending:null,                                                // 先知：下一次补子要强制落下的类型（本回合未补子则保留到下次）
-    heartPoison:false, rogueStealTurn:false, fireChainTurn:false, firewall:false, echoOfFate:false, tauntWindow:false,   // 巫医蛊毒：本回合连心改为毒怪；盗贼：本回合命中偷金；火法师：火焰链 / 火墙；先知：命运回响；斧王：下一轮受伤转上限
-    foeCdBonus:0, skillCdMod:0, splash:false, rebirthTurn:false, rebirthSaves:0, healMult:1, witherAura:false, unbroken:false,  // 活死人：迷惑/技能冷却修正/溅射/重生/治疗减半/竭心；斧王：越挫越勇
+    heartPoison:false, rogueStealTurn:false, fireChainTurn:false, firewall:false, echoOfFate:false, tauntWindow:false, frostPulse:0, flashWhite:0,   // 巫医蛊毒：本回合连心改为毒怪；盗贼：本回合命中偷金；火法师：火焰链 / 火墙；先知：命运回响；斧王：下一轮受伤转上限；巫妖：冰封脉冲/冰甲白闪
+    foeCdBonus:0, skillCdMod:0, splash:false, rebirthTurn:false, rebirthSaves:0, healMult:1, witherAura:false, unbroken:false, iceArmor:false,  // 亡灵：迷惑/技能冷却修正/溅射/重生/治疗减半/竭心/冰甲；斧王：越挫越勇
     upgradeChoices:3, bombCd:3, goldLock:0, goldFrozen:0, healUses:0, bombUses:0, shadowBombGold:false, tycoonGoldShield:false, frozen:{},  // 转职被动相关；healUses：治疗递增；bombUses：爆破手炸弹递增；shadowBombGold：乾坤一掷；tycoonGoldShield：钱能买命；frozen：雪人冰封的主动剩余回合（skill/heal/bomb）
     finaleStarted:false, finaleWave:0, cleared:false};                      // 终局：终焉之主浪潮 / 破关
 }
@@ -311,16 +314,18 @@ const BOSSES=[
       if(rr>=0) magmaShieldFx({r:rr,c:cc}, cells);
       const per=player.armorPerShield||1, heal=cells.length*per;
       for(const cell of cells) grid[cell.r][cell.c]=null;
+      holdNextGravity(); holdVisibleBoard();
       t.hp=Math.min(t.maxHp, t.hp+heal);
       applyGravity(); syncPositions(false);
       log(tr(`♨️ 岩浆魔融化了 ${cells.length} 面盾，按每盾护甲进度 ${per} 回复 ${heal} 生命（→${t.hp}）`,`♨️ Magmafiend melts ${cells.length} shields and heals ${heal} HP at ${per} per shield (→${t.hp})`), 'debuff'); } },
   { id:'vampire', emoji:'🧛', name:['吸血鬼','Vampire'], quip:['你的心留着也浪费，我喝了。','Those hearts are wasted on you. Mine now.'], perTurn:true, swordable:true,
     special:['每回合吸取场上的 ❤️ 回血','Drains ❤️ each turn to heal'],
     desc:['可以用{W}攻击它。但它【每回合】会吸取棋盘上所有的心来回血——别把心留在场上！','You CAN hit it with a {WC}. But every turn it drains all hearts on the board to heal — do not leave hearts on the board!'],
-    act(t){ let n=0, pois=0; const normalCells=[], poisonCells=[]; const polluted=pollutionActive();   // 正常心回血；毒心(污染光环 或 巫医黑毒心)反害它
+    act(t){ let n=0, pois=0; const normalCells=[], poisonCells=[]; const polluted=pollutionActive(); let rr=-1, cc=-1; for(let r=0;r<ROWS&&rr<0;r++)for(let c=0;c<COLS;c++){ if(grid[r][c]===t){ rr=r; cc=c; break; } }   // 正常心回血；毒心(污染光环 或 巫医黑毒心)反害它
       for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const x=grid[r][c]; if(x&&x.type==='heart'){ if(polluted||x.poison){ pois++; poisonCells.push([r,c]); } else { n++; normalCells.push([r,c]); } grid[r][c]=null; } }
       const tot=n+pois; if(!tot) return;
-      vampireDrainFx(normalCells, poisonCells);
+      holdNextGravity(); holdVisibleBoard();
+      vampireDrainFx(rr>=0?{r:rr,c:cc}:null, normalCells, poisonCells);
       const per=2+(t.tier||1), delta=(n-pois)*per;   // 净效果：正常−毒心
       t.hp += delta;
       if(t.hp<=0){ for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ if(grid[r][c]===t) grid[r][c]=null; } thiefRecover(t); player.xp+=15; gainGold(20); onBossKilled(); applyGravity(); syncPositions(false); log(tr('🧛 吸血鬼吸到毒心，中毒身亡！','🧛 The Vampire drank poison hearts and died!')); }
@@ -446,6 +451,7 @@ function currentSwordFlat(){ return player.swordFlat + (player.titan?Math.floor(
 function burnTickDamage(t){ return Math.max(1, Math.floor(currentSwordFlat()*0.2)) * Math.max(1, t.burnStacks||0); }
 function firewallTickDamage(){ return Math.max(1, Math.floor(currentSwordFlat()*0.2)); }
 function fireWallRows(){ return { start: Math.max(0, ROWS-3), end: ROWS-1 }; }
+function frostOrbDamage(){ return Math.max(1, currentSwordFlat()); }
 function igniteTarget(t, stacks){
   if(!t || t.finale || !(t.type==='enemy' || t.type==='boss')) return false;
   t.burnStacks=(t.burnStacks||0) + Math.max(1, stacks|0);
@@ -656,12 +662,14 @@ const TIER1={
     for(const [r,c] of pick){ const t=grid[r][c]; const before=t.hp; const drain=Math.min(p.maxHp, before); t.hp-=drain; healed+=drain; statueReflect(t, drain);   // 石像：吸魂的伤害也会反弹
       if(t.hp<=0){ const isB=t.type==='boss'; grid[r][c]=null; kills++; if(isB){thiefRecover(t);p.xp+=15;gainGold(20);onBossKilled();} else {p.xp+=3+(p.killXp||0);gainGold(1);}
         if(p.splash && p.maxHp>before) splashes.push(p.maxHp-before); } }   // 溅射：吸魂的溢出（吸力上限−目标血量）也砸向剩余敌人
+    holdNextGravity(); holdVisibleBoard();
     soulDrainFx(pick);   // 特效：从每个被吸目标的格子画一条红线指向血条（纯视觉，不影响逻辑/重放）
     let splashK=0; for(const over of splashes){ splashK+=splashHit(over).kills; }   // 溅射独立结算（含剑免疫 Boss，排除终焉）
     kills+=splashK;
     const h=gainHeal(healed); const lh=lifestealHeal(kills); applyGravity(); syncPositions(false);
     log(tr(`🪄 吸魂大法：吸取 ${pick.length} 个目标 ${healed} 生命，回血 ${h}`+(kills?`，击杀 ${kills} 只`:'')+(lh?`，吸血 +${lh}`:'')+(splashes.length?`，溅射 ${splashes.length} 次`:''),`🪄 Soul Drain: drained ${healed} from ${pick.length}, +${h} HP`+(kills?`, ${kills} killed`:'')+(lh?`, +${lh} lifesteal`:'')+(splashes.length?`, ${splashes.length} splash`:'')), 'heal'); return true; }}},
   skeletonking:{n:['骷髅王','Skeleton King'], quip:['死过一次，再死一次又何妨。','Died once already — what is one more?'], skill:{name:['重生','Rebirth'], short:['本回合致死则满血复活(此后冷却+2)','Cheat death this turn, full heal'], desc:['发动后本回合若受到致命伤害，会立刻满血复活而非死亡。每触发一次，重生的冷却永久 +2。发动即进入冷却（无论本回合是否真的触发）。','Armed this turn: if a lethal blow lands, you revive at full HP instead of dying. Each trigger permanently raises Rebirth’s cooldown by 2. Goes on cooldown when cast, whether or not it triggers.'], cd:5, f:p=>{ p.rebirthTurn=true; log(tr('💀 重生待命：本回合若被击败，将满血复活！','💀 Rebirth armed: if slain this turn, revive at full HP!'), 'buff'); return true; }}},
+  lich:{n:['巫妖','Lich'], quip:['感受死亡的寒冷吧。','Feel the cold of death.'], skill:{name:['冰封球','Frost Orb'], short:['全场固定伤害+全体减速','Flat damage + slow all foes'], desc:['对场上所有怪物/Boss（终焉之主除外）造成一次当前固定伤害，并让它们的当前攻击倒计时 +1。也就是说，它们下一次出手会额外慢一回合。属于冰霜攻击，可命中剑免疫 Boss。','Deals your current flat damage once to all monsters/bosses on the board (excluding the Overlord), then adds +1 to their current attack countdown. In other words, their next attack is delayed by one extra turn. This is a frost attack and can hit sword-immune bosses.'], cd:5, f:p=>{ addBossFx(Math.floor(ROWS/2), Math.floor(COLS/2), false, '#7fd3ff'); let hit=0, kills=0, total=0, lh=0; const dmg=frostOrbDamage(); for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const t=grid[r][c]; if(!t||t.finale||!(t.type==='enemy'||t.type==='boss')) continue; const before=t.hp; t.hp-=dmg; t.cd+=1; t.frostTurns=2; hit++; total+=Math.min(dmg, before); if(t.hp<=0){ const isB=t.type==='boss'; grid[r][c]=null; kills++; if(isB){ thiefRecover(t); player.xp+=15; gainGold(20); onBossKilled(); } else { player.xp+=3+(player.killXp||0); gainGold(1); } } } if(kills) lh=lifestealHeal(kills); applyGravity(); syncPositions(false); log(tr(`🧊 冰封球：全场 ${hit} 个目标共掉 ${total}`+(kills?`，击杀 ${kills}`:'')+(lh?`，吸血 +${lh}`:'')+`，下一次出手更慢`,`🧊 Frost Orb: ${hit} targets lose ${total}`+(kills?`, ${kills} killed`:'')+(lh?`, +${lh} lifesteal`:'')+`, next attacks delayed`), 'buff'); return hit||kills||lh; }}},
   butcher:{n:['屠夫','Butcher'], quip:['钩子一甩，肉就乖乖到底。','One swing of the hook, and the meat comes to me.'], skill:{name:['钩子','Hook'], short:['拉到底排；离底越远伤害越高','Drag down; farther from bottom = more damage'], desc:['一钩把棋盘上所有的怪和 Boss（含{W}免疫，终焉之主除外）顺着各自所在列拉到尽可能底部，其余棋子上浮；随后按【离底线的距离】造成伤害：最底排吃 1× 固定伤害、倒数第二排吃 2×，依此类推。场上没有可拉的敌人时无效、不进冷却。','Hooks every monster & boss (incl. {W}-immune; not the Overlord) down to the bottom of its column while other tiles float up; then deals damage by【distance from the bottom】— bottom row takes 1× flat damage, second-from-bottom 2×, and so on. No effect — and no cooldown — when there is nothing to pull.'], cd:5, f:p=>{
     let moved=0, any=false, dmg=0, kills=0; const isMon=t=>t&&(t.type==='enemy'||t.type==='boss')&&!t.finale; const hookBase=Math.max(1, p.swordFlat||0); const lines=[];
     for(let c=0;c<COLS;c++){
@@ -695,6 +703,7 @@ const TIER2={
   bloodfrenzy:{n:['血狂','Blood Frenzy'], d:['吸血/嗜血回血超出生命上限时，溢出的 30% 增为永久生命上限；但每回合结束损失 5% 最大生命','Lifesteal/Bloodthirst healing past max HP: 30% of overflow becomes permanent max HP; but at end of every turn, lose 5% of max HP'], f:p=>{ p.bloodFrenzy=true; }},
   cheapskate:{n:['小气鬼','Cheapskate'], d:['消耗金币的主动（商店治疗/炸弹、会长「收买」）花费减半','Gold-spending actives (shop Heal/Bomb, Guild Master’s Buyout) cost half'], f:p=>{ p.cheapskate=true; }},
   witheraura:{n:['竭心光环','Wither Aura'], d:['按你每回合恢复量（受治疗减半影响）先扣自己同等生命，再让全场敌人/Boss 各掉同等生命','Each turn, lose HP equal to your regen amount after healing modifiers, then deal that same amount to all enemies/bosses'], f:p=>{ p.witherAura=true; }},
+  icearmor:{n:['冰甲','Ice Armor'], d:['每次你受到怪物/Boss攻击后，对攻击者造成 50% 当前固定伤害（至少 1），并让它的当前攻击倒计时 +1','Whenever a monster/boss hits you, deal 50% of your current flat damage back to that attacker (minimum 1) and add +1 to its current attack countdown'], f:p=>{ p.iceArmor=true; }},
   unbroken:{n:['越挫越勇','Unbroken'], d:['每次你受到一次伤害时，永久获得 +1 最大生命','Whenever you take damage, gain +1 permanent max HP'], f:p=>{ p.unbroken=true; }},
   splash:{n:['溅射','Splash'], d:['攻击溢出伤害随机溅到剩余敌人（含{W}免疫 Boss）','Overflow damage splashes to a random remaining foe (incl. {W}-immune bosses)'], f:p=>{ p.splash=true; }},
   rotflesh:{n:['积累腐肉','Carrion Feast'], d:['每杀死一个敌人/Boss，生命上限永久 +1（腐肉越积越厚）','Each enemy/boss killed: +1 permanent max HP (carrion keeps piling up)'], f:p=>{ p.rotflesh=true; }},
@@ -707,14 +716,14 @@ const CLASS_T2={
   knight:'general', priest:'holystrike', firemage:'firewall', swordsaint:'bladeall',
   ranger:'sharpshooter', rogue:'shadow', elder:'thorns', seer:'echooffate',
   blacksmith:'shieldbash', miser:'tycoon', guildmaster:'cheapskate', musketeer:'demolitionist',
-  necromancer:'witheraura', skeletonking:'splash', butcher:'rotflesh',
+  necromancer:'witheraura', skeletonking:'splash', butcher:'rotflesh', lich:'icearmor',
   berserker:'warlord', fighter:'bloodfrenzy', witchdoctor:'allpoison', axelord:'unbroken',
 };
 const RACE_PATHS={
   human:{t1:['knight','priest','firemage','swordsaint'], t2:['general','holystrike','firewall','bladeall']},
   elf:  {t1:['ranger','rogue','elder','seer'], t2:['sharpshooter','shadow','thorns','echooffate']},
   dwarf:{t1:['blacksmith','miser','guildmaster','musketeer'], t2:['shieldbash','tycoon','cheapskate','demolitionist']},
-  undead:{t1:['necromancer','skeletonking','butcher'], t2:['witheraura','splash','rotflesh']},
+  undead:{t1:['necromancer','skeletonking','butcher','lich'], t2:['witheraura','splash','rotflesh','icearmor']},
   orc:  {t1:['berserker','fighter','witchdoctor','axelord'], t2:['warlord','bloodfrenzy','allpoison','unbroken']},
 };
 function raceById(id){ return RACES.find(r=>r.id===id)||RACES[0]; }
@@ -1140,6 +1149,15 @@ function syncPositions(snap){
     if(snap || t.curY===undefined) t.curY=cellY(r);
   }
 }
+function holdVisibleBoard(){
+  if(!grid) return;
+  for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){
+    const t=grid[r][c]; if(!t) continue;
+    t.curY=cellY(r);
+    if(gravityFxHold>0) t.fxHold=gravityFxHold;
+    else delete t.fxHold;
+  }
+}
 
 //==================== 渲染 ====================
 const cv=document.getElementById('board'), ctx=cv.getContext('2d');
@@ -1202,10 +1220,12 @@ function draw(){
     const burning = !!(t.burnTurns && t.burnStacks>0);
     const fireLinked = !!(player && player.fireChainTurn && t.type==='boss' && !t.finale);
     const immuneBossBurning = !!(burning && t.type==='boss' && !t.finale && !bossDef(t).swordable);   // 剑免疫 Boss 被点燃后，底色恢复成原 Boss 色，只保留燃烧光效/角标
+    const frosted = !!(t.frostTurns>0);
+    const flashedWhite = !!(t.flashWhite>0);
     // 能被剑攻击的（怪 / 可剑连的Boss，以及剑本身）统一红底，一眼看出可攻击；蔓藤缠绕中的怪改绿底；燃烧中的怪改橙红底；火焰链激活时的 Boss 改火红底
-    const baseCol = immuneBossBurning ? d.color : burning ? '#ff6b2f' : fireLinked ? '#ff5336' : coiled ? '#27ae60' : (isSwordTarget(t) || t.type==='sword') ? DEF.sword.color : d.color;   // 黑毒心/绿毒心底色与普通心一致，只换 emoji（💚/🖤）
+    const baseCol = flashedWhite ? '#eef7ff' : frosted ? '#6fb6ff' : immuneBossBurning ? d.color : burning ? '#ff6b2f' : fireLinked ? '#ff5336' : coiled ? '#27ae60' : (isSwordTarget(t) || t.type==='sword') ? DEF.sword.color : d.color;   // 黑毒心/绿毒心底色与普通心一致，只换 emoji（💚/🖤）
     // 被剑链穿过的怪/可攻击Boss → 红色高亮（表示正被攻击）；燃烧目标走橙色光晕；火焰链激活的 Boss 走更亮的火色
-    const gl = (picked && chainType==='sword' && (isSwordTarget(t) || isFireChainTarget(t))) ? '#ff8a3c' : burning ? '#ff9a52' : fireLinked ? '#ff7043' : coiled ? '#2ecc71' : d.glow;
+    const gl = flashedWhite ? '#ffffff' : frosted ? '#d9f3ff' : (picked && chainType==='sword' && (isSwordTarget(t) || isFireChainTarget(t))) ? '#ff8a3c' : burning ? '#ff9a52' : fireLinked ? '#ff7043' : coiled ? '#2ecc71' : d.glow;
     // 背景
     ctx.save();
     roundRect(x+4,y+4,g,g,12);
@@ -1391,9 +1411,11 @@ function absorbLinesFx(cells, opt){
 function soulDrainFx(cells){
   absorbLinesFx((cells||[]).map(([r,c])=>({r,c})), { targetId:'hpBar', stroke:'#ff2d2d', glow:'#ff3b3b' });
 }
-function vampireDrainFx(normalCells, poisonCells){
-  if(normalCells&&normalCells.length) absorbLinesFx(normalCells.map(([r,c])=>({r,c})), { targetId:'hpBar', stroke:'#ff4d6d', glow:'#ff99aa' });
-  if(poisonCells&&poisonCells.length) absorbLinesFx(poisonCells.map(([r,c])=>({r,c})), { targetId:'hpBar', stroke:'#66d17a', glow:'#c08bff' });
+function vampireDrainFx(src, normalCells, poisonCells){
+  if(!src) return;
+  const targetEl={ getBoundingClientRect(){ const cv0=document.getElementById('board'); if(!cv0||!cv0.getBoundingClientRect) return {left:0,top:0,width:0,height:0}; const r=cv0.getBoundingClientRect(); if(!r.width) return {left:0,top:0,width:0,height:0}; const sx=r.width/cv0.width, sy=r.height/cv0.height; const cx=r.left+(cellX(src.c)+TILE/2)*sx, cy=r.top+(cellY(src.r)+TILE/2)*sy; return {left:cx, top:cy, width:0, height:0}; } };
+  if(normalCells&&normalCells.length) absorbLinesFx(normalCells.map(([r,c])=>({r,c})), { targetEl, stroke:'#ff4d6d', glow:'#ff99aa' });
+  if(poisonCells&&poisonCells.length) absorbLinesFx(poisonCells.map(([r,c])=>({r,c})), { targetEl, stroke:'#66d17a', glow:'#c08bff' });
 }
 function magmaShieldFx(src, cells){
   if(headless || jumping || !src || !cells || !cells.length) return;
@@ -1428,8 +1450,10 @@ function loop(){
   // 缓动下落
   for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const t=grid[r][c]; if(!t)continue;
     const ty=cellY(r); if(t.curY===undefined)t.curY=ty;
+    if(t.fxHold>0){ t.fxHold--; if(t.fxHold<=0) delete t.fxHold; continue; }
     t.curY += (ty-t.curY)*0.3; if(Math.abs(ty-t.curY)<0.5)t.curY=ty; }
   for(let i=bossFx.length-1;i>=0;i--){ if(--bossFx[i].life<=0) bossFx.splice(i,1); }   // 推进/回收入场特效
+  for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const t=grid[r][c]; if(!t) continue; if(t.frostTurns>0) t.frostTurns--; if(t.flashWhite>0) t.flashWhite--; }
   for(let i=bombFx.length-1;i>=0;i--){ if(--bombFx[i].life<=0) bombFx.splice(i,1); }   // 推进/回收炸弹特效
   for(let i=hookFx.length-1;i>=0;i--){ if(--hookFx[i].life<=0) hookFx.splice(i,1); }   // 推进/回收屠夫拖拽线
   draw(); requestAnimationFrame(loop);
@@ -1941,6 +1965,16 @@ function advanceEnemies(){
   if(player.rebirthTurn) player.rebirthTurn=false; // 骷髅王重生仅护本回合（未触发则失效）
   if(player.tauntWindow) player.tauntWindow=false; // 斧王嘲讽：只覆盖被拉成 cd=1 的这一轮敌人动作
 }
+function reflectIceArmor(amt, atkr){
+  let r=-1,c=-1,t=null;
+  if(atkr && (atkr.type==='enemy'||(atkr.type==='boss'&&!atkr.finale))){
+    for(let rr=0;rr<ROWS&&!t;rr++)for(let cc=0;cc<COLS;cc++){ if(grid[rr][cc]===atkr){ r=rr;c=cc;t=atkr;break; } }
+  }
+  if(!t) return;
+  const hit=Math.min(amt,t.hp); t.hp-=hit; t.cd+=1; t.frostTurns=2; t.flashWhite=2; let lh=0;
+  if(t.hp<=0){ const isB=t.type==='boss'; grid[r][c]=null; if(isB){ thiefRecover(t); player.xp+=15; gainGold(20); onBossKilled(); } else { player.xp+=3+(player.killXp||0); gainGold(1); } lh=lifestealHeal(1); }
+  log(tr(`🧊 冰甲反弹 ${hit} 伤害，并让攻击者更慢出手`+(lh?`，吸血 +${lh}`:''),`🧊 Ice Armor reflects ${hit} damage and slows the attacker`+(lh?`, +${lh} lifesteal`:'')), 'buff');
+}
 // 玩家受伤的统一入口：圣盾免伤 / 狂怒不屈保命 / 矮人护甲翻倍 / 荆棘反弹 / 伤害统计
 function hurtPlayer(atk, sourceKey, ignoreArmor, attacker){
   if(player.shieldTurn) return 0;
@@ -1959,6 +1993,7 @@ function hurtPlayer(atk, sourceKey, ignoreArmor, attacker){
   addDmg(sourceKey, dmg);
   if(dmg>0 && player.tauntWindow){ const grow=Math.max(1, Math.floor(dmg*0.5)); player.maxHp+=grow; log(tr(`🪓 嘲讽吸收：永久最大生命 +${grow}`,`🪓 Taunt converts into +${grow} max HP`), 'buff'); }
   if(dmg>0 && player.unbroken){ player.maxHp+=1; log(tr('🪓 越挫越勇：永久最大生命 +1','🪓 Unbroken: +1 permanent max HP'), 'buff'); }
+  if(dmg>0 && player.iceArmor && attacker){ const ice=Math.max(1, Math.floor(frostOrbDamage()*0.5)); reflectIceArmor(ice, attacker); }
   if(player.thorns && dmg>0 && attacker){ const refl=Math.round(player.armor*(player.armorMult||1)+(player.toughness||0)); if(refl>0) reflectThorns(refl, attacker); }   // 荆棘：受到「真·攻击」时把当前护甲减伤量反弹给攻击者（非攻击不传 attacker→不反弹）
   return dmg;
 }
@@ -2013,14 +2048,16 @@ function reflectThorns(amt, atkr){
 
 function applyGravity(){
   const prophecyType=player&&player.prophecyPending;
+  const hold=gravityFxHold|0;
   let spawned=0;
   for(let c=0;c<COLS;c++){
     let write=ROWS-1;
     for(let r=ROWS-1;r>=0;r--){ if(grid[r][c]){ const t=grid[r][c];
-      if(write!==r){ grid[write][c]=t; grid[r][c]=null; } write--; } }
+      if(write!==r){ grid[write][c]=t; grid[r][c]=null; if(hold>0){ t.curY=cellY(r); t.fxHold=hold; } } write--; } }
     let above=-1;
-    for(let r=write;r>=0;r--){ const t=makeTile(prophecyType||undefined); t.curY=cellY(above); above--; grid[r][c]=t; spawned++; }
+    for(let r=write;r>=0;r--){ const t=makeTile(prophecyType||undefined); t.curY=cellY(above); if(hold>0) t.fxHold=hold; above--; grid[r][c]=t; spawned++; }
   }
+  gravityFxHold=0;
   if(prophecyType && spawned>0){
     player.prophecyPending=null;
     log(tr(`🔮 神谕应验：本次补子全部变为${prophecyLabel(prophecyType)}` ,`🔮 Prophecy fulfilled: this refill became all ${prophecyLabel(prophecyType,true)}`), 'buff');

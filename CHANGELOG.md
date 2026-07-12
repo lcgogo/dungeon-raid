@@ -1,3 +1,10 @@
+## [v1.52.0]
+
+> Version-Impact: verify
+
+- 亡灵新增第 4 职业「巫妖 Lich」：主动「冰封球 Frost Orb」会对全场怪物/Boss（终焉之主除外）造成一次当前固定伤害，并让它们的当前攻击倒计时 +1；锁定二阶被动为「冰甲 Ice Armor」，每次你受到怪物/Boss 攻击后会对攻击者反弹 50% 当前固定伤害（至少 1），并让它当前攻击倒计时 +1。与此同时，吸魂、吸血鬼吸心、岩浆魔融盾这几类“棋子先消失再补位”的特效，现在会让空格先短暂停留一拍，再开始落子，手机上更容易看清哪些棋子先被吸走或融掉。
+- Added a fourth Undead class, **Lich**. Its active **Frost Orb** deals your current flat damage once to all monsters/bosses on the board (excluding the Overlord) and adds +1 to their current attack countdown, while its locked tier-2 passive **Ice Armor** reflects 50% of your current flat damage back to attackers (minimum 1) and slows their next attack by +1 countdown. At the same time, Soul Drain, Vampire heart-drain, and Magmafiend shield-melt turns now briefly hold emptied cells before refill begins, making it much easier on mobile to read which pieces vanished before the falling tiles start.
+
 ## [v1.51.1]
 
 - 吸血鬼每回合吸心现在新增更清楚的视觉反馈：普通心与毒心会分别用不同颜色的吸取线拉向血条，吸血鬼本体也会在吸血/反噬时给出对应颜色的短脉冲，更容易一眼分辨这次吸心是回血还是中毒。

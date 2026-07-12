@@ -5,7 +5,7 @@ const path = require('path');
 const file = fs.existsSync('dungeon-raid-dev.html') ? 'dungeon-raid-dev.html' : path.join('..', 'dungeon-raid-dev.html');
 let s = fs.readFileSync(file, 'utf8').match(/<script>([\s\S]*?)<\/script>/)[1];
 const EXPORT = `globalThis.__G={startGame,raceById,onBossKilled,dispatchReplayAct,buyItem,resolve,applyGravity,
-  TIER1,TIER2,RACE_PATHS, CLASS_T2, gainHeal, witherAuraTick, hurtPlayer,
+  TIER1,TIER2,RACE_PATHS, CLASS_T2, gainHeal, witherAuraTick, hurtPlayer, frostOrbDamage,
   get player(){return player}, get grid(){return grid},
   set busy(v){busy=v}, set pendingLevels(v){pendingLevels=v}, set replaying(v){replaying=v}, set replayRec(v){replayRec=v}};`;
 s = s.replace('resize(); showClassSelect(); loop();', EXPORT);
@@ -114,6 +114,33 @@ const dmg=G.hurtPlayer(7,'enemy',true,{type:'enemy'});
 ok(dmg===7,'斧王受伤按实际伤害结算');
 ok(ax.maxHp===beforeMax+4,'嘲讽窗口把50%实际伤害转为永久最大生命（7→+3）且越挫越勇额外+1');
 ok(ax.hp===beforeHp-7,'斧王受伤仍正常掉血');
+
+// 亡灵巫妖：100回合锁定被动改为冰甲，受击后反击并减速攻击者
+ok(G.CLASS_T2.lich==='icearmor','巫妖锁定被动=冰甲');
+G.replayRec={seed:37,race:'undead',acts:[]}; G.replaying=true; G.startGame(G.raceById('undead')); G.replaying=false;
+const li=G.player; li.hp=li.maxHp=40; li.tier1='lich'; li.swordFlat=4; G.busy=false; G.pendingLevels=0;
+li.turns=100; G.onBossKilled(); ok(li.t2Pending,'巫妖100回合→t2Pending'); li.t2Pending=false;
+G.dispatchReplayAct(['t',2,'icearmor']); ok(li.tier2==='icearmor' && li.iceArmor===true,'二阶=冰甲(被动生效)');
+li.frozen={};
+G.grid[0][0]={type:'enemy', hp:2, maxHp:2, atk:4, cd:2, baseCd:2};
+const enemy=G.grid[0][0];
+const liBeforeHp=li.hp;
+const liDmg=G.hurtPlayer(6,'enemy',true,enemy);
+ok(liDmg===6,'巫妖受伤按实际伤害结算');
+ok(!G.grid[0][0],'冰甲反击能击杀低血攻击者');
+ok(li.hp===liBeforeHp-6,'冰甲不改变本次正常掉血');
+
+// 亡灵巫妖：主动冰封球打全场并让目标出手变慢
+G.replayRec={seed:41,race:'undead',acts:[]}; G.replaying=true; G.startGame(G.raceById('undead')); G.replaying=false;
+const lf=G.player; lf.hp=lf.maxHp=40; lf.tier1='lich'; lf.swordFlat=4; G.busy=false; G.pendingLevels=0;
+G.grid[0][0]={type:'enemy', hp:5, maxHp:5, atk:4, cd:2, baseCd:2};
+G.grid[0][1]={type:'boss', bossId:'ghost', hp:5, maxHp:5, atk:4, cd:2, baseCd:2, tier:1};
+const frostDmg=G.frostOrbDamage();
+const enemyCdBefore=G.grid[0][0].cd, bossCdBefore=G.grid[0][1].cd;
+G.TIER1.lich.skill.f(lf);
+ok(G.grid[0][0] && G.grid[0][0].hp===5-frostDmg && G.grid[0][1] && G.grid[0][1].hp===5-frostDmg,'冰封球能命中普通怪与剑免疫Boss');
+ok(G.grid[0][0] && G.grid[0][0].cd===enemyCdBefore+1 && G.grid[0][1] && G.grid[0][1].cd===bossCdBefore+1,'冰封球会让目标当前出手更慢一回合');
+ok(frostDmg===lf.swordFlat,'冰封球使用当前固定伤害作为伤害基数');
 
 // onBossKilled 链：未到回合不应误触发
 const q=Object.assign({},{t1:se.t1Pending||e.t1Pending||p.t1Pending,t2:se.t2Pending||e.t2Pending||p.t2Pending,t3:se.t3Pending||e.t3Pending||p.t3Pending,t4:se.t4Pending||e.t4Pending||p.t4Pending});
