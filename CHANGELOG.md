@@ -1,3 +1,8 @@
+## [v1.54.3]
+
+- 给僵尸（Zombie）的尸毒发作补上了更直观的绿线提示：当潜伏结束后它真的让你掉血时，现在会从僵尸所在格向 HP 条拉一条绿色感染线。这样你不仅能看见血条继续保持感染态的绿色，也能一眼看清这一下掉血就是哪只僵尸引发的。这是纯视觉增强，不改数值、顺序，也不影响录像 / verify 兼容。
+- Added clearer visual feedback to Zombie plague ticks: once incubation ends and the Zombie actually makes you lose HP, it now draws a green infection tether from the Zombie’s tile to the HP bar. That way you not only see the bar staying infected-green, but can also immediately tell which Zombie caused that HP loss. This is visual-only polish — no stat, turn-order, replay, or verify behavior changes.
+
 ## [v1.54.2]
 
 - 修正吸血鬼吸心与饕餮吞怪吸取线在部分移动浏览器上的显示回归：此前即使目标坐标已恢复为有效点位，若浏览器本身不支持 SVG 线段的 `element.animate()`，吸取线仍会因初始 `stroke-dashoffset=len` 而一直保持全隐藏，直到整层 SVG 被移除。现在这类浏览器会回退为“直接显示一小拍”的兼容路径，因此吸血鬼吸心、饕餮吞怪，以及共用这套吸取线 helper 的相关吸取特效都会重新可见。这仍是纯视觉修复，不改数值、顺序，也不影响录像 / verify 兼容。
