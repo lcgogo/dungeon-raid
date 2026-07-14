@@ -176,8 +176,8 @@
 (()=>{
 //==================== 配置 ====================
 // 版本号 v主.次.修：不影响 verify/replay 兼容边界的小改动改"修"；凡是影响 verify/replay/版本分桶/release 验证语义的改动都改"次"；大版本变更需先确认。页面底部显示。
-const VERSION='v1.54.3';
-const CHANGELOG_LINES=[{"ver": "v1.54.3", "zh": "给僵尸（Zombie）的尸毒发作补上了更直观的绿线提示：当潜伏结束后它真的让你掉血时，现在会从僵尸所在格向 HP 条拉一条绿色感染线。这样你不仅能看见血条继续保持感染态的绿色，也能一眼看清这一下掉血就是哪只僵尸引发的。这是纯视觉增强，不改数值、顺序，也不影响录像 / verify 兼容。", "en": "Added clearer visual feedback to Zombie plague ticks: once incubation ends and the Zombie actually makes you lose HP, it now draws a green infection tether from the Zombie’s tile to the HP bar. That way you not only see the bar staying infected-green, but can also immediately tell which Zombie caused that HP loss. This is visual-only polish — no stat, turn-order, replay, or verify behavior changes."}, {"ver": "v1.54.2", "zh": "修正吸血鬼吸心与饕餮吞怪吸取线在部分移动浏览器上的显示回归：此前即使目标坐标已恢复为有效点位，若浏览器本身不支持 SVG 线段的 `element.animate()`，吸取线仍会因初始 `stroke-dashoffset=len` 而一直保持全隐藏，直到整层 SVG 被移除。现在这类浏览器会回退为“直接显示一小拍”的兼容路径，因此吸血鬼吸心、饕餮吞怪，以及共用这套吸取线 helper 的相关吸取特效都会重新可见。这仍是纯视觉修复，不改数值、顺序，也不影响录像 / verify 兼容。", "en": "Fixed a mobile-browser regression affecting Vampire heart-drains and Devourer growth tethers: even after point targets were accepted again, browsers that do not support `element.animate()` on SVG lines still kept the tether fully hidden because it started at `stroke-dashoffset=len` and never advanced before the whole SVG layer was removed. Those browsers now fall back to showing the line directly for a brief beat, so Vampire drains, Devourer siphons, and the related shared drain-line effects are visible again. This remains a visual-only fix — no stat, turn-order, replay, or verify behavior changes."}, {"ver": "v1.54.1", "zh": "修正饕餮（Devourer）吞怪涨血特效的回归问题：此前共用吸取线函数把「宽高为 0、但 left/top 有效」的点目标也误判成无效，结果拉线终点若是饕餮本体格心，整条吸取线就会直接不画。现在恢复为：饕餮每次从普通怪身上吸血时，都会继续把吸取线拉回自身，方便看清它这回合到底吃了谁。这是纯视觉修复，不改数值、顺序，也不影响录像 / verify 兼容。", "en": "Fixed a Devourer growth-line regression: the shared drain-line helper was still rejecting valid point targets whose width/height were 0 even when their left/top coordinates were real, so if the tether was meant to end at the Devourer’s own board-center point the whole line was skipped. Devourer drains now correctly draw back into the boss again whenever it siphons regular enemies, making it clear what it fed on that turn. This is a visual-only fix — no stat, turn-order, replay, or verify behavior changes."}, {"ver": "v1.54.0", "zh": "树人职业的当前内部 canonical id 由 `elder` 迁到 `treant`，并补上旧 id `elder → treant` 的兼容归一化：旧录像里的转职动作、旧存档里的 `player.tier1`、以及开发工具传入的 `--t1=elder` 仍然会被自动解析到树人，不会因为这次内部更名而失效。对玩家可见的职业显示仍然继续是「树人 Treant」，只是代码和工具入口终于与当前名称一致。", "en": "Migrated the Treant class’s active canonical internal id from `elder` to `treant`, while adding legacy normalization for `elder → treant`. Old replay tier-choice actions, old saves containing `player.tier1`, and developer tooling inputs such as `--t1=elder` still resolve to Treant automatically, so the internal cleanup does not strand existing data. Player-facing naming remains “Treant” — the code and tooling now finally match it."}, {"ver": "v1.53.1", "zh": "给饕餮（Devourer）的“吞怪涨血”补上了更直观的吸取线特效：每当它从普通怪身上吸血时，会从被吸的怪格子拉线回到饕餮本体，方便一眼看清它这回合到底吃了谁。这是纯视觉增强，不改数值、不改顺序，也不影响录像 / verify 兼容。", "en": "Added clearer siphon-line feedback to the Devourer growth step: whenever it drains HP from regular enemies, animated tethers now pull from those enemies back into the Devourer so you can immediately see what it fed on that turn. This is visual-only polish — no stat, turn-order, replay, or verify behavior changes."}];   /* auto-injected by dr.sh embed-changelog（勿手改） */
+const VERSION='v1.55.0';
+const CHANGELOG_LINES=[{"ver": "v1.55.0", "zh": "修正了一个会让“多只怪同回合应同时出手”却被漏算的敌方回合 bug：像鸟人（Birdman）这类会在自己行动中换位的怪/Boss，之前可能把后面排队、同样已到出手时机的另一只怪从快照里的原格子挪走，导致 `advanceEnemies()` 误以为它已被移除而直接跳过，所以你会看到“棋盘上明明有多只怪该打你，结果只记了一条攻击、也只掉了一只怪的血”。现在如果行动者只是被同回合内的其它效果换位，系统会继续按它当前所在格让它完成这一次应有的出手；只有真的离场/被替换时才跳过。同时补了一条回归测试，专门覆盖“两只鸟人同回合同时行动”场景。另：底部小日志条本来就只显示最新两行，想看完整多段连击/受击过程请点开日志历史。", "en": "Fixed an enemy-phase bug that could drop one of several ready attackers from the same turn. Movers such as Birdman can swap positions during their own action; previously that could pull another already-ready monster/boss out of its snapshotted cell, causing `advanceEnemies()` to mistake it for a removed actor and skip its attack entirely. The visible symptom was exactly “multiple foes looked ready, but only one attack got logged and only one hit was applied.” The turn loop now follows actors that were merely relocated within the same turn and only skips ones that were actually removed or replaced. A regression test now covers the “two Birdmen act in the same turn” case. Also note: the compact bottom log intentionally shows only the latest two lines — tap it for the full history when debugging multi-step turns."}, {"ver": "v1.54.4", "zh": "会长（Guild Master）的「收买 Buyout」现在新增更直观的花钱反馈：当你成功花金币把全场普通怪买通成金币时，会从 HUD 上显示金币数量的位置向每只被买通的怪拉出金色连线，更容易看清这次钱是花到哪些怪身上了。这是纯视觉增强，不改数值、目标、顺序，也不影响录像 / verify 兼容。", "en": "Guild Master’s Buyout now has clearer spend feedback: when you successfully pay gold to bribe all regular enemies into coins, golden tethers stretch from the HUD gold counter to each bribed enemy so it is much easier to see where that money went. This is visual-only polish — no stat, targeting, turn-order, replay, or verify behavior changes."}, {"ver": "v1.54.3", "zh": "给僵尸（Zombie）的尸毒发作补上了更直观的绿线提示：当潜伏结束后它真的让你掉血时，现在会从僵尸所在格向 HP 条拉一条绿色感染线。这样你不仅能看见血条继续保持感染态的绿色，也能一眼看清这一下掉血就是哪只僵尸引发的。这是纯视觉增强，不改数值、顺序，也不影响录像 / verify 兼容。", "en": "Added clearer visual feedback to Zombie plague ticks: once incubation ends and the Zombie actually makes you lose HP, it now draws a green infection tether from the Zombie’s tile to the HP bar. That way you not only see the bar staying infected-green, but can also immediately tell which Zombie caused that HP loss. This is visual-only polish — no stat, turn-order, replay, or verify behavior changes."}, {"ver": "v1.54.2", "zh": "修正吸血鬼吸心与饕餮吞怪吸取线在部分移动浏览器上的显示回归：此前即使目标坐标已恢复为有效点位，若浏览器本身不支持 SVG 线段的 `element.animate()`，吸取线仍会因初始 `stroke-dashoffset=len` 而一直保持全隐藏，直到整层 SVG 被移除。现在这类浏览器会回退为“直接显示一小拍”的兼容路径，因此吸血鬼吸心、饕餮吞怪，以及共用这套吸取线 helper 的相关吸取特效都会重新可见。这仍是纯视觉修复，不改数值、顺序，也不影响录像 / verify 兼容。", "en": "Fixed a mobile-browser regression affecting Vampire heart-drains and Devourer growth tethers: even after point targets were accepted again, browsers that do not support `element.animate()` on SVG lines still kept the tether fully hidden because it started at `stroke-dashoffset=len` and never advanced before the whole SVG layer was removed. Those browsers now fall back to showing the line directly for a brief beat, so Vampire drains, Devourer siphons, and the related shared drain-line effects are visible again. This remains a visual-only fix — no stat, turn-order, replay, or verify behavior changes."}, {"ver": "v1.54.1", "zh": "修正饕餮（Devourer）吞怪涨血特效的回归问题：此前共用吸取线函数把「宽高为 0、但 left/top 有效」的点目标也误判成无效，结果拉线终点若是饕餮本体格心，整条吸取线就会直接不画。现在恢复为：饕餮每次从普通怪身上吸血时，都会继续把吸取线拉回自身，方便看清它这回合到底吃了谁。这是纯视觉修复，不改数值、顺序，也不影响录像 / verify 兼容。", "en": "Fixed a Devourer growth-line regression: the shared drain-line helper was still rejecting valid point targets whose width/height were 0 even when their left/top coordinates were real, so if the tether was meant to end at the Devourer’s own board-center point the whole line was skipped. Devourer drains now correctly draw back into the boss again whenever it siphons regular enemies, making it clear what it fed on that turn. This is a visual-only fix — no stat, turn-order, replay, or verify behavior changes."}];   /* auto-injected by dr.sh embed-changelog（勿手改） */
 const DEV=true;   // release build (DEV=false); dev build is dungeon-raid-dev.html (DEV=true)
 const REC_API='https://api.dungeonraid.win';   // 录像分享 API（Cloudflare Worker + KV）
 // 带种子随机数（mulberry32）：游戏全程用 rnd() 取代原生随机，配合录制种子可确定性重放
@@ -398,11 +398,11 @@ const BOSSES=[
     act(t){
       const dmg=hurtPlayer(Math.max(1,Math.ceil(t.atk*0.5)), 'birdman', false, t);
       if(dmg>0) log(tr(`🦅 鸟人俯冲啄击，掉 ${dmg} 血！`,`🦅 The Birdman dives and pecks for ${dmg}!`), 'bad');
-      let pos=null; for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ if(grid[r][c]===t) pos=[r,c]; }
+      const pos=findTilePos(t);
       if(!pos) return;
       const cells=[]; for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const x=grid[r][c]; if(x&&x!==t&&!x.finale) cells.push([r,c]); }   // 不和终焉之主换位（否则它被移位、advanceEnemies 快照守卫会跳过其推进，破关被拖到 511 之后）
       if(!cells.length) return;
-      const [nr,nc]=cells[Math.floor(rnd()*cells.length)]; const [r,c]=pos; const tmp=grid[nr][nc];
+      const [nr,nc]=cells[Math.floor(rnd()*cells.length)]; const {r,c}=pos; const tmp=grid[nr][nc];
       grid[nr][nc]=t; grid[r][c]=tmp; t.curY=cellY(nr); if(tmp) tmp.curY=cellY(r); syncPositions(false);
       log(tr('🦅 鸟人振翅，和一个棋子换了位置！','🦅 The Birdman flaps to a new spot!'), 'debuff'); } },
   // 终焉之主：第 500 回合出现。无血量、无攻击、不可被打。每回合把若干非怪/非Boss棋子变成随机Boss（第1波1个…第10波10个），撑满10波不死即破关。不进随机池。
@@ -444,6 +444,10 @@ function spawnFinale(){
   log(tr('👑 终焉之主降临！撑过 10 波 Boss 浪潮即可破关！','👑 The Overlord descends! Survive 10 waves of bosses to clear the game!'), 'bad');
 }
 function bossDef(t){ return BOSSES.find(b=>b.id===(t&&t.bossId)) || BOSSES[0]; }
+function findTilePos(tile){
+  for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++) if(grid[r][c]===tile) return {r,c};
+  return null;
+}
 function isSwordTarget(t){ return !!t && !t.finale && (t.type==='enemy' || (t.type==='boss' && (bossDef(t).swordable || !!(player&&player.pierceTurn)))); }  // 斗士嗜血：本回合可攻击剑免疫 Boss；终焉之主(finale)永不可攻击
 function isFireChainTarget(t){ return !!(player&&player.fireChainTurn) && !!t && !t.finale && (t.type==='enemy' || t.type==='boss'); }   // 火法师：本回合剑链划过的所有怪/Boss（含幽灵等）都会被点燃，且这些 Boss 视为可连目标
 function gainGold(g, msgActive, msgFrozen){
@@ -640,8 +644,8 @@ const TIER1={
   seer:{n:['先知','Seer'], quip:['我命由我不由天','My fate is mine, not heaven\'s.'], skill:{name:['神谕','Prophecy'], short:['指定下次落下的棋子','Choose the next falling tiles'], desc:['发动后选择一种棋子：金币、盾、心、剑或怪物。下一次补子时，新落下的所有棋子都会变成该类型。若选择怪物，则只会生成普通怪物，不会生成 Boss。若本回合没有触发补子，则效果会保留到下一次补子发生。','Choose one tile type: coin, shield, heart, sword, or enemy. During the next refill, all newly falling tiles become that type. If enemy is chosen, only normal enemies are created, never bosses. If no refill happens this turn, the effect is kept until the next refill occurs.'], cd:5, f:p=>{ showProphecySelect(prophecySlotKey); return '__defer__'; }}},
   blacksmith:{n:['锻造师','Blacksmith'], quip:['盾别拿手里，焊身上才香。','Do not hold shields — wear them.'], skill:{name:['锻甲','Forge Armor'], short:['收全场盾→护甲','Absorb all shields'], desc:['吞下棋盘上所有的盾，按「每盾护甲进度」一次性转成护甲进度并立刻结算升甲。兽人无甲→无效；场上没盾→无效、不进冷却。','Devours every shield on the board, converting each into Armor XP at your per-shield rate and leveling armor at once. No effect for the armor-less Orc, or when there are no shields (no cooldown then).'], cd:5, f:p=>{ if(p.noArmor) return false; const cells=[]; let n=0; for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){const t=grid[r][c]; if(t&&t.type==='shield'){cells.push({r,c,type:'shield'}); grid[r][c]=null;n++;}} if(!n)return false; absorbLinesFx(cells,{targetId:'skillBtn'}); p.shieldXp+=n*p.armorPerShield; while(p.shieldXp>=armorNeeded(p.armor)){p.shieldXp-=armorNeeded(p.armor);p.armor++;} applyGravity(); syncPositions(false); log(tr(`🔰 锻甲：吞下 ${n} 盾（减伤 ${p.armor}）`,`🔰 Forge: ${n} shields (armor ${p.armor})`), 'buff'); return n; }}},
   miser:{n:['守财奴','Miser'], quip:['钱躺一会儿，利滚利。','Let the gold nap — it wakes up doubled.'], skill:{name:['囤金','Hoard'], short:['锁金生利','Lock gold for interest'], desc:['锁金 4 回合：期间金币不直接进账、也不能用商店/技能，而是先囤起来；4 回合后一次性按 2.5 倍返还囤积的金币。','Locks gold for 4 turns: coins are stockpiled (not banked or spent) and shop/skills are disabled; after 4 turns the stockpile is paid back at 2.5×.'], cd:5, f:p=>{ if(p.goldLock>0) return false; const n=4; p.goldLock=n; p.goldFrozen=0; log(tr(`🔒 囤金：锁定 ${n} 回合（期间不产/不花金币，到期返还 2.5 倍）`,`🔒 Hoard: locked ${n} turns (no gold in/out; 2.5× payout at end)`), 'buff'); return true; }}},
-  guildmaster:{n:['会长','Guild Master'], quip:['有钱能使鬼推磨。','Money makes the world go round.'], skill:{name:['收买','Buyout'], short:['花「全怪血量」的金币把全场怪买通成金币','Pay gold = total enemy HP to bribe all enemies into coins'], desc:['花费「场上所有普通怪当前血量之和」那么多金币，把它们全部买通、原地变成金币（不影响 Boss）。金币不够则发动不了。无冷却，钱够就能反复用。学了「小气鬼」后花费减半。','Spend gold equal to the total current HP of all regular monsters to bribe them all into coins on the spot (bosses unaffected). Fails if you cannot afford it. No cooldown — reusable while you have the gold. Costs half once you have Cheapskate.'], cd:5, noCd:true, f:p=>{ let hp=0; const cells=[]; for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const t=grid[r][c]; if(t&&t.type==='enemy'){ hp+=t.hp; cells.push([r,c]); } } const cost=p.cheapskate?Math.ceil(hp/2):hp;   // 小气鬼：买通花费也减半（会长100回合必得小气鬼）
-    if(!cells.length || p.gold<cost) return false; p.gold-=cost;   // 真正花钱：付「全怪血量」金币买通
+  guildmaster:{n:['会长','Guild Master'], quip:['有钱能使鬼推磨。','Money makes the world go round.'], skill:{name:['收买','Buyout'], short:['花「全怪血量」的金币把全场怪买通成金币','Pay gold = total enemy HP to bribe all enemies into coins'], desc:['花费「场上所有普通怪当前血量之和」那么多金币，把它们全部买通、原地变成金币（不影响 Boss）。金币不够则发动不了。无冷却，钱够就能反复用。学了「小气鬼」后花费减半。发动成功时，还会从金币数位置向被买通的怪拉出金色连线，更直观地看到这笔钱花去了哪里。','Spend gold equal to the total current HP of all regular monsters to bribe them all into coins on the spot (bosses unaffected). Fails if you cannot afford it. No cooldown — reusable while you have the gold. Costs half once you have Cheapskate. On success, golden tethers now also stretch from the gold counter to the bribed enemies so you can immediately see where the money went.'], cd:5, noCd:true, f:p=>{ let hp=0; const cells=[]; for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const t=grid[r][c]; if(t&&t.type==='enemy'){ hp+=t.hp; cells.push([r,c]); } } const cost=p.cheapskate?Math.ceil(hp/2):hp;   // 小气鬼：买通花费也减半（会长100回合必得小气鬼）
+    if(!cells.length || p.gold<cost) return false; p.gold-=cost; buyoutFx(cells.map(([r,c])=>({r,c})));   // 真正花钱：付「全怪血量」金币买通
     for(const [r,c] of cells){ const nt=makeTile('coin'); nt.curY=cellY(r); grid[r][c]=nt; } syncPositions(false); log(tr(`💰 收买：花 ${cost} 金币买通 ${cells.length} 只怪，化为金币！`,`💰 Buyout: paid ${cost} gold to bribe ${cells.length} enemies into coins!`), 'buff'); return cells.length; }}},
   musketeer:{n:['火枪手','Musketeer'], quip:['一颗子弹，喂饱最肥的那个。','One bullet for the fattest one.'], skill:{name:['狙击','Snipe'], short:['优先轰 Boss；多 Boss 取血最少','Prioritize bosses; lowest-HP boss first'], desc:['优先狙击场上的 Boss；如果有多个 Boss，则选择【生命最低】的那个。若场上没有 Boss，再狙击当前生命最高的怪/Boss（炸弹式攻击，含{W}免疫与特殊 Boss，终焉之主除外），伤害 = 炸弹伤害 ×2（炸弹被「爆破手」强化时，狙击同步增强）。若这一发把它打死，获得 3 倍经验与 3 倍金币。场上没有目标时无效、不进冷却。','Prioritize bosses on the board; if there are multiple bosses, shoot the one with the **lowest HP**. If there is no boss, fall back to the highest-HP monster/boss (bomb-type — hits {W}-immune & special bosses; not the Overlord) for 2× your Bomb damage (scales with Demolitionist). If the shot kills, gain triple XP and triple gold. No effect — and no cooldown — when there is no target.'], cd:5, f:p=>{
     let bossT=null, bossR=-1, bossC=-1, bossHP=Infinity, t=null, tr_=-1, tc=-1, best=-1;
@@ -1435,6 +1439,35 @@ function zombiePlagueFx(src){
   if(!src) return;
   absorbLinesFx([{r:src.r,c:src.c}], { targetId:'hpBar', stroke:'#27ae60', glow:'#7dff9d' });
 }
+function buyoutFx(cells){
+  if(headless || jumping || !cells || !cells.length) return;
+  try{
+    if(!document.createElementNS) return;
+    const cv0=document.getElementById('board'), src=document.getElementById('goldTxt');
+    if(!cv0||!src||!cv0.getBoundingClientRect||!src.getBoundingClientRect) return;
+    const r=cv0.getBoundingClientRect(), sr=src.getBoundingClientRect();
+    if(!r.width) return;
+    const sx=r.width/cv0.width, sy=r.height/cv0.height;
+    const x1=sr.left+((sr.width||0)/2), y1=sr.top+((sr.height||0)/2);
+    if(!Number.isFinite(x1) || !Number.isFinite(y1)) return;
+    const NS='http://www.w3.org/2000/svg';
+    const svg=document.createElementNS(NS,'svg');
+    svg.style.cssText='position:fixed;inset:0;width:100vw;height:100vh;pointer-events:none;z-index:45';
+    cells.forEach(cell=>{
+      const x2=r.left+(cellX(cell.c)+TILE/2)*sx, y2=r.top+(cellY(cell.r)+TILE/2)*sy;
+      const ln=document.createElementNS(NS,'line');
+      ln.setAttribute('x1',x1); ln.setAttribute('y1',y1); ln.setAttribute('x2',x2); ln.setAttribute('y2',y2);
+      ln.setAttribute('stroke','#f1c40f'); ln.setAttribute('stroke-width','3'); ln.setAttribute('stroke-linecap','round');
+      ln.style.filter='drop-shadow(0 0 6px #ffe58f)';
+      const len=Math.hypot(x2-x1,y2-y1); ln.setAttribute('stroke-dasharray',len); ln.setAttribute('stroke-dashoffset',len);
+      svg.appendChild(ln);
+      if(ln.animate) ln.animate([{strokeDashoffset:len,opacity:1},{strokeDashoffset:0,opacity:1,offset:.45},{strokeDashoffset:0,opacity:0}],{duration:620,easing:'ease-out',fill:'forwards'});
+      else { ln.setAttribute('stroke-dashoffset','0'); ln.style.opacity='0.92'; }
+    });
+    document.body.appendChild(svg);
+    setTimeout(()=>{ try{ svg.remove(); }catch(e){} }, 680);
+  }catch(e){}
+}
 function boardPointTarget(src){
   if(!src) return null;
   return { getBoundingClientRect(){ const cv0=document.getElementById('board'); if(!cv0||!cv0.getBoundingClientRect) return {left:0,top:0,width:0,height:0}; const r=cv0.getBoundingClientRect(); if(!r.width) return {left:0,top:0,width:0,height:0}; const sx=r.width/cv0.width, sy=r.height/cv0.height; const cx=r.left+(cellX(src.c)+TILE/2)*sx, cy=r.top+(cellY(src.r)+TILE/2)*sy; return {left:cx, top:cy, width:0, height:0}; } };
@@ -1994,9 +2027,14 @@ function advanceEnemies(){
   const actors=[];
   for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const t=grid[r][c];
     if(t && (t.type==='enemy' || t.type==='boss')) actors.push({r,c,t}); }
-  for(const {r,c,t} of actors){
+  for(const actor of actors){
+    let {r,c,t}=actor;
     if(player.cleared) break;          // 破关已结算（终焉第10波）：停止其余 Boss 行动
-    if(grid[r][c]!==t) continue;        // 已被本回合其它效果移除/替换（如小偷逃走）→ 跳过
+    if(grid[r][c]!==t){
+      const pos=findTilePos(t);        // 允许行动者先被别的效果换位（如多只鸟人互换）后，仍按自身当前所在格继续行动一次
+      if(!pos) continue;               // 已被本回合其它效果移除/替换（如小偷逃走）→ 跳过
+      r=pos.r; c=pos.c;
+    }
     const def = t.type==='boss' ? bossDef(t) : null;
     if(def && def.perTurn){ def.act(t); continue; }    // 纯每回合型（小丑/吸血鬼）：无倒计时
     let acted=false;

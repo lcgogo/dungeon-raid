@@ -1,3 +1,15 @@
+## [v1.55.0]
+
+> Version-Impact: verify
+
+- 修正了一个会让“多只怪同回合应同时出手”却被漏算的敌方回合 bug：像鸟人（Birdman）这类会在自己行动中换位的怪/Boss，之前可能把后面排队、同样已到出手时机的另一只怪从快照里的原格子挪走，导致 `advanceEnemies()` 误以为它已被移除而直接跳过，所以你会看到“棋盘上明明有多只怪该打你，结果只记了一条攻击、也只掉了一只怪的血”。现在如果行动者只是被同回合内的其它效果换位，系统会继续按它当前所在格让它完成这一次应有的出手；只有真的离场/被替换时才跳过。同时补了一条回归测试，专门覆盖“两只鸟人同回合同时行动”场景。另：底部小日志条本来就只显示最新两行，想看完整多段连击/受击过程请点开日志历史。
+- Fixed an enemy-phase bug that could drop one of several ready attackers from the same turn. Movers such as Birdman can swap positions during their own action; previously that could pull another already-ready monster/boss out of its snapshotted cell, causing `advanceEnemies()` to mistake it for a removed actor and skip its attack entirely. The visible symptom was exactly “multiple foes looked ready, but only one attack got logged and only one hit was applied.” The turn loop now follows actors that were merely relocated within the same turn and only skips ones that were actually removed or replaced. A regression test now covers the “two Birdmen act in the same turn” case. Also note: the compact bottom log intentionally shows only the latest two lines — tap it for the full history when debugging multi-step turns.
+
+## [v1.54.4]
+
+- 会长（Guild Master）的「收买 Buyout」现在新增更直观的花钱反馈：当你成功花金币把全场普通怪买通成金币时，会从 HUD 上显示金币数量的位置向每只被买通的怪拉出金色连线，更容易看清这次钱是花到哪些怪身上了。这是纯视觉增强，不改数值、目标、顺序，也不影响录像 / verify 兼容。
+- Guild Master’s Buyout now has clearer spend feedback: when you successfully pay gold to bribe all regular enemies into coins, golden tethers stretch from the HUD gold counter to each bribed enemy so it is much easier to see where that money went. This is visual-only polish — no stat, targeting, turn-order, replay, or verify behavior changes.
+
 ## [v1.54.3]
 
 - 给僵尸（Zombie）的尸毒发作补上了更直观的绿线提示：当潜伏结束后它真的让你掉血时，现在会从僵尸所在格向 HP 条拉一条绿色感染线。这样你不仅能看见血条继续保持感染态的绿色，也能一眼看清这一下掉血就是哪只僵尸引发的。这是纯视觉增强，不改数值、顺序，也不影响录像 / verify 兼容。

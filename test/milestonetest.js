@@ -6,7 +6,7 @@ const file = fs.existsSync('dungeon-raid-dev.html') ? 'dungeon-raid-dev.html' : 
 let s = fs.readFileSync(file, 'utf8').match(/<script>([\s\S]*?)<\/script>/)[1];
 const EXPORT = `globalThis.__G={startGame,raceById,onBossKilled,dispatchReplayAct,buyItem,resolve,applyGravity,advanceEnemies,
   TIER1,TIER2,RACE_PATHS, CLASS_T2, gainHeal, witherAuraTick, hurtPlayer, frostOrbDamage,
-  get player(){return player}, get grid(){return grid}, set selection(v){selection=v},
+  get player(){return player}, get grid(){return grid}, get logHistory(){return logHistory}, set selection(v){selection=v},
   set busy(v){busy=v}, set pendingLevels(v){pendingLevels=v}, set replaying(v){replaying=v}, set replayRec(v){replayRec=v}};`;
 s = s.replace('resize(); showClassSelect(); loop();', EXPORT);
 const elH={get(t,p){if(p==='style')return t._s||(t._s={});if(p==='dataset')return t._d||(t._d={});if(p==='classList')return{add(){},remove(){},toggle(){}};if(p==='getContext')return()=>new Proxy({},{get:()=>()=>{},set:()=>true});if(['addEventListener','appendChild','setAttribute','focus','click'].includes(p))return()=>{};if(p==='querySelector')return()=>new Proxy({},elH);if(p==='querySelectorAll')return()=>[];if(p==='getBoundingClientRect')return()=>({left:0,top:0,width:420,height:420});if(['width','height','clientWidth','clientHeight'].includes(p))return 420;return t[p];},set(t,p,v){t[p]=v;return true;}};
@@ -162,6 +162,17 @@ ok(dv.hp===80-1,'饕餮cd归零时先按出手前40血→20攻击结算减伤（
 ok(dev && dev.hp===28,'饕餮出手后自损到20，再吞10/6两只怪各一半生命，回到28血');
 ok(dev && dev.cd===4,'饕餮出手后重置回基础倒计时');
 ok(foeHps.length===2 && foeHps[0]===3 && foeHps[1]===5,'饕餮强击后才吞普通怪生命');
+
+// 鸟人：多只同回合出手时不应因第一只换位而让第二只被快照守卫误跳过
+G.replayRec={seed:47,race:'human',acts:[]}; G.replaying=true; G.startGame(G.raceById('human')); G.replaying=false;
+const bd=G.player; bd.hp=bd.maxHp=50; bd.armor=0; bd.toughness=0; G.busy=false; G.pendingLevels=0;
+for(let r=0;r<6;r++)for(let c=0;c<6;c++) G.grid[r][c]=null;
+G.grid[0][0]={type:'boss', bossId:'birdman', hp:12, maxHp:12, atk:6, cd:1, baseCd:4, tier:1};
+G.grid[0][1]={type:'boss', bossId:'birdman', hp:12, maxHp:12, atk:6, cd:1, baseCd:4, tier:1};
+G.advanceEnemies();
+const birdPecks=G.logHistory.filter(e=>e&&e.m&&e.m.includes('鸟人俯冲啄击')).length;
+ok(bd.hp===44,'两只鸟人同回合都应各自啄击一次（总共掉 6 血）');
+ok(birdPecks===2,'两只鸟人同回合都应各自写入一次啄击日志');
 
 // onBossKilled 链：未到回合不应误触发
 const q=Object.assign({},{t1:se.t1Pending||e.t1Pending||p.t1Pending,t2:se.t2Pending||e.t2Pending||p.t2Pending,t3:se.t3Pending||e.t3Pending||p.t3Pending,t4:se.t4Pending||e.t4Pending||p.t4Pending});
