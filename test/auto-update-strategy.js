@@ -132,8 +132,8 @@ function updateSubmitFile(topBuilds, version) {
     newComment
   );
   newContent = newContent.replace(
-    /buildSets:\s*\[[\s\S]*?\],/,
-    `buildSets: [\n${buildLines}\n    ],`
+    /buildSets:\s*\[[\s\S]*?\],(?=\s*extraArgs)/,
+    `buildSets: [\n${buildLines}\n    ],\n`
   );
 
   fs.writeFileSync(SUBMIT_FILE, newContent, 'utf8');

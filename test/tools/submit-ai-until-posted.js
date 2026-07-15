@@ -14,24 +14,26 @@ function parseArgs(argv) {
     waitMs: 8000,
     verifyPolls: 18,
     agent: 'ai',
-      // Builds ordered by strength (1-game test data, v1.55.0):
-  //   human swordsaint + firewall      441    441   human
-  //   elf treant + sharpshooter        391    391   elf
-  //   dwarf blacksmith + tycoon        381    381   dwarf
+        // Builds ordered by strength (5-game test data, v1.55.0):
+  //   elf seer + sharpshooter          251    382   elf
+  //   elf treant + sharpshooter        238    363   elf
+  //   elf treant + shadow              202    372   elf
+  //   elf treant + echooffate          195    333   elf
+  //   human swordsaint + firewall      181    322   human
+  //   dwarf musketeer + shieldbash     177    293   dwarf
+  //   dwarf musketeer + cheapskate     165    204   dwarf
+  //   dwarf blacksmith + cheapskate    161    254   dwarf
   // NOTE: --boss filter is NOT used — server verify replays with full BOSSES array,
   //   so filtering would cause replay mismatch and fail verification.
     buildSets: [
-      ['--submit-ai', '--games=1', '--gap=4200', '--min=0', '--race=human', '--t1=swordsaint', '--t2=firewall'],
-      ['--submit-ai', '--games=1', '--gap=4200', '--min=0', '--race=elf', '--t1=treant', '--t2=sharpshooter'],
-      ['--submit-ai', '--games=1', '--gap=4200', '--min=0', '--race=dwarf', '--t1=blacksmith', '--t2=tycoon'],
-    ],
-      ['--submit-ai', '--games=1', '--gap=4200', '--min=0', '--race=human', '--t1=swordsaint', '--t2=general'],
+      ['--submit-ai', '--games=1', '--gap=4200', '--min=0', '--race=elf', '--t1=seer', '--t2=sharpshooter'],
       ['--submit-ai', '--games=1', '--gap=4200', '--min=0', '--race=elf', '--t1=treant', '--t2=sharpshooter'],
       ['--submit-ai', '--games=1', '--gap=4200', '--min=0', '--race=elf', '--t1=treant', '--t2=shadow'],
-      ['--submit-ai', '--games=1', '--gap=4200', '--min=0', '--race=dwarf', '--t1=musketeer', '--t2=tycoon'],
-      ['--submit-ai', '--games=1', '--gap=4200', '--min=0', '--race=undead', '--t1=butcher', '--t2=splash'],
-      ['--submit-ai', '--games=1', '--gap=4200', '--min=0', '--race=undead', '--t1=necromancer', '--t2=rotflesh'],
-      ['--submit-ai', '--games=1', '--gap=4200', '--min=0', '--race=orc', '--t1=fighter', '--t2=bloodfrenzy'],
+      ['--submit-ai', '--games=1', '--gap=4200', '--min=0', '--race=elf', '--t1=treant', '--t2=echooffate'],
+      ['--submit-ai', '--games=1', '--gap=4200', '--min=0', '--race=human', '--t1=swordsaint', '--t2=firewall'],
+      ['--submit-ai', '--games=1', '--gap=4200', '--min=0', '--race=dwarf', '--t1=musketeer', '--t2=shieldbash'],
+      ['--submit-ai', '--games=1', '--gap=4200', '--min=0', '--race=dwarf', '--t1=musketeer', '--t2=cheapskate'],
+      ['--submit-ai', '--games=1', '--gap=4200', '--min=0', '--race=dwarf', '--t1=blacksmith', '--t2=cheapskate'],
     ],
     extraArgs: [],
   };
