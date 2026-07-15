@@ -174,6 +174,19 @@ const birdPecks=G.logHistory.filter(e=>e&&e.m&&e.m.includes('鸟人俯冲啄击'
 ok(bd.hp===44,'两只鸟人同回合都应各自啄击一次（总共掉 6 血）');
 ok(birdPecks===2,'两只鸟人同回合都应各自写入一次啄击日志');
 
+// 普通怪：同回合多只出手时底部日志应汇总成一条摘要，而不是被最后一只覆盖
+G.replayRec={seed:53,race:'human',acts:[]}; G.replaying=true; G.startGame(G.raceById('human')); G.replaying=false;
+const nm=G.player; nm.hp=nm.maxHp=50; nm.armor=0; nm.toughness=0; G.busy=false; G.pendingLevels=0;
+for(let r=0;r<6;r++)for(let c=0;c<6;c++) G.grid[r][c]=null;
+G.grid[0][0]={type:'enemy', hp:8, maxHp:8, atk:3, cd:1, baseCd:4};
+G.grid[0][1]={type:'enemy', hp:8, maxHp:8, atk:7, cd:1, baseCd:4};
+const logStart=G.logHistory.length;
+G.advanceEnemies();
+const recentLogs=G.logHistory.slice(logStart).map(e=>e&&e.m||'');
+ok(nm.hp===40,'两只普通怪同回合都应各自造成伤害（总共掉 10 血）');
+ok(recentLogs.some(m=>m.includes('2 只普通怪攻击：3 + 7 → 共掉 10 血')),'普通怪同回合攻击应汇总成一条摘要日志');
+ok(!recentLogs.some(m=>m.includes('减伤计算')),'普通怪汇总后不再逐条刷减伤计算日志');
+
 // onBossKilled 链：未到回合不应误触发
 const q=Object.assign({},{t1:se.t1Pending||e.t1Pending||p.t1Pending,t2:se.t2Pending||e.t2Pending||p.t2Pending,t3:se.t3Pending||e.t3Pending||p.t3Pending,t4:se.t4Pending||e.t4Pending||p.t4Pending});
 ok(!q.t1&&!q.t2&&!q.t3&&!q.t4,'里程碑用尽后无残留 pending');

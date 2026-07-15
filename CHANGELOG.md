@@ -1,9 +1,14 @@
+## [v1.55.1]
+
+- 普通怪同回合连续出手时，底部小日志现在会自动汇总成一条摘要，例如 `👹 2 只普通怪攻击：3 + 7 → 共掉 10 血！`。这样即使底部日志条仍然只显示最近两行，你也不会再只看到最后一只怪的攻击；想看更完整的逐步过程，仍可点开日志历史。此改动只调整日志呈现，不改战斗数值、顺序，也不影响录像 / verify 兼容。
+- Same-turn hits from multiple normal enemies are now collapsed into a single compact summary line in the bottom log, for example `👹 2 normal enemies attack: 3 + 7 → 10 HP lost!`. That means the two-line mini log no longer makes it look like only the last normal enemy attacked; if you want the full step-by-step history, you can still expand the log. This change is presentation-only: no combat math, turn order, replay, or verify behavior changed.
+
 ## [v1.55.0]
 
 > Version-Impact: verify
 
-- 修正了一个会让“多只怪同回合应同时出手”却被漏算的敌方回合 bug：像鸟人（Birdman）这类会在自己行动中换位的怪/Boss，之前可能把后面排队、同样已到出手时机的另一只怪从快照里的原格子挪走，导致 `advanceEnemies()` 误以为它已被移除而直接跳过，所以你会看到“棋盘上明明有多只怪该打你，结果只记了一条攻击、也只掉了一只怪的血”。现在如果行动者只是被同回合内的其它效果换位，系统会继续按它当前所在格让它完成这一次应有的出手；只有真的离场/被替换时才跳过。同时补了一条回归测试，专门覆盖“两只鸟人同回合同时行动”场景。另：底部小日志条本来就只显示最新两行，想看完整多段连击/受击过程请点开日志历史。
-- Fixed an enemy-phase bug that could drop one of several ready attackers from the same turn. Movers such as Birdman can swap positions during their own action; previously that could pull another already-ready monster/boss out of its snapshotted cell, causing `advanceEnemies()` to mistake it for a removed actor and skip its attack entirely. The visible symptom was exactly “multiple foes looked ready, but only one attack got logged and only one hit was applied.” The turn loop now follows actors that were merely relocated within the same turn and only skips ones that were actually removed or replaced. A regression test now covers the “two Birdmen act in the same turn” case. Also note: the compact bottom log intentionally shows only the latest two lines — tap it for the full history when debugging multi-step turns.
+- 修正了一个会让“多只怪同回合应同时出手”却被漏算的敌方回合 bug：像鸟人（Birdman）这类会在自己行动中换位的怪/Boss，之前可能把后面排队、同样已到出手时机的另一只怪从快照里的原格子挪走，导致 `advanceEnemies()` 误以为它已被移除而直接跳过，所以你会看到“棋盘上明明有多只怪该打你，结果只记了一条攻击、也只掉了一只怪的血”。现在如果行动者只是被同回合内的其它效果换位，系统会继续按它当前所在格让它完成这一次应有的出手；只有真的离场/被替换时才跳过。同时补了两条回归测试：一条覆盖“两只鸟人同回合同时行动”场景，另一条把多只普通怪的连续出手汇总成一条摘要日志（例如 `👹 2 只普通怪攻击：3 + 7 → 共掉 10 血！`），避免底部小日志条只显示最后一只怪的攻击。完整日志历史仍可点开查看。
+- Fixed an enemy-phase bug that could drop one of several ready attackers from the same turn. Movers such as Birdman can swap positions during their own action; previously that could pull another already-ready monster/boss out of its snapshotted cell, causing `advanceEnemies()` to mistake it for a removed actor and skip its attack entirely. The turn loop now follows actors that were merely relocated within the same turn and only skips ones that were actually removed or replaced. Two regression tests now cover both the “two Birdmen act in the same turn” case and the new normal-enemy summary log behavior. Regular enemy hits in the same enemy phase are now collapsed into one compact line (for example, `👹 2 normal enemies attack: 3 + 7 → 10 HP lost!`), so the bottom log no longer hides earlier hits just because it only shows the latest two lines. Full log history is still available on tap.
 
 ## [v1.54.4]
 
