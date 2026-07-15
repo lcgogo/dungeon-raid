@@ -4,7 +4,7 @@ const fs = require('fs');
 const path = require('path');
 const { spawnSync } = require('child_process');
 
-const PROJECT_ROOT = path.join(__dirname, '..');
+const PROJECT_ROOT = path.join(__dirname, '..', '..');
 
 function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 
@@ -14,20 +14,17 @@ function parseArgs(argv) {
     waitMs: 8000,
     verifyPolls: 18,
     agent: 'ai',
-    // Builds ordered by strength (10-game test data, v1.49.0):
-    //   build                          median  max   race
-    //   human swordsaint + holystrike    222   441   human  🏆
-    //   human swordsaint + general       263   411   human  🏆
-    //   elf treant + sharpshooter        222   361   elf
-    //   elf treant + shadow              165   331   elf
-    //   dwarf musketeer + tycoon         176   304   dwarf
-    //   undead butcher + splash          138   218   undead
-    //   undead necromancer + rotflesh    144   206   undead
-    //   orc fighter + bloodfrenzy        120   172   orc
-    // NOTE: --boss filter is NOT used — server verify replays with full BOSSES array,
-    //   so filtering would cause replay mismatch and fail verification.
+      // Builds ordered by strength (1-game test data, v1.55.0):
+  //   human swordsaint + firewall      441    441   human
+  //   elf treant + sharpshooter        391    391   elf
+  //   dwarf blacksmith + tycoon        381    381   dwarf
+  // NOTE: --boss filter is NOT used — server verify replays with full BOSSES array,
+  //   so filtering would cause replay mismatch and fail verification.
     buildSets: [
-      ['--submit-ai', '--games=1', '--gap=4200', '--min=0', '--race=human', '--t1=swordsaint', '--t2=holystrike'],
+      ['--submit-ai', '--games=1', '--gap=4200', '--min=0', '--race=human', '--t1=swordsaint', '--t2=firewall'],
+      ['--submit-ai', '--games=1', '--gap=4200', '--min=0', '--race=elf', '--t1=treant', '--t2=sharpshooter'],
+      ['--submit-ai', '--games=1', '--gap=4200', '--min=0', '--race=dwarf', '--t1=blacksmith', '--t2=tycoon'],
+    ],
       ['--submit-ai', '--games=1', '--gap=4200', '--min=0', '--race=human', '--t1=swordsaint', '--t2=general'],
       ['--submit-ai', '--games=1', '--gap=4200', '--min=0', '--race=elf', '--t1=treant', '--t2=sharpshooter'],
       ['--submit-ai', '--games=1', '--gap=4200', '--min=0', '--race=elf', '--t1=treant', '--t2=shadow'],

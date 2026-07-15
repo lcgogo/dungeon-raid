@@ -17,7 +17,7 @@ const path = require('path');
 
 const PROJECT_ROOT = path.join(__dirname, '..');
 const HTML_FILE = path.join(PROJECT_ROOT, 'dungeon-raid.html');
-const SUBMIT_FILE = path.join(__dirname, 'submit-ai-until-posted.js');
+const SUBMIT_FILE = path.join(__dirname, 'tools', 'submit-ai-until-posted.js');
 
 // ---------- 参数 ----------
 const ARG = Object.fromEntries(process.argv.slice(2).map(s => {
@@ -78,7 +78,7 @@ function generateBuilds(data) {
 // ---------- 3) 测试单个 build ----------
 function testBuild(build) {
   const args = [
-    'playtest.js',
+    'test/tools/playtest.js',
     `--race=${build.race}`,
     `--t1=${build.t1}`,
     `--t2=${build.t2b}`,
