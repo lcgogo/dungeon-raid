@@ -44,7 +44,7 @@ async function consumeToken(env, token, seed) {
   return { ok: true, dbg: !!t.dbg, gate: t.gate || null };
 }
 
-const json = (o, s = 200) => new Response(JSON.stringify(o), { status: s, headers: { 'Content-Type': 'application/json', ...CORS } });
+const json = (o, s = 200, extraHeaders = null) => new Response(JSON.stringify(o), { status: s, headers: { 'Content-Type': 'application/json', ...CORS, ...(extraHeaders || {}) } });
 function shortId(n = 8) {
   const c = 'abcdefghijklmnopqrstuvwxyz0123456789', a = crypto.getRandomValues(new Uint8Array(n));
   let s = ''; for (let i = 0; i < n; i++) s += c[a[i] % 36]; return s;
@@ -428,7 +428,7 @@ export default {
     const url = new URL(req.url), p = url.pathname;
 
     // 写入类端点按来源 IP 限流（每 IP 20 次/60s），挡刷榜/批量伪造。绑定缺失时（本地/未配）跳过。
-    if (req.method === 'POST' && (p === '/rec' || p === '/score' || p === '/clear' || p === '/seed') && env.WRITE_LIMITER) {
+    if (req.method === 'POST' && (p === '/rec' || p === '/score' || p === '/clear') && env.WRITE_LIMITER) {
       const ip = req.headers.get('cf-connecting-ip') || 'unknown';
       const { success } = await env.WRITE_LIMITER.limit({ key: ip });
       if (!success) return json({ error: 'too many requests, slow down' }, 429);
@@ -436,10 +436,30 @@ export default {
 
     // POST /seed —— 发放一次性服务端种子 + token（上榜成绩须用它，防离线刷种子）。门槛快照延后到真正需要预判/上传时再取，避免把 D1 查找压在开局路径上。已被上方按 IP 限流。
     if (req.method === 'POST' && p === '/seed') {
+      const seedReqStart = Date.now();
+      const limiterStart = Date.now();
+      let limiterMs = 0;
+      let kvMs = 0;
+      if (env.WRITE_LIMITER) {
+        const ip = req.headers.get('cf-connecting-ip') || 'unknown';
+        const { success } = await env.WRITE_LIMITER.limit({ key: ip });
+        limiterMs = Date.now() - limiterStart;
+        if (!success) return json({ error: 'too many requests, slow down' }, 429, { 'X-Seed-Limit-Ms': String(limiterMs), 'X-Seed-Kv-Ms': '0', 'X-Seed-Total-Ms': String(Date.now() - seedReqStart) });
+      } else {
+        limiterMs = Date.now() - limiterStart;
+      }
       const seed = crypto.getRandomValues(new Uint32Array(1))[0] >>> 0;
       const token = shortId(16);
-      if (env.REC) await env.REC.put('seed:' + token, JSON.stringify({ s: seed, u: 0, dbg: 0, gate: null }), { expirationTtl: SEED_TTL });
-      return json({ seed, token, debug_bypass: false });
+      if (env.REC) {
+        const kvStart = Date.now();
+        await env.REC.put('seed:' + token, JSON.stringify({ s: seed, u: 0, dbg: 0, gate: null }), { expirationTtl: SEED_TTL });
+        kvMs = Date.now() - kvStart;
+      }
+      return json({ seed, token, debug_bypass: false }, 200, {
+        'X-Seed-Limit-Ms': String(limiterMs),
+        'X-Seed-Kv-Ms': String(kvMs),
+        'X-Seed-Total-Ms': String(Date.now() - seedReqStart),
+      });
     }
 
     // GET /threshold?race=&version=&agent= —— 读取当前门槛快照（前端结果页按需懒加载，不再绑在 /seed 上）。

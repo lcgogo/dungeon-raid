@@ -1,3 +1,8 @@
+## [v1.55.2]
+
+- 正式版现在会在你进入「选择种族」页后先预取 1 枚服务端 seed，并在你真正点下种族时优先复用同 race + version 的那枚结果；这样大多数等待都会被藏在你浏览 / 犹豫选种族的那段时间里，不再把整段 seed 请求都暴露在「点种族后卡一下」这一步。若预取没命中、还在请求中或最终失败，仍保留原来的补拉与本地随机兜底逻辑，因此不影响离线可玩性，也不改录像 / verify 兼容。
+- Release builds now prefetch one server seed as soon as you enter the race-select screen, then try to reuse the matching race + version result when you actually tap a race. In practice that hides most of the wait inside the time you spend browsing / hesitating on the race picker instead of exposing the whole seed fetch right after the tap. If the prefetch misses, is still in flight, or ultimately fails, the old fallback path still applies (retry live, then fall back to a local random non-ranked run), so offline playability and replay / verify compatibility stay unchanged.
+
 ## [v1.55.1]
 
 - 普通怪同回合连续出手时，底部小日志现在会自动汇总成一条摘要，例如 `👹 2 只普通怪攻击：3 + 7 → 共掉 10 血！`。这样即使底部日志条仍然只显示最近两行，你也不会再只看到最后一只怪的攻击；想看更完整的逐步过程，仍可点开日志历史。此改动只调整日志呈现，不改战斗数值、顺序，也不影响录像 / verify 兼容。

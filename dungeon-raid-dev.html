@@ -176,8 +176,8 @@
 (()=>{
 //==================== 配置 ====================
 // 版本号 v主.次.修：不影响 verify/replay 兼容边界的小改动改"修"；凡是影响 verify/replay/版本分桶/release 验证语义的改动都改"次"；大版本变更需先确认。页面底部显示。
-const VERSION='v1.55.1';
-const CHANGELOG_LINES=[{"ver": "v1.55.1", "zh": "普通怪同回合连续出手时，底部小日志现在会自动汇总成一条摘要，例如 `👹 2 只普通怪攻击：3 + 7 → 共掉 10 血！`。这样即使底部日志条仍然只显示最近两行，你也不会再只看到最后一只怪的攻击；想看更完整的逐步过程，仍可点开日志历史。此改动只调整日志呈现，不改战斗数值、顺序，也不影响录像 / verify 兼容。", "en": "Same-turn hits from multiple normal enemies are now collapsed into a single compact summary line in the bottom log, for example `👹 2 normal enemies attack: 3 + 7 → 10 HP lost!`. That means the two-line mini log no longer makes it look like only the last normal enemy attacked; if you want the full step-by-step history, you can still expand the log. This change is presentation-only: no combat math, turn order, replay, or verify behavior changed."}, {"ver": "v1.55.0", "zh": "修正了一个会让“多只怪同回合应同时出手”却被漏算的敌方回合 bug：像鸟人（Birdman）这类会在自己行动中换位的怪/Boss，之前可能把后面排队、同样已到出手时机的另一只怪从快照里的原格子挪走，导致 `advanceEnemies()` 误以为它已被移除而直接跳过，所以你会看到“棋盘上明明有多只怪该打你，结果只记了一条攻击、也只掉了一只怪的血”。现在如果行动者只是被同回合内的其它效果换位，系统会继续按它当前所在格让它完成这一次应有的出手；只有真的离场/被替换时才跳过。同时补了两条回归测试：一条覆盖“两只鸟人同回合同时行动”场景，另一条把多只普通怪的连续出手汇总成一条摘要日志（例如 `👹 2 只普通怪攻击：3 + 7 → 共掉 10 血！`），避免底部小日志条只显示最后一只怪的攻击。完整日志历史仍可点开查看。", "en": "Fixed an enemy-phase bug that could drop one of several ready attackers from the same turn. Movers such as Birdman can swap positions during their own action; previously that could pull another already-ready monster/boss out of its snapshotted cell, causing `advanceEnemies()` to mistake it for a removed actor and skip its attack entirely. The turn loop now follows actors that were merely relocated within the same turn and only skips ones that were actually removed or replaced. Two regression tests now cover both the “two Birdmen act in the same turn” case and the new normal-enemy summary log behavior. Regular enemy hits in the same enemy phase are now collapsed into one compact line (for example, `👹 2 normal enemies attack: 3 + 7 → 10 HP lost!`), so the bottom log no longer hides earlier hits just because it only shows the latest two lines. Full log history is still available on tap."}, {"ver": "v1.54.4", "zh": "会长（Guild Master）的「收买 Buyout」现在新增更直观的花钱反馈：当你成功花金币把全场普通怪买通成金币时，会从 HUD 上显示金币数量的位置向每只被买通的怪拉出金色连线，更容易看清这次钱是花到哪些怪身上了。这是纯视觉增强，不改数值、目标、顺序，也不影响录像 / verify 兼容。", "en": "Guild Master’s Buyout now has clearer spend feedback: when you successfully pay gold to bribe all regular enemies into coins, golden tethers stretch from the HUD gold counter to each bribed enemy so it is much easier to see where that money went. This is visual-only polish — no stat, targeting, turn-order, replay, or verify behavior changes."}, {"ver": "v1.54.3", "zh": "给僵尸（Zombie）的尸毒发作补上了更直观的绿线提示：当潜伏结束后它真的让你掉血时，现在会从僵尸所在格向 HP 条拉一条绿色感染线。这样你不仅能看见血条继续保持感染态的绿色，也能一眼看清这一下掉血就是哪只僵尸引发的。这是纯视觉增强，不改数值、顺序，也不影响录像 / verify 兼容。", "en": "Added clearer visual feedback to Zombie plague ticks: once incubation ends and the Zombie actually makes you lose HP, it now draws a green infection tether from the Zombie’s tile to the HP bar. That way you not only see the bar staying infected-green, but can also immediately tell which Zombie caused that HP loss. This is visual-only polish — no stat, turn-order, replay, or verify behavior changes."}, {"ver": "v1.54.2", "zh": "修正吸血鬼吸心与饕餮吞怪吸取线在部分移动浏览器上的显示回归：此前即使目标坐标已恢复为有效点位，若浏览器本身不支持 SVG 线段的 `element.animate()`，吸取线仍会因初始 `stroke-dashoffset=len` 而一直保持全隐藏，直到整层 SVG 被移除。现在这类浏览器会回退为“直接显示一小拍”的兼容路径，因此吸血鬼吸心、饕餮吞怪，以及共用这套吸取线 helper 的相关吸取特效都会重新可见。这仍是纯视觉修复，不改数值、顺序，也不影响录像 / verify 兼容。", "en": "Fixed a mobile-browser regression affecting Vampire heart-drains and Devourer growth tethers: even after point targets were accepted again, browsers that do not support `element.animate()` on SVG lines still kept the tether fully hidden because it started at `stroke-dashoffset=len` and never advanced before the whole SVG layer was removed. Those browsers now fall back to showing the line directly for a brief beat, so Vampire drains, Devourer siphons, and the related shared drain-line effects are visible again. This remains a visual-only fix — no stat, turn-order, replay, or verify behavior changes."}];   /* auto-injected by dr.sh embed-changelog（勿手改） */
+const VERSION='v1.55.2';
+const CHANGELOG_LINES=[{"ver": "v1.55.2", "zh": "正式版现在会在你进入「选择种族」页后先预取 1 枚服务端 seed，并在你真正点下种族时优先复用同 race + version 的那枚结果；这样大多数等待都会被藏在你浏览 / 犹豫选种族的那段时间里，不再把整段 seed 请求都暴露在「点种族后卡一下」这一步。若预取没命中、还在请求中或最终失败，仍保留原来的补拉与本地随机兜底逻辑，因此不影响离线可玩性，也不改录像 / verify 兼容。", "en": "Release builds now prefetch one server seed as soon as you enter the race-select screen, then try to reuse the matching race + version result when you actually tap a race. In practice that hides most of the wait inside the time you spend browsing / hesitating on the race picker instead of exposing the whole seed fetch right after the tap. If the prefetch misses, is still in flight, or ultimately fails, the old fallback path still applies (retry live, then fall back to a local random non-ranked run), so offline playability and replay / verify compatibility stay unchanged."}, {"ver": "v1.55.1", "zh": "普通怪同回合连续出手时，底部小日志现在会自动汇总成一条摘要，例如 `👹 2 只普通怪攻击：3 + 7 → 共掉 10 血！`。这样即使底部日志条仍然只显示最近两行，你也不会再只看到最后一只怪的攻击；想看更完整的逐步过程，仍可点开日志历史。此改动只调整日志呈现，不改战斗数值、顺序，也不影响录像 / verify 兼容。", "en": "Same-turn hits from multiple normal enemies are now collapsed into a single compact summary line in the bottom log, for example `👹 2 normal enemies attack: 3 + 7 → 10 HP lost!`. That means the two-line mini log no longer makes it look like only the last normal enemy attacked; if you want the full step-by-step history, you can still expand the log. This change is presentation-only: no combat math, turn order, replay, or verify behavior changed."}, {"ver": "v1.55.0", "zh": "修正了一个会让“多只怪同回合应同时出手”却被漏算的敌方回合 bug：像鸟人（Birdman）这类会在自己行动中换位的怪/Boss，之前可能把后面排队、同样已到出手时机的另一只怪从快照里的原格子挪走，导致 `advanceEnemies()` 误以为它已被移除而直接跳过，所以你会看到“棋盘上明明有多只怪该打你，结果只记了一条攻击、也只掉了一只怪的血”。现在如果行动者只是被同回合内的其它效果换位，系统会继续按它当前所在格让它完成这一次应有的出手；只有真的离场/被替换时才跳过。同时补了两条回归测试：一条覆盖“两只鸟人同回合同时行动”场景，另一条把多只普通怪的连续出手汇总成一条摘要日志（例如 `👹 2 只普通怪攻击：3 + 7 → 共掉 10 血！`），避免底部小日志条只显示最后一只怪的攻击。完整日志历史仍可点开查看。", "en": "Fixed an enemy-phase bug that could drop one of several ready attackers from the same turn. Movers such as Birdman can swap positions during their own action; previously that could pull another already-ready monster/boss out of its snapshotted cell, causing `advanceEnemies()` to mistake it for a removed actor and skip its attack entirely. The turn loop now follows actors that were merely relocated within the same turn and only skips ones that were actually removed or replaced. Two regression tests now cover both the “two Birdmen act in the same turn” case and the new normal-enemy summary log behavior. Regular enemy hits in the same enemy phase are now collapsed into one compact line (for example, `👹 2 normal enemies attack: 3 + 7 → 10 HP lost!`), so the bottom log no longer hides earlier hits just because it only shows the latest two lines. Full log history is still available on tap."}, {"ver": "v1.54.4", "zh": "会长（Guild Master）的「收买 Buyout」现在新增更直观的花钱反馈：当你成功花金币把全场普通怪买通成金币时，会从 HUD 上显示金币数量的位置向每只被买通的怪拉出金色连线，更容易看清这次钱是花到哪些怪身上了。这是纯视觉增强，不改数值、目标、顺序，也不影响录像 / verify 兼容。", "en": "Guild Master’s Buyout now has clearer spend feedback: when you successfully pay gold to bribe all regular enemies into coins, golden tethers stretch from the HUD gold counter to each bribed enemy so it is much easier to see where that money went. This is visual-only polish — no stat, targeting, turn-order, replay, or verify behavior changes."}, {"ver": "v1.54.3", "zh": "给僵尸（Zombie）的尸毒发作补上了更直观的绿线提示：当潜伏结束后它真的让你掉血时，现在会从僵尸所在格向 HP 条拉一条绿色感染线。这样你不仅能看见血条继续保持感染态的绿色，也能一眼看清这一下掉血就是哪只僵尸引发的。这是纯视觉增强，不改数值、顺序，也不影响录像 / verify 兼容。", "en": "Added clearer visual feedback to Zombie plague ticks: once incubation ends and the Zombie actually makes you lose HP, it now draws a green infection tether from the Zombie’s tile to the HP bar. That way you not only see the bar staying infected-green, but can also immediately tell which Zombie caused that HP loss. This is visual-only polish — no stat, turn-order, replay, or verify behavior changes."}];   /* auto-injected by dr.sh embed-changelog（勿手改） */
 const DEV=true;   // release build (DEV=false); dev build is dungeon-raid-dev.html (DEV=true)
 const REC_API='https://api.dungeonraid.win';   // 录像分享 API（Cloudflare Worker + KV）
 // 带种子随机数（mulberry32）：游戏全程用 rnd() 取代原生随机，配合录制种子可确定性重放
@@ -835,10 +835,20 @@ function showRaceSelect(){
   const bestLine = best ? `<p>${tr('🏆 最佳纪录：等级','🏆 Best: Level')} ${best.level} · 💰${best.gold}</p>` : '';
   card.innerHTML=`<h2>${tr('选择种族','Choose your race')}</h2>${bestLine}
     <p style="font-size:12px;color:var(--dim);line-height:1.6">${tr('击败第 50 回合的 Boss 即可转职，解锁职业的主动技能；之后随着探险深入，还会解锁更强大的技能……','Beat the turn-50 boss to advance to a class and unlock its active skill; delve deeper to unlock ever more powerful skills…')}</p>`;
-  RACES.forEach(rc=>{
+  const firstRc=preferredSeedRace();
+  if(firstRc) prefetchServerSeed(firstRc);
+  RACES.forEach((rc,idx)=>{
     const b=document.createElement('button'); b.className='choice';
     b.innerHTML=`<b>${rc.e} ${L(rc.n)}</b><small style="white-space:pre-line">${L(rc.d)}</small>`;
     b.onclick=()=>freshStart(rc);
+    if(idx===0){
+      b.onpointerenter=()=>prefetchServerSeed(rc);
+      b.onfocus=()=>prefetchServerSeed(rc);
+      b.ontouchstart=()=>prefetchServerSeed(rc);
+    } else {
+      b.onpointerenter=()=>prefetchServerSeed(rc);
+      b.onfocus=()=>prefetchServerSeed(rc);
+    }
     card.appendChild(b);
   });
   const back=document.createElement('button'); back.className='btn'; back.style.marginTop='4px';
@@ -1001,7 +1011,47 @@ function onBossKilled(){
 
 //==================== 初始化 ====================
 let __seedCtr=0;
-// 正式版开局向服务端申请一次性种子：在选完种族后再取，让上传门槛能按“种族 + 版本桶”返回准确快照。
+let pendingServerSeed=null;   // 选种族页预取的服务端 seed：只保留 1 个，按 race+version 匹配复用，避免点种族后现等
+function serverSeedKey(rc){ return rc&&rc.id ? `${rc.id}|${VERSION}` : ''; }
+function preferredSeedRace(){
+  try{
+    const save=JSON.parse(localStorage.getItem(SAVE_KEY)||'null');
+    if(save&&save.player&&raceById(save.player.race).id===save.player.race) return raceById(save.player.race);
+  }catch(e){}
+  const last=getLastRec();
+  if(last&&last.race) return raceById(last.race);
+  return RACES[0];
+}
+function prefetchServerSeed(rc){
+  if(DEV||!rc) return null;
+  if(typeof navigator!=='undefined' && navigator.onLine===false) return null;
+  const key=serverSeedKey(rc); if(!key) return null;
+  if(pendingServerSeed && pendingServerSeed.key===key) return pendingServerSeed.promise || Promise.resolve(pendingServerSeed.srv||null);
+  const slot={key,srv:null,promise:null};
+  slot.promise=fetchServerSeed(rc).then(srv=>{
+    if(pendingServerSeed===slot){ slot.srv=srv||null; slot.promise=null; }
+    return srv||null;
+  }).catch(()=>{
+    if(pendingServerSeed===slot){ slot.srv=null; slot.promise=null; }
+    return null;
+  });
+  pendingServerSeed=slot;
+  return slot.promise;
+}
+function pendingSeedPromise(rc){
+  const key=serverSeedKey(rc);
+  if(pendingServerSeed && pendingServerSeed.key===key){
+    if(pendingServerSeed.promise) return pendingServerSeed.promise;
+    if(pendingServerSeed.srv) return Promise.resolve(pendingServerSeed.srv);
+  }
+  return null;
+}
+function consumePrefetchedServerSeed(rc){
+  const key=serverSeedKey(rc);
+  if(pendingServerSeed && pendingServerSeed.key===key && pendingServerSeed.srv){ const srv=pendingServerSeed.srv; pendingServerSeed=null; return srv; }
+  return null;
+}
+// 正式版服务端种子请求：进入选种族页后先偷偷预取 1 个；真开局时优先复用同 race + version 的预取结果，没命中再现拉。
 async function fetchServerSeed(rc){
   if(DEV) return null;
   if(typeof navigator!=='undefined' && navigator.onLine===false) return null;
@@ -1035,12 +1085,15 @@ function offlineSeedNotice(){
   log(tr('⚠️ 没拿到服务端种子：本局本地随机，照常可玩，只是不计排行榜。','⚠️ No server seed: local random run — fully playable, just not ranked.'), 'debuff');
   toast(tr('⚠️ 没拿到服务端种子，本局用<b>本地随机</b>开局<br>照常可玩，<b>只是不计排行榜</b>','⚠️ No server seed — using a <b>local random</b> seed<br>fully playable, <b>just not ranked</b>'));
 }
-// 开新局入口：正式版在选完种族后再向服务端要一个种子+token（防离线刷幸运种子），以便门槛快照能按“种族 + 版本桶”返回；dev 或离线失败 → 本地随机（可玩，不计排名）
+// 开新局入口：正式版在进入选种族页时先预取 1 个服务端种子（只保留同 race+version 命中的那枚），点种族时优先复用；dev 或离线失败 → 本地随机（可玩，不计排名）
 async function freshStart(rc){
   if(DEV){ startGame(rc); return; }
   if(typeof navigator!=='undefined' && navigator.onLine===false){ startGame(rc); offlineSeedNotice(); return; }   // 明确离线：秒开不等
-  let srv=null;
-  try{ srv=await Promise.race([ fetchServerSeed(rc), new Promise(res=>setTimeout(()=>res(null), 2500)) ]); }catch(e){}
+  let srv=consumePrefetchedServerSeed(rc);
+  if(!srv){
+    const pending=pendingSeedPromise(rc);
+    try{ srv=await Promise.race([ pending || fetchServerSeed(rc), new Promise(res=>setTimeout(()=>res(null), 2500)) ]); }catch(e){}
+  }
   startGame(rc, srv);
   if(!srv) offlineSeedNotice();
 }
