@@ -1,3 +1,8 @@
+## [v1.55.3]
+
+- 正式版现在会把最近成功拿到的 1 枚服务端 seed 作为本地 warm seed 暂存起来：页面启动时只读取/清理本地缓存、不主动申请；当你下一次进入「选择种族」页时，若这枚 seed 仍未过期且版本匹配，就会优先把它留给下次开局直接消费，只有本地没有可用 warm seed 时才会再向 API 预取新的那 1 枚。这样既能把等待进一步藏到上一局之后或上一次访问期间，又不会像“首页一打开就囤 3–5 枚”那样平白放大 KV 写入与在线领票成本。若本地 warm seed 失效、版本变更、请求仍在路上或最终失败，依旧保留原来的现拉 + 本地随机兜底逻辑，因此不影响离线可玩性，也不改录像 / verify 兼容。
+- Release builds now keep at most one recently acquired server seed as a local warm seed. Page boot only reads / prunes that cache and never auto-requests more; the next time you enter race select, a still-valid same-version warm seed is held back for immediate consumption on the next run start, and only when no usable local warm seed exists do we prefetch a fresh replacement from the API. That hides even more of the wait in the time after the previous run or between visits, without turning page load into “stockpile 3–5 tickets” and needlessly amplifying KV writes or seed issuance. If the warm seed has expired, the version changed, the request is still in flight, or the fetch ultimately fails, the existing live-fetch + local-random fallback path still applies, so offline playability and replay / verify compatibility remain unchanged.
+
 ## [v1.55.2]
 
 - 正式版现在会在你进入「选择种族」页后先预取 1 枚服务端 seed，并在你真正点下种族时优先复用同 race + version 的那枚结果；这样大多数等待都会被藏在你浏览 / 犹豫选种族的那段时间里，不再把整段 seed 请求都暴露在「点种族后卡一下」这一步。若预取没命中、还在请求中或最终失败，仍保留原来的补拉与本地随机兜底逻辑，因此不影响离线可玩性，也不改录像 / verify 兼容。
