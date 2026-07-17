@@ -112,7 +112,7 @@ ax.tauntWindow=true;
 const beforeMax=ax.maxHp, beforeHp=ax.hp;
 const dmg=G.hurtPlayer(7,'enemy',true,{type:'enemy'});
 ok(dmg===7,'斧王受伤按实际伤害结算');
-ok(ax.maxHp===beforeMax+4,'嘲讽窗口把50%实际伤害转为永久最大生命（7→+3）且越挫越勇额外+1');
+ok(ax.maxHp===beforeMax+2,'嘲讽窗口把10%实际伤害转为永久最大生命（7→至少+1）且越挫越勇额外+1');
 ok(ax.hp===beforeHp-7,'斧王受伤仍正常掉血');
 
 // 亡灵巫妖：100回合锁定被动改为冰甲，受击后反击并减速攻击者

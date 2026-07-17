@@ -176,8 +176,8 @@
 (()=>{
 //==================== 配置 ====================
 // 版本号 v主.次.修：不影响 verify/replay 兼容边界的小改动改"修"；凡是影响 verify/replay/版本分桶/release 验证语义的改动都改"次"；大版本变更需先确认。页面底部显示。
-const VERSION='v1.55.3';
-const CHANGELOG_LINES=[{"ver": "v1.55.3", "zh": "正式版现在会把最近成功拿到的 1 枚服务端 seed 作为本地 warm seed 暂存起来：页面启动时只读取/清理本地缓存、不主动申请；当你下一次进入「选择种族」页时，若这枚 seed 仍未过期且版本匹配，就会优先把它留给下次开局直接消费，只有本地没有可用 warm seed 时才会再向 API 预取新的那 1 枚。这样既能把等待进一步藏到上一局之后或上一次访问期间，又不会像“首页一打开就囤 3–5 枚”那样平白放大 KV 写入与在线领票成本。若本地 warm seed 失效、版本变更、请求仍在路上或最终失败，依旧保留原来的现拉 + 本地随机兜底逻辑，因此不影响离线可玩性，也不改录像 / verify 兼容。", "en": "Release builds now keep at most one recently acquired server seed as a local warm seed. Page boot only reads / prunes that cache and never auto-requests more; the next time you enter race select, a still-valid same-version warm seed is held back for immediate consumption on the next run start, and only when no usable local warm seed exists do we prefetch a fresh replacement from the API. That hides even more of the wait in the time after the previous run or between visits, without turning page load into “stockpile 3–5 tickets” and needlessly amplifying KV writes or seed issuance. If the warm seed has expired, the version changed, the request is still in flight, or the fetch ultimately fails, the existing live-fetch + local-random fallback path still applies, so offline playability and replay / verify compatibility remain unchanged."}, {"ver": "v1.55.2", "zh": "正式版现在会在你进入「选择种族」页后先预取 1 枚服务端 seed，并在你真正点下种族时优先复用同 race + version 的那枚结果；这样大多数等待都会被藏在你浏览 / 犹豫选种族的那段时间里，不再把整段 seed 请求都暴露在「点种族后卡一下」这一步。若预取没命中、还在请求中或最终失败，仍保留原来的补拉与本地随机兜底逻辑，因此不影响离线可玩性，也不改录像 / verify 兼容。", "en": "Release builds now prefetch one server seed as soon as you enter the race-select screen, then try to reuse the matching race + version result when you actually tap a race. In practice that hides most of the wait inside the time you spend browsing / hesitating on the race picker instead of exposing the whole seed fetch right after the tap. If the prefetch misses, is still in flight, or ultimately fails, the old fallback path still applies (retry live, then fall back to a local random non-ranked run), so offline playability and replay / verify compatibility stay unchanged."}, {"ver": "v1.55.1", "zh": "普通怪同回合连续出手时，底部小日志现在会自动汇总成一条摘要，例如 `👹 2 只普通怪攻击：3 + 7 → 共掉 10 血！`。这样即使底部日志条仍然只显示最近两行，你也不会再只看到最后一只怪的攻击；想看更完整的逐步过程，仍可点开日志历史。此改动只调整日志呈现，不改战斗数值、顺序，也不影响录像 / verify 兼容。", "en": "Same-turn hits from multiple normal enemies are now collapsed into a single compact summary line in the bottom log, for example `👹 2 normal enemies attack: 3 + 7 → 10 HP lost!`. That means the two-line mini log no longer makes it look like only the last normal enemy attacked; if you want the full step-by-step history, you can still expand the log. This change is presentation-only: no combat math, turn order, replay, or verify behavior changed."}, {"ver": "v1.55.0", "zh": "修正了一个会让“多只怪同回合应同时出手”却被漏算的敌方回合 bug：像鸟人（Birdman）这类会在自己行动中换位的怪/Boss，之前可能把后面排队、同样已到出手时机的另一只怪从快照里的原格子挪走，导致 `advanceEnemies()` 误以为它已被移除而直接跳过，所以你会看到“棋盘上明明有多只怪该打你，结果只记了一条攻击、也只掉了一只怪的血”。现在如果行动者只是被同回合内的其它效果换位，系统会继续按它当前所在格让它完成这一次应有的出手；只有真的离场/被替换时才跳过。同时补了两条回归测试：一条覆盖“两只鸟人同回合同时行动”场景，另一条把多只普通怪的连续出手汇总成一条摘要日志（例如 `👹 2 只普通怪攻击：3 + 7 → 共掉 10 血！`），避免底部小日志条只显示最后一只怪的攻击。完整日志历史仍可点开查看。", "en": "Fixed an enemy-phase bug that could drop one of several ready attackers from the same turn. Movers such as Birdman can swap positions during their own action; previously that could pull another already-ready monster/boss out of its snapshotted cell, causing `advanceEnemies()` to mistake it for a removed actor and skip its attack entirely. The turn loop now follows actors that were merely relocated within the same turn and only skips ones that were actually removed or replaced. Two regression tests now cover both the “two Birdmen act in the same turn” case and the new normal-enemy summary log behavior. Regular enemy hits in the same enemy phase are now collapsed into one compact line (for example, `👹 2 normal enemies attack: 3 + 7 → 10 HP lost!`), so the bottom log no longer hides earlier hits just because it only shows the latest two lines. Full log history is still available on tap."}, {"ver": "v1.54.4", "zh": "会长（Guild Master）的「收买 Buyout」现在新增更直观的花钱反馈：当你成功花金币把全场普通怪买通成金币时，会从 HUD 上显示金币数量的位置向每只被买通的怪拉出金色连线，更容易看清这次钱是花到哪些怪身上了。这是纯视觉增强，不改数值、目标、顺序，也不影响录像 / verify 兼容。", "en": "Guild Master’s Buyout now has clearer spend feedback: when you successfully pay gold to bribe all regular enemies into coins, golden tethers stretch from the HUD gold counter to each bribed enemy so it is much easier to see where that money went. This is visual-only polish — no stat, targeting, turn-order, replay, or verify behavior changes."}];   /* auto-injected by dr.sh embed-changelog（勿手改） */
+const VERSION='v1.56.0';
+const CHANGELOG_LINES=[{"ver": "v1.56.0", "zh": "下调了斧王（Axe Lord）主动「嘲讽 Taunt」在承受集火时的滚雪球强度：现在在那一轮被你主动拉来的攻击中，只有实际伤害的 10% 会转化为永久最大生命，并保留至少 +1 的下限；原先是 50%。这样它仍然保留“挨打换成长”的职业身份，但不会再那么容易靠一轮集火把生命上限抬得过快。由于这个数值会改变同种子 + 同操作序列下的实际结局，这次按 verify / replay 影响处理，升 minor 并开启新的版本桶。", "en": "Nerfed Axe Lord’s active Taunt so its taunt-window snowball is much smaller: during the forced enemy volley, only 10% of the actual damage you take is now converted into permanent max HP, while still keeping the minimum +1 floor; previously it was 50%. That preserves the skill’s “get hit to grow” identity without letting a single focus-fire turn inflate max HP so aggressively. Because this value can change the real outcome of the same seed + action sequence, this release is treated as verify / replay impacting and therefore bumps the minor version bucket."}, {"ver": "v1.55.3", "zh": "正式版现在会把最近成功拿到的 1 枚服务端 seed 作为本地 warm seed 暂存起来：页面启动时只读取/清理本地缓存、不主动申请；当你下一次进入「选择种族」页时，若这枚 seed 仍未过期且版本匹配，就会优先把它留给下次开局直接消费，只有本地没有可用 warm seed 时才会再向 API 预取新的那 1 枚。这样既能把等待进一步藏到上一局之后或上一次访问期间，又不会像“首页一打开就囤 3–5 枚”那样平白放大 KV 写入与在线领票成本。若本地 warm seed 失效、版本变更、请求仍在路上或最终失败，依旧保留原来的现拉 + 本地随机兜底逻辑，因此不影响离线可玩性，也不改录像 / verify 兼容。", "en": "Release builds now keep at most one recently acquired server seed as a local warm seed. Page boot only reads / prunes that cache and never auto-requests more; the next time you enter race select, a still-valid same-version warm seed is held back for immediate consumption on the next run start, and only when no usable local warm seed exists do we prefetch a fresh replacement from the API. That hides even more of the wait in the time after the previous run or between visits, without turning page load into “stockpile 3–5 tickets” and needlessly amplifying KV writes or seed issuance. If the warm seed has expired, the version changed, the request is still in flight, or the fetch ultimately fails, the existing live-fetch + local-random fallback path still applies, so offline playability and replay / verify compatibility remain unchanged."}, {"ver": "v1.55.2", "zh": "正式版现在会在你进入「选择种族」页后先预取 1 枚服务端 seed，并在你真正点下种族时优先复用同 race + version 的那枚结果；这样大多数等待都会被藏在你浏览 / 犹豫选种族的那段时间里，不再把整段 seed 请求都暴露在「点种族后卡一下」这一步。若预取没命中、还在请求中或最终失败，仍保留原来的补拉与本地随机兜底逻辑，因此不影响离线可玩性，也不改录像 / verify 兼容。", "en": "Release builds now prefetch one server seed as soon as you enter the race-select screen, then try to reuse the matching race + version result when you actually tap a race. In practice that hides most of the wait inside the time you spend browsing / hesitating on the race picker instead of exposing the whole seed fetch right after the tap. If the prefetch misses, is still in flight, or ultimately fails, the old fallback path still applies (retry live, then fall back to a local random non-ranked run), so offline playability and replay / verify compatibility stay unchanged."}, {"ver": "v1.55.1", "zh": "普通怪同回合连续出手时，底部小日志现在会自动汇总成一条摘要，例如 `👹 2 只普通怪攻击：3 + 7 → 共掉 10 血！`。这样即使底部日志条仍然只显示最近两行，你也不会再只看到最后一只怪的攻击；想看更完整的逐步过程，仍可点开日志历史。此改动只调整日志呈现，不改战斗数值、顺序，也不影响录像 / verify 兼容。", "en": "Same-turn hits from multiple normal enemies are now collapsed into a single compact summary line in the bottom log, for example `👹 2 normal enemies attack: 3 + 7 → 10 HP lost!`. That means the two-line mini log no longer makes it look like only the last normal enemy attacked; if you want the full step-by-step history, you can still expand the log. This change is presentation-only: no combat math, turn order, replay, or verify behavior changed."}, {"ver": "v1.55.0", "zh": "修正了一个会让“多只怪同回合应同时出手”却被漏算的敌方回合 bug：像鸟人（Birdman）这类会在自己行动中换位的怪/Boss，之前可能把后面排队、同样已到出手时机的另一只怪从快照里的原格子挪走，导致 `advanceEnemies()` 误以为它已被移除而直接跳过，所以你会看到“棋盘上明明有多只怪该打你，结果只记了一条攻击、也只掉了一只怪的血”。现在如果行动者只是被同回合内的其它效果换位，系统会继续按它当前所在格让它完成这一次应有的出手；只有真的离场/被替换时才跳过。同时补了两条回归测试：一条覆盖“两只鸟人同回合同时行动”场景，另一条把多只普通怪的连续出手汇总成一条摘要日志（例如 `👹 2 只普通怪攻击：3 + 7 → 共掉 10 血！`），避免底部小日志条只显示最后一只怪的攻击。完整日志历史仍可点开查看。", "en": "Fixed an enemy-phase bug that could drop one of several ready attackers from the same turn. Movers such as Birdman can swap positions during their own action; previously that could pull another already-ready monster/boss out of its snapshotted cell, causing `advanceEnemies()` to mistake it for a removed actor and skip its attack entirely. The turn loop now follows actors that were merely relocated within the same turn and only skips ones that were actually removed or replaced. Two regression tests now cover both the “two Birdmen act in the same turn” case and the new normal-enemy summary log behavior. Regular enemy hits in the same enemy phase are now collapsed into one compact line (for example, `👹 2 normal enemies attack: 3 + 7 → 10 HP lost!`), so the bottom log no longer hides earlier hits just because it only shows the latest two lines. Full log history is still available on tap."}];   /* auto-injected by dr.sh embed-changelog（勿手改） */
 const DEV=true;   // release build (DEV=false); dev build is dungeon-raid-dev.html (DEV=true)
 const REC_API='https://api.dungeonraid.win';   // 录像分享 API（Cloudflare Worker + KV）
 // 带种子随机数（mulberry32）：游戏全程用 rnd() 取代原生随机，配合录制种子可确定性重放
@@ -654,6 +654,7 @@ const TIER1={
     if(bossT){ t=bossT; tr_=bossR; tc=bossC; } else if(!t){ return false; }
     if(!t) return false;   // 没有可狙击目标
     const D=bombDamage(p)*2, isBoss=t.type==='boss', before=t.hp, dealt=Math.min(D,before);
+    snipeBeamFx({targetId:'skillBtn'}, {r:tr_, c:tc, killed:D>=before});
     addBombFx(tr_,tc); t.hp-=D; statueReflect(t, dealt);   // 复用炸弹特效；石像会反弹
     let killed=false, lh=0;
     if(t.hp<=0){ killed=true; grid[tr_][tc]=null;
@@ -663,7 +664,7 @@ const TIER1={
     }
     log(tr(`🎯 狙击：对最肥目标 −${dealt}`+(killed?`，击杀！3 倍奖励`:'')+(lh?`，吸血 +${lh}`:''),`🎯 Snipe: −${dealt} to the toughest foe`+(killed?`, killed! triple rewards`:'')+(lh?`, +${lh} lifesteal`:''))); return true; }}},
   berserker:{n:['牛头人','Tauren'], quip:['疼？疼说明这刀还能更快。','Pain just means I can swing faster.'], skill:{name:['狂怒','Frenzy'], short:['本回合不死+残血增伤','Undying this turn + low-HP dmg'], desc:['立即把当前生命减半，本回合进入「不屈」：无论受到多少伤害都至少保留 1 血；且本回合血越少{W}伤害越高（最多 +60%）。只持续本回合。','Halves your current HP and grants Undying this turn: you keep ≥1 HP no matter the damage, and the lower your HP the higher your {W} damage (up to +60%). This turn only.'], cd:5, f:p=>{ p.hp=Math.max(1,Math.floor(p.hp/2)); p.lowHpDmg=true; p.undyingTurn=true; log(tr(`${wE()} 狂怒！生命减半并进入不屈（本回合无论受多少伤都保留 1 血），血越少${wN()}伤越高`,`${wE()} Frenzy! HP halved and Undying this turn (keep ≥1 HP no matter the damage); lower HP, higher ${wN()} damage`), 'buff'); return true; }}} ,
-  axelord:{n:['斧王','Axe Lord'], quip:['群殴？一起上吧。','All at once? Come on, then.'], skill:{name:['嘲讽','Taunt'], short:['全场敌人下回合立刻攻击','All foes attack next turn'], desc:['使场上所有敌人/Boss（终焉之主除外）的攻击倒计时变为 1，也就是它们会在下回合立刻攻击。接下来这批攻击中，你受到的实际伤害有 50% 会转化为永久最大生命。','Sets the attack countdown of all enemies/bosses on the board (excluding the Overlord) to 1, so they will attack on the next turn. During those attacks, 50% of the actual damage you take is converted into permanent max HP.'], cd:5, f:p=>{ let hit=0; for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const t=grid[r][c]; if(t&&(t.type==='enemy'||(t.type==='boss'&&!t.finale))){ t.cd=1; hit++; } } if(!hit) return false; p.tauntWindow=true; log(tr('🪓 嘲讽：全场敌人下回合立刻攻击，你受到的实际伤害有 50% 会转化为永久最大生命','🪓 Taunt: all foes attack next turn, and 50% of the actual damage you take becomes permanent max HP'), 'buff'); return true; }}},
+  axelord:{n:['斧王','Axe Lord'], quip:['群殴？一起上吧。','All at once? Come on, then.'], skill:{name:['嘲讽','Taunt'], short:['全场敌人下回合立刻攻击','All foes attack next turn'], desc:['使场上所有敌人/Boss（终焉之主除外）的攻击倒计时变为 1，也就是它们会在下回合立刻攻击。接下来这批攻击中，你受到的实际伤害有 10% 会转化为永久最大生命（至少 +1）。','Sets the attack countdown of all enemies/bosses on the board (excluding the Overlord) to 1, so they will attack on the next turn. During those attacks, 10% of the actual damage you take is converted into permanent max HP (minimum +1).'], cd:5, f:p=>{ let hit=0; for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const t=grid[r][c]; if(t&&(t.type==='enemy'||(t.type==='boss'&&!t.finale))){ t.cd=1; hit++; } } if(!hit) return false; p.tauntWindow=true; log(tr('🪓 嘲讽：全场敌人下回合立刻攻击，你受到的实际伤害有 10% 会转化为永久最大生命（至少 +1）','🪓 Taunt: all foes attack next turn, and 10% of the actual damage you take becomes permanent max HP (minimum +1)'), 'buff'); return true; }}},
   fighter:{n:['斗士','Fighter'], quip:['越打越精神，血是我的能量饮料。','The more I fight, the better I feel.'], skill:{name:['嗜血','Bloodthirst'], short:['每命中吸3血+本回合可攻击{W}免疫怪','+3 HP per hit + pierce {W}-immunity'], desc:['本回合的{W}攻击附带两个效果：① 每命中一只怪/Boss 回复 3 点生命（按命中数算，不是击杀数）；② 可以打到平时{W}免疫的 Boss（幽灵/小丑/雪人/污染怪等，终焉之主除外）。只持续本回合，本回合不出{W}就浪费。','This turn your {W} attack gains two effects: (1) heal 3 HP per foe you hit (by hits, not kills); (2) it can strike normally {W}-immune bosses (Ghost/Clown/Snowman/Corruptor…; not the Overlord). This turn only — wasted if you make no {W} attack.'], cd:5, f:p=>{ p.bloodthirst=1; p.pierceTurn=true; log(tr(`🩸 嗜血：本回合${wChain()}每击中一只怪回 3 血，且可用${wN()}攻击${wN()}免疫的 Boss（幽灵/小丑）`,`🩸 Bloodthirst: heal 3 per enemy hit this turn, and your ${wN()} can hit ${wN()}-immune bosses (Ghost/Clown)`), 'buff'); return true; }}},
   witchdoctor:{n:['巫医','Witch Doctor'], quip:['你的心意我收下，怪替你喝。','Your love? The monsters drink it for you.'], skill:{name:['蛊毒','Hex'], short:['全场心燃成黑毒心','Burn hearts → black poison'], desc:['把棋盘上所有的红心当场燃成黑毒心（🖤）。之后连接黑毒心不回血，而是把这些生命当毒灌给场上所有怪/Boss（含{W}免疫的，终焉之主除外，与炸弹同口径）。毒伤 = 心数 × 每颗心回复量 × 连击。场上没有心时无效、不进冷却。','Burns every red heart on the board into a black poison heart (🖤) on the spot. Linking a black heart heals nothing — it poisons every foe instead (incl. {W}-immune; not the Overlord, same reach as the Bomb). Poison = hearts × heal-per-heart × combo. No effect — and no cooldown — if there are no hearts.'], cd:5, f:p=>{ let n=0; for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const t=grid[r][c]; if(t&&t.type==='heart'&&!t.poison){ t.poison=true; n++; } } if(!n) return false; syncPositions(false); log(tr(`🧪 蛊毒：${n} 颗心燃成黑毒心（连它们毒灌全场怪、不回血）`,`🧪 Hex: ${n} hearts burned into black poison (link them to poison all foes, no heal)`), 'buff'); return n; }}},
   swordsaint:{n:['剑圣','Sword Saint'], quip:['在我眼里，万物皆可开刃。','In my eyes, anything can be a blade.'], skill:{name:['化剑','Bladeshift'], short:['全场心/金币→剑','Hearts & coins → swords'], desc:['把棋盘上所有的心和金币都变成{W}，便于接出更长的{W}链打出爆发。场上没有心/金币时无效、不进冷却。','Turns every heart and coin on the board into {W}s so you can chain longer for a burst. No effect — and no cooldown — if there are none.'], cd:5, f:p=>{ let n=0; for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const t=grid[r][c]; if(t&&(t.type==='heart'||t.type==='coin')){ t.type='sword'; n++; } } if(!n) return false; log(tr(`⚔️ 化剑：${n} 个心/金币化为剑`,`⚔️ Bladeshift: ${n} hearts/coins → swords`), 'buff'); return n; }}},
@@ -1571,6 +1572,96 @@ function boardPointTarget(src){
   if(!src) return null;
   return { getBoundingClientRect(){ const cv0=document.getElementById('board'); if(!cv0||!cv0.getBoundingClientRect) return {left:0,top:0,width:0,height:0}; const r=cv0.getBoundingClientRect(); if(!r.width) return {left:0,top:0,width:0,height:0}; const sx=r.width/cv0.width, sy=r.height/cv0.height; const cx=r.left+(cellX(src.c)+TILE/2)*sx, cy=r.top+(cellY(src.r)+TILE/2)*sy; return {left:cx, top:cy, width:0, height:0}; } };
 }
+function snipeBeamFx(src, target){
+  if(headless || jumping || !src || !target) return;
+  try{
+    if(!document.createElementNS) return;
+    const cv0=document.getElementById('board'), srcEl=(src.targetEl||document.getElementById(src.targetId||'skillBtn'));
+    if(!cv0||!srcEl||!cv0.getBoundingClientRect||!srcEl.getBoundingClientRect) return;
+    const r=cv0.getBoundingClientRect(), sr=srcEl.getBoundingClientRect();
+    if(!r.width) return;
+    const sx=r.width/cv0.width, sy=r.height/cv0.height;
+    const x1=(src.anchorX!=null?src.anchorX:(sr.left+((sr.width||0)/2))), y1=(src.anchorY!=null?src.anchorY:(sr.top+((sr.height||0)/2)));
+    if(!Number.isFinite(x1) || !Number.isFinite(y1)) return;
+    const x2=r.left+(cellX(target.c)+TILE/2)*sx, y2=r.top+(cellY(target.r)+TILE/2)*sy;
+    const hitRed=(target&&target.killed)?'#ffcf54':'#ff5a48';
+    const hitDark=(target&&target.killed)?'#3a2800':'#1a1a1a';
+    const NS='http://www.w3.org/2000/svg';
+    const svg=document.createElementNS(NS,'svg');
+    svg.style.cssText='position:fixed;inset:0;width:100vw;height:100vh;pointer-events:none;z-index:45';
+    const mk=(stroke,width,glow,delay,dur)=>{
+      const ln=document.createElementNS(NS,'line');
+      ln.setAttribute('x1',x1); ln.setAttribute('y1',y1); ln.setAttribute('x2',x2); ln.setAttribute('y2',y2);
+      ln.setAttribute('stroke',stroke); ln.setAttribute('stroke-width',String(width)); ln.setAttribute('stroke-linecap','round');
+      ln.style.filter=`drop-shadow(0 0 6px ${glow})`;
+      const len=Math.hypot(x2-x1,y2-y1); ln.setAttribute('stroke-dasharray',len); ln.setAttribute('stroke-dashoffset',len);
+      svg.appendChild(ln);
+      if(ln.animate) ln.animate([
+        {strokeDashoffset:len,opacity:0},
+        {strokeDashoffset:len*0.15,opacity:1,offset:0.28},
+        {strokeDashoffset:0,opacity:0.95,offset:0.5},
+        {strokeDashoffset:0,opacity:0}
+      ],{duration:dur,easing:'cubic-bezier(.2,.7,.2,1)',delay,fill:'forwards'});
+      else { ln.setAttribute('stroke-dashoffset','0'); ln.style.opacity='0.9'; }
+    };
+    const ring=(cx,cy,r0,r1,fill,delay,dur,stroke)=>{
+      const el=document.createElementNS(NS,'circle');
+      el.setAttribute('cx',cx); el.setAttribute('cy',cy); el.setAttribute('r',r0);
+      if(stroke){
+        el.setAttribute('fill','none'); el.setAttribute('stroke',stroke); el.setAttribute('stroke-width',String(Math.max(1.5,TILE*0.06)));
+        el.style.filter='drop-shadow(0 0 6px '+stroke+')';
+      } else {
+        el.setAttribute('fill',fill);
+        if(fill) el.style.filter='drop-shadow(0 0 8px '+fill+')';
+      }
+      svg.appendChild(el);
+      if(el.animate) el.animate([
+        {r:r0, opacity:stroke?0.95:0.95},
+        {r:r1, opacity:stroke?0.1:0}
+      ],{duration:dur,easing:'ease-out',delay,fill:'forwards'});
+      else { el.setAttribute('r',r1); el.style.opacity=stroke?'0.1':'0'; }
+    };
+    const flash=(cx,cy,w0,w1,h0,h1,fill,delay,dur,rot)=>{
+      const el=document.createElementNS(NS,'ellipse');
+      el.setAttribute('cx',cx); el.setAttribute('cy',cy); el.setAttribute('rx',w0); el.setAttribute('ry',h0);
+      el.setAttribute('fill',fill); el.setAttribute('transform',`rotate(${rot||0} ${cx} ${cy})`);
+      el.style.filter='drop-shadow(0 0 8px '+fill+')';
+      svg.appendChild(el);
+      if(el.animate) el.animate([
+        {rx:w0, ry:h0, opacity:0.98},
+        {rx:w1, ry:h1, opacity:0}
+      ],{duration:dur,easing:'ease-out',delay,fill:'forwards'});
+      else { el.setAttribute('rx',w1); el.setAttribute('ry',h1); el.style.opacity='0'; }
+    };
+    const spark=(ang,delay,dur,color,reach)=>{
+      const rad=ang*Math.PI/180, ex=x2+Math.cos(rad)*reach, ey=y2+Math.sin(rad)*reach;
+      const ln=document.createElementNS(NS,'line');
+      ln.setAttribute('x1',x2); ln.setAttribute('y1',y2); ln.setAttribute('x2',ex); ln.setAttribute('y2',ey);
+      ln.setAttribute('stroke',color); ln.setAttribute('stroke-width',String(Math.max(1.4,TILE*0.045))); ln.setAttribute('stroke-linecap','round');
+      ln.style.filter='drop-shadow(0 0 5px '+color+')';
+      svg.appendChild(ln);
+      if(ln.animate) ln.animate([
+        {x2:x2,y2:y2,opacity:0},
+        {x2:ex,y2:ey,opacity:1,offset:0.28},
+        {x2:ex,y2:ey,opacity:0}
+      ],{duration:dur,easing:'ease-out',delay,fill:'forwards'});
+      else { ln.setAttribute('x2',ex); ln.setAttribute('y2',ey); ln.style.opacity='0'; }
+    };
+    mk('#ff3b30', 4.3, '#ff8a80', 0, 170);
+    mk('#161616', 2.2, '#5a5a5a', 95, 210);
+    flash(x1,y1,Math.max(4,TILE*0.08),Math.max(11,TILE*0.22),Math.max(1.8,TILE*0.028),Math.max(5,TILE*0.07),'#ffd6a6',0,120,-18);
+    flash(x1,y1,Math.max(2.8,TILE*0.05),Math.max(8,TILE*0.14),Math.max(1.6,TILE*0.022),Math.max(4,TILE*0.05),'#ff4a3d',18,100,22);
+    ring(x2,y2,Math.max(2,TILE*0.035),Math.max(13,TILE*0.22),null,78,170,hitRed);
+    ring(x2,y2,Math.max(1.5,TILE*0.025),Math.max(10,TILE*0.16),null,135,180,hitDark);
+    flash(x2,y2,Math.max(2.3,TILE*0.04),Math.max(8,TILE*0.1),Math.max(2.3,TILE*0.04),Math.max(8,TILE*0.1),hitDark,118,120,0);
+    spark(-30, 88, 120, hitRed, Math.max(9,TILE*0.18));
+    spark(18, 102, 120, '#ffb16d', Math.max(8,TILE*0.14));
+    spark(152, 114, 130, hitDark, Math.max(7,TILE*0.12));
+    if(target&&target.killed) spark(70, 126, 150, '#ffd966', Math.max(11,TILE*0.2));
+    document.body.appendChild(svg);
+    setTimeout(()=>{ try{ svg.remove(); }catch(e){} }, 430);
+  }catch(e){}
+}
 function vampireDrainFx(src, normalCells, poisonCells){
   const targetEl=boardPointTarget(src); if(!targetEl) return;
   if(normalCells&&normalCells.length) absorbLinesFx(normalCells.map(([r,c])=>({r,c})), { targetEl, stroke:'#ff4d6d', glow:'#ff99aa' });
@@ -2194,7 +2285,7 @@ function hurtPlayer(atk, sourceKey, ignoreArmor, attacker){
   if(player.rebirthTurn && player.hp<=0){ player.hp=player.maxHp; player.rebirthTurn=false; player.rebirthSaves=(player.rebirthSaves||0)+1; // 骷髅王重生：本回合致死则满血复活，此后重生冷却 +2
     log(tr('💀 骷髅王重生！生命恢复至满（重生冷却 +2）','💀 Skeleton King reborn! Full HP (Rebirth cooldown +2)'), 'heal'); }
   addDmg(sourceKey, dmg);
-  if(dmg>0 && player.tauntWindow){ const grow=Math.max(1, Math.floor(dmg*0.5)); player.maxHp+=grow; log(tr(`🪓 嘲讽吸收：永久最大生命 +${grow}`,`🪓 Taunt converts into +${grow} max HP`), 'buff'); }
+  if(dmg>0 && player.tauntWindow){ const grow=Math.max(1, Math.floor(dmg*0.1)); player.maxHp+=grow; log(tr(`🪓 嘲讽吸收：永久最大生命 +${grow}`,`🪓 Taunt converts into +${grow} max HP`), 'buff'); }
   if(dmg>0 && player.unbroken){ player.maxHp+=1; log(tr('🪓 越挫越勇：永久最大生命 +1','🪓 Unbroken: +1 permanent max HP'), 'buff'); }
   if(dmg>0 && player.iceArmor && attacker){ const ice=Math.max(1, Math.floor(frostOrbDamage()*0.5)); reflectIceArmor(ice, attacker); }
   if(player.thorns && dmg>0 && attacker){ const refl=Math.round(player.armor*(player.armorMult||1)+(player.toughness||0)); if(refl>0) reflectThorns(refl, attacker); }   // 荆棘：受到「真·攻击」时把当前护甲减伤量反弹给攻击者（非攻击不传 attacker→不反弹）

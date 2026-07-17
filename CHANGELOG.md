@@ -1,3 +1,10 @@
+## [v1.56.0]
+
+> Version-Impact: verify
+
+- 下调了斧王（Axe Lord）主动「嘲讽 Taunt」在承受集火时的滚雪球强度：现在在那一轮被你主动拉来的攻击中，只有**实际伤害的 10%** 会转化为**永久最大生命**，并保留**至少 +1** 的下限；原先是 50%。这样它仍然保留“挨打换成长”的职业身份，但不会再那么容易靠一轮集火把生命上限抬得过快。由于这个数值会改变同种子 + 同操作序列下的实际结局，这次按 verify / replay 影响处理，升 minor 并开启新的版本桶。
+- Nerfed Axe Lord’s active **Taunt** so its taunt-window snowball is much smaller: during the forced enemy volley, only **10% of the actual damage you take** is now converted into **permanent max HP**, while still keeping the **minimum +1** floor; previously it was 50%. That preserves the skill’s “get hit to grow” identity without letting a single focus-fire turn inflate max HP so aggressively. Because this value can change the real outcome of the same seed + action sequence, this release is treated as verify / replay impacting and therefore bumps the minor version bucket.
+
 ## [v1.55.3]
 
 - 正式版现在会把最近成功拿到的 1 枚服务端 seed 作为本地 warm seed 暂存起来：页面启动时只读取/清理本地缓存、不主动申请；当你下一次进入「选择种族」页时，若这枚 seed 仍未过期且版本匹配，就会优先把它留给下次开局直接消费，只有本地没有可用 warm seed 时才会再向 API 预取新的那 1 枚。这样既能把等待进一步藏到上一局之后或上一次访问期间，又不会像“首页一打开就囤 3–5 枚”那样平白放大 KV 写入与在线领票成本。若本地 warm seed 失效、版本变更、请求仍在路上或最终失败，依旧保留原来的现拉 + 本地随机兜底逻辑，因此不影响离线可玩性，也不改录像 / verify 兼容。
