@@ -1,3 +1,8 @@
+## [v1.56.2]
+
+- 修正了 350 级跨界主动的一个纯视觉问题：当你把狙击这类带“从技能按钮发出连线”特效的主动换到 💊 治疗槽或 💥 炸弹槽后，连线现在会从**实际占用的那个槽位**发出，而不再错误地总是从左侧的一阶主动技能按钮发出。该修复只影响特效起点，不改技能效果、数值、顺序，也不影响录像 / verify 兼容。
+- Fixed a visual-origin bug for 350-level crossover actives: if you swap a beam/tether-style active such as Snipe into the 💊 Heal slot or 💥 Bomb slot, the effect now starts from the **actual occupied slot** instead of incorrectly always firing from the left-side tier-1 active button. This only changes the effect origin, not the skill’s behavior, numbers, turn order, or replay / verify compatibility.
+
 ## [v1.56.1]
 
 - 调整了火枪手（Musketeer）的俏皮话文案：把那句台词收紧为「有人为你出了个好价钱。」/ “Someone put a good price on you.”，去掉前缀式的“狙击—— / Snipe —”，让口吻更自然一点。这是纯文本润色，不改数值、顺序，也不影响录像 / verify 兼容。
