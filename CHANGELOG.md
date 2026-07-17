@@ -1,3 +1,8 @@
+## [v1.56.1]
+
+- 调整了火枪手（Musketeer）的俏皮话文案：把那句台词收紧为「有人为你出了个好价钱。」/ “Someone put a good price on you.”，去掉前缀式的“狙击—— / Snipe —”，让口吻更自然一点。这是纯文本润色，不改数值、顺序，也不影响录像 / verify 兼容。
+- Tightened the Musketeer quip text to “有人为你出了个好价钱。” / “Someone put a good price on you.”, removing the prefixed “狙击—— / Snipe —” so the line reads more naturally. This is text-only polish — no stat, turn-order, replay, or verify behavior changes.
+
 ## [v1.56.0]
 
 > Version-Impact: verify
