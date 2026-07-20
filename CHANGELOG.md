@@ -1,3 +1,8 @@
+## [v1.56.3]
+
+- 下调了人类榜自动改判到 AI 榜的门槛：GitHub Actions 现在会把**前 200 条人类榜录像里所有 `score >= 25` 的条目**都自动改判到 AI 榜，而不再只处理 `Very High / score >= 65`。`Low / Medium / High / Very High` 这四档仍然保留为“可疑度标签”，不再等同于是否会自动改判；因此新策略会更激进，一部分 `Medium` / `High` 风险录像也会直接移到 AI 榜。此改动属于榜单运营策略调整，不改录像回放、战斗数值或 verify 语义。
+- Lowered the automatic human→AI leaderboard reclassification line: GitHub Actions now auto-reclassifies **every top-200 human-board replay with `score >= 25`** to the AI board, instead of only handling `Very High / score >= 65`. The existing `Low / Medium / High / Very High` buckets are still kept as suspicion labels only, so they no longer match the final reclassification boundary one-to-one; under this more aggressive policy, some `Medium` / `High` recordings will also move straight to the AI board. This is a leaderboard-operations policy change only — no replay engine, combat math, or verify semantics are altered.
+
 ## [v1.56.2]
 
 - 修正了 350 级跨界主动的一个纯视觉问题：当你把狙击这类带“从技能按钮发出连线”特效的主动换到 💊 治疗槽或 💥 炸弹槽后，连线现在会从**实际占用的那个槽位**发出，而不再错误地总是从左侧的一阶主动技能按钮发出。该修复只影响特效起点，不改技能效果、数值、顺序，也不影响录像 / verify 兼容。

@@ -68,14 +68,14 @@ jobs:
             max_auto = 10
           candidates = []
           for r in rows:
-            if r.get('risk') != 'Very High' or r.get('score', 0) < 65:
+            if r.get('score', 0) < 25:
               continue
             candidates.append({
               'id': r.get('id'),
               'score': r.get('score', 0),
               'risk': r.get('risk', ''),
               'reasons': r.get('reasons', []),
-              'reason': 'auto classify very high suspicion',
+              'reason': 'auto classify suspicion threshold >=25',
               'turns': r.get('turns'),
               'race': r.get('race'),
               'ver': r.get('ver'),
@@ -158,7 +158,7 @@ jobs:
                 f.write(f"| {r.get('score',0)} | {r.get('risk','-')} | {r.get('turns','-')} | {r.get('race','-')} | {r.get('ver','-')} | {r.get('id','-')} | {reasons} |\n")
             else:
               f.write('\n## Top suspicious recordings\n\nNo recordings scored 25 or above in this run.\n')
-            f.write('\n## Auto classify (Very High only)\n\n')
+            f.write('\n## Auto classify (score ≥ 25)\n\n')
             f.write(f"- Dry run: **{auto_candidates.get('dryRun', True)}**\n")
             f.write(f"- Selected candidates: **{len(auto_candidates.get('candidates', []))}**\n")
             f.write(f"- Applied: **{summary.get('applied', 0)}**\n")

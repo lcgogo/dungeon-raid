@@ -3,24 +3,24 @@
     "id": "9w8a4rvf",
     "file": "human/9w8a4rvf.json",
     "expectation": "human",
-    "maxScore": 64,
-    "forbidRisk": "Very High",
-    "notes": "人类高分样本，不应跨过自动改判边界"
+    "maxScore": 24,
+    "forbidRisk": "Medium",
+    "notes": "人类高分样本，在新策略下必须继续低于 25 分自动改判线"
   },
   {
     "id": "l9gc02xy",
     "file": "human/l9gc02xy.json",
     "expectation": "human",
-    "maxScore": 64,
-    "forbidRisk": "Very High",
-    "notes": "人类样本，保护自动改判边界不误伤"
+    "maxScore": 24,
+    "forbidRisk": "Medium",
+    "notes": "人类样本，保护 25 分自动改判边界不误伤"
   },
   {
     "id": "oan40cg2",
     "file": "human/oan40cg2.json",
     "expectation": "human",
-    "maxScore": 64,
-    "forbidRisk": "Very High",
-    "notes": "人类样本，验证新增机械节奏规则不过度扩散"
+    "maxScore": 24,
+    "forbidRisk": "Medium",
+    "notes": "人类样本，验证机械节奏规则在新 25 分边界下不过度扩散"
   }
 ]

@@ -64,7 +64,7 @@
 - 看录像：`https://api.dungeonraid.win/rec/<id>`；列 KV：`npx wrangler kv key list --namespace-id <REC_ID>`。
 - 验证器状态：`https://verify.dungeonraid.win/`（看 engineVersion / last / lastErr）。
 - 手动验证一次：`API_BASE=https://api.dungeonraid.win VERIFY_SECRET=… node verify.js`。
-- 自动改判：GitHub Actions `score-human-leaderboard.yml` 每 6 小时扫描一次人类榜前 200 条录像；`risk=Very High`（`score >= 65`）的候选会经 Worker `/classify-auto` 自动改判到 AI 榜，并把候选/结果写入 `.reports/auto-classify-*.json` artifact。误判回滚仍走 `ADMIN_SECRET=… bash dr.sh classify <id> human`。
+- 自动改判：GitHub Actions `score-human-leaderboard.yml` 每 6 小时扫描一次人类榜前 200 条录像；**凡是 `score >= 25` 的候选都会经 Worker `/classify-auto` 自动改判到 AI 榜**，并把候选/结果写入 `.reports/auto-classify-*.json` artifact。`Low / Medium / High / Very High` 仍只是可疑度标签，不再等同于是否会自动改判；因此新策略会把一部分 `Medium` / `High` 风险录像也直接移到 AI 榜。误判回滚仍走 `ADMIN_SECRET=… bash dr.sh classify <id> human`。
 - 上传门槛：`score_thresholds` 现按 `agent + race + minor version bucket + scope_kind` 存多条快照；解析时走固定回退链：`同种族+当前minor → 同种族+recent3 → 全种族+当前minor → 全种族+recent3`，优先命中样本数 ≥30 的 scope。计算 upload gate 时仍排除 `turns >= 510` 的近终局成绩，并把最终门槛硬限制在 350 回合内；此外，只要成绩进入**同种族 + 同 agent + 同口径**的前 10 名，也允许上传（闯关榜与破关榜都适用）。
 
 ## 数据流向小结

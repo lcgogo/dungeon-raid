@@ -3,16 +3,16 @@
     "id": "hhctliry",
     "file": "ai/hhctliry.json",
     "expectation": "ai",
-    "minScore": 65,
+    "minScore": 25,
     "expectedRisk": "Very High",
-    "notes": "离散时间戳但上下文极机械，应继续触发自动改判"
+    "notes": "离散时间戳但上下文极机械；在新策略下应继续越过 25 分自动改判线"
   },
   {
     "id": "00f636vf",
     "file": "ai/00f636vf.json",
     "expectation": "ai",
-    "minScore": 65,
+    "minScore": 25,
     "expectedRisk": "Very High",
-    "notes": "当前目标样本，防止后续测试 AI 规则回避检测"
+    "notes": "当前目标样本；新策略下也必须继续高于 25 分自动改判线"
   }
 ]
