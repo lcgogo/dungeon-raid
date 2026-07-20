@@ -9,7 +9,7 @@
 | 组件 | 平台 | 作用 | 代码/位置 |
 |---|---|---|---|
 | 游戏静态页 | **Cloudflare Pages** | `dungeon-raid.html`(正式版)/ `dungeon-raid-dev.html`(开发版)/ `index.html` | 仓库根；`deploy/dr.sh deploy/release` 部署 |
-| 榜单 API | **Cloudflare Worker** (`api.dungeonraid.win`) | 收成绩、存档、算名次、`/pending`·`/verify`、推送验证 | `worker/src/index.js`；`cd deploy/worker && npx wrangler deploy` |
+| 榜单 API | **Cloudflare Worker** (`api.dungeonraid.win`) | 收成绩、存档、算名次、`/pending`·`/verify`、推送验证 | 源码 `worker/src/index.js`；配置 `deploy/worker/wrangler.toml`；`npx wrangler deploy --config deploy/worker/wrangler.toml` |
 | 录像存储 | **Cloudflare KV**(`REC` 命名空间) | key=8位id，value=录像 JSON（种子+操作序列 ≈2–4KB） | — |
 | 成绩元数据 | **Cloudflare D1**(`dungeon-raid-scores`) | turns/level/gold/version/verified/source… | `worker/migrations/` |
 | 重放验证器 | **render**（藏在 `verify.dungeonraid.win` Cloudflare 橙云后） | 确定性重放录像、比对、回写 verified | `verify-server.js`（常驻）/ `verify.js`（核心） |
@@ -59,12 +59,14 @@
 ## 运维速查
 
 - 发版（游戏）：`bash deploy/dr.sh release`（dev→正式版同步 + 提交 + push + 部署 Pages + GitHub Release）；只发 dev：`bash deploy/dr.sh deploy`；完整性核对：`bash deploy/dr.sh integrity`。
-- 部署 Worker：`cd deploy/worker && npx wrangler deploy`。
+- 部署 Worker：从仓库根执行 `npx wrangler deploy --config deploy/worker/wrangler.toml`。
+- 应用 D1 迁移：迁移 SQL 放 `worker/migrations/`，从仓库根执行 `npx wrangler d1 migrations apply dungeon-raid-scores --remote --config deploy/worker/wrangler.toml`。
+- Worker secret：从仓库根执行 `npx wrangler secret list --config deploy/worker/wrangler.toml` 查看名称；用 `npx wrangler secret put <NAME> --config deploy/worker/wrangler.toml` 覆盖值。
 - render：从本仓库部署 `node verify-server.js`（`render.yaml` 蓝图 / `Procfile` 通用）；自定义域 `verify.dungeonraid.win`（Cloudflare 橙云 + SSL 模式 **Full**，非 strict）。验证器现会优先按 `engines/<version>.html` 选精确引擎；`dr.sh release` / `dr.ps1 release` 会自动归档正式版快照到 `engines/`，供旧版本录像重放。
 - 看录像：`https://api.dungeonraid.win/rec/<id>`；列 KV：`npx wrangler kv key list --namespace-id <REC_ID>`。
 - 验证器状态：`https://verify.dungeonraid.win/`（看 engineVersion / last / lastErr）。
 - 手动验证一次：`API_BASE=https://api.dungeonraid.win VERIFY_SECRET=… node verify.js`。
-- 自动改判：GitHub Actions `score-human-leaderboard.yml` 每 6 小时扫描一次人类榜前 200 条录像；**凡是 `score >= 25` 的候选都会经 Worker `/classify-auto` 自动改判到 AI 榜**，并把候选/结果写入 `.reports/auto-classify-*.json` artifact。`Low / Medium / High / Very High` 仍只是可疑度标签，不再等同于是否会自动改判；因此新策略会把一部分 `Medium` / `High` 风险录像也直接移到 AI 榜。误判回滚仍走 `ADMIN_SECRET=… bash dr.sh classify <id> human`。
+- 自动改判：GitHub Actions `score-human-leaderboard.yml` 每 6 小时扫描一次人类榜前 200 条录像；**凡是 `score >= 25` 的候选都会经 Worker `/classify-auto` 自动改判到 AI 榜**，并把候选/结果写入 `.reports/auto-classify-*.json` artifact。`Low / Medium / High / Very High` 仍只是可疑度标签，不再等同于是否会自动改判；因此新策略会把一部分 `Medium` / `High` 风险录像也直接移到 AI 榜。误判回滚仍走 `ADMIN_SECRET=… bash deploy/dr.sh classify <id> human`。
 - 上传门槛：`score_thresholds` 现按 `agent + race + minor version bucket + scope_kind` 存多条快照；解析时走固定回退链：`同种族+当前minor → 同种族+recent3 → 全种族+当前minor → 全种族+recent3`，优先命中样本数 ≥30 的 scope。计算 upload gate 时仍排除 `turns >= 510` 的近终局成绩，并把最终门槛硬限制在 350 回合内；此外，只要成绩进入**同种族 + 同 agent + 同口径**的前 10 名，也允许上传（闯关榜与破关榜都适用）。
 
 ## 数据流向小结

@@ -48,7 +48,7 @@ cmd_integrity(){
 # ---------- 黑盒改判：把某条成绩在 人类榜↔AI榜 之间挪（需环境变量 ADMIN_SECRET）----------
 cmd_classify(){
   local id="$1" agent="$2"
-  [ -n "$id" ] && { [ "$agent" = ai ] || [ "$agent" = human ]; } || { echo "用法: ADMIN_SECRET=… bash dr.sh classify <id> <ai|human>"; return 1; }
+  [ -n "$id" ] && { [ "$agent" = ai ] || [ "$agent" = human ]; } || { echo "用法: ADMIN_SECRET=… bash deploy/dr.sh classify <id> <ai|human>"; return 1; }
   [ -n "$ADMIN_SECRET" ] || { echo "缺少环境变量 ADMIN_SECRET"; return 1; }
   curl -s -X POST "https://api.dungeonraid.win/classify?k=$ADMIN_SECRET" \
     -H 'Content-Type: application/json' -d "{\"id\":\"$id\",\"agent\":\"$agent\"}"; echo

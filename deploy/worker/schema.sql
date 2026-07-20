@@ -1,7 +1,9 @@
--- D1 排行榜表 —— 全量 schema 参照 / 测试期「清库重建」脚本（含 DROP TABLE，会清空旧数据！）：
---   npx wrangler d1 execute dungeon-raid-scores --remote --file=schema.sql
+-- D1 排行榜表 —— 全量 schema 参照 / 测试期「清库重建」脚本（含 DROP TABLE，会清空旧数据！）。
+-- 从仓库根执行：
+--   npx wrangler d1 execute dungeon-raid-scores --remote --file=deploy/worker/schema.sql --config deploy/worker/wrangler.toml
 -- ⚠️ 线上 schema 变更不要用这个（会丢数据），改走迁移框架：
---   npx wrangler d1 migrations apply dungeon-raid-scores --remote   （见 migrations/）
+--   迁移 SQL 放 worker/migrations/
+--   npx wrangler d1 migrations apply dungeon-raid-scores --remote --config deploy/worker/wrangler.toml
 DROP TABLE IF EXISTS scores;
 CREATE TABLE scores (
   id       TEXT PRIMARY KEY,           -- 同时是 KV 里录像的 key

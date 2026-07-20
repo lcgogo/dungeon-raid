@@ -23,7 +23,7 @@
 - **正式版 `dungeon-raid.html` 不准手改**：两个 HTML 只许差 `const DEV` 一行；dev→prod 同步只能由 release 脚本做。
 - **密钥永不进仓库**：`VERIFY_SECRET` / `VERIFY_PUSH_URL` / `RENDER_PING_URL` / `GH_DISPATCH_TOKEN`、验证器 onrender 原址——只存在于 Cloudflare Worker / GitHub Actions / render 的环境变量里，**别 print、别写进代码或文档**。
 - **正式版存档跨版本不兼容**（从头开始）；dev 存档不受版本限制。
-- **后端 schema 变更走 D1 迁移框架**：`worker/migrations/` + `wrangler d1 migrations apply ... --remote`，勿手敲 SQL。
+- **后端 schema 变更走 D1 迁移框架**：迁移 SQL 放 `worker/migrations/`，从仓库根执行 `npx wrangler d1 migrations apply dungeon-raid-scores --remote --config deploy/worker/wrangler.toml`，勿手敲 SQL。
 
 ---
 
@@ -68,5 +68,5 @@
 
 ## 6. 后端 / 验证链
 
-- Worker：`worker/src/index.js`，`cd worker && npx wrangler deploy`。排行榜只展示 `verified=1`；`agent`(human/ai) 分人类榜/AI 榜。
+- Worker：源码 `worker/src/index.js`；部署配置 `deploy/worker/wrangler.toml`；从仓库根执行 `npx wrangler deploy --config deploy/worker/wrangler.toml`。排行榜只展示 `verified=1`；`agent`(human/ai) 分人类榜/AI 榜。
 - 重放验证器：`verify.js`（核心）/ `verify-server.js`（render 常驻）；GitHub Actions 定时跑 `verify.js` 兜底 + 保活 render。完整架构、免费额度、密钥放哪、运维速查全在 **`ARCHITECTURE.md`**。

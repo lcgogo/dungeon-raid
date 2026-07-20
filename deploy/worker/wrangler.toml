@@ -1,5 +1,5 @@
 name = "dungeon-raid-rec"
-main = "src/index.js"
+main = "../../worker/src/index.js"
 compatibility_date = "2026-06-01"
 
 # 自定义域名：API 走 api.dungeonraid.win（绑定时自动建代理DNS+证书）
@@ -17,14 +17,16 @@ binding = "REC"
 id = "4120eb6aa18944e7892d9607bc5cfb06"
 
 # D1：排行榜分数。database_id 在 `wrangler d1 create dungeon-raid-scores` 后填入。
-# schema 变更走迁移框架：migrations/ 下放 NNNN_*.sql，`wrangler d1 migrations apply dungeon-raid-scores --remote` 按 d1_migrations 记录只跑没跑过的。
+# schema 变更走迁移框架：worker/migrations/ 下放 NNNN_*.sql，
+# `npx wrangler d1 migrations apply dungeon-raid-scores --remote --config deploy/worker/wrangler.toml` 按 d1_migrations 记录只跑没跑过的。
 [[d1_databases]]
 binding = "DB"
 database_name = "dungeon-raid-scores"
 database_id = "eea75d9c-bce5-433a-81a5-10c946a664fd"
-migrations_dir = "migrations"
+migrations_dir = "../../worker/migrations"
 
-# 注：验证密钥 VERIFY_SECRET 用 `wrangler secret put VERIFY_SECRET` 设置（不写在此文件）
+# 注：密钥不写在此文件；从仓库根用 `npx wrangler secret list --config deploy/worker/wrangler.toml` 查看，
+# 用 `npx wrangler secret put <NAME> --config deploy/worker/wrangler.toml` 覆盖。
 
 # 限流：写入类端点（/rec /score /clear）按来源 IP 限速，挡刷榜/批量伪造。period 仅支持 10 或 60 秒。
 [[unsafe.bindings]]

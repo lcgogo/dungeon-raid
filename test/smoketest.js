@@ -1,5 +1,5 @@
 // API 冒烟测试：POST 一个 40 回合分数 → 看百分位；再拉榜单。
-// 运行：cd worker && node smoketest.js
+// 运行：node test/smoketest.js
 const API = 'https://api.dungeonraid.win';
 (async () => {
   // 先测连通

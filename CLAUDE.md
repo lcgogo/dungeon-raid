@@ -29,8 +29,8 @@
 ## 关键不变量
 - **录像确定性重放 = 防作弊根基**：任何新录制的玩家动作都要接进 `dispatchReplayAct`；新动作不能破坏“同种子 + 同操作序列 → 同结局”。榜单按 `rec.ver`（开局版本）分桶，verify.js 用对应引擎重放。
 - 正式版存档跨版本不兼容（从头开始）；dev 存档不受版本限制。
-- 后端 schema 变更走 D1 迁移框架：`worker/migrations/` + `wrangler d1 migrations apply ... --remote`，勿手敲 SQL。
+- 后端 schema 变更走 D1 迁移框架：迁移 SQL 放 `worker/migrations/`，从仓库根执行 `npx wrangler d1 migrations apply dungeon-raid-scores --remote --config deploy/worker/wrangler.toml`，勿手敲 SQL。
 
 ## 后端
-- Worker：`worker/src/index.js`，`wrangler deploy`。排行榜只展示 `verified=1`；`agent`(human/ai) 分人类榜/AI 榜。
+- Worker：源码 `worker/src/index.js`；部署配置 `deploy/worker/wrangler.toml`；从仓库根执行 `npx wrangler deploy --config deploy/worker/wrangler.toml`。排行榜只展示 `verified=1`；`agent`(human/ai) 分人类榜/AI 榜。
 - 每小时 GitHub Actions（`.github/workflows/verify.yml`）跑 verify.js 重放校验；密钥 `VERIFY_SECRET` 需在 Cloudflare 与 GitHub repo 两侧一致。
