@@ -1,5 +1,5 @@
 name: score-human-leaderboard
-# 定时给人类榜前 N 条录像打 AI 可疑度分，并把 Very High 项自动改判到 AI 榜。
+# 定时给人类榜前 N 条录像打 AI 可疑度分，并把 score >= 25 项自动改判到 AI 榜。
 on:
   schedule:
     - cron: '17 */6 * * *'    # 每 6 小时一次，避开 verify 的 5 分钟节奏
@@ -11,7 +11,7 @@ on:
         default: true
         type: boolean
       max_auto:
-        description: '本次最多自动改判几条 Very High 录像（1-50）'
+        description: '本次最多自动改判几条 score >= 25 录像（1-50）'
         required: false
         default: '10'
         type: string
@@ -116,7 +116,7 @@ jobs:
             if not secret:
               raise RuntimeError('Missing GitHub secret CLASSIFY_AUTOMATION_SECRET')
             url = "https://api.dungeonraid.win/classify-auto"
-            req = urllib.request.Request(url, data=json.dumps(payload).encode('utf-8'), headers={'Content-Type': 'application/json', 'x-classify-automation-secret': secret})
+            req = urllib.request.Request(url, data=json.dumps(payload).encode('utf-8'), headers={'Content-Type': 'application/json', 'User-Agent': 'curl/8.0.0', 'x-classify-automation-secret': secret})
             with urllib.request.urlopen(req, timeout=60) as res:
               body = res.read().decode('utf-8')
             out_path.write_text(body, encoding='utf-8')
