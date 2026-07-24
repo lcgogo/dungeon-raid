@@ -1,3 +1,8 @@
+## [v1.56.4]
+
+- 修正了回放跳转 / 步进时可能残留召唤师召唤线特效的问题：召唤师的纯视觉 SVG 连线现在和其它拉线特效一样，会在无头与回放快进阶段被抑制，并在退出回放或跳转回合时统一清理临时特效层，避免之前一路快进过的紫色召唤线堆在当前画面上。该修复只影响视觉特效，不改召唤结果、回合顺序、数值，也不影响录像 / verify 兼容。
+- Fixed a replay visual cleanup issue where Summoner summoning tethers could linger after replay jumps or step navigation. The Summoner’s SVG-only tether effect is now suppressed during headless / replay fast-forward paths like other tether effects, and transient effect layers are cleared when leaving replay or jumping turns, so purple lines from fast-forwarded turns no longer pile onto the current view. This only affects visuals, not spawn results, turn order, numbers, replay, or verify compatibility.
+
 ## [v1.56.3]
 
 - 下调了人类榜自动改判到 AI 榜的门槛：GitHub Actions 现在会把**前 200 条人类榜录像里所有 `score >= 25` 的条目**都自动改判到 AI 榜，而不再只处理 `Very High / score >= 65`。`Low / Medium / High / Very High` 这四档仍然保留为“可疑度标签”，不再等同于是否会自动改判；因此新策略会更激进，一部分 `Medium` / `High` 风险录像也会直接移到 AI 榜。此改动属于榜单运营策略调整，不改录像回放、战斗数值或 verify 语义。

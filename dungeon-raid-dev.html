@@ -176,8 +176,8 @@
 (()=>{
 //==================== 配置 ====================
 // 版本号 v主.次.修：不影响 verify/replay 兼容边界的小改动改"修"；凡是影响 verify/replay/版本分桶/release 验证语义的改动都改"次"；大版本变更需先确认。页面底部显示。
-const VERSION='v1.56.3';
-const CHANGELOG_LINES=[{"ver": "v1.56.3", "zh": "下调了人类榜自动改判到 AI 榜的门槛：GitHub Actions 现在会把前 200 条人类榜录像里所有 `score >= 25` 的条目都自动改判到 AI 榜，而不再只处理 `Very High / score >= 65`。`Low / Medium / High / Very High` 这四档仍然保留为“可疑度标签”，不再等同于是否会自动改判；因此新策略会更激进，一部分 `Medium` / `High` 风险录像也会直接移到 AI 榜。此改动属于榜单运营策略调整，不改录像回放、战斗数值或 verify 语义。", "en": "Lowered the automatic human→AI leaderboard reclassification line: GitHub Actions now auto-reclassifies every top-200 human-board replay with `score >= 25` to the AI board, instead of only handling `Very High / score >= 65`. The existing `Low / Medium / High / Very High` buckets are still kept as suspicion labels only, so they no longer match the final reclassification boundary one-to-one; under this more aggressive policy, some `Medium` / `High` recordings will also move straight to the AI board. This is a leaderboard-operations policy change only — no replay engine, combat math, or verify semantics are altered."}, {"ver": "v1.56.2", "zh": "修正了 350 级跨界主动的一个纯视觉问题：当你把狙击这类带“从技能按钮发出连线”特效的主动换到 💊 治疗槽或 💥 炸弹槽后，连线现在会从实际占用的那个槽位发出，而不再错误地总是从左侧的一阶主动技能按钮发出。该修复只影响特效起点，不改技能效果、数值、顺序，也不影响录像 / verify 兼容。", "en": "Fixed a visual-origin bug for 350-level crossover actives: if you swap a beam/tether-style active such as Snipe into the 💊 Heal slot or 💥 Bomb slot, the effect now starts from the actual occupied slot instead of incorrectly always firing from the left-side tier-1 active button. This only changes the effect origin, not the skill’s behavior, numbers, turn order, or replay / verify compatibility."}, {"ver": "v1.56.1", "zh": "调整了火枪手（Musketeer）的俏皮话文案：把那句台词收紧为「有人为你出了个好价钱。」/ “Someone put a good price on you.”，去掉前缀式的“狙击—— / Snipe —”，让口吻更自然一点。这是纯文本润色，不改数值、顺序，也不影响录像 / verify 兼容。", "en": "Tightened the Musketeer quip text to “有人为你出了个好价钱。” / “Someone put a good price on you.”, removing the prefixed “狙击—— / Snipe —” so the line reads more naturally. This is text-only polish — no stat, turn-order, replay, or verify behavior changes."}, {"ver": "v1.56.0", "zh": "下调了斧王（Axe Lord）主动「嘲讽 Taunt」在承受集火时的滚雪球强度：现在在那一轮被你主动拉来的攻击中，只有实际伤害的 10% 会转化为永久最大生命，并保留至少 +1 的下限；原先是 50%。这样它仍然保留“挨打换成长”的职业身份，但不会再那么容易靠一轮集火把生命上限抬得过快。由于这个数值会改变同种子 + 同操作序列下的实际结局，这次按 verify / replay 影响处理，升 minor 并开启新的版本桶。", "en": "Nerfed Axe Lord’s active Taunt so its taunt-window snowball is much smaller: during the forced enemy volley, only 10% of the actual damage you take is now converted into permanent max HP, while still keeping the minimum +1 floor; previously it was 50%. That preserves the skill’s “get hit to grow” identity without letting a single focus-fire turn inflate max HP so aggressively. Because this value can change the real outcome of the same seed + action sequence, this release is treated as verify / replay impacting and therefore bumps the minor version bucket."}, {"ver": "v1.55.3", "zh": "正式版现在会把最近成功拿到的 1 枚服务端 seed 作为本地 warm seed 暂存起来：页面启动时只读取/清理本地缓存、不主动申请；当你下一次进入「选择种族」页时，若这枚 seed 仍未过期且版本匹配，就会优先把它留给下次开局直接消费，只有本地没有可用 warm seed 时才会再向 API 预取新的那 1 枚。这样既能把等待进一步藏到上一局之后或上一次访问期间，又不会像“首页一打开就囤 3–5 枚”那样平白放大 KV 写入与在线领票成本。若本地 warm seed 失效、版本变更、请求仍在路上或最终失败，依旧保留原来的现拉 + 本地随机兜底逻辑，因此不影响离线可玩性，也不改录像 / verify 兼容。", "en": "Release builds now keep at most one recently acquired server seed as a local warm seed. Page boot only reads / prunes that cache and never auto-requests more; the next time you enter race select, a still-valid same-version warm seed is held back for immediate consumption on the next run start, and only when no usable local warm seed exists do we prefetch a fresh replacement from the API. That hides even more of the wait in the time after the previous run or between visits, without turning page load into “stockpile 3–5 tickets” and needlessly amplifying KV writes or seed issuance. If the warm seed has expired, the version changed, the request is still in flight, or the fetch ultimately fails, the existing live-fetch + local-random fallback path still applies, so offline playability and replay / verify compatibility remain unchanged."}];   /* auto-injected by dr.sh embed-changelog（勿手改） */
+const VERSION='v1.56.4';
+const CHANGELOG_LINES=[{"ver": "v1.56.4", "zh": "修正了回放跳转 / 步进时可能残留召唤师召唤线特效的问题：召唤师的纯视觉 SVG 连线现在和其它拉线特效一样，会在无头与回放快进阶段被抑制，并在退出回放或跳转回合时统一清理临时特效层，避免之前一路快进过的紫色召唤线堆在当前画面上。该修复只影响视觉特效，不改召唤结果、回合顺序、数值，也不影响录像 / verify 兼容。", "en": "Fixed a replay visual cleanup issue where Summoner summoning tethers could linger after replay jumps or step navigation. The Summoner’s SVG-only tether effect is now suppressed during headless / replay fast-forward paths like other tether effects, and transient effect layers are cleared when leaving replay or jumping turns, so purple lines from fast-forwarded turns no longer pile onto the current view. This only affects visuals, not spawn results, turn order, numbers, replay, or verify compatibility."}, {"ver": "v1.56.3", "zh": "下调了人类榜自动改判到 AI 榜的门槛：GitHub Actions 现在会把前 200 条人类榜录像里所有 `score >= 25` 的条目都自动改判到 AI 榜，而不再只处理 `Very High / score >= 65`。`Low / Medium / High / Very High` 这四档仍然保留为“可疑度标签”，不再等同于是否会自动改判；因此新策略会更激进，一部分 `Medium` / `High` 风险录像也会直接移到 AI 榜。此改动属于榜单运营策略调整，不改录像回放、战斗数值或 verify 语义。", "en": "Lowered the automatic human→AI leaderboard reclassification line: GitHub Actions now auto-reclassifies every top-200 human-board replay with `score >= 25` to the AI board, instead of only handling `Very High / score >= 65`. The existing `Low / Medium / High / Very High` buckets are still kept as suspicion labels only, so they no longer match the final reclassification boundary one-to-one; under this more aggressive policy, some `Medium` / `High` recordings will also move straight to the AI board. This is a leaderboard-operations policy change only — no replay engine, combat math, or verify semantics are altered."}, {"ver": "v1.56.2", "zh": "修正了 350 级跨界主动的一个纯视觉问题：当你把狙击这类带“从技能按钮发出连线”特效的主动换到 💊 治疗槽或 💥 炸弹槽后，连线现在会从实际占用的那个槽位发出，而不再错误地总是从左侧的一阶主动技能按钮发出。该修复只影响特效起点，不改技能效果、数值、顺序，也不影响录像 / verify 兼容。", "en": "Fixed a visual-origin bug for 350-level crossover actives: if you swap a beam/tether-style active such as Snipe into the 💊 Heal slot or 💥 Bomb slot, the effect now starts from the actual occupied slot instead of incorrectly always firing from the left-side tier-1 active button. This only changes the effect origin, not the skill’s behavior, numbers, turn order, or replay / verify compatibility."}, {"ver": "v1.56.1", "zh": "调整了火枪手（Musketeer）的俏皮话文案：把那句台词收紧为「有人为你出了个好价钱。」/ “Someone put a good price on you.”，去掉前缀式的“狙击—— / Snipe —”，让口吻更自然一点。这是纯文本润色，不改数值、顺序，也不影响录像 / verify 兼容。", "en": "Tightened the Musketeer quip text to “有人为你出了个好价钱。” / “Someone put a good price on you.”, removing the prefixed “狙击—— / Snipe —” so the line reads more naturally. This is text-only polish — no stat, turn-order, replay, or verify behavior changes."}, {"ver": "v1.56.0", "zh": "下调了斧王（Axe Lord）主动「嘲讽 Taunt」在承受集火时的滚雪球强度：现在在那一轮被你主动拉来的攻击中，只有实际伤害的 10% 会转化为永久最大生命，并保留至少 +1 的下限；原先是 50%。这样它仍然保留“挨打换成长”的职业身份，但不会再那么容易靠一轮集火把生命上限抬得过快。由于这个数值会改变同种子 + 同操作序列下的实际结局，这次按 verify / replay 影响处理，升 minor 并开启新的版本桶。", "en": "Nerfed Axe Lord’s active Taunt so its taunt-window snowball is much smaller: during the forced enemy volley, only 10% of the actual damage you take is now converted into permanent max HP, while still keeping the minimum +1 floor; previously it was 50%. That preserves the skill’s “get hit to grow” identity without letting a single focus-fire turn inflate max HP so aggressively. Because this value can change the real outcome of the same seed + action sequence, this release is treated as verify / replay impacting and therefore bumps the minor version bucket."}];   /* auto-injected by dr.sh embed-changelog（勿手改） */
 const DEV=true;   // release build (DEV=false); dev build is dungeon-raid-dev.html (DEV=true)
 const REC_API='https://api.dungeonraid.win';   // 录像分享 API（Cloudflare Worker + KV）
 // 带种子随机数（mulberry32）：游戏全程用 rnd() 取代原生随机，配合录制种子可确定性重放
@@ -1496,6 +1496,12 @@ function drawBombFx(){
   }
   ctx.shadowBlur=0;
 }
+function markTransientFxDom(svg){
+  try{ if(svg&&svg.classList) svg.classList.add('drFxSvg'); }catch(e){}
+}
+function clearTransientFxDom(){
+  try{ document.querySelectorAll('.drFxSvg').forEach(el=>el.remove()); }catch(e){}
+}
 // 通用吸取线特效：从棋盘格子画线到某个 UI 目标（纯 UI，不进录像；无头/桩件环境自动跳过）
 function absorbLinesFx(cells, opt){
   if(headless || jumping || !cells || !cells.length) return;   // 快进（跳回合/步进）时不放特效，免得一股脑闪一堆线
@@ -1527,7 +1533,7 @@ function absorbLinesFx(cells, opt){
       if(ln.animate) ln.animate([{strokeDashoffset:len,opacity:1},{strokeDashoffset:0,opacity:1,offset:.5},{strokeDashoffset:0,opacity:0}],{duration:680,easing:'ease-out',fill:'forwards'});
       else { ln.setAttribute('stroke-dashoffset','0'); ln.style.opacity='0.92'; }   // 某些移动浏览器不支持 SVG 线段动画：至少要直接显示，别整条线隐身
     });
-    document.body.appendChild(svg);
+    markTransientFxDom(svg); document.body.appendChild(svg);
     setTimeout(()=>{ try{ svg.remove(); }catch(e){} }, 720);
   }catch(e){}
 }
@@ -1564,7 +1570,7 @@ function buyoutFx(cells){
       if(ln.animate) ln.animate([{strokeDashoffset:len,opacity:1},{strokeDashoffset:0,opacity:1,offset:.45},{strokeDashoffset:0,opacity:0}],{duration:620,easing:'ease-out',fill:'forwards'});
       else { ln.setAttribute('stroke-dashoffset','0'); ln.style.opacity='0.92'; }
     });
-    document.body.appendChild(svg);
+    markTransientFxDom(svg); document.body.appendChild(svg);
     setTimeout(()=>{ try{ svg.remove(); }catch(e){} }, 680);
   }catch(e){}
 }
@@ -1663,7 +1669,7 @@ function snipeBeamFx(src, target){
     spark(18, 102, 120, '#ffb16d', Math.max(8,TILE*0.14));
     spark(152, 114, 130, hitDark, Math.max(7,TILE*0.12));
     if(target&&target.killed) spark(70, 126, 150, '#ffd966', Math.max(11,TILE*0.2));
-    document.body.appendChild(svg);
+    markTransientFxDom(svg); document.body.appendChild(svg);
     setTimeout(()=>{ try{ svg.remove(); }catch(e){} }, 430);
   }catch(e){}
 }
@@ -1678,7 +1684,7 @@ function devourerDrainFx(src, cells){
   absorbLinesFx(cells.map(({r,c})=>({r,c})), { targetEl, stroke:'#b8ff5c', glow:'#e6ff8a' });
 }
 function summonerFx(src, cells){
-  if(!src || !cells || !cells.length) return;
+  if(headless || jumping || !src || !cells || !cells.length) return;
   try{
     if(!document.createElementNS) return;
     const cv0=document.getElementById('board');
@@ -1700,7 +1706,7 @@ function summonerFx(src, cells){
       svg.appendChild(ln);
       if(ln.animate) ln.animate([{strokeDashoffset:len,opacity:1},{strokeDashoffset:0,opacity:1,offset:.45},{strokeDashoffset:0,opacity:0}],{duration:620,easing:'ease-out',fill:'forwards'});
     });
-    document.body.appendChild(svg);
+    markTransientFxDom(svg); document.body.appendChild(svg);
     setTimeout(()=>{ try{ svg.remove(); }catch(e){} }, 680);
   }catch(e){}
 }
@@ -1727,7 +1733,7 @@ function magmaShieldFx(src, cells){
       svg.appendChild(ln);
       if(ln.animate) ln.animate([{strokeDashoffset:len,opacity:1},{strokeDashoffset:0,opacity:1,offset:.5},{strokeDashoffset:0,opacity:0}],{duration:620,easing:'ease-out',fill:'forwards'});
     });
-    document.body.appendChild(svg);
+    markTransientFxDom(svg); document.body.appendChild(svg);
     setTimeout(()=>{ try{ svg.remove(); }catch(e){} }, 680);
   }catch(e){}
 }
@@ -2821,7 +2827,7 @@ function replayDone(){ clearTimeout(replayTimer); replayTimer=null; replayPaused
 function stopReplay(){
   clearTimeout(replayTimer); replayTimer=null;
   replaying=false; replayRec=null; replayPending=null;
-  bombFx.length=0; bossFx.length=0; hookFx.length=0;
+  bombFx.length=0; bossFx.length=0; hookFx.length=0; clearTransientFxDom();
   document.getElementById('replayBar').classList.remove('show');
   if(replayResumeState){
     player=replayResumeState.player;
@@ -2841,7 +2847,7 @@ function jumpToTurn(target){
   if(!replaying||!replayRec) return;
   const rec0=replayRec, acts=rec0.acts;            // 本地持有：防止快进中误触 stopReplay 把 replayRec 置空
   clearTimeout(replayTimer); replayTimer=null; replayPending=null;
-  bombFx.length=0; bossFx.length=0; hookFx.length=0;                 // 清掉上一段残留的爆炸/入场/拖拽特效，否则会画在跳转后的棋盘上
+  bombFx.length=0; bossFx.length=0; hookFx.length=0; clearTransientFxDom();   // 清掉上一段残留的爆炸/入场/拖拽/拉线特效，否则会画在跳转后的棋盘上
   replayAutoPaused = target>=replayTotalTurns-10;   // 跳到接近终点就别再自动暂停
   replayIdx=0; busy=false; jumping=true; selection=[];   // 快进期间抑制 gameOver/onClear
   try{
