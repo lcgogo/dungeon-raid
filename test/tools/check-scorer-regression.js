@@ -50,6 +50,7 @@ function evaluateCase(def) {
   if (def.maxScore != null && result.score > def.maxScore) failures.push(`expected score <= ${def.maxScore}, got ${result.score}`);
   if (def.expectedRisk && result.risk !== def.expectedRisk) failures.push(`expected risk ${def.expectedRisk}, got ${result.risk}`);
   if (def.forbidRisk && result.risk === def.forbidRisk) failures.push(`forbid risk ${def.forbidRisk}, got ${result.risk}`);
+  if (def.expectedReasonIncludes && !(result.reasons || []).some(r => r.includes(def.expectedReasonIncludes))) failures.push(`expected reason including ${def.expectedReasonIncludes}`);
   return {
     id: result.id,
     expectation: def.expectation || '',

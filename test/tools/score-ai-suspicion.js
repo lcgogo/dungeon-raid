@@ -198,6 +198,9 @@ function percentile(arr, p) {
   const idx = Math.min(a.length - 1, Math.max(0, Math.floor((a.length - 1) * p)));
   return a[idx];
 }
+function rateAtMost(arr, limit) {
+  return arr.length ? arr.filter(x => x <= limit).length / arr.length : 0;
+}
 
 function allTimedActs(rec) { return (rec.acts || []).filter(a => Array.isArray(a) && typeof a[a.length - 1] === 'number'); }
 function moveActs(rec) { return (rec.acts || []).filter(a => Array.isArray(a) && a[0] === 'm'); }
@@ -234,6 +237,9 @@ function extractTimingMetrics(rec) {
 
   const meanDt = mean(deltas), medianDt = median(deltas), stdDt = stddev(deltas);
   const cv = meanDt > 0 ? stdDt / meanDt : 0;
+  const sub20Rate = rateAtMost(deltas, 20);
+  const sub50Rate = rateAtMost(deltas, 50);
+  const sub100Rate = rateAtMost(deltas, 100);
 
   const seg1 = deltas.slice(0, Math.floor(deltas.length / 3));
   const seg2 = deltas.slice(Math.floor(deltas.length / 3), Math.floor(deltas.length * 2 / 3));
@@ -260,6 +266,9 @@ function extractTimingMetrics(rec) {
     cv,
     p10: percentile(deltas, 0.10),
     p90: percentile(deltas, 0.90),
+    sub20Rate,
+    sub50Rate,
+    sub100Rate,
     lateEarlyRatio,
     maxMedianGap,
     segmentCvs: segCvs,
@@ -348,6 +357,17 @@ function scoreFromMetrics(m, c) {
   const xr = c && c.densePauseRatio;
   const mechSignals = [dr, br, xr].filter(v => v != null && v <= 1.05).length;
   const coarseMechanical = m.moveCount > 180 && m.p10 === 0 && m.p90 <= 2 && m.longChainRate >= 0.70 && m.meanChainLen >= 7 && mechSignals >= 2;
+  const inhumanMsTiming = m.moveCount >= 80 && m.medianDt <= 5 && m.p90 <= 20 && m.sub20Rate >= 0.80;
+  const inhumanFastLongRun = m.moveCount >= 180 && m.meanDt < 100 && m.medianDt < 50 && m.sub100Rate >= 0.80;
+  const inhumanFast = inhumanMsTiming || inhumanFastLongRun;
+
+  if (inhumanMsTiming) {
+    score += 85;
+    reasons.push('整局毫秒级操作间隔，超过人类触屏能力');
+  } else if (inhumanFastLongRun) {
+    score += 70;
+    reasons.push('长局操作间隔低于人类反应能力');
+  }
 
   if (m.cv < 0.08) { score += 28; reasons.push('节奏极稳'); }
   else if (m.cv < 0.12) { score += 22; reasons.push('节奏很稳'); }
@@ -407,9 +427,11 @@ function scoreFromMetrics(m, c) {
     reasons.push('多类局面都近乎不停顿');
   }
 
-  if (m.cv > 0.35 && !coarseMechanical) { score -= 4; reasons.push('节奏波动较像真人'); }
-  if (m.lateEarlyRatio > 1.35) score -= 8;
-  else if (m.lateEarlyRatio > 1.20) { score -= 5; reasons.push('后期明显变慢'); }
+  if (m.cv > 0.35 && !coarseMechanical && !inhumanFast) { score -= 4; reasons.push('节奏波动较像真人'); }
+  if (!inhumanFast) {
+    if (m.lateEarlyRatio > 1.35) score -= 8;
+    else if (m.lateEarlyRatio > 1.20) { score -= 5; reasons.push('后期明显变慢'); }
+  }
 
   if (score < 0) score = 0;
   if (score > 100) score = 100;
@@ -438,10 +460,13 @@ function analyzeRecording(item) {
   };
 }
 
+function pct(n) { return `${Math.round((n || 0) * 100)}%`; }
+function formatMs(n) { return String(Math.round(n || 0)); }
+
 function formatTable(results, top, minScore) {
   const rows = results.filter(r => !r.error && r.score >= minScore).slice().sort((a,b)=>b.score-a.score).slice(0, top);
-  console.log('score  risk       turns  race     ver       meanDt  cv     decR   bossR  source/id');
-  console.log('-----  ---------  -----  -------  --------  ------  -----  -----  -----  ----------------');
+  console.log('score  risk       turns  race     ver       mean  med   p90  <=20  cv     decR   bossR  source/id');
+  console.log('-----  ---------  -----  -------  --------  ----  ----  ---  ----  -----  -----  -----  ----------------');
   for (const r of rows) {
     const decR = r.metrics.decisionPauseRatio == null ? '-' : r.metrics.decisionPauseRatio.toFixed(2);
     const bossR = r.metrics.bossPauseRatio == null ? '-' : r.metrics.bossPauseRatio.toFixed(2);
@@ -451,7 +476,10 @@ function formatTable(results, top, minScore) {
       String(r.turns).padStart(5),
       String(r.race || '-').padEnd(7),
       String(r.ver || '-').padEnd(8),
-      String(Math.round(r.metrics.meanDt)).padStart(6),
+      formatMs(r.metrics.meanDt).padStart(4),
+      formatMs(r.metrics.medianDt).padStart(4),
+      formatMs(r.metrics.p90).padStart(3),
+      pct(r.metrics.sub20Rate).padStart(4),
       r.metrics.cv.toFixed(3).padStart(5),
       String(decR).padStart(5),
       String(bossR).padStart(5),

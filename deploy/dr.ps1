@@ -164,7 +164,7 @@ function cmd_seed_debug {
 # ---------- test ----------
 function cmd_test {
     $fail = 0
-    $tests = @("finaltest", "milestonetest", "savetest", "sticktest", "fxpointtest")
+    $tests = @("finaletest", "milestonetest", "savetest", "sticktest", "fxpointtest")
     foreach ($t in $tests) {
         Write-Host ("{0,-14}" -f $t) -NoNewline
         $jsPath = "test\$t.js"
@@ -178,6 +178,14 @@ function cmd_test {
     }
     Write-Host ("{0,-14}" -f "thresholdtest") -NoNewline
     node "test\worker\threshold-top10-smoketest.js" > $null 2>&1
+    if ($LASTEXITCODE -eq 0) {
+        Write-Host "PASS" -ForegroundColor Green
+    } else {
+        Write-Host "FAIL" -ForegroundColor Red
+        $fail = 1
+    }
+    Write-Host ("{0,-14}" -f "scorertest") -NoNewline
+    node "test\tools\check-scorer-regression.js" > $null 2>&1
     if ($LASTEXITCODE -eq 0) {
         Write-Host "PASS" -ForegroundColor Green
     } else {

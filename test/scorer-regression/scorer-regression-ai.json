@@ -14,5 +14,14 @@
     "minScore": 25,
     "expectedRisk": "Very High",
     "notes": "当前目标样本；新策略下也必须继续高于 25 分自动改判线"
+  },
+  {
+    "id": "uplb2zcs",
+    "file": "ai/uplb2zcs.json",
+    "expectation": "ai",
+    "minScore": 65,
+    "expectedRisk": "Very High",
+    "expectedReasonIncludes": "毫秒级操作间隔",
+    "notes": "曾漏判的人类榜无名 350 回合样本：medianDt=1ms / p90=4ms，必须被毫秒级硬信号拦截"
   }
 ]
