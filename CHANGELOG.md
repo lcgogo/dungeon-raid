@@ -1,3 +1,8 @@
+## [v1.57.1]
+
+- 精简人物栏文案：HUD 里的「护甲进度」改为「护甲」，「等级经验」改为「经验」，角色属性弹框里的对应行也同步收短；同时把说明里的“攒满 +1 护甲”统一改成更准确的“攒满 +1 减伤”。英文对应从 “Armor XP / Level XP” 改为 “Armor / XP”，并用 “damage reduction” 解释实际效果。这是纯 UI 文案调整，不改数值、录像或 verify 兼容。
+- Simplified the character HUD labels: “Armor XP” is now “Armor”, “Level XP” is now “XP”, and the matching player-detail rows use the shorter labels too. The wording now says the bar grants “+1 damage reduction” instead of “+1 armor” to better describe the actual effect. This is UI text only; no numbers, replay, or verify behavior changed.
+
 ## [v1.57.0]
 
 > Version-Impact: verify

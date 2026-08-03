@@ -51,7 +51,7 @@ Each enemy tile shows three numbers:
 
 - **XP comes only from kills** (+3 per enemy). On level-up, **pick 1 of 3** upgrades. The regen upgrade **Channel Vitality** now scales by repeated picks: the 1st pick gives +1 per turn, the 2nd adds +2 more (total 3), the 3rd adds +3 more (total 6), and so on.
 - **Combo bonus**: longer chains pay more — total reward `× (1 + (N − 2) × 15%)` (5-chain ≈ ×1.45, 7-chain ≈ ×1.75).
-- **Armor accumulates**: shields do not grant armor directly; they fill "armor progress," and filling it gives +1 armor (costs more each time). Armor soaks each hit, then the rest comes off your HP.
+- **Armor accumulates**: shields do not grant damage reduction directly; they fill the HUD "Armor" bar, and filling it gives +1 damage reduction (costs more each time). Damage reduction soaks each hit, then the rest comes off your HP.
 - **Gold shop**: 💊 Heal (restore 10 HP, **+2 healing and +1 gold cost per use**; **unavailable at full HP** to avoid waste) / 💥 Bomb (all foes −5 HP). Each item has its own cooldown.
 
 ## 🧬 Races (chosen at start)
