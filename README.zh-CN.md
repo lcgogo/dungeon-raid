@@ -108,8 +108,8 @@
 | 🪦 亡灵 | 🧊 巫妖 Lich | 冰封球 Frost Orb | 对全场怪物/Boss（终焉之主除外）造成一次**当前固定伤害**，并让它们的**当前攻击倒计时 +1**（下一次出手额外慢一回合） |
 | 🐉 神兽 | 🐉 青龙 Azure Dragon | 龙吟 Dragon Roar | 对全场所有怪物（含普攻免疫 Boss）造成 =等级的伤害 |
 | 🐉 神兽 | 🐯 白虎 White Tiger | 白虎破军 Tiger Breaker | 下一次爪链可攻击爪免疫 Boss，且伤害 ×3 |
-| 🐉 神兽 | 🐢 玄龟 Black Tortoise | 玄甲镇岳 Tortoise Bastion | 立即 +1 减伤 |
-| 🐉 神兽 | 🐦‍🔥 朱雀 Vermilion Bird | 涅槃 Nirvana | 本回合被击败不会死亡；生命上限 +⌊等级/2⌋，恢复至新上限的 50% |
+| 🐉 神兽 | 🐢 玄龟 Black Tortoise | 玄甲镇岳 Tortoise Bastion | 护甲进度充满，立即升一级 |
+| 🐉 神兽 | 🐦‍🔥 朱雀 Vermilion Bird | 涅槃 Phoenix Rebirth | 本回合被击败不会死亡；生命上限 +⌊等级/2⌋，恢复至新上限的 50% |
 
 ## 🎖️ 二阶技能 / 本族技能 · 被动（锁定职业）
 
@@ -138,7 +138,7 @@
 | 🪦 亡灵 | 屠夫 → 积累腐肉 Carrion Feast | 每杀死一个敌人/Boss，生命上限永久 +1（腐肉越积越厚）|
 | 🪦 亡灵 | 巫妖 → 冰甲 Ice Armor | 每次你受到怪物/Boss攻击后，对攻击者造成**50% 当前固定伤害**（至少 1），并让它的**当前攻击倒计时 +1** |
 | 🐉 神兽 | 青龙 → 龙威 Dragon Might | 使用任意主动技能后，普通怪物的攻击减半 |
-| 🐉 神兽 | 白虎 → 杀伐之心 Tiger Fury | 固定爪伤 +2 |
+| 🐉 神兽 | 白虎 → 杀伐之心 Tiger Fury | 固定爪伤 +⌊等级/2⌋ |
 | 🐉 神兽 | 玄龟 → 恐鳌之心 Heart of Tarrasque | 每回合恢复当前生命的 10% |
 | 🐉 神兽 | 朱雀 → 火羽 Fire Feather | 任何攻击朱雀的怪物都会被点燃，复用火法师的点燃逻辑 |
 

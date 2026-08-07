@@ -108,8 +108,8 @@ Each race has **several** classes; every skill has a **5-turn cooldown** (except
 | 🪦 Undead | 🧊 Lich | Frost Orb | Deal your **current flat damage** once to all monsters/bosses on the board (excluding the Overlord), then add **+1 to their current attack countdown** so their next attack is delayed by one extra turn |
 | 🐉 Mythic Beasts | 🐉 Azure Dragon | Dragon Roar | Deal damage equal to your level to all foes, including normal-attack-immune bosses |
 | 🐉 Mythic Beasts | 🐯 White Tiger | Tiger Breaker | Your next Claw chain can hit Claw-immune bosses and deals ×3 damage |
-| 🐉 Mythic Beasts | 🐢 Black Tortoise | Tortoise Bastion | Immediately gain +1 damage reduction |
-| 🐉 Mythic Beasts | 🐦‍🔥 Vermilion Bird | Nirvana | Cannot die this turn; gain ⌊level/2⌋ max HP and revive at 50% of the new max HP |
+| 🐉 Mythic Beasts | 🐢 Black Tortoise | Tortoise Bastion | Fill Armor progress and gain one Armor level immediately |
+| 🐉 Mythic Beasts | 🐦‍🔥 Vermilion Bird | Phoenix Rebirth | Cannot die this turn; gain ⌊level/2⌋ max HP and revive at 50% of the new max HP |
 
 ## 🎖️ Tier-2 Skill / Race Skill · Passives (locked to class)
 
@@ -138,7 +138,7 @@ At **level 100 (Tier-2 Skill)** you automatically get the passive **locked to yo
 | 🪦 Undead | Butcher → Carrion Feast | Each enemy/boss killed: +1 permanent max HP (carrion keeps piling up) |
 | 🪦 Undead | Lich → Ice Armor | Whenever a monster/boss hits you, deal **50% of your current flat damage** back to that attacker (minimum 1) and add **+1 to its current attack countdown** |
 | 🐉 Mythic Beasts | Azure Dragon → Dragon Might | After using any active skill, normal monsters deal half attack damage |
-| 🐉 Mythic Beasts | White Tiger → Tiger Fury | +2 flat Claw damage |
+| 🐉 Mythic Beasts | White Tiger → Tiger Fury | +⌊level/2⌋ flat Claw damage |
 | 🐉 Mythic Beasts | Black Tortoise → Heart of Tarrasque | Restore 10% of current HP each turn |
 | 🐉 Mythic Beasts | Vermilion Bird → Fire Feather | Any monster that attacks Vermilion Bird is ignited using Flame Chain’s burn logic |
 

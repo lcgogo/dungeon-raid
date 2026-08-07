@@ -1,3 +1,22 @@
+## [v1.65.0]
+
+> Version-Impact: verify
+
+- 玄龟一阶主动「玄甲镇岳 Tortoise Bastion」改为立即填满当前护甲进度并升一级，不再直接增加 +1 减伤。
+- Black Tortoise’s tier-one active **Tortoise Bastion** now fills current Armor progress and immediately grants one Armor level instead of directly adding +1 damage reduction.
+
+## [v1.64.0]
+
+> Version-Impact: verify
+
+- 白虎二阶被动「杀伐之心 Tiger Fury」改为动态追加 `⌊当前等级/2⌋` 点固定爪伤，随等级成长，不再是固定 +2。
+- White Tiger’s tier-two passive **Tiger Fury** now dynamically adds `⌊current level/2⌋` flat Claw damage, scaling with level instead of remaining at a fixed +2.
+
+## [v1.63.1]
+
+- 朱雀主动「涅槃」的英文名改为 **Phoenix Rebirth**，更准确表达凤凰浴火重生，而不是佛教语境中超越生死的 Nirvana；内部技能 ID 和效果不变。
+- Renamed Vermilion Bird’s active from **Nirvana** to **Phoenix Rebirth** to match its phoenix-style revival effect; the internal skill ID and gameplay are unchanged.
+
 ## [v1.63.0]
 
 > Version-Impact: verify
