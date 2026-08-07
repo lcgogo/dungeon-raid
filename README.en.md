@@ -140,7 +140,7 @@ At **level 100 (Tier-2 Skill)** you automatically get the passive **locked to yo
 | 🐉 Mythic Beasts | Azure Dragon → Dragon Might | After using any active skill, normal monsters deal half attack damage |
 | 🐉 Mythic Beasts | White Tiger → Tiger Fury | +2 flat Claw damage |
 | 🐉 Mythic Beasts | Black Tortoise → Heart of Tarrasque | Restore 10% of current HP each turn |
-| 🐉 Mythic Beasts | Vermilion Bird → Phoenix Ash | The first time you die this run, revive at full HP |
+| 🐉 Mythic Beasts | Vermilion Bird → Fire Feather | Any monster that attacks Vermilion Bird is ignited using Flame Chain’s burn logic |
 
 ## 👹 Bestiary
 

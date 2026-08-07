@@ -1,3 +1,10 @@
+## [v1.63.0]
+
+> Version-Impact: verify
+
+- 朱雀二阶被动改为「火羽 Fire Feather」：任何攻击朱雀的普通怪或 Boss 都会被点燃，复用火法师的点燃、持续伤害与叠层逻辑；移除原「不灭火种」的首次满血复生。
+- Vermilion Bird’s tier-two passive is now **Fire Feather**: any normal monster or boss that attacks Vermilion Bird is ignited using Flame Chain’s burn, duration, and stacking logic. The old first-death full-health revival is removed.
+
 ## [v1.62.0]
 
 > Version-Impact: verify

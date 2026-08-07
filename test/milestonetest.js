@@ -235,7 +235,7 @@ bz.tier1='azuredragon'; G.TIER2.dragonmight.f(bz); bz.hp=40; bz.skillCd=0; G.bus
 bz.tier1='blackturtle'; bz.armor=0; bz.shieldTurn=false; G.TIER1.blackturtle.skill.f(bz); ok(bz.armor===1 && bz.shieldTurn===false,'玄龟玄甲镇岳立即+1减伤');
  bz.hp=20; bz.maxHp=40; G.TIER2.tortoiseheart.f(bz); ok(bz.tortoiseRegen===true,'玄龟厚土玄甲获得每回合恢复被动');
 bz.tier1='vermilion'; bz.level=10; bz.hp=40; bz.maxHp=40; bz.nirvanaTurn=false; G.TIER1.vermilion.skill.f(bz); G.hurtPlayer(999,'enemy',true,{type:'enemy'}); ok(bz.hp===23 && bz.maxHp===45 && bz.nirvanaTurn===false,'朱雀涅槃致死后增加生命上限并恢复50%');
-bz.beastPhoenix=true; bz.hp=1; bz.maxHp=40; G.hurtPlayer(999,'enemy',true,{type:'enemy'}); ok(bz.hp===40 && bz.beastPhoenix===false,'朱雀不灭火种首次致死自动满血复生');
+bz.hp=40; bz.maxHp=40; bz.fireFeather=false; const featherFoe={type:'enemy',hp:10,maxHp:10,atk:3,cd:1,baseCd:1}; G.TIER2.phoenixash.f(bz); G.hurtPlayer(1,'enemy',false,featherFoe); ok(bz.fireFeather===true && featherFoe.burnStacks===1,'朱雀火羽点燃攻击者');
 
 // onBossKilled 链：未到回合不应误触发
 const q=Object.assign({},{t1:se.t1Pending||e.t1Pending||p.t1Pending,t2:se.t2Pending||e.t2Pending||p.t2Pending,t3:se.t3Pending||e.t3Pending||p.t3Pending,t4:se.t4Pending||e.t4Pending||p.t4Pending});
