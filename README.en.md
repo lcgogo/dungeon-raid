@@ -139,7 +139,7 @@ At **level 100 (Tier-2 Skill)** you automatically get the passive **locked to yo
 | 🪦 Undead | Lich → Ice Armor | Whenever a monster/boss hits you, deal **50% of your current flat damage** back to that attacker (minimum 1) and add **+1 to its current attack countdown** |
 | 🐉 Mythic Beasts | Azure Dragon → Dragon Might | After using any active skill, normal monsters deal half attack damage |
 | 🐉 Mythic Beasts | White Tiger → Tiger Fury | +2 flat Claw damage |
-| 🐉 Mythic Beasts | Black Tortoise → Tortoise Heart | Permanently gain +1 extra damage reduction |
+| 🐉 Mythic Beasts | Black Tortoise → Tortoise Heart | Restore 10% of current HP each turn |
 | 🐉 Mythic Beasts | Vermilion Bird → Phoenix Ash | The first time you die this run, revive at full HP |
 
 ## 👹 Bestiary

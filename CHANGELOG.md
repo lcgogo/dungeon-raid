@@ -1,3 +1,10 @@
+## [v1.61.0]
+
+> Version-Impact: verify
+
+- 玄龟二阶被动「厚土玄甲 Tortoise Heart」改为每回合恢复当前生命的 10%，不再填充护甲进度。
+- Black Tortoise’s tier-two passive **Tortoise Heart** now restores 10% of current HP each turn instead of filling Armor progress.
+
 ## [v1.60.0]
 
 > Version-Impact: verify

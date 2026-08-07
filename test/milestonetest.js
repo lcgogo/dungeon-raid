@@ -233,6 +233,7 @@ G.TIER2.tigerfury.f(bz); ok(bz.swordFlat===2,'白虎二阶固定爪伤+2');
 bz.tier1='azuredragon'; bz.level=4; bz.skillCd=0; G.grid[1][0]={type:'enemy',hp:10,maxHp:10,atk:1,cd:9,baseCd:9}; G.grid[1][1]={type:'boss',bossId:'ghost',hp:10,maxHp:10,atk:1,cd:9,baseCd:9,tier:1}; G.TIER1.azuredragon.skill.f(bz); ok(G.grid[1][0].hp===6 && G.grid[1][1].hp===6,'青龙龙吟按等级对全场含普攻免疫Boss造成伤害');
 bz.tier1='azuredragon'; G.TIER2.dragonmight.f(bz); bz.hp=40; bz.skillCd=0; G.busy=false; for(let r=0;r<6;r++)for(let c=0;c<6;c++) G.grid[r][c]=null; G.grid[2][0]={type:'enemy',hp:10,maxHp:10,atk:6,cd:1,baseCd:1}; ok(bz.dragonMight===true,'青龙龙威被动已获得'); G.activateSkill(); G.advanceEnemies(); ok(bz.hp===37,'龙威触发后普通怪攻击减半');
 bz.tier1='blackturtle'; bz.armor=0; bz.shieldTurn=false; G.TIER1.blackturtle.skill.f(bz); ok(bz.armor===1 && bz.shieldTurn===false,'玄龟玄甲镇岳立即+1减伤');
+ bz.hp=20; bz.maxHp=40; G.TIER2.tortoiseheart.f(bz); ok(bz.tortoiseRegen===true,'玄龟厚土玄甲获得每回合恢复被动');
 bz.tier1='vermilion'; bz.beastPhoenix=true; bz.rebirthTurn=false; bz.shieldTurn=false; bz.hp=1; bz.maxHp=40; G.hurtPlayer(999,'enemy',true,{type:'enemy'}); ok(bz.hp===40 && bz.beastPhoenix===false,'朱雀不灭火种首次致死自动满血复生');
 
 // onBossKilled 链：未到回合不应误触发
