@@ -109,7 +109,7 @@
 | 🐉 神兽 | 🐉 青龙 Azure Dragon | 龙吟 Dragon Roar | 对全场所有怪物（含普攻免疫 Boss）造成 =等级的伤害 |
 | 🐉 神兽 | 🐯 白虎 White Tiger | 白虎破军 Tiger Breaker | 下一次爪链可攻击爪免疫 Boss，且伤害 ×3 |
 | 🐉 神兽 | 🐢 玄龟 Black Tortoise | 玄甲镇岳 Tortoise Bastion | 立即 +1 减伤 |
-| 🐉 神兽 | 🐦‍🔥 朱雀 Vermilion Bird | 涅槃天火 Phoenixfire | 对全场敌人造成当前固定伤害，且本回合准备涅槃复生 |
+| 🐉 神兽 | 🐦‍🔥 朱雀 Vermilion Bird | 涅槃 Nirvana | 本回合被击败不会死亡；生命上限 +⌊等级/2⌋，恢复至新上限的 50% |
 
 ## 🎖️ 二阶技能 / 本族技能 · 被动（锁定职业）
 

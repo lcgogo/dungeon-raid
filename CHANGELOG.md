@@ -1,3 +1,10 @@
+## [v1.62.0]
+
+> Version-Impact: verify
+
+- 朱雀主动改为「涅槃 Nirvana」：俏皮话为“死亡即新生！”。本回合被击败不会死亡，生命上限永久增加 ⌊当前等级/2⌋，并恢复到新生命上限的 50%。
+- Vermilion Bird’s active is now **Nirvana** with the quip “Death is new life!”. Lethal damage this turn no longer kills the player; max HP permanently increases by ⌊current level/2⌋ and HP is restored to 50% of the new max HP.
+
 ## [v1.61.1]
 
 - 玄龟二阶被动中文名改为「恐鳌之心」，英文名改为 **Heart of Tarrasque**；内部技能 ID 保持不变，不影响录像兼容。

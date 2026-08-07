@@ -109,7 +109,7 @@ Each race has **several** classes; every skill has a **5-turn cooldown** (except
 | 🐉 Mythic Beasts | 🐉 Azure Dragon | Dragon Roar | Deal damage equal to your level to all foes, including normal-attack-immune bosses |
 | 🐉 Mythic Beasts | 🐯 White Tiger | Tiger Breaker | Your next Claw chain can hit Claw-immune bosses and deals ×3 damage |
 | 🐉 Mythic Beasts | 🐢 Black Tortoise | Tortoise Bastion | Immediately gain +1 damage reduction |
-| 🐉 Mythic Beasts | 🐦‍🔥 Vermilion Bird | Phoenixfire | Deal current flat damage to all foes and arm a full-health rebirth this turn |
+| 🐉 Mythic Beasts | 🐦‍🔥 Vermilion Bird | Nirvana | Cannot die this turn; gain ⌊level/2⌋ max HP and revive at 50% of the new max HP |
 
 ## 🎖️ Tier-2 Skill / Race Skill · Passives (locked to class)
 

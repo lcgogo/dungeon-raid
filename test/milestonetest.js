@@ -234,7 +234,8 @@ bz.tier1='azuredragon'; bz.level=4; bz.skillCd=0; G.grid[1][0]={type:'enemy',hp:
 bz.tier1='azuredragon'; G.TIER2.dragonmight.f(bz); bz.hp=40; bz.skillCd=0; G.busy=false; for(let r=0;r<6;r++)for(let c=0;c<6;c++) G.grid[r][c]=null; G.grid[2][0]={type:'enemy',hp:10,maxHp:10,atk:6,cd:1,baseCd:1}; ok(bz.dragonMight===true,'青龙龙威被动已获得'); G.activateSkill(); G.advanceEnemies(); ok(bz.hp===37,'龙威触发后普通怪攻击减半');
 bz.tier1='blackturtle'; bz.armor=0; bz.shieldTurn=false; G.TIER1.blackturtle.skill.f(bz); ok(bz.armor===1 && bz.shieldTurn===false,'玄龟玄甲镇岳立即+1减伤');
  bz.hp=20; bz.maxHp=40; G.TIER2.tortoiseheart.f(bz); ok(bz.tortoiseRegen===true,'玄龟厚土玄甲获得每回合恢复被动');
-bz.tier1='vermilion'; bz.beastPhoenix=true; bz.rebirthTurn=false; bz.shieldTurn=false; bz.hp=1; bz.maxHp=40; G.hurtPlayer(999,'enemy',true,{type:'enemy'}); ok(bz.hp===40 && bz.beastPhoenix===false,'朱雀不灭火种首次致死自动满血复生');
+bz.tier1='vermilion'; bz.level=10; bz.hp=40; bz.maxHp=40; bz.nirvanaTurn=false; G.TIER1.vermilion.skill.f(bz); G.hurtPlayer(999,'enemy',true,{type:'enemy'}); ok(bz.hp===23 && bz.maxHp===45 && bz.nirvanaTurn===false,'朱雀涅槃致死后增加生命上限并恢复50%');
+bz.beastPhoenix=true; bz.hp=1; bz.maxHp=40; G.hurtPlayer(999,'enemy',true,{type:'enemy'}); ok(bz.hp===40 && bz.beastPhoenix===false,'朱雀不灭火种首次致死自动满血复生');
 
 // onBossKilled 链：未到回合不应误触发
 const q=Object.assign({},{t1:se.t1Pending||e.t1Pending||p.t1Pending,t2:se.t2Pending||e.t2Pending||p.t2Pending,t3:se.t3Pending||e.t3Pending||p.t3Pending,t4:se.t4Pending||e.t4Pending||p.t4Pending});
