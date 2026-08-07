@@ -88,7 +88,7 @@ Each race has **several** classes; every skill has a **5-turn cooldown** (except
 |---|---|---|---|
 | 🧑 Human | 🛡️ Knight | Aegis | Immune to all damage this turn |
 | 🧑 Human | 💗 Priest | Blessing | Clear all hearts on the board; each becomes 3 XP **and also heals you (by your heal-per-heart)** |
-| 🧑 Human | 🔥 Fire Mage | Flame Chain | Once activated, it behaves like Frenzy for targeting: eligible bosses turn fiery red and become chainable this turn, and even sword-immune bosses can be used as the first link target; every monster/boss your sword chain touches (including sword-immune foes such as Ghosts) is then ignited and loses **20% of the flat damage from the ignition turn** each turn (minimum 1, stacking by burn stacks) until it dies |
+| 🧑 Human | 🔥 Fire Mage | Flame Chain | Highlights and enables bosses this turn, including sword-immune bosses as the first target; every enemy hit by your sword chain is ignited and then loses **20% of the ignition-turn flat damage** each turn (minimum 1, stacks, until death) |
 | 🧑 Human | ⚔️ Sword Saint | Bladeshift | Turn every heart and coin into swords (its signature passive "Anything a Blade" unlocks at level 100, see below) |
 | 🧝 Elf | 🏹 Ranger | Arrow Rain | Deal "sword power ×2" damage to all enemies |
 | 🧝 Elf | 💰 Rogue | Empty Pockets | For this turn, each enemy hit by your sword chain drops extra gold equal to 20% of its pre-hit HP (rounded down, minimum 1); the chain turns gold |
@@ -151,7 +151,7 @@ Every **10 turns** a random boss is guaranteed to appear; **beating one by any m
 | 👻 Ghost | Bomb only | Immune to sword chains; **its HP matches same-tier normal enemies (without the extra boss-tier HP multiplier)**; strikes you hard when its timer hits 0 |
 | 🤡 Clown | Bomb only | Re-rolls several non-monster tiles into other resources each turn, disrupting your chains; does NOT spawn monsters (that's the Summoner) |
 | 🪢 Lashmaster | Bomb only | On spawn, all normal enemies get **-1 attack countdown**, and each turn after that they get **-1 attack countdown** again. It may not be the deadliest foe by itself, but it drags the whole board into a frenzy the longer it lives. |
-| ♨️ Magmafiend | Sword / Bomb | **Every turn**, it melts all shields on the board and converts each shield into HP using the current “armor XP per shield” value; in addition, it **feeds on fire** — instead of being ignited or hurt by Firewall, those fire effects heal it. It does not directly strip your current armor, but it makes it much harder to sustain a shield-based defense. |
+| ♨️ Magmafiend | Sword / Bomb | **Every turn**, it melts all shields on the board but no longer restores HP from them; it also **feeds on fire** — instead of being ignited or hurt by Firewall, those fire effects heal it. It does not directly strip your current armor, but it makes it much harder to sustain a shield-based defense. |
 | 🧛 Vampire | Sword / Bomb | Drains every heart on the board each turn to heal — do not leave hearts out; but **drinking poison hearts (Corruptor green / Witch Doctor black) poisons it instead — it loses HP and can even die** (counter it with Hex) |
 | 🥷 Assassin | Sword / Bomb | Stats like a normal enemy, but its hits are **true damage** — ignore armor, straight to HP |
 | 🦖 Devourer | Sword / Bomb | When its countdown hits 0, it first strikes for **50% of its current HP**; only after that hit resolves does it drain half the HP from every regular enemy to grow |

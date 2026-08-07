@@ -1,3 +1,10 @@
+## [v1.60.0]
+
+> Version-Impact: verify
+
+- 岩浆魔现在每回合仍会融化棋盘上的全部盾牌，但不再把盾牌转化为自身生命；其原有的吸收火焰机制保持不变。该 Boss 机制变化会影响战斗结果与录像验证。
+- Magmafiend still melts every shield on the board each turn, but no longer converts those shields into HP. Its existing fire-absorption behavior is unchanged. This boss-mechanic change affects combat outcomes and replay verification.
+
 ## [v1.59.0]
 
 > Version-Impact: verify
