@@ -93,7 +93,7 @@ Each race has **several** classes; every skill has a **5-turn cooldown** (except
 | 🧝 Elf | 🌿 Treant | Vine Coil | For the next 3 turns, all enemies/bosses (incl. sword-immune; Overlord excluded) lose 30% of your max HP each turn; cursed foes glow green |
 | 🧝 Elf | 🔮 Seer | Prophecy | Opens a modal to choose coin / shield / heart / sword / enemy; during the next refill, all newly falling tiles become that type. If no refill happens this turn, the effect waits until the next refill. Choosing enemy creates only normal enemies, never bosses |
 | 🎅 Dwarf | 🔰 Blacksmith | Forge Armor | Absorb all shields on the board into armor progress |
-| 🎅 Dwarf | 🔒 Miser | Hoard | Invest **all current gold** into Hoard; after **4 turns**, the remaining invested gold is paid back at **2.5×**. New gold earned during Hoard is banked normally, and shops / other skills remain usable |
+| 🎅 Dwarf | 🔒 Miser | Hoard | Invest **all current gold** into Hoard; after **4 turns**, the remaining invested gold is paid back at **1.2×**. New gold earned during Hoard is banked normally, and shops / other skills remain usable |
 | 🎅 Dwarf | 💼 Guild Master | Buyout | **Pay gold equal to the total HP of all enemies** to bribe them all **into coins** (only if you can afford it; **no cooldown** — reuse it as long as you have gold; bosses unaffected; costs half once you have Cheapskate) |
 | 🎅 Dwarf | 🔫 Musketeer | Snipe | Prioritizes bosses; if there are multiple bosses, it shoots the one with the **lowest HP**. If there is no boss, it falls back to the current **highest-HP** monster/boss (bomb-type — hits sword-immune & special bosses; not the Overlord) for **2× your Bomb damage**; a kill grants **triple XP + triple gold** (CD 5; scales with Demolitionist) |
 | 🧌 Orc | 🔪 Tauren | Frenzy | Halve HP and become **Undying** (**this turn only**: keep ≥1 HP no matter the damage); also **permanently** enables low-HP scaling — lower HP means higher sword damage (up to +60%) |
@@ -121,7 +121,7 @@ At **level 100 (Tier-2 Skill)** you automatically get the passive **locked to yo
 | 🧝 Elf | Seer → Echo of Fate | After Prophecy resolves, 3 additional random non-boss tiles transform into the chosen type; if enemy was chosen, those 3 also become normal enemies |
 | 🎅 Dwarf | Blacksmith → Shield Bash | Adds your armor (damage-reduction) value to flat {W} damage — more armor, harder hits |
 | 🎅 Dwarf | Musketeer → Demolitionist | Each bomb use: +1 damage and +5 gold cost (stronger but pricier each time) |
-| 🎅 Dwarf | Miser → Money Buys Life | While Hoard is active, incoming damage spends **invested Hoard gold** first; if that runs out, it spends **current gold**, and only the remainder spills into HP |
+| 🎅 Dwarf | Miser → Money Buys Life | While Hoard is active, incoming damage spends **current gold only**; if wallet gold runs out, the remainder spills into HP and **invested Hoard gold is not spent** |
 | 🎅 Dwarf | Guild Master → Cheapskate | Gold-spending actives (shop 💊Heal / 💥Bomb, Guild Master’s Buyout) cost half |
 | 🧌 Orc | Tauren → Titan | Higher max HP means higher flat sword damage (+1 per 12 max HP) |
 | 🧌 Orc | Fighter → Blood Frenzy | When Lifesteal/Bloodthirst healing exceeds max HP, **30%** of the overflow becomes permanent max HP; but at the **end of every turn you lose 5% of max HP** |

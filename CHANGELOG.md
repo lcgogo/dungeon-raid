@@ -1,3 +1,10 @@
+## [v1.58.0]
+
+> Version-Impact: verify
+
+- 下调守财奴「囤金 Hoard」新版本金投资的收益：4 回合后返还倍率从 **2.5 倍** 降到 **1.2 倍**，保留“投入当前手头金币、期间新金币照常进账、商店/其它技能可用”的机制，但显著压低滚雪球速度。同时调整「钱能买命 Money Buys Life」为更简单的口径：囤金期间受伤时只扣**手头金币**，手头金币不够时剩余伤害才掉血，**不消耗囤金本金**；囤金到期结算也放到敌人行动之后，让最后一回合的伤害仍会先触发钱能买命，再结算返还。由于这会改变金币路径、受伤结果与后续决策，本次按 replay / verify 影响处理。
+- Reduced Miser **Hoard**’s new principal-investment payout from **2.5×** to **1.2×** after 4 turns. It still invests current gold while newly earned gold, shops, and other skills remain available, but the snowball is much smaller. **Money Buys Life** now uses the simpler rule while Hoard is active: incoming damage spends **wallet gold only**; if wallet gold runs out, the remainder spills into HP and invested Hoard gold is never spent. Hoard also matures after enemy actions, so damage on the last locked turn is still checked before the payout resolves. Because this changes gold paths, damage outcomes, and downstream decisions, this release is treated as replay / verify impacting.
+
 ## [v1.57.1]
 
 - 精简人物栏文案：HUD 里的「护甲进度」改为「护甲」，「等级经验」改为「经验」，角色属性弹框里的对应行也同步收短；同时把说明里的“攒满 +1 护甲”统一改成更准确的“攒满 +1 减伤”。英文对应从 “Armor XP / Level XP” 改为 “Armor / XP”，并用 “damage reduction” 解释实际效果。这是纯 UI 文案调整，不改数值、录像或 verify 兼容。

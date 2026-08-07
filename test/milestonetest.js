@@ -57,7 +57,7 @@ G.buyItem('bomb');
 ok(h.skill2Cd>0,'点炸弹槽→施放换装主动(进冷却 skill2Cd>0)');
 ok(h.gold===goldBefore,'施放主动不花金币(炸弹槽未被当消耗品买)');
 
-// 350 回合跨界囤金：投入当前金币，期间新金币照常入账，普通商店仍可用，到期按剩余本金 2.5 倍返还
+// 350 回合跨界囤金：投入当前金币，期间新金币照常入账，普通商店仍可用，到期按剩余本金 1.2 倍返还
 G.replayRec={seed:18,race:'human',acts:[]}; G.replaying=true; G.startGame(G.raceById('human')); G.replaying=false;
 const mh=G.player; mh.hp=mh.maxHp=999999; mh.tier1='knight'; mh.tier2='holystrike'; mh.tier2b='general'; mh.turns=350; mh.shopCd={heal:0,bomb:0}; G.busy=false; G.pendingLevels=0;
 G.onBossKilled(); ok(mh.t4Pending,'350回合→可选择跨界囤金'); mh.t4Pending=false;
@@ -69,15 +69,23 @@ G.gainGold(30); ok(mh.gold===30 && mh.goldFrozen===100,'囤金期间新金币照
 mh.shopCd.heal=0; mh.hp=mh.maxHp-20; const beforeHealGold=mh.gold; G.buyItem('heal');
 ok(mh.gold<beforeHealGold && mh.goldFrozen===100,'囤金期间普通商店仍可使用，且不动囤金本金');
 mh.gold=0; mh.goldFrozen=80; mh.goldLock=1; mh.shopCd={heal:0,bomb:0}; mh.frozen={}; G.selection=[{r:0,c:0,type:'coin'},{r:0,c:1,type:'coin'}]; G.grid[0][0]={type:'coin'}; G.grid[0][1]={type:'coin'};
-G.resolve(); ok(mh.gold===Math.round(80*2.5)+Math.round(2*mh.goldPerCoin) && mh.goldFrozen===0 && mh.goldLock===0,'囤金到期按剩余本金2.5倍返还，新连金币正常另计');
+G.resolve(); ok(mh.gold===Math.round(80*1.2)+Math.round(2*mh.goldPerCoin) && mh.goldFrozen===0 && mh.goldLock===0,'囤金到期按剩余本金1.2倍返还，新连金币正常另计');
 
-// 钱能买命：先扣囤金本金，不够再扣手头金币，最后才掉血
+// 钱能买命：只扣手头金币，不动囤金本金，最后才掉血
 G.replayRec={seed:20,race:'dwarf',acts:[]}; G.replaying=true; G.startGame(G.raceById('dwarf')); G.replaying=false;
 const ty=G.player; ty.hp=ty.maxHp=50; ty.armor=0; ty.toughness=0; ty.tycoonGoldShield=true; ty.goldLock=2; ty.goldFrozen=5; ty.gold=7; G.busy=false; G.pendingLevels=0;
 const tyHp=ty.hp; const tyDmg=G.hurtPlayer(10,'enemy',true,{type:'enemy'});
-ok(tyDmg===0 && ty.goldFrozen===0 && ty.gold===2 && ty.hp===tyHp,'钱能买命先扣囤金5再扣手头5，挡住全部10伤害');
+ok(tyDmg===3 && ty.goldFrozen===5 && ty.gold===0 && ty.hp===tyHp-3,'钱能买命只扣手头7，囤金本金不动，剩余3伤害掉血');
 const tyDmg2=G.hurtPlayer(6,'enemy',true,{type:'enemy'});
-ok(tyDmg2===4 && ty.gold===0 && ty.hp===tyHp-4,'钱能买命金币不够时只让剩余伤害掉血');
+ok(tyDmg2===6 && ty.goldFrozen===5 && ty.gold===0 && ty.hp===tyHp-9,'钱能买命手头金币不够时不动囤金本金，剩余伤害掉血');
+
+ty.hp=ty.maxHp=50; ty.armor=0; ty.toughness=0; ty.goldLock=1; ty.goldFrozen=6; ty.gold=0; ty.shopCd={}; ty.frozen={}; G.busy=false; G.pendingLevels=0;
+for(let r=0;r<6;r++)for(let c=0;c<6;c++) G.grid[r][c]=null;
+G.grid[0][0]={type:'heart'}; G.grid[0][1]={type:'heart'};
+G.grid[5][5]={type:'enemy', hp:20, maxHp:20, atk:6, cd:1, baseCd:3};
+G.selection=[{r:0,c:0,type:'heart'},{r:0,c:1,type:'heart'}];
+G.resolve();
+ok(ty.hp===44 && ty.gold===Math.round(6*1.2) && ty.goldFrozen===0 && ty.goldLock===0,'钱能买命最后1回合只用手头金币挡伤，不动囤金本金并正常到期返还');
 
 // 盗贼链：100 回合锁定被动 shadow，现显示/生效为「乾坤一掷」
 G.replayRec={seed:11,race:'elf',acts:[]}; G.replaying=true; G.startGame(G.raceById('elf')); G.replaying=false;
