@@ -34,6 +34,7 @@ The two builds keep **separate, non-overwriting saves** (Dev uses its own localS
   | 🔰 Shield | Gain armor (absorbs damage before health) |
   | 💗 Heart | Restore health |
   | 💰 Coin | Earn gold for the shop |
+  | 🐾 Claw | The Mythic Beasts' weapon for attacking foes |
   | 👹 Enemy | A monster |
 
 - A **sword chain can be dragged straight through 👹**. Every enemy on the chain takes the **full** chain damage **independently** — enough damage means an instant kill. The sword is your weapon, so a chain must include **at least one 🔪** to deal damage (chaining only monsters with no sword isn't an attack and costs no turn).
@@ -65,6 +66,7 @@ Pick a race at the start. Each has a unique **trait** and a matching **weakness*
 | 🎅 Dwarf | Armor counts double (each point blocks 2) | ×0.85 total sword damage (flat included) |
 | 🧌 Orc | Fortify Body upgrade gives double max HP (+12 each) | **No Armor** — can never gain armor (shields removed from the board) |
 | 🪦 Undead | **Confusion**: all monsters (incl. bosses) get +1 attack countdown | All healing halved (hearts/potion/drain) + active-skill cooldowns +1 |
+| 🐉 Mythic Beasts | **Divine Sense**: gain 2× XP | **Yin-Yang Imbalance**: all foes get −1 attack countdown (minimum 1) |
 
 ## 🌟 Progression Path
 
@@ -104,6 +106,10 @@ Each race has **several** classes; every skill has a **5-turn cooldown** (except
 | 🪦 Undead | 💀 Skeleton King | Rebirth | If slain this turn, cheat death and refill to full HP; afterward Rebirth's own cooldown grows +2 (each actual revive) |
 | 🪦 Undead | 🪝 Butcher | Hook | Drags every monster/boss (incl. sword-immune; Overlord excluded) down to the bottom of its column while other tiles float up; then deals damage by **distance from the bottom**: bottom row takes 1× flat damage, second-from-bottom takes 2×, and so on (CD 5) |
 | 🪦 Undead | 🧊 Lich | Frost Orb | Deal your **current flat damage** once to all monsters/bosses on the board (excluding the Overlord), then add **+1 to their current attack countdown** so their next attack is delayed by one extra turn |
+| 🐉 Mythic Beasts | 🐉 Azure Dragon | Dragon Roar | Deal damage equal to your level to all foes, including normal-attack-immune bosses |
+| 🐉 Mythic Beasts | 🐯 White Tiger | Tiger Breaker | Your next Claw chain can hit Claw-immune bosses and deals ×3 damage |
+| 🐉 Mythic Beasts | 🐢 Black Tortoise | Tortoise Bastion | Immediately gain +1 damage reduction |
+| 🐉 Mythic Beasts | 🐦‍🔥 Vermilion Bird | Phoenixfire | Deal current flat damage to all foes and arm a full-health rebirth this turn |
 
 ## 🎖️ Tier-2 Skill / Race Skill · Passives (locked to class)
 
@@ -131,6 +137,10 @@ At **level 100 (Tier-2 Skill)** you automatically get the passive **locked to yo
 | 🪦 Undead | Skeleton King → Splash | Overflow damage splashes to a random remaining foe (**including sword-immune bosses**); triggers from sword chains, Arrow Rain, and Soul Drain overflow |
 | 🪦 Undead | Butcher → Carrion Feast | Each enemy/boss killed: +1 permanent max HP (carrion keeps piling up) |
 | 🪦 Undead | Lich → Ice Armor | Whenever a monster/boss hits you, deal **50% of your current flat damage** back to that attacker (minimum 1) and add **+1 to its current attack countdown** |
+| 🐉 Mythic Beasts | Azure Dragon → Dragon Might | After using any active skill, normal monsters deal half attack damage |
+| 🐉 Mythic Beasts | White Tiger → Tiger Fury | +2 flat Claw damage |
+| 🐉 Mythic Beasts | Black Tortoise → Tortoise Heart | Permanently gain +1 extra damage reduction |
+| 🐉 Mythic Beasts | Vermilion Bird → Phoenix Ash | The first time you die this run, revive at full HP |
 
 ## 👹 Bestiary
 

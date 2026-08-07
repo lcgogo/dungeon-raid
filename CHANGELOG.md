@@ -1,3 +1,10 @@
+## [v1.59.0]
+
+> Version-Impact: verify
+
+- 新增第六种族「神兽 Mythic Beasts」及 `🐾 爪 / Claw` 武器。共享特性「神识」使获得经验 ×2，弱点「阴阳失衡」使敌人攻击倒计时 -1（最低 1）；新增青龙「龙吟」（全场造成等同等级的伤害，100 级被动「龙威」使使用任意主动后普通怪攻击减半）、白虎「白虎破军」、玄龟「玄甲镇岳」（立即 +1 减伤）、朱雀「涅槃天火 Phoenixfire」四条职业线及对应二阶被动。白虎可让爪链命中爪免疫 Boss，朱雀具备群体伤害与复生能力；所有新动作均接入确定性录像回放路径。
+- Added the sixth race, **Mythic Beasts**, with the `🐾 Claw` weapon, **Divine Sense** (2× XP), and the Yin-Yang Imbalance countdown weakness. Added Azure Dragon (**Dragon Roar**, dealing level-based damage to all foes, with level-100 **Dragon Might** halving normal-monster attack after any active skill), White Tiger, Black Tortoise (**immediately gain +1 damage reduction**), and Vermilion Bird class paths with their tier-two passives; White Tiger can pierce Claw immunity, while Vermilion Bird has area damage and rebirth tools. All new actions are wired into deterministic replay.
+
 ## [v1.58.0]
 
 > Version-Impact: verify

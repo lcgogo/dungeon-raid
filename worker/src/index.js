@@ -23,7 +23,7 @@ const THRESH_SCOPE = 'upload:human:race=all:recent3';
 const THRESH_RECENT = 3;
 const THRESH_SURVIVAL_CAP = 350;
 const THRESH_MIN_SAMPLE = 30;
-const PLAYABLE_RACES = ['human', 'elf', 'dwarf', 'orc', 'undead'];
+const PLAYABLE_RACES = ['human', 'elf', 'dwarf', 'orc', 'undead', 'beast'];
 const THRESH_DEFAULT = { scope: THRESH_SCOPE, recent: THRESH_RECENT, agent: 'human', race: 'all', target_race: 'all', version_bucket: '', requested_version_bucket: '', scope_kind: `recent${THRESH_RECENT}`, versions: [], total: 0, upload_min_turns: 0, top1_turns: 0, score_top10_turns: 0, score_top10_level: 0, score_top10_gold: 0, clear_total: 0, clear_top10_level: 0, clear_top10_turns: 0, p5: 0, p10: 0, p30: 0, p50: 0, p70: 0, p90: 0, computed: 0 };
 const AUTO_CLASSIFY_BATCH_MAX = 50;
 // 反作弊·服务端发种子：上榜成绩必须用服务端发的种子（防离线刷幸运种子）。

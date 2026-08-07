@@ -4,8 +4,8 @@ const fs = require('fs');
 const path = require('path');
 const file = fs.existsSync('dungeon-raid-dev.html') ? 'dungeon-raid-dev.html' : path.join('..', 'dungeon-raid-dev.html');
 let s = fs.readFileSync(file, 'utf8').match(/<script>([\s\S]*?)<\/script>/)[1];
-const EXPORT = `globalThis.__G={startGame,raceById,onBossKilled,dispatchReplayAct,buyItem,resolve,applyGravity,advanceEnemies,
-  TIER1,TIER2,RACE_PATHS, CLASS_T2, gainGold, gainHeal, witherAuraTick, hurtPlayer, frostOrbDamage,
+const EXPORT = `globalThis.__G={startGame,raceById,onBossKilled,dispatchReplayAct,buyItem,resolve,applyGravity,advanceEnemies,activateSkill,makeTile,isSwordTarget,
+  TIER1,TIER2,RACE_PATHS, CLASS_T2, WEAPON, gainGold, gainHeal, addXp, witherAuraTick, hurtPlayer, frostOrbDamage,
   get player(){return player}, get grid(){return grid}, get logHistory(){return logHistory}, set selection(v){selection=v},
   set busy(v){busy=v}, set pendingLevels(v){pendingLevels=v}, set replaying(v){replaying=v}, set replayRec(v){replayRec=v}};`;
 s = s.replace('resize(); showClassSelect(); loop();', EXPORT);
@@ -216,6 +216,24 @@ const recentLogs=G.logHistory.slice(logStart).map(e=>e&&e.m||'');
 ok(nm.hp===40,'两只普通怪同回合都应各自造成伤害（总共掉 10 血）');
 ok(recentLogs.some(m=>m.includes('2 只普通怪攻击：3 + 7 → 共掉 10 血')),'普通怪同回合攻击应汇总成一条摘要日志');
 ok(!recentLogs.some(m=>m.includes('减伤计算')),'普通怪汇总后不再逐条刷减伤计算日志');
+
+// 神兽：四象职业、🐾武器、爪链破免疫、神识经验与朱雀复生
+ok(G.WEAPON.beast && G.WEAPON.beast.e==='🐾' && G.WEAPON.beast.n[0]==='爪','神兽武器=🐾爪');
+ok(G.RACE_PATHS.beast.t1.length===4 && G.RACE_PATHS.beast.t2.length===4,'神兽拥有四条四象职业线');
+G.replayRec={seed:59,race:'beast',acts:[]}; G.replaying=true; G.startGame(G.raceById('beast')); G.replaying=false;
+const bz=G.player; bz.hp=bz.maxHp=40; bz.level=1; bz.armor=0; bz.toughness=0; bz.skillCd=0; G.busy=false; G.pendingLevels=0;
+const xpBefore=bz.xp; G.addXp(bz,3);
+ok(bz.xp===xpBefore+6,'神兽神识获得经验翻倍');
+bz.tier1='whitetiger'; bz.skillCd=0; G.grid[0][0]={type:'sword'}; G.grid[0][1]={type:'boss',bossId:'ghost',hp:20,maxHp:20,atk:1,cd:9,baseCd:9,tier:1};
+G.TIER1.whitetiger.skill.f(bz);
+ok(G.isSwordTarget(G.grid[0][1]) && bz.pierceTurn===1 && bz.beastDamageMult===3,'白虎破军可让爪链命中剑免疫Boss并蓄势');
+G.selection=[{r:0,c:0,type:'sword'},{r:0,c:1,type:'boss'}]; G.resolve();
+ok(!G.grid[0][1] || G.grid[0][1].hp<=17,'白虎破军爪链伤害已生效');
+G.TIER2.tigerfury.f(bz); ok(bz.swordFlat===2,'白虎二阶固定爪伤+2');
+bz.tier1='azuredragon'; bz.level=4; bz.skillCd=0; G.grid[1][0]={type:'enemy',hp:10,maxHp:10,atk:1,cd:9,baseCd:9}; G.grid[1][1]={type:'boss',bossId:'ghost',hp:10,maxHp:10,atk:1,cd:9,baseCd:9,tier:1}; G.TIER1.azuredragon.skill.f(bz); ok(G.grid[1][0].hp===6 && G.grid[1][1].hp===6,'青龙龙吟按等级对全场含普攻免疫Boss造成伤害');
+bz.tier1='azuredragon'; G.TIER2.dragonmight.f(bz); bz.hp=40; bz.skillCd=0; G.busy=false; for(let r=0;r<6;r++)for(let c=0;c<6;c++) G.grid[r][c]=null; G.grid[2][0]={type:'enemy',hp:10,maxHp:10,atk:6,cd:1,baseCd:1}; ok(bz.dragonMight===true,'青龙龙威被动已获得'); G.activateSkill(); G.advanceEnemies(); ok(bz.hp===37,'龙威触发后普通怪攻击减半');
+bz.tier1='blackturtle'; bz.armor=0; bz.shieldTurn=false; G.TIER1.blackturtle.skill.f(bz); ok(bz.armor===1 && bz.shieldTurn===false,'玄龟玄甲镇岳立即+1减伤');
+bz.tier1='vermilion'; bz.beastPhoenix=true; bz.rebirthTurn=false; bz.shieldTurn=false; bz.hp=1; bz.maxHp=40; G.hurtPlayer(999,'enemy',true,{type:'enemy'}); ok(bz.hp===40 && bz.beastPhoenix===false,'朱雀不灭火种首次致死自动满血复生');
 
 // onBossKilled 链：未到回合不应误触发
 const q=Object.assign({},{t1:se.t1Pending||e.t1Pending||p.t1Pending,t2:se.t2Pending||e.t2Pending||p.t2Pending,t3:se.t3Pending||e.t3Pending||p.t3Pending,t4:se.t4Pending||e.t4Pending||p.t4Pending});
