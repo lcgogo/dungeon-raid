@@ -1,3 +1,8 @@
+## [v1.61.1]
+
+- 玄龟二阶被动中文名改为「恐鳌之心」，英文名改为 **Heart of Tarrasque**；内部技能 ID 保持不变，不影响录像兼容。
+- Renamed the Black Tortoise tier-two passive to **Heart of Tarrasque** (恐鳌之心); the internal skill ID is unchanged, so replay compatibility is unaffected.
+
 ## [v1.61.0]
 
 > Version-Impact: verify
