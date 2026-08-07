@@ -2,6 +2,8 @@
 // 无头玩法机器人：加载 dungeon-raid.html 里的真实脚本（桩件顶替 DOM），自动玩并统计平衡。
 const fs = require('fs');
 const path = require('path');
+const os = require('os');
+const { spawn } = require('child_process');
 
 // ---------- 1) 取出真实脚本，并在 IIFE 末尾注入导出钩子 ----------
 const ROOT = path.resolve(__dirname, '..', '..');
@@ -513,7 +515,62 @@ const CANDIDATES=[
   { name:'D atk0.8/cd3-4', v:{ hp:'3 + Math.floor(Math.random()*3) + Math.floor(lv*0.8)', atk:'2 + Math.floor(lv*0.8)', cd:'3 + Math.floor(Math.random()*2)', chance:'Math.min(0.32, 0.11 + player.level*0.015)' } },
   { name:'D2 atk0.85/cd3-4',v:{ hp:'3 + Math.floor(Math.random()*3) + Math.floor(lv*0.82)', atk:'2 + Math.floor(lv*0.85)', cd:'3 + Math.floor(Math.random()*2)', chance:'Math.min(0.33, 0.115 + player.level*0.015)' } },
 ];
+
+// 并行 clearsweep：每个子进程独立加载游戏脚本，避免全局棋盘/RNG/ARG 互相污染。
+function decodeSweepCombo(raw){ return JSON.parse(Buffer.from(raw, 'base64url').toString('utf8')); }
+function runSweepChild(job, n){
+  return new Promise(resolve=>{
+    const encoded=Buffer.from(JSON.stringify(job)).toString('base64url');
+    const args=[__filename]; if(process.argv.includes('--dev')) args.push('--dev');
+    args.push(`--combo=${encoded}`, `--games=${n}`);
+    const cp=spawn(process.execPath,args,{cwd:ROOT,stdio:['ignore','pipe','pipe']});
+    let out='', err=''; cp.stdout.on('data',d=>{out+=d;}); cp.stderr.on('data',d=>{err+=d;});
+    cp.on('error',e=>resolve({error:e.message}));
+    cp.on('close',code=>{
+      if(code!==0){ resolve({error:(err||out||`child exit ${code}`).trim().slice(-500)}); return; }
+      try{ resolve(JSON.parse(out.trim().split('\n').pop())); }catch(e){ resolve({error:`invalid child output: ${e.message} ${out.slice(-300)}`}); }
+    });
+  });
+}
+async function runParallelSweep(){
+  G=loadGame(); applyBossFilter(G);
+  const N=ARG.games?+ARG.games:60, profiles='upsweep' in ARG?Object.keys(UP_PROFILES):['balanced'];
+  const jobs=[];
+  for(const rc of G.RACES) for(const t1 of G.RACE_PATHS[rc.id].t1){
+    const locked=G.CLASS_T2[t1];
+    for(const t2b of G.RACE_PATHS[rc.id].t2.filter(x=>x!==locked)) for(const prof of profiles)
+      jobs.push({race:rc.id,t1,t2b,prof,locked});
+  }
+  const limit=Math.max(1,Math.min(jobs.length,Math.floor(+ARG.parallel||os.cpus().length-1||1)));
+  console.log(`全分支破关扫描（并行 ${limit} 个子进程；每个组合 ${N} 局，实时文件值，全 Boss 池；升级取向 ×${profiles.length}）  破关线=511 回合\n`);
+  console.log('种族   一阶/锁定二阶          +200级被动    升级取向 | 局数 | 回合中位 最高 | 破关');
+  console.log('-------|----------------------|------------|---------|------|---------------|-----');
+  const results=new Array(jobs.length); let next=0;
+  async function worker(){ while(true){ const i=next++; if(i>=jobs.length) return; results[i]=await runSweepChild(jobs[i],N); } }
+  await Promise.all(Array.from({length:limit},worker));
+  let totalClears=0, best={turns:0}, errors=0; const clearedBuilds=[];
+  const nm=(pool,id)=>id&&pool[id]?pool[id].n[0]:(id||'—');
+  for(let i=0;i<jobs.length;i++){
+    const j=jobs[i], r=results[i];
+    if(r.error){ errors++; console.log(`${j.race} ${j.t1}/${j.t2b} ${j.prof} | ERROR ${r.error}`); continue; }
+    totalClears+=r.clears;
+    if(r.clears) clearedBuilds.push({...j,rc:G.raceById(j.race),clears:r.clears,mx:r.mx});
+    if(r.mx>best.turns) best={turns:r.mx,rc:G.raceById(j.race).n[0],t1:nm(G.TIER1,j.t1),locked:nm(G.TIER2,j.locked),t2b:nm(G.TIER2,j.t2b),prof:j.prof};
+    console.log(G.raceById(j.race).n[0].padEnd(5)+'  '+(`${nm(G.TIER1,j.t1)}/${nm(G.TIER2,j.locked)}`).padEnd(20)+' +'+nm(G.TIER2,j.t2b).padEnd(10)+' '+j.prof.padEnd(15)+' |'+String(r.games).padStart(5)+' |'+String(r.med).padStart(7)+String(r.mx).padStart(6)+' | '+(r.clears?`🏆${r.clears}`:'0'));
+  }
+  console.log(`\n扫描 ${jobs.length} 个组合 × ${N} 局。破关(≥511回合)总计 ${totalClears} 局。${errors?`子进程错误 ${errors} 个。`:''}`);
+  if(clearedBuilds.length) console.log('能破关的组合：',clearedBuilds.map(b=>`${b.rc.n[0]} ${nm(G.TIER1,b.t1)}+${nm(G.TIER2,b.t2b)} [${b.prof}] ${b.clears}/${N}（最高 ${b.mx}）`).join('\n  '));
+  else console.log(`❌ 没有任何组合破关。最长记录：${best.rc} ${best.t1}/${best.locked}+${best.t2b} [${best.prof}] → ${best.turns} 回合。`);
+}
+if(ARG.combo){
+  const job=decodeSweepCombo(ARG.combo); G=loadGame(); applyBossFilter(G); ARG.t1=job.t1; ARG.t2=job.t2b; UP_PRIORITY=UP_PROFILES[job.prof]||UP_PROFILES.balanced;
+  const n=ARG.games?+ARG.games:60, turns=[]; let clears=0, errors=0;
+  const rc=G.raceById(job.race); for(let i=0;i<n;i++){ try{ const o=playGame(rc); turns.push(o.turns); if(o.turns>=511) clears++; }catch(e){ errors++; } }
+  turns.sort((a,b)=>a-b); process.stdout.write(JSON.stringify({games:turns.length,clears,errors,med:turns.length?turns[Math.floor(turns.length/2)]:0,mx:Math.max(0,...turns)})); process.exit(0);
+}
 if('clearsweep' in ARG){
+  if(!ARG.serial){ runParallelSweep(); }
+  else {
   // ---- 全分支破关扫描：所有 种族 × 一阶职业 × 200级第二被动（含锁定的二阶），每个 build 跑 N 局，看有没有能破关(≥511回合)的 ----
   //      加 --upsweep：再叠加「升级取向」维度（均衡/纯攻/纯肉/续航），覆盖所有升级分支。
   G = loadGame(); applyBossFilter(G);
@@ -549,6 +606,7 @@ if('clearsweep' in ARG){
   console.log(`\n扫描 ${combos} 个组合 × ${N} 局。破关(≥511回合)总计 ${totalClears} 局。`);
   if(clearedBuilds.length){ console.log('能破关的组合：'); clearedBuilds.forEach(b=>console.log(`  ${b.rc} ${b.t1}+${b.t2b} [${b.prof}]：${b.clears}/${b.N} 局破关（最高 ${b.mx} 回合）`)); }
   else console.log(`❌ 没有任何组合破关。最长记录：${best.rc} ${best.t1}/${best.locked}+${best.t2b} [${best.prof}] → ${best.turns} 回合。`);
+  }
 }
 else if('survivors' in ARG){
   // ---- 分析模式：列出撑到 >=阈值 回合的每一局及其完整 build（种族/一阶/二阶/第二被动/换装主动）----
