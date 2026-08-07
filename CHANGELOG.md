@@ -1,3 +1,8 @@
+## [v1.65.1]
+
+- 测试工具 `playtest.js` 的全职业线扫描改为默认并行执行，并支持 `--parallel=N` 指定并发数；新增 v1.65.0 全量回归报告及历史报告归档。
+- The `playtest.js` full career-line sweep now runs in parallel by default, supports `--parallel=N`, and adds the v1.65.0 regression report with archived historical results.
+
 ## [v1.65.0]
 
 > Version-Impact: verify
