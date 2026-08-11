@@ -176,8 +176,8 @@
 (()=>{
 //==================== 配置 ====================
 // 版本号 v主.次.修：不影响 verify/replay 兼容边界的小改动改"修"；凡是影响 verify/replay/版本分桶/release 验证语义的改动都改"次"；大版本变更需先确认。页面底部显示。
-const VERSION='v1.65.1';
-const CHANGELOG_LINES=[{"ver": "v1.65.1", "zh": "测试工具 `playtest.js` 的全职业线扫描改为默认并行执行，并支持 `--parallel=N` 指定并发数；新增 v1.65.0 全量回归报告及历史报告归档。", "en": "The `playtest.js` full career-line sweep now runs in parallel by default, supports `--parallel=N`, and adds the v1.65.0 regression report with archived historical results."}, {"ver": "v1.65.0", "zh": "玄龟一阶主动「玄甲镇岳 Tortoise Bastion」改为立即填满当前护甲进度并升一级，不再直接增加 +1 减伤。", "en": "Black Tortoise’s tier-one active Tortoise Bastion now fills current Armor progress and immediately grants one Armor level instead of directly adding +1 damage reduction."}, {"ver": "v1.64.0", "zh": "白虎二阶被动「杀伐之心 Tiger Fury」改为动态追加 `⌊当前等级/2⌋` 点固定爪伤，随等级成长，不再是固定 +2。", "en": "White Tiger’s tier-two passive Tiger Fury now dynamically adds `⌊current level/2⌋` flat Claw damage, scaling with level instead of remaining at a fixed +2."}, {"ver": "v1.63.1", "zh": "朱雀主动「涅槃」的英文名改为 Phoenix Rebirth，更准确表达凤凰浴火重生，而不是佛教语境中超越生死的 Nirvana；内部技能 ID 和效果不变。", "en": "Renamed Vermilion Bird’s active from Nirvana to Phoenix Rebirth to match its phoenix-style revival effect; the internal skill ID and gameplay are unchanged."}, {"ver": "v1.63.0", "zh": "朱雀二阶被动改为「火羽 Fire Feather」：任何攻击朱雀的普通怪或 Boss 都会被点燃，复用火法师的点燃、持续伤害与叠层逻辑；移除原「不灭火种」的首次满血复生。", "en": "Vermilion Bird’s tier-two passive is now Fire Feather: any normal monster or boss that attacks Vermilion Bird is ignited using Flame Chain’s burn, duration, and stacking logic. The old first-death full-health revival is removed."}];   /* auto-injected by dr.sh embed-changelog（勿手改） */
+const VERSION='v1.66.0';
+const CHANGELOG_LINES=[{"ver": "v1.66.0", "zh": "修复神兽青龙被动「龙威」未在治疗、炸弹及换装主动使用后触发的问题；这些主动现在都会正确开启普通怪攻击减半效果。", "en": "Fixed Mythic Beast Azure Dragon's Dragon Might so using Heal, Bomb, or a swapped active correctly enables the normal-monster attack-halving effect."}, {"ver": "v1.65.1", "zh": "测试工具 `playtest.js` 的全职业线扫描改为默认并行执行，并支持 `--parallel=N` 指定并发数；新增 v1.65.0 全量回归报告及历史报告归档。", "en": "The `playtest.js` full career-line sweep now runs in parallel by default, supports `--parallel=N`, and adds the v1.65.0 regression report with archived historical results."}, {"ver": "v1.65.0", "zh": "玄龟一阶主动「玄甲镇岳 Tortoise Bastion」改为立即填满当前护甲进度并升一级，不再直接增加 +1 减伤。", "en": "Black Tortoise’s tier-one active Tortoise Bastion now fills current Armor progress and immediately grants one Armor level instead of directly adding +1 damage reduction."}, {"ver": "v1.64.0", "zh": "白虎二阶被动「杀伐之心 Tiger Fury」改为动态追加 `⌊当前等级/2⌋` 点固定爪伤，随等级成长，不再是固定 +2。", "en": "White Tiger’s tier-two passive Tiger Fury now dynamically adds `⌊current level/2⌋` flat Claw damage, scaling with level instead of remaining at a fixed +2."}, {"ver": "v1.63.1", "zh": "朱雀主动「涅槃」的英文名改为 Phoenix Rebirth，更准确表达凤凰浴火重生，而不是佛教语境中超越生死的 Nirvana；内部技能 ID 和效果不变。", "en": "Renamed Vermilion Bird’s active from Nirvana to Phoenix Rebirth to match its phoenix-style revival effect; the internal skill ID and gameplay are unchanged."}];   /* auto-injected by dr.sh embed-changelog（勿手改） */
 const DEV=true;   // release build (DEV=false); dev build is dungeon-raid-dev.html (DEV=true)
 const REC_API='https://api.dungeonraid.win';   // 录像分享 API（Cloudflare Worker + KV）
 // 带种子随机数（mulberry32）：游戏全程用 rnd() 取代原生随机，配合录制种子可确定性重放
@@ -1872,6 +1872,9 @@ window.addEventListener('pointerup',endDrag);
 cv.addEventListener('pointercancel',endDrag);
 
 //==================== 金币商店 ====================
+function triggerDragonMight(){
+  if(player.dragonMight) player.dragonMightActive=true;
+}
 const SHOP={
   heal: {cost:15, f(){ const base=10+2*(player.healUses||0); const h=gainHeal(base); player.healUses=(player.healUses||0)+1; log(tr(`💊 喝下药水，回复 ${h} 生命`,`💊 Potion: +${h} HP`), 'heal'); }},   // 每使用一次：恢复量 +2、下次多花 1 金（后期不再鸡肋）
   bomb: {cost:25, f(){ let kills=0, boss=0; const extra = bombGoldSacrificeBonus(player); if(extra>0) player.gold=Math.max(0, player.gold-extra); const D = bombDamage(player)+extra;   // 基础5 + 爆破手累计 + 乾坤一掷（先买炸弹，再额外扣当前金币 20% 换伤害）
@@ -1894,7 +1897,7 @@ function buyItem(key){
   if(player.shopCd[key]>0) return;            // 该商品冷却中
   const it=SHOP[key]; if(!it) return;
   const cost=shopCost(key); if(player.gold<cost) return;
-  player.gold-=cost; it.f();
+  player.gold-=cost; it.f(); triggerDragonMight();
   if(grid.some(row=>row.some(t=>!t))){ applyGravity(); syncPositions(false); }   // 商店即时效果（如神圣打击）若打出空洞，立刻补格；正常回合结算仍走 resolve 末尾统一补格
   recAct(['b',key]);   // 录制购买
   player.shopCd[key]= (key==='bomb' && player.bombCd) ? player.bombCd : 3;  // 炸弹默认冷却 3；若有被动修改 bombCd，则按其值进入冷却
@@ -1922,6 +1925,7 @@ function castSkill2(key){
   const r=sk.f(player);
   if(r===false) return;        // 技能无效（如对无甲用锻甲）：不进冷却、不刷日志
   if(r==='__defer__') return;   // 先知换装：技能函数里已弹框，等待选择
+  triggerDragonMight();
   if(!sk.noCd) player.skill2Cd=effSkillCd(player.skill2.id);   // 无冷却技能（收买）不进冷却
   recAct(['b',key]);   // 录制（占用槽位 key）；回放 dispatchReplayAct('b',key)→buyItem→castSkill2
   if(r===undefined) log(tr(`✨ 【${L(sk.name)}】发动！`,`✨ ${L(sk.name)} activated!`), 'buff');
@@ -2025,6 +2029,7 @@ function prophecyLabel(type, en){
 function activateSeerSkill(type, fromReplay, slotKey){
   if(!player) return false;
   player.prophecyPending=type;
+  triggerDragonMight();
   if(slotKey){ player.skill2Cd=effSkillCd(player.skill2.id); if(!fromReplay) recAct(['b',slotKey,'seer',type]); }
   else { player.skillCd=effSkillCd(player.tier1); if(!fromReplay) recAct(['k','seer',type]); }
   prophecySlotKey=null;
@@ -2059,7 +2064,7 @@ function activateSkill(){
   if(r===false) return;        // 技能判定无效（如锻甲场上没护甲）：不进冷却、不刷日志
   if(r==='__defer__') return;  // 先知：等待弹框选择具体类型，提交后再进冷却/录像
   if(!sk.noCd) player.skillCd=effSkillCd(player.tier1);   // 无冷却技能（收买）不进冷却，有钱即可反复用
-  if(player.dragonMight) player.dragonMightActive=true;   // 龙威：解锁后使用任意主动，普通怪攻击减半
+  triggerDragonMight();   // 龙威：解锁后使用任意主动，普通怪攻击减半
   recAct(['k']);   // 录制技能发动
   if(r===undefined) log(tr(`✨ 【${L(sk.name)}】发动！`,`✨ ${L(sk.name)} activated!`), 'buff'); // 技能没自带日志才用通用日志
   checkLevel(); updateHUD();

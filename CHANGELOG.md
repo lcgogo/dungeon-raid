@@ -1,3 +1,10 @@
+## [v1.66.0]
+
+> Version-Impact: verify
+
+- 修复神兽青龙被动「龙威」未在治疗、炸弹及换装主动使用后触发的问题；这些主动现在都会正确开启普通怪攻击减半效果。
+- Fixed Mythic Beast Azure Dragon's **Dragon Might** so using Heal, Bomb, or a swapped active correctly enables the normal-monster attack-halving effect.
+
 ## [v1.65.1]
 
 - 测试工具 `playtest.js` 的全职业线扫描改为默认并行执行，并支持 `--parallel=N` 指定并发数；新增 v1.65.0 全量回归报告及历史报告归档。

@@ -57,6 +57,15 @@ G.buyItem('bomb');
 ok(h.skill2Cd>0,'点炸弹槽→施放换装主动(进冷却 skill2Cd>0)');
 ok(h.gold===goldBefore,'施放主动不花金币(炸弹槽未被当消耗品买)');
 
+// 神兽龙威：治疗和炸弹也属于主动使用，应激活普通怪攻击减半窗口
+G.replayRec={seed:171,race:'beast',acts:[]}; G.replaying=true; G.startGame(G.raceById('beast')); G.replaying=false;
+const dm=G.player; dm.hp=dm.maxHp=100; dm.hp=80; dm.gold=100; dm.dragonMight=true; dm.dragonMightActive=false; dm.shopCd={heal:0,bomb:0}; dm.frozen={}; G.busy=false; G.pendingLevels=0;
+G.buyItem('heal'); ok(dm.dragonMightActive===true,'龙威：使用治疗后触发普通怪攻击减半');
+dm.dragonMightActive=false; dm.shopCd={heal:0,bomb:0}; dm.skill2=null;
+for(let r=0;r<6;r++)for(let c=0;c<6;c++) G.grid[r][c]=null;
+G.grid[0][0]={type:'enemy',hp:20,maxHp:20,atk:4,cd:9,baseCd:9};
+G.buyItem('bomb'); ok(dm.dragonMightActive===true,'龙威：使用炸弹后触发普通怪攻击减半');
+
 // 350 回合跨界囤金：投入当前金币，期间新金币照常入账，普通商店仍可用，到期按剩余本金 1.2 倍返还
 G.replayRec={seed:18,race:'human',acts:[]}; G.replaying=true; G.startGame(G.raceById('human')); G.replaying=false;
 const mh=G.player; mh.hp=mh.maxHp=999999; mh.tier1='knight'; mh.tier2='holystrike'; mh.tier2b='general'; mh.turns=350; mh.shopCd={heal:0,bomb:0}; G.busy=false; G.pendingLevels=0;
