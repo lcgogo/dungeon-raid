@@ -1,3 +1,10 @@
+## [v1.67.0]
+
+> Version-Impact: verify
+
+- 龙威生效时，普通怪的攻击力显示和实际伤害统一为 `⌈攻击力/2⌉`，避免棋盘角标仍显示原始攻击力。
+- When Dragon Might is active, normal monsters now display and deal `ceil(attack / 2)` damage consistently.
+
 ## [v1.66.0]
 
 > Version-Impact: verify

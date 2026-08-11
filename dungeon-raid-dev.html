@@ -176,8 +176,8 @@
 (()=>{
 //==================== 配置 ====================
 // 版本号 v主.次.修：不影响 verify/replay 兼容边界的小改动改"修"；凡是影响 verify/replay/版本分桶/release 验证语义的改动都改"次"；大版本变更需先确认。页面底部显示。
-const VERSION='v1.66.0';
-const CHANGELOG_LINES=[{"ver": "v1.66.0", "zh": "修复神兽青龙被动「龙威」未在治疗、炸弹及换装主动使用后触发的问题；这些主动现在都会正确开启普通怪攻击减半效果。", "en": "Fixed Mythic Beast Azure Dragon's Dragon Might so using Heal, Bomb, or a swapped active correctly enables the normal-monster attack-halving effect."}, {"ver": "v1.65.1", "zh": "测试工具 `playtest.js` 的全职业线扫描改为默认并行执行，并支持 `--parallel=N` 指定并发数；新增 v1.65.0 全量回归报告及历史报告归档。", "en": "The `playtest.js` full career-line sweep now runs in parallel by default, supports `--parallel=N`, and adds the v1.65.0 regression report with archived historical results."}, {"ver": "v1.65.0", "zh": "玄龟一阶主动「玄甲镇岳 Tortoise Bastion」改为立即填满当前护甲进度并升一级，不再直接增加 +1 减伤。", "en": "Black Tortoise’s tier-one active Tortoise Bastion now fills current Armor progress and immediately grants one Armor level instead of directly adding +1 damage reduction."}, {"ver": "v1.64.0", "zh": "白虎二阶被动「杀伐之心 Tiger Fury」改为动态追加 `⌊当前等级/2⌋` 点固定爪伤，随等级成长，不再是固定 +2。", "en": "White Tiger’s tier-two passive Tiger Fury now dynamically adds `⌊current level/2⌋` flat Claw damage, scaling with level instead of remaining at a fixed +2."}, {"ver": "v1.63.1", "zh": "朱雀主动「涅槃」的英文名改为 Phoenix Rebirth，更准确表达凤凰浴火重生，而不是佛教语境中超越生死的 Nirvana；内部技能 ID 和效果不变。", "en": "Renamed Vermilion Bird’s active from Nirvana to Phoenix Rebirth to match its phoenix-style revival effect; the internal skill ID and gameplay are unchanged."}];   /* auto-injected by dr.sh embed-changelog（勿手改） */
+const VERSION='v1.67.0';
+const CHANGELOG_LINES=[{"ver": "v1.67.0", "zh": "龙威生效时，普通怪的攻击力显示和实际伤害统一为 `⌈攻击力/2⌉`，避免棋盘角标仍显示原始攻击力。", "en": "When Dragon Might is active, normal monsters now display and deal `ceil(attack / 2)` damage consistently."}, {"ver": "v1.66.0", "zh": "修复神兽青龙被动「龙威」未在治疗、炸弹及换装主动使用后触发的问题；这些主动现在都会正确开启普通怪攻击减半效果。", "en": "Fixed Mythic Beast Azure Dragon's Dragon Might so using Heal, Bomb, or a swapped active correctly enables the normal-monster attack-halving effect."}, {"ver": "v1.65.1", "zh": "测试工具 `playtest.js` 的全职业线扫描改为默认并行执行，并支持 `--parallel=N` 指定并发数；新增 v1.65.0 全量回归报告及历史报告归档。", "en": "The `playtest.js` full career-line sweep now runs in parallel by default, supports `--parallel=N`, and adds the v1.65.0 regression report with archived historical results."}, {"ver": "v1.65.0", "zh": "玄龟一阶主动「玄甲镇岳 Tortoise Bastion」改为立即填满当前护甲进度并升一级，不再直接增加 +1 减伤。", "en": "Black Tortoise’s tier-one active Tortoise Bastion now fills current Armor progress and immediately grants one Armor level instead of directly adding +1 damage reduction."}, {"ver": "v1.64.0", "zh": "白虎二阶被动「杀伐之心 Tiger Fury」改为动态追加 `⌊当前等级/2⌋` 点固定爪伤，随等级成长，不再是固定 +2。", "en": "White Tiger’s tier-two passive Tiger Fury now dynamically adds `⌊current level/2⌋` flat Claw damage, scaling with level instead of remaining at a fixed +2."}];   /* auto-injected by dr.sh embed-changelog（勿手改） */
 const DEV=true;   // release build (DEV=false); dev build is dungeon-raid-dev.html (DEV=true)
 const REC_API='https://api.dungeonraid.win';   // 录像分享 API（Cloudflare Worker + KV）
 // 带种子随机数（mulberry32）：游戏全程用 rnd() 取代原生随机，配合录制种子可确定性重放
@@ -1389,7 +1389,7 @@ function draw(){
       }
       // 攻击力角标（左上）——特效/大招型 Boss（攻击力无意义）不显示；但有 shownAtk/dynAtk 的按展示值显示，避免漏看
       if(!isBoss || (!bdef.act && !bdef.cdAttack) || bdef.shownAtk || bdef.dynAtk){
-        const av=(isBoss && (bdef.shownAtk||bdef.dynAtk)) ? (bdef.shownAtk?bdef.shownAtk(t):bdef.dynAtk(t)) : t.atk;
+        const av=(isBoss && (bdef.shownAtk||bdef.dynAtk)) ? (bdef.shownAtk?bdef.shownAtk(t):bdef.dynAtk(t)) : (isBoss?t.atk:normalEnemyAttack(t));
         const ax=x+10, ay=y+10, ar=TILE*0.16;
         ctx.beginPath(); ctx.arc(ax,ay,ar,0,7);
         ctx.fillStyle=(isBoss&&bdef.trueDmg)?'#8e44ad':'#c0392b'; ctx.fill(); ctx.strokeStyle='#000'; ctx.lineWidth=1; ctx.stroke();
@@ -1875,6 +1875,9 @@ cv.addEventListener('pointercancel',endDrag);
 function triggerDragonMight(){
   if(player.dragonMight) player.dragonMightActive=true;
 }
+function normalEnemyAttack(t){
+  return player.dragonMightActive ? Math.max(1,Math.ceil(t.atk/2)) : t.atk;
+}
 const SHOP={
   heal: {cost:15, f(){ const base=10+2*(player.healUses||0); const h=gainHeal(base); player.healUses=(player.healUses||0)+1; log(tr(`💊 喝下药水，回复 ${h} 生命`,`💊 Potion: +${h} HP`), 'heal'); }},   // 每使用一次：恢复量 +2、下次多花 1 金（后期不再鸡肋）
   bomb: {cost:25, f(){ let kills=0, boss=0; const extra = bombGoldSacrificeBonus(player); if(extra>0) player.gold=Math.max(0, player.gold-extra); const D = bombDamage(player)+extra;   // 基础5 + 爆破手累计 + 乾坤一掷（先买炸弹，再额外扣当前金币 20% 换伤害）
@@ -2275,7 +2278,7 @@ function advanceEnemies(){
         const dmg=hurtPlayer(t.atk, def.id, true, t);   // 真实伤害：无视护甲（但圣盾仍可挡）
         log(tr(`${def.emoji} ${L(def.name)} 真实伤害 ${dmg}（无视护甲）！`,`${def.emoji} ${L(def.name)} hits for ${dmg} TRUE damage (ignores armor)!`), 'bad');
       } else {
-        const atk=(!def && player.dragonMightActive) ? Math.max(1,Math.ceil(t.atk/2)) : t.atk;
+        const atk=def ? t.atk : normalEnemyAttack(t);
         const dmg=hurtPlayer(atk, def?def.id:'enemy', false, t);
         if(def) log(tr(`${def.emoji} Boss 重击 ${t.atk} → 掉 ${dmg} 血！`,`${def.emoji} Boss strike ${t.atk} → ${dmg} HP lost!`), 'bad');
         else if(dmg>0){ enemyHits.push(dmg); enemyTotal+=dmg; }
@@ -2975,7 +2978,7 @@ function tileInfo(t){
   return {icon:'👹', title:tr('怪物','Enemy'),
     desc:tr(`左上是攻击力，右上是倒计时。每行动一次倒计时 −1，归零就攻击你：先用护甲抵消，剩下的才掉血，但每次至少掉 1 滴。用${wChain()}串过它就能攻击，伤害够高直接点杀。`,`Top-left is its attack, top-right its timer. The timer drops by 1 each action; at 0 it attacks — your armor soaks most of it, but you always lose at least 1 HP. Drag a ${wChain()} through it to attack; enough damage kills it.`),
     rows:[ [tr('血量','HP'), `${t.hp} / ${t.maxHp}`],
-      [tr('攻击力','Attack'), `${t.atk}`],
+      [tr('攻击力','Attack'), `${normalEnemyAttack(t)}`],
       [tr('倒计时','Timer'), `${t.cd} / ${t.baseCd}`] ]};
 }
 function showTileInfo(t){

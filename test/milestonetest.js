@@ -4,7 +4,7 @@ const fs = require('fs');
 const path = require('path');
 const file = fs.existsSync('dungeon-raid-dev.html') ? 'dungeon-raid-dev.html' : path.join('..', 'dungeon-raid-dev.html');
 let s = fs.readFileSync(file, 'utf8').match(/<script>([\s\S]*?)<\/script>/)[1];
-const EXPORT = `globalThis.__G={startGame,raceById,onBossKilled,dispatchReplayAct,buyItem,resolve,applyGravity,advanceEnemies,activateSkill,makeTile,isSwordTarget,
+const EXPORT = `globalThis.__G={startGame,raceById,onBossKilled,dispatchReplayAct,buyItem,resolve,applyGravity,advanceEnemies,activateSkill,makeTile,isSwordTarget,normalEnemyAttack,
   TIER1,TIER2,RACE_PATHS, CLASS_T2, WEAPON, gainGold, gainHeal, addXp, currentSwordFlat, witherAuraTick, hurtPlayer, frostOrbDamage,
   get player(){return player}, get grid(){return grid}, get logHistory(){return logHistory}, set selection(v){selection=v},
   set busy(v){busy=v}, set pendingLevels(v){pendingLevels=v}, set replaying(v){replaying=v}, set replayRec(v){replayRec=v}};`;
@@ -65,6 +65,10 @@ dm.dragonMightActive=false; dm.shopCd={heal:0,bomb:0}; dm.skill2=null;
 for(let r=0;r<6;r++)for(let c=0;c<6;c++) G.grid[r][c]=null;
 G.grid[0][0]={type:'enemy',hp:20,maxHp:20,atk:4,cd:9,baseCd:9};
 G.buyItem('bomb'); ok(dm.dragonMightActive===true,'龙威：使用炸弹后触发普通怪攻击减半');
+
+// 龙威显示与结算：普通怪攻击力向上取整减半，并实际按显示值造成伤害
+const dragonEnemy={type:'enemy',hp:20,maxHp:20,atk:9,cd:1,baseCd:3};
+ok(G.normalEnemyAttack(dragonEnemy)===5,'龙威：普通怪攻击 9 显示并结算为向上取整后的 5');
 
 // 350 回合跨界囤金：投入当前金币，期间新金币照常入账，普通商店仍可用，到期按剩余本金 1.2 倍返还
 G.replayRec={seed:18,race:'human',acts:[]}; G.replaying=true; G.startGame(G.raceById('human')); G.replaying=false;
