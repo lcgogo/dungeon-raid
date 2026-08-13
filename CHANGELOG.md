@@ -1,3 +1,8 @@
+## [v1.67.2]
+
+- 统一日志简报和展开日志的显示顺序，最新日志显示在上方。
+- Unified the compact and expanded log views so the newest entries appear first.
+
 ## [v1.67.1]
 
 - 移除没有攻击行为的小偷左上角攻击力角标，避免与右上角逃走倒计时混淆。
