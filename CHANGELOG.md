@@ -1,3 +1,8 @@
+## [v1.67.1]
+
+- 移除没有攻击行为的小偷左上角攻击力角标，避免与右上角逃走倒计时混淆。
+- Removed the Thief's non-functional top-left attack badge to avoid confusing it with the escape timer.
+
 ## [v1.67.0]
 
 > Version-Impact: verify
