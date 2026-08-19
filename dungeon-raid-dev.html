@@ -176,8 +176,8 @@
 (()=>{
 //==================== 配置 ====================
 // 版本号 v主.次.修：不影响 verify/replay 兼容边界的小改动改"修"；凡是影响 verify/replay/版本分桶/release 验证语义的改动都改"次"；大版本变更需先确认。页面底部显示。
-const VERSION='v1.67.2';
-const CHANGELOG_LINES=[{"ver": "v1.67.2", "zh": "统一日志简报和展开日志的显示顺序，最新日志显示在上方。", "en": "Unified the compact and expanded log views so the newest entries appear first."}, {"ver": "v1.67.1", "zh": "移除没有攻击行为的小偷左上角攻击力角标，避免与右上角逃走倒计时混淆。", "en": "Removed the Thief's non-functional top-left attack badge to avoid confusing it with the escape timer."}, {"ver": "v1.67.0", "zh": "龙威生效时，普通怪的攻击力显示和实际伤害统一为 `⌈攻击力/2⌉`，避免棋盘角标仍显示原始攻击力。", "en": "When Dragon Might is active, normal monsters now display and deal `ceil(attack / 2)` damage consistently."}, {"ver": "v1.66.0", "zh": "修复神兽青龙被动「龙威」未在治疗、炸弹及换装主动使用后触发的问题；这些主动现在都会正确开启普通怪攻击减半效果。", "en": "Fixed Mythic Beast Azure Dragon's Dragon Might so using Heal, Bomb, or a swapped active correctly enables the normal-monster attack-halving effect."}, {"ver": "v1.65.1", "zh": "测试工具 `playtest.js` 的全职业线扫描改为默认并行执行，并支持 `--parallel=N` 指定并发数；新增 v1.65.0 全量回归报告及历史报告归档。", "en": "The `playtest.js` full career-line sweep now runs in parallel by default, supports `--parallel=N`, and adds the v1.65.0 regression report with archived historical results."}];   /* auto-injected by dr.sh embed-changelog（勿手改） */
+const VERSION='v1.68.0';
+const CHANGELOG_LINES=[{"ver": "v1.68.0", "zh": "重做玄龟一阶主动「玄甲镇岳」：发动后 3 回合受到的所有伤害减半（向上取整，最低 1 点）；不再永久增加减伤，需选择时机使用。", "en": "Reworked Black Tortoise's tier-one active Tortoise Bastion: halve all incoming damage for 3 turns (rounded up, minimum 1); it no longer grants permanent reduction, so timing matters."}, {"ver": "v1.67.2", "zh": "统一日志简报和展开日志的显示顺序，最新日志显示在上方。", "en": "Unified the compact and expanded log views so the newest entries appear first."}, {"ver": "v1.67.1", "zh": "移除没有攻击行为的小偷左上角攻击力角标，避免与右上角逃走倒计时混淆。", "en": "Removed the Thief's non-functional top-left attack badge to avoid confusing it with the escape timer."}, {"ver": "v1.67.0", "zh": "龙威生效时，普通怪的攻击力显示和实际伤害统一为 `⌈攻击力/2⌉`，避免棋盘角标仍显示原始攻击力。", "en": "When Dragon Might is active, normal monsters now display and deal `ceil(attack / 2)` damage consistently."}, {"ver": "v1.66.0", "zh": "修复神兽青龙被动「龙威」未在治疗、炸弹及换装主动使用后触发的问题；这些主动现在都会正确开启普通怪攻击减半效果。", "en": "Fixed Mythic Beast Azure Dragon's Dragon Might so using Heal, Bomb, or a swapped active correctly enables the normal-monster attack-halving effect."}];   /* auto-injected by dr.sh embed-changelog（勿手改） */
 const DEV=true;   // release build (DEV=false); dev build is dungeon-raid-dev.html (DEV=true)
 const REC_API='https://api.dungeonraid.win';   // 录像分享 API（Cloudflare Worker + KV）
 // 带种子随机数（mulberry32）：游戏全程用 rnd() 取代原生随机，配合录制种子可确定性重放
@@ -276,7 +276,7 @@ function newPlayer(){
     chosenPerks:[],                                                      // 本局已选技能名（按选择顺序，供录像/展示用）
     prophecyPending:null,                                                // 先知：下一次补子要强制落下的类型（本回合未补子则保留到下次）
     heartPoison:false, rogueStealTurn:false, fireChainTurn:false, firewall:false, echoOfFate:false, tauntWindow:false, frostPulse:0, flashWhite:0,   // 巫医蛊毒：本回合连心改为毒怪；盗贼：本回合命中偷金；火法师：火焰链 / 火墙；先知：命运回响；斧王：下一轮受伤转上限；巫妖：冰封脉冲/冰甲白闪
-    foeCdBonus:0, skillCdMod:0, splash:false, rebirthTurn:false, nirvanaTurn:false, rebirthSaves:0, healMult:1, witherAura:false, unbroken:false, iceArmor:false, beastDamageMult:1, beastPhoenix:false, fireFeather:false, dragonMight:false, dragonMightActive:false, tortoiseRegen:false,  // 神兽：神识经验/龙威/玄龟回生/朱雀火羽/朱雀涅槃
+    foeCdBonus:0, skillCdMod:0, splash:false, rebirthTurn:false, nirvanaTurn:false, rebirthSaves:0, healMult:1, witherAura:false, unbroken:false, iceArmor:false, beastDamageMult:1, beastPhoenix:false, fireFeather:false, dragonMight:false, dragonMightActive:false, tortoiseRegen:false, tortoiseGuardTurns:0,  // 神兽：神识经验/龙威/玄龟回生/玄龟临时半伤/朱雀火羽/朱雀涅槃
     upgradeChoices:3, bombCd:3, goldLock:0, goldFrozen:0, healUses:0, bombUses:0, shadowBombGold:false, tycoonGoldShield:false, frozen:{},  // 转职被动相关；healUses：治疗递增；bombUses：爆破手炸弹递增；shadowBombGold：乾坤一掷；tycoonGoldShield：钱能买命；frozen：雪人冰封的主动剩余回合（skill/heal/bomb）
     finaleStarted:false, finaleWave:0, cleared:false};                      // 终局：终焉之主浪潮 / 破关
 }
@@ -703,7 +703,7 @@ const TIER1={
     log(tr(`🪝 钩子：把全场怪/Boss 拉到底排，造成 ${dmg} 伤害`+(kills?`，击杀 ${kills}`:'')+(lh?`，吸血 +${lh}`:''),`🪝 Hook: dragged all foes down for ${dmg} damage`+(kills?`, ${kills} killed`:'')+(lh?`, +${lh} lifesteal`:'')), moved?'buff':''); return true; }}},
   azuredragon:{n:['青龙','Azure Dragon'], quip:['接受来自远古的绝对威压吧！','Accept the absolute pressure of the ancients!'], skill:{name:['龙吟','Dragon Roar'], short:['全场造成等级伤害','Deal level damage to all foes'], desc:['对全场所有怪物（包括普攻免疫 Boss）造成等同当前等级的伤害。','Deal damage equal to your current level to every foe, including normal-attack-immune bosses.'], cd:5, f:p=>{ addBossFx(Math.floor(ROWS/2), Math.floor(COLS/2), false, '#f5b041', true); const r=dealDamage(p.level,null,true); applyGravity(); syncPositions(false); log(tr(`🐉 龙吟：全场 ${r.dmg} 伤害`+ (r.kills?`，击杀 ${r.kills}`:''),`🐉 Dragon Roar: ${r.dmg} damage to all foes`+(r.kills?`, ${r.kills} killed`:'')), 'buff'); return true; }}},
   whitetiger:{n:['白虎','White Tiger'], quip:['杀意先到，爪锋随后。','The killing intent arrives before the claw.'], skill:{name:['白虎破军','Tiger Breaker'], short:['下一次爪链可破免疫且伤害×3','Next Claw chain pierces immunity and deals ×3'], desc:['下一次爪链可以攻击平时爪免疫的 Boss，并使该次爪链伤害 ×3；效果会保留到下一次使用爪链。','Your next Claw chain can hit normally Claw-immune bosses and deals ×3 damage; the effect remains until a Claw chain is used.'], cd:5, f:p=>{ p.pierceTurn=1; p.beastDamageMult=3; log(tr('🐾 白虎破军：下一次爪链可破免疫，伤害 ×3','🐾 Tiger Breaker: your next Claw chain pierces immunity for ×3 damage'), 'buff'); return true; }}},
-  blackturtle:{n:['玄龟','Black Tortoise'], quip:['山岳不动，风雷自止。','The mountain does not move; storms pass around it.'], skill:{name:['玄甲镇岳','Tortoise Bastion'], short:['护甲进度充满并升一级','Fill Armor progress and gain one Armor level'], desc:['立即填满当前护甲进度，并触发一次升甲。','Immediately fill your current Armor progress and trigger one Armor level-up.'], cd:5, f:p=>{ if(p.noArmor) return false; p.shieldXp=armorNeeded(p.armor); while(p.shieldXp>=armorNeeded(p.armor)){ p.shieldXp-=armorNeeded(p.armor); p.armor++; } log(tr(`🐢 玄甲镇岳：护甲进度充满，减伤 +1（当前 ${p.armor}）`,`🐢 Tortoise Bastion: Armor filled, +1 damage reduction (now ${p.armor})`), 'buff'); return true; }}},
+  blackturtle:{n:['玄龟','Black Tortoise'], quip:['山岳不动，风雷自止。','The mountain does not move; storms pass around it.'], skill:{name:['玄甲镇岳','Tortoise Bastion'], short:['3回合所受伤害减半','Halve damage taken for 3 turns'], desc:['发动后 3 回合内，受到的所有伤害减半（向上取整，最低 1 点）。效果结束后恢复原状，冷却 5 回合。','For 3 turns, halve all incoming damage (rounded up, minimum 1). The effect then expires, with a 5-turn cooldown.'], cd:5, f:p=>{ if(p.noArmor) return false; p.tortoiseGuardTurns=3; log(tr('🐢 玄甲镇岳：未来 3 回合所受伤害减半（最低 1）','🐢 Tortoise Bastion: damage taken is halved for the next 3 turns (minimum 1)'), 'buff'); return true; }}},
   vermilion:{n:['朱雀','Vermilion Bird'], quip:['死亡即新生！','Death is new life!'], skill:{name:['涅槃','Phoenix Rebirth'], short:['本回合致死：恢复50%生命并增加生命上限','Lethal this turn: revive at 50% HP and raise max HP'], desc:['本回合被击败不会死亡：生命上限永久增加 ⌊当前等级/2⌋，并恢复到新的生命上限的 50%。','You cannot die this turn: permanently gain ⌊current level/2⌋ max HP, then revive at 50% of your new max HP if dealt lethal damage.'], cd:5, f:p=>{ p.nirvanaTurn=true; log(tr('🔥 涅槃：本回合死亡即新生！','🔥 Phoenix Rebirth: death is new life this turn!'), 'buff'); return true; }}}
 };
 // 二阶职业：被动
@@ -2152,6 +2152,7 @@ function resolve(){
   burnTick();   // 火焰链：已点燃目标每回合持续灼烧，直到死亡
   firewallTick();   // 火墙：底部三行的怪物每回合掉当前固定伤害 20%
   advanceEnemies();
+  if(player.tortoiseGuardTurns>0) player.tortoiseGuardTurns--;   // 玄甲镇岳：覆盖本回合敌人行动后递减
   if(player.tortoiseRegen && player.hp>0){ const rh=Math.max(1,Math.floor(player.hp*0.1)); const healed=gainHeal(rh); if(healed>0) log(tr(`🐢 恐鳌之心：恢复当前生命的 10%（+${healed}）`,`🐢 Heart of Tarrasque: restored 10% of current HP (+${healed})`), 'heal'); }
   if(player.goldLock>0){ player.goldLock--; if(player.goldLock===0){ const pay=Math.round(player.goldFrozen*1.2); player.gold+=pay; player.goldFrozen=0; log(tr(`🔓 囤金到期：返还 ${pay} 金币`,`🔓 Hoard matured: +${pay} gold`), 'buff'); } } // 守财奴囤金到期（1.2 倍）：放在敌人行动后，让「钱能买命」覆盖最后一回合
   if(player.cleared) return;   // 终焉第10波撑过 → onClear 已结算，停止后续处理
@@ -2313,6 +2314,7 @@ function hurtPlayer(atk, sourceKey, ignoreArmor, attacker){
   if(player.shieldTurn) return 0;
   const armorReducer = player.armor*(player.armorMult||1) + (player.toughness||0);
   let dmg = ignoreArmor ? atk : Math.max(1, atk - armorReducer);
+  if(player.tortoiseGuardTurns>0 && dmg>0) dmg=Math.max(1,Math.ceil(dmg*0.5));
   if(player.tycoonGoldShield && player.goldLock>0 && dmg>0){
     const paid = loseGoldForShield(dmg), spill = dmg-paid;
     if(paid>0) log(tr(`💸 钱能买命：花掉 ${paid} 金币挡住 ${paid} 伤害`,`💸 Money Buys Life: spend ${paid} gold to block ${paid} damage`), 'buff');
@@ -3064,8 +3066,9 @@ function updateHUD(){
   updateDanger();
   const an=armorNeeded(player.armor);
   document.getElementById('arBar').style.width=Math.min(100,player.shieldXp/an*100)+'%';
+  const tortoiseGuard=player.tortoiseGuardTurns>0 ? `　🐢½×${player.tortoiseGuardTurns}` : '';
   document.getElementById('arTxt').textContent=
-    `${tr('减伤','DR')} ${player.armor}${player.toughness?`+${player.toughness}`:''}　${player.shieldXp}/${an}`;
+    `${tr('减伤','DR')} ${player.armor}${player.toughness?`+${player.toughness}`:''}${tortoiseGuard}　${player.shieldXp}/${an}`;
   const need=xpNeeded(player.level);
   document.getElementById('xpBar').style.width=(player.xp/need*100)+'%';
   document.getElementById('xpTxt').textContent=`${player.xp} / ${need}`;

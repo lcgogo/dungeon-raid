@@ -1,3 +1,10 @@
+## [v1.68.0]
+
+> Version-Impact: verify
+
+- 重做玄龟一阶主动「玄甲镇岳」：发动后 3 回合受到的所有伤害减半（向上取整，最低 1 点）；不再永久增加减伤，需选择时机使用。
+- Reworked Black Tortoise's tier-one active **Tortoise Bastion**: halve all incoming damage for 3 turns (rounded up, minimum 1); it no longer grants permanent reduction, so timing matters.
+
 ## [v1.67.2]
 
 - 统一日志简报和展开日志的显示顺序，最新日志显示在上方。
