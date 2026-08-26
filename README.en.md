@@ -124,7 +124,7 @@ At **level 100 (Tier-2 Skill)** you automatically get the passive **locked to yo
 | 🧝 Elf | Ranger → Sharpshooter | +2 extra XP per enemy killed by a sword chain |
 | 🧝 Elf | Rogue → All-In | After buying a bomb, also spend 20% of your current gold and add exactly that amount to this bomb’s damage |
 | 🧝 Elf | Treant → Thorns | When hit, reflect your current armor (damage-reduction) back to the attacker (more armor → more reflect; DoT/poison-backlash/Statue reflection do NOT trigger it) |
-| 🧝 Elf | Seer → Echo of Fate | After Prophecy resolves, 3 additional random non-boss tiles transform into the chosen type; if enemy was chosen, those 3 also become normal enemies |
+| 🧝 Elf | Seer → Echo of Fate | Every 5 valid turns, the next refill is guaranteed to match the non-enemy tile cleared on the trigger turn |
 | 🎅 Dwarf | Blacksmith → Shield Bash | Adds your armor (damage-reduction) value to flat {W} damage — more armor, harder hits |
 | 🎅 Dwarf | Musketeer → Demolitionist | Each bomb use: +1 damage and +5 gold cost (stronger but pricier each time) |
 | 🎅 Dwarf | Miser → Money Buys Life | While Hoard is active, incoming damage spends **current gold only**; if wallet gold runs out, the remainder spills into HP and **invested Hoard gold is not spent** |

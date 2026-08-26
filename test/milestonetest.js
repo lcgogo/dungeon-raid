@@ -116,6 +116,16 @@ se.turns=100; G.onBossKilled(); ok(se.t2Pending,'先知100回合→t2Pending'); 
 G.dispatchReplayAct(['t',2,'echooffate']); ok(se.tier2==='echooffate' && se.echoOfFate===true,'二阶=命运回响(被动生效)');
 G.dispatchReplayAct(['k','seer','coin']); ok(se.prophecyPending==='coin','先知主动录像可记录选择类型');
 
+// 命运回响：每5个有效回合记录触发回合的资源类型，下一次补子才兑现且不依赖先知
+G.replayRec={seed:21,race:'elf',acts:[]}; G.replaying=true; G.startGame(G.raceById('elf')); G.replaying=false;
+const er=G.player; er.tier1='ranger'; er.echoOfFate=true; er.turns=4; G.busy=false; G.pendingLevels=0;
+for(let r=0;r<6;r++)for(let c=0;c<6;c++) G.grid[r][c]=null;
+G.grid[0][0]={type:'coin'}; G.grid[0][1]={type:'coin'};
+G.selection=[{r:0,c:0,type:'coin'},{r:0,c:1,type:'coin'}]; G.resolve();
+ok(er.echoPendingType==='coin','其他精灵职业的命运回响在第5个有效回合自动记录金币');
+G.grid[0][0]=null; G.applyGravity();
+ok(er.echoPendingType===null && G.grid[0][0].type==='coin','命运回响让下一次补子全部变为触发回合的非怪物棋子');
+
 // 活死人死灵：100回合锁定被动改为竭心光环
 ok(G.CLASS_T2.necromancer==='witheraura','死灵锁定被动=竭心光环');
 G.replayRec={seed:23,race:'undead',acts:[]}; G.replaying=true; G.startGame(G.raceById('undead')); G.replaying=false;

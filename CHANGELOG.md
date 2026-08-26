@@ -1,3 +1,10 @@
+## [v1.69.0]
+
+> Version-Impact: verify
+
+- 将「命运回响」改为通用周期被动：每 5 个有效回合自动触发，下一回合补子必定变成触发回合消除的非怪物棋子。
+- Reworked **Echo of Fate** into a general periodic passive: every 5 valid turns, the next refill is guaranteed to match the non-enemy tile cleared on the trigger turn.
+
 ## [v1.68.0]
 
 > Version-Impact: verify
