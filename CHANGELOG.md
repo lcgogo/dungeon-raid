@@ -1,3 +1,8 @@
+## [v1.69.1]
+
+- 为鞭笞者增加从 Boss 指向受影响普通怪的红色发光鞭痕特效，并复用通用棋盘连线特效。
+- Added a red glowing lash effect from Lashmaster to affected normal enemies, reusing the shared board tether effect.
+
 ## [v1.69.0]
 
 > Version-Impact: verify

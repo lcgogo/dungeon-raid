@@ -176,8 +176,8 @@
 (()=>{
 //==================== 配置 ====================
 // 版本号 v主.次.修：不影响 verify/replay 兼容边界的小改动改"修"；凡是影响 verify/replay/版本分桶/release 验证语义的改动都改"次"；大版本变更需先确认。页面底部显示。
-const VERSION='v1.69.0';
-const CHANGELOG_LINES=[{"ver": "v1.69.0", "zh": "将「命运回响」改为通用周期被动：每 5 个有效回合自动触发，下一回合补子必定变成触发回合消除的非怪物棋子。", "en": "Reworked Echo of Fate into a general periodic passive: every 5 valid turns, the next refill is guaranteed to match the non-enemy tile cleared on the trigger turn."}, {"ver": "v1.68.0", "zh": "重做玄龟一阶主动「玄甲镇岳」：发动后 3 回合受到的所有伤害减半（向上取整，最低 1 点）；不再永久增加减伤，需选择时机使用。", "en": "Reworked Black Tortoise's tier-one active Tortoise Bastion: halve all incoming damage for 3 turns (rounded up, minimum 1); it no longer grants permanent reduction, so timing matters."}, {"ver": "v1.67.2", "zh": "统一日志简报和展开日志的显示顺序，最新日志显示在上方。", "en": "Unified the compact and expanded log views so the newest entries appear first."}, {"ver": "v1.67.1", "zh": "移除没有攻击行为的小偷左上角攻击力角标，避免与右上角逃走倒计时混淆。", "en": "Removed the Thief's non-functional top-left attack badge to avoid confusing it with the escape timer."}, {"ver": "v1.67.0", "zh": "龙威生效时，普通怪的攻击力显示和实际伤害统一为 `⌈攻击力/2⌉`，避免棋盘角标仍显示原始攻击力。", "en": "When Dragon Might is active, normal monsters now display and deal `ceil(attack / 2)` damage consistently."}];   /* auto-injected by dr.sh embed-changelog（勿手改） */
+const VERSION='v1.69.1';
+const CHANGELOG_LINES=[{"ver": "v1.69.1", "zh": "为鞭笞者增加从 Boss 指向受影响普通怪的红色发光鞭痕特效，并复用通用棋盘连线特效。", "en": "Added a red glowing lash effect from Lashmaster to affected normal enemies, reusing the shared board tether effect."}, {"ver": "v1.69.0", "zh": "将「命运回响」改为通用周期被动：每 5 个有效回合自动触发，下一回合补子必定变成触发回合消除的非怪物棋子。", "en": "Reworked Echo of Fate into a general periodic passive: every 5 valid turns, the next refill is guaranteed to match the non-enemy tile cleared on the trigger turn."}, {"ver": "v1.68.0", "zh": "重做玄龟一阶主动「玄甲镇岳」：发动后 3 回合受到的所有伤害减半（向上取整，最低 1 点）；不再永久增加减伤，需选择时机使用。", "en": "Reworked Black Tortoise's tier-one active Tortoise Bastion: halve all incoming damage for 3 turns (rounded up, minimum 1); it no longer grants permanent reduction, so timing matters."}, {"ver": "v1.67.2", "zh": "统一日志简报和展开日志的显示顺序，最新日志显示在上方。", "en": "Unified the compact and expanded log views so the newest entries appear first."}, {"ver": "v1.67.1", "zh": "移除没有攻击行为的小偷左上角攻击力角标，避免与右上角逃走倒计时混淆。", "en": "Removed the Thief's non-functional top-left attack badge to avoid confusing it with the escape timer."}];   /* auto-injected by dr.sh embed-changelog（勿手改） */
 const DEV=true;   // release build (DEV=false); dev build is dungeon-raid-dev.html (DEV=true)
 const REC_API='https://api.dungeonraid.win';   // 录像分享 API（Cloudflare Worker + KV）
 // 带种子随机数（mulberry32）：游戏全程用 rnd() 取代原生随机，配合录制种子可确定性重放
@@ -306,8 +306,8 @@ const BOSSES=[
   { id:'lashmaster', emoji:'🪢', name:['鞭笞者','Lashmaster'], quip:['小子们，给我燥起来。','Move, you lot — stir up some chaos.'], perTurn:true,
     special:['出场与每回合都让所有普通怪攻击倒计时 -1','On spawn and every turn, all normal enemies get -1 countdown'],
     desc:['{WC}对它无效，只能用 💥炸弹 炸。它一出场就会让场上所有普通怪物的攻击倒计时 -1，之后【每回合】再让所有普通怪物的攻击倒计时 -1。它自己未必最疼，但会把整盘怪一起抽进暴走节奏——拖得越久，怪就越快出手。','Immune to {WC} — only the 💥 Bomb works. On spawn it reduces the attack countdown of all normal enemies on the board by 1, then does so again every turn after that. It may not hit the hardest by itself, but it drives the whole board into a frenzy — the longer it lives, the faster everything else attacks.'],
-    onSpawn(t){ let n=0; for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const x=grid[r][c]; if(x&&x.type==='enemy'){ x.cd=Math.max(1,x.cd-1); n++; } } if(n) log(tr(`🪢 鞭笞者现身，${n} 只怪物立刻被驱赶向前！`,`🪢 Lashmaster arrives — ${n} enemies are driven forward at once!`), 'debuff'); },
-    act(t){ let n=0; for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const x=grid[r][c]; if(x&&x.type==='enemy'){ x.cd=Math.max(1,x.cd-1); n++; } } if(n) log(tr(`🪢 鞭笞者鞭策全场，${n} 只怪物变得更暴躁！`,`🪢 Lashmaster drives the horde forward — ${n} enemies speed up!`), 'debuff'); } },
+    onSpawn(t){ let n=0; const cells=[]; let sr=-1, sc=-1; for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const x=grid[r][c]; if(x===t){ sr=r; sc=c; } else if(x&&x.type==='enemy'){ x.cd=Math.max(1,x.cd-1); cells.push({r,c}); n++; } } if(n){ lashmasterFx({r:sr,c:sc},cells); log(tr(`🪢 鞭笞者现身，${n} 只怪物立刻被驱赶向前！`,`🪢 Lashmaster arrives — ${n} enemies are driven forward at once!`), 'debuff'); } },
+    act(t){ let n=0; const cells=[]; let sr=-1, sc=-1; for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const x=grid[r][c]; if(x===t){ sr=r; sc=c; } else if(x&&x.type==='enemy'){ x.cd=Math.max(1,x.cd-1); cells.push({r,c}); n++; } } if(n){ lashmasterFx({r:sr,c:sc},cells); log(tr(`🪢 鞭笞者鞭策全场，${n} 只怪物变得更暴躁！`,`🪢 Lashmaster drives the horde forward — ${n} enemies speed up!`), 'debuff'); } } },
   { id:'magmafiend', emoji:'♨️', name:['岩浆魔','Magmafiend'], quip:['别想用你那纸糊的盾牌保护你。','Do not hide behind those paper shields.'], perTurn:true, swordable:true,
     special:['每回合融化场上所有盾牌；吸收火焰回血','Melts all shields each turn; feeds on fire'],
     desc:['可以用{W}攻击它。但它【每回合】都会融化棋盘上所有的盾牌，但不会因此回血。它不会直接拆掉你已经有的护甲值，却会让你很难继续靠盾链续上防线；此外它【吸收火焰】——不会被点燃，火墙与点燃本应造成的火焰伤害反而会为它回血。','You CAN hit it with a {WC}. But【every turn】it melts all shields on the board without healing from them. It does not directly strip your current armor, but it makes it much harder to sustain a shield-based defense; in addition, it【feeds on fire】— it cannot be ignited, and any damage it would have taken from burn or Firewall instead heals it.'],
@@ -1510,6 +1510,39 @@ function drawBombFx(){
   }
   ctx.shadowBlur=0;
 }
+// 通用棋盘连线特效：从一个棋盘位置指向多个棋盘位置（纯视觉）。
+function boardTetherFx(src, cells, opt){
+  opt=opt||{};
+  if(headless || jumping || !src || src.r<0 || !cells || !cells.length) return;
+  try{
+    if(!document.createElementNS) return;
+    const cv0=document.getElementById('board');
+    if(!cv0||!cv0.getBoundingClientRect) return;
+    const r=cv0.getBoundingClientRect();
+    if(!r.width) return;
+    const sx=r.width/cv0.width, sy=r.height/cv0.height;
+    const x1=r.left+(cellX(src.c)+TILE/2)*sx, y1=r.top+(cellY(src.r)+TILE/2)*sy;
+    const NS='http://www.w3.org/2000/svg';
+    const svg=document.createElementNS(NS,'svg');
+    svg.style.cssText='position:fixed;inset:0;width:100vw;height:100vh;pointer-events:none;z-index:45';
+    cells.forEach(cell=>{
+      const x2=r.left+(cellX(cell.c)+TILE/2)*sx, y2=r.top+(cellY(cell.r)+TILE/2)*sy;
+      const ln=document.createElementNS(NS,'line');
+      ln.setAttribute('x1',x1); ln.setAttribute('y1',y1); ln.setAttribute('x2',x2); ln.setAttribute('y2',y2);
+      const stroke=opt.stroke||'#b78cff', glow=opt.glow||'#f0d3ff';
+      ln.setAttribute('stroke',stroke); ln.setAttribute('stroke-width',String(opt.width||3)); ln.setAttribute('stroke-linecap','round');
+      ln.style.filter=`drop-shadow(0 0 6px ${glow})`;
+      const len=Math.hypot(x2-x1,y2-y1); ln.setAttribute('stroke-dasharray',len); ln.setAttribute('stroke-dashoffset',len);
+      svg.appendChild(ln);
+      if(ln.animate) ln.animate([{strokeDashoffset:len,opacity:1},{strokeDashoffset:0,opacity:1,offset:.5},{strokeDashoffset:0,opacity:0}],{duration:opt.duration||620,easing:'ease-out',fill:'forwards'});
+      else { ln.setAttribute('stroke-dashoffset','0'); ln.style.opacity='0.9'; }
+    });
+    markTransientFxDom(svg); document.body.appendChild(svg);
+    setTimeout(()=>{ try{ svg.remove(); }catch(e){} }, (opt.duration||620)+60);
+  }catch(e){}
+}
+// 鞭笞者：从 Boss 向本次被鞭策的普通怪抽出红色鞭痕。
+function lashmasterFx(src, cells){ boardTetherFx(src,cells,{stroke:'#e74c3c',glow:'#ff9a8f',duration:540}); }
 function markTransientFxDom(svg){
   try{ if(svg&&svg.classList) svg.classList.add('drFxSvg'); }catch(e){}
 }
@@ -1698,58 +1731,10 @@ function devourerDrainFx(src, cells){
   absorbLinesFx(cells.map(({r,c})=>({r,c})), { targetEl, stroke:'#b8ff5c', glow:'#e6ff8a' });
 }
 function summonerFx(src, cells){
-  if(headless || jumping || !src || !cells || !cells.length) return;
-  try{
-    if(!document.createElementNS) return;
-    const cv0=document.getElementById('board');
-    if(!cv0||!cv0.getBoundingClientRect) return;
-    const r=cv0.getBoundingClientRect();
-    if(!r.width) return;
-    const sx=r.width/cv0.width, sy=r.height/cv0.height;
-    const x1=r.left+(cellX(src.c)+TILE/2)*sx, y1=r.top+(cellY(src.r)+TILE/2)*sy;
-    const NS='http://www.w3.org/2000/svg';
-    const svg=document.createElementNS(NS,'svg');
-    svg.style.cssText='position:fixed;inset:0;width:100vw;height:100vh;pointer-events:none;z-index:45';
-    cells.forEach(cell=>{
-      const x2=r.left+(cellX(cell.c)+TILE/2)*sx, y2=r.top+(cellY(cell.r)+TILE/2)*sy;
-      const ln=document.createElementNS(NS,'line');
-      ln.setAttribute('x1',x1); ln.setAttribute('y1',y1); ln.setAttribute('x2',x2); ln.setAttribute('y2',y2);
-      ln.setAttribute('stroke','#b78cff'); ln.setAttribute('stroke-width','3'); ln.setAttribute('stroke-linecap','round');
-      ln.style.filter='drop-shadow(0 0 6px #f0d3ff)';
-      const len=Math.hypot(x2-x1,y2-y1); ln.setAttribute('stroke-dasharray',len); ln.setAttribute('stroke-dashoffset',len);
-      svg.appendChild(ln);
-      if(ln.animate) ln.animate([{strokeDashoffset:len,opacity:1},{strokeDashoffset:0,opacity:1,offset:.45},{strokeDashoffset:0,opacity:0}],{duration:620,easing:'ease-out',fill:'forwards'});
-    });
-    markTransientFxDom(svg); document.body.appendChild(svg);
-    setTimeout(()=>{ try{ svg.remove(); }catch(e){} }, 680);
-  }catch(e){}
+  boardTetherFx(src,cells,{stroke:'#b78cff',glow:'#f0d3ff'});
 }
 function magmaShieldFx(src, cells){
-  if(headless || jumping || !src || !cells || !cells.length) return;
-  try{
-    if(!document.createElementNS) return;
-    const cv0=document.getElementById('board');
-    if(!cv0||!cv0.getBoundingClientRect) return;
-    const r=cv0.getBoundingClientRect();
-    if(!r.width) return;
-    const sx=r.width/cv0.width, sy=r.height/cv0.height;
-    const x1=r.left+(cellX(src.c)+TILE/2)*sx, y1=r.top+(cellY(src.r)+TILE/2)*sy;
-    const NS='http://www.w3.org/2000/svg';
-    const svg=document.createElementNS(NS,'svg');
-    svg.style.cssText='position:fixed;inset:0;width:100vw;height:100vh;pointer-events:none;z-index:45';
-    cells.forEach(cell=>{
-      const x2=r.left+(cellX(cell.c)+TILE/2)*sx, y2=r.top+(cellY(cell.r)+TILE/2)*sy;
-      const ln=document.createElementNS(NS,'line');
-      ln.setAttribute('x1',x1); ln.setAttribute('y1',y1); ln.setAttribute('x2',x2); ln.setAttribute('y2',y2);
-      ln.setAttribute('stroke','#ff6b2f'); ln.setAttribute('stroke-width','3'); ln.setAttribute('stroke-linecap','round');
-      ln.style.filter='drop-shadow(0 0 6px #ffb347)';
-      const len=Math.hypot(x2-x1,y2-y1); ln.setAttribute('stroke-dasharray',len); ln.setAttribute('stroke-dashoffset',len);
-      svg.appendChild(ln);
-      if(ln.animate) ln.animate([{strokeDashoffset:len,opacity:1},{strokeDashoffset:0,opacity:1,offset:.5},{strokeDashoffset:0,opacity:0}],{duration:620,easing:'ease-out',fill:'forwards'});
-    });
-    markTransientFxDom(svg); document.body.appendChild(svg);
-    setTimeout(()=>{ try{ svg.remove(); }catch(e){} }, 680);
-  }catch(e){}
+  boardTetherFx(src,cells,{stroke:'#ff6b2f',glow:'#ffb347'});
 }
 
 function loop(){
