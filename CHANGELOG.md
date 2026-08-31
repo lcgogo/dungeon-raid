@@ -1,3 +1,8 @@
+## [v1.69.2]
+
+- 精简饕餮的中英文技能描述，突出吸收怪物能量后发动全力一击的机制。
+- Shortened Devourer's Chinese and English description to emphasize absorbing monster energy before its full-power strike.
+
 ## [v1.69.1]
 
 - 为鞭笞者增加从 Boss 指向受影响普通怪的红色发光鞭痕特效，并复用通用棋盘连线特效。
