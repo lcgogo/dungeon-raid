@@ -52,6 +52,11 @@
   #log{font-size:11px; color:var(--dim); height:44px; box-sizing:border-box; overflow:hidden; margin:6px 0; line-height:1.4; cursor:pointer;
        background:var(--panel2); border:1px solid #3a2d4d; border-radius:10px; padding:5px 9px;}
   #log:hover{border-color:#6a4fa3;}
+  .settlementLog{background:var(--panel2); border:1px solid #3a2d4d; border-radius:10px; margin:4px 0 10px; text-align:left; overflow:hidden;}
+  .settlementLog summary{padding:6px 9px; color:var(--gold); font-size:11px; cursor:pointer;}
+  .settlementLogPreview{padding:0 9px 6px; max-height:54px; overflow:hidden; font-size:11px; line-height:1.45;}
+  .settlementLogPreview div,.settlementLogFull div{white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .settlementLogFull{border-top:1px solid #3a2d4d; padding:4px 9px 6px; max-height:180px; overflow-y:auto; font-size:11px; line-height:1.55;}
 
   /* shop */
   #shop{display:flex; gap:6px; margin:6px 0 0;}
@@ -184,8 +189,8 @@
 (()=>{
 //==================== 配置 ====================
 // 版本号 v主.次.修：不影响 verify/replay 兼容边界的小改动改"修"；凡是影响 verify/replay/版本分桶/release 验证语义的改动都改"次"；大版本变更需先确认。页面底部显示。
-const VERSION='v1.71.0';
-const CHANGELOG_LINES=[{"ver": "v1.71.0", "zh": "修复每回合结算顺序：敌人造成致命伤害后立即判定死亡，不再允许回合恢复在死亡后生效。", "en": "Fixed turn resolution order: lethal enemy damage now triggers death immediately, before per-turn healing can take effect."}, {"ver": "v1.70.6", "zh": "调整升级弹框时机：Boss 或主动技能的结算与视觉效果完成后，才显示升级选择。", "en": "Delayed upgrade popups until Boss or active-skill resolution and visual effects have finished."}, {"ver": "v1.70.5", "zh": "将自动释放边框流光周期放慢至 15 秒，进一步降低视觉干扰。", "en": "Slowed the auto-release border trail to a 15-second cycle to further reduce visual interference."}, {"ver": "v1.70.4", "zh": "进一步放慢自动释放边框流光，降低动态效果对操作的干扰。", "en": "Slowed the auto-release border trail further to reduce visual interference during play."}, {"ver": "v1.70.3", "zh": "将自动释放边框流光改为更短、更密、更慢的多段光线效果。", "en": "Tuned the auto-release border trail to use shorter, denser, slower-moving light segments."}];   /* auto-injected by dr.sh embed-changelog（勿手改） */
+const VERSION='v1.71.2';
+const CHANGELOG_LINES=[{"ver": "v1.71.2", "zh": "修复新局错误继承上一局治疗/炸弹自动释放状态的问题；只有继续上局才会保留该状态。", "en": "Fixed new runs incorrectly inheriting the previous run's Heal/Bomb auto-release state; only continuing a run preserves it."}, {"ver": "v1.71.1", "zh": "移除结算页冗长的技能列表，改为默认显示最近 3 行、可展开查看完整内容的日志框。", "en": "Replaced the verbose settlement perk list with a compact 3-line log box that expands to the full history."}, {"ver": "v1.71.0", "zh": "修复每回合结算顺序：敌人造成致命伤害后立即判定死亡，不再允许回合恢复在死亡后生效。", "en": "Fixed turn resolution order: lethal enemy damage now triggers death immediately, before per-turn healing can take effect."}, {"ver": "v1.70.6", "zh": "调整升级弹框时机：Boss 或主动技能的结算与视觉效果完成后，才显示升级选择。", "en": "Delayed upgrade popups until Boss or active-skill resolution and visual effects have finished."}, {"ver": "v1.70.5", "zh": "将自动释放边框流光周期放慢至 15 秒，进一步降低视觉干扰。", "en": "Slowed the auto-release border trail to a 15-second cycle to further reduce visual interference."}];   /* auto-injected by dr.sh embed-changelog（勿手改） */
 const DEV=true;   // release build (DEV=false); dev build is dungeon-raid-dev.html (DEV=true)
 const REC_API='https://api.dungeonraid.win';   // 录像分享 API（Cloudflare Worker + KV）
 // 带种子随机数（mulberry32）：游戏全程用 rnd() 取代原生随机，配合录制种子可确定性重放
@@ -1179,6 +1184,7 @@ function startGame(rc, srv){   // srv={seed,token}：服务端发的种子（正
     saveRec();
   }
   player=newPlayer(); player.race=rc.id; rc.f(player); player.hp=player.maxHp;
+  player.autoUse={heal:false,bomb:false};   // 新局不继承上一局的自动释放状态；只有“继续上局”才恢复存档状态
   selection=[]; dragging=false; busy=false; pendingLevels=0;
   grid=[];
   for(let r=0;r<ROWS;r++){ grid[r]=[]; for(let c=0;c<COLS;c++){
@@ -2528,16 +2534,13 @@ function gameOver(){
     report=`<div style="text-align:left;margin:4px 0 10px;background:var(--panel2);border-radius:10px;padding:5px 4px">
       <div style="text-align:center;color:var(--dim);font-size:11px;margin-bottom:1px">${tr('☠️ 致命回合伤害来源','☠️ Killing blow — damage this turn')}</div>${rows}</div>`;
   }
-  // 技能列表（中文名）
-  const perkNames = player.chosenPerks.map(id => { const u=UPGRADES[id]; return u ? L(u.n) : id; }).join('、');
-  const perkLine = player.chosenPerks.length ? `<div style="text-align:left;font-size:12px;color:var(--gold);margin:4px 0 8px">✦ ${tr('技能：','Perks: ')}${perkNames}</div>` : '';
   const card=document.getElementById('card');
   card.innerHTML=`<h2 style="color:var(--hp);margin-bottom:4px">${tr('💀 你倒下了','💀 You fell')}</h2>
     <p style="margin-bottom:8px">${tr('地牢吞噬了又一位冒险者…','The dungeon claims another adventurer…')}</p>
     <div style="font-size:14px;margin-bottom:8px">${tr('等级','Lv')} <b style="color:var(--gold)">${player.level}</b> · 💰<b style="color:var(--gold)">${player.gold}</b> · <b style="color:var(--gold)">${player.turns}</b> ${tr('回合','turns')}</div>
     <div style="font-size:12px;color:var(--dim);margin:-4px 0 8px">⏱ ${tr('用时','Played')} ${fmtDur(durMs)}</div>
     ${report}
-    ${perkLine}
+    ${settlementLogBox()}
     ${DEV?'':`<div id="rankBox" style="text-align:left;margin:4px 0 12px;background:var(--panel2);border-radius:10px;padding:6px 4px;min-height:20px"></div>`}
     <div style="display:flex;gap:6px;justify-content:center;margin-bottom:8px;flex-wrap:wrap">
       <button class="choice" id="goReplay" style="width:auto;margin:0;padding:7px 12px">🎬 ${tr('回放本局','Replay')}</button>
@@ -2568,15 +2571,12 @@ function onClear(){
   if(rec){ rec.maxHp=player.maxHp; rec.level=player.level; rec.gold=player.gold; rec.turns=player.turns; rec.cleared=!!player.cleared; rec.perks=player.chosenPerks.slice(); }
   if(wasReplay){ stopReplay(); }
   else { saveBest(); clearSave(); try{ if(rec) localStorage.setItem(REC_LAST_KEY, JSON.stringify(rec)); }catch(e){} }
-  // 技能列表（中文名）
-  const perkNames = player.chosenPerks.map(id => { const u=UPGRADES[id]; return u ? L(u.n) : id; }).join('、');
-  const perkLine = player.chosenPerks.length ? `<div style="text-align:left;font-size:12px;color:var(--gold);margin:4px 0 8px">✦ ${tr('技能：','Perks: ')}${perkNames}</div>` : '';
   const card=document.getElementById('card');
   card.innerHTML=`<h2 style="color:var(--gold);margin-bottom:4px">🏆 ${tr('破关！','CLEARED!')}</h2>
     <p style="line-height:1.6;margin-bottom:8px">${tr('🎉 终焉之主的浪潮退去，你撑过全部 10 波，成为第一个活着走出地牢的冒险者——「再无人生还」的传说终于有了结局。','🎉 The Overlord’s waves recede; you survived all 10 and became the first to walk out of the dungeon alive — the legend that “none returned” finally has its ending.')} <span style="color:var(--dim)">${tr('感谢游玩这份致敬之作 🙏','Thanks for playing this tribute 🙏')}</span></p>
     <div style="font-size:14px;margin-bottom:8px">${tr('破关等级','Clear Lv')} <b style="color:var(--gold)">${player.level}</b> <span style="color:var(--dim);font-size:11px">${tr('越低越强','lower=better')}</span> · 💰<b style="color:var(--gold)">${player.gold}</b> · <b style="color:var(--gold)">${player.turns}</b> ${tr('回合','t')}</div>
     <div style="font-size:12px;color:var(--dim);margin:-4px 0 8px">⏱ ${tr('用时','Played')} ${fmtDur(durMs)}</div>
-    ${perkLine}
+    ${settlementLogBox()}
     ${DEV?'':`<div id="rankBox" style="text-align:left;margin:4px 0 12px;background:var(--panel2);border-radius:10px;padding:6px 4px;min-height:20px"></div>`}
     <div style="display:flex;gap:6px;justify-content:center;margin-bottom:8px;flex-wrap:wrap">
       <button class="choice" id="goReplay" style="width:auto;margin:0;padding:7px 12px">🎬 ${tr('回放本局','Replay')}</button>
@@ -3201,6 +3201,14 @@ function log(m, k){
   logHistory.push({m, k}); if(logHistory.length>80)logHistory.shift();   // 完整历史含类型标记（点 log 栏查看更多）
   logEl.innerHTML=logHistory.slice(-2).reverse().map(e=>`<span style="color:${logColor(e)}">${e.m}</span>`).join('<br>'); }
 function logClear(){ logHistory=[]; logEl.innerHTML=''; }
+function settlementLogBox(){
+  const recent=logHistory.slice(-3).reverse(), full=logHistory.slice().reverse();
+  const row=e=>`<div style="color:${logColor(e)}">${e.m}</div>`;
+  return `<details class="settlementLog"><summary>📜 ${tr('最近日志（点击展开）','Recent log (tap to expand)')}</summary>
+    <div class="settlementLogPreview">${recent.length?recent.map(row).join(''):`<div style="color:var(--dim)">${tr('暂无日志','No log entries')}</div>`}</div>
+    <div class="settlementLogFull">${full.length?full.map(row).join(''):`<div style="color:var(--dim)">${tr('暂无日志','No log entries')}</div>`}</div>
+  </details>`;
+}
 // 点 log 栏 → 弹出完整日志历史（与底部简报一致，最新在上）。纯 UI，不进录像。
 function showLogHistory(){
   if(busy||pendingLevels||!logHistory.length) return;

@@ -1,3 +1,13 @@
+## [v1.71.2]
+
+- 修复新局错误继承上一局治疗/炸弹自动释放状态的问题；只有继续上局才会保留该状态。
+- Fixed new runs incorrectly inheriting the previous run's Heal/Bomb auto-release state; only continuing a run preserves it.
+
+## [v1.71.1]
+
+- 移除结算页冗长的技能列表，改为默认显示最近 3 行、可展开查看完整内容的日志框。
+- Replaced the verbose settlement perk list with a compact 3-line log box that expands to the full history.
+
 ## [v1.71.0]
 
 > Version-Impact: verify
