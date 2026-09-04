@@ -158,7 +158,7 @@ if 'fetch(\'versions.json\'' in text or 'id="prodVer"' in text or 'id="devVer"' 
 pathlib.Path('public').mkdir(exist_ok=True)
 pathlib.Path('public/index.html').write_text(text, encoding='utf-8')
 PY
-  cp dungeon-raid.html dungeon-raid-dev.html apple-touch-icon.png icon-192.png icon-512.png manifest.webmanifest public/
+  cp dungeon-raid.html dungeon-raid-dev.html apple-touch-icon.png icon-192.png icon-512.png manifest.webmanifest sw.js public/
   cp deploy/pages/functions/_middleware.js public/functions/
   echo "public/ 内容（应只有网页文件，无私钥）："; ls -R public
   npx --yes wrangler pages project create "$PROJ" --production-branch=main 2>/dev/null || true

@@ -231,6 +231,7 @@ function cmd_deploy {
     Copy-Item "icon-192.png" "public\icon-192.png" -Force
     Copy-Item "icon-512.png" "public\icon-512.png" -Force
     Copy-Item "manifest.webmanifest" "public\manifest.webmanifest" -Force
+    Copy-Item "sw.js" "public\sw.js" -Force
     Copy-Item "pages\functions\_middleware.js" "public\functions\" -Force
 
     Write-Host "public/ 内容（应只有网页文件，无私钥）:"

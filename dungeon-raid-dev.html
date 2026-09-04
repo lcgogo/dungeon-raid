@@ -187,10 +187,11 @@
 
 <script>
 (()=>{
+if('serviceWorker' in navigator) window.addEventListener('load',()=>navigator.serviceWorker.register('/sw.js').catch(()=>{}));
 //==================== 配置 ====================
 // 版本号 v主.次.修：不影响 verify/replay 兼容边界的小改动改"修"；凡是影响 verify/replay/版本分桶/release 验证语义的改动都改"次"；大版本变更需先确认。页面底部显示。
-const VERSION='v1.71.2';
-const CHANGELOG_LINES=[{"ver": "v1.71.2", "zh": "修复新局错误继承上一局治疗/炸弹自动释放状态的问题；只有继续上局才会保留该状态。", "en": "Fixed new runs incorrectly inheriting the previous run's Heal/Bomb auto-release state; only continuing a run preserves it."}, {"ver": "v1.71.1", "zh": "移除结算页冗长的技能列表，改为默认显示最近 3 行、可展开查看完整内容的日志框。", "en": "Replaced the verbose settlement perk list with a compact 3-line log box that expands to the full history."}, {"ver": "v1.71.0", "zh": "修复每回合结算顺序：敌人造成致命伤害后立即判定死亡，不再允许回合恢复在死亡后生效。", "en": "Fixed turn resolution order: lethal enemy damage now triggers death immediately, before per-turn healing can take effect."}, {"ver": "v1.70.6", "zh": "调整升级弹框时机：Boss 或主动技能的结算与视觉效果完成后，才显示升级选择。", "en": "Delayed upgrade popups until Boss or active-skill resolution and visual effects have finished."}, {"ver": "v1.70.5", "zh": "将自动释放边框流光周期放慢至 15 秒，进一步降低视觉干扰。", "en": "Slowed the auto-release border trail to a 15-second cycle to further reduce visual interference."}];   /* auto-injected by dr.sh embed-changelog（勿手改） */
+const VERSION='v1.71.4';
+const CHANGELOG_LINES=[{"ver": "v1.71.4", "zh": "修复 iOS Safari 的离线缓存错误：Service Worker 不再返回带重定向的导航响应。", "en": "Fixed the iOS Safari offline-cache error by preventing the Service Worker from returning redirected navigation responses."}, {"ver": "v1.71.3", "zh": "增加 PWA Service Worker 缓存：iOS 先联网打开一次页面后，完全断网时仍可打开游戏并使用本地随机开局。", "en": "Added a PWA Service Worker cache so iOS can reopen the game fully offline after one initial online visit, using the existing local-random fallback."}, {"ver": "v1.71.2", "zh": "修复新局错误继承上一局治疗/炸弹自动释放状态的问题；只有继续上局才会保留该状态。", "en": "Fixed new runs incorrectly inheriting the previous run's Heal/Bomb auto-release state; only continuing a run preserves it."}, {"ver": "v1.71.1", "zh": "移除结算页冗长的技能列表，改为默认显示最近 3 行、可展开查看完整内容的日志框。", "en": "Replaced the verbose settlement perk list with a compact 3-line log box that expands to the full history."}, {"ver": "v1.71.0", "zh": "修复每回合结算顺序：敌人造成致命伤害后立即判定死亡，不再允许回合恢复在死亡后生效。", "en": "Fixed turn resolution order: lethal enemy damage now triggers death immediately, before per-turn healing can take effect."}];   /* auto-injected by dr.sh embed-changelog（勿手改） */
 const DEV=true;   // release build (DEV=false); dev build is dungeon-raid-dev.html (DEV=true)
 const REC_API='https://api.dungeonraid.win';   // 录像分享 API（Cloudflare Worker + KV）
 // 带种子随机数（mulberry32）：游戏全程用 rnd() 取代原生随机，配合录制种子可确定性重放

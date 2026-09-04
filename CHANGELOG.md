@@ -1,3 +1,13 @@
+## [v1.71.4]
+
+- 修复 iOS Safari 的离线缓存错误：Service Worker 不再返回带重定向的导航响应。
+- Fixed the iOS Safari offline-cache error by preventing the Service Worker from returning redirected navigation responses.
+
+## [v1.71.3]
+
+- 增加 PWA Service Worker 缓存：iOS 先联网打开一次页面后，完全断网时仍可打开游戏并使用本地随机开局。
+- Added a PWA Service Worker cache so iOS can reopen the game fully offline after one initial online visit, using the existing local-random fallback.
+
 ## [v1.71.2]
 
 - 修复新局错误继承上一局治疗/炸弹自动释放状态的问题；只有继续上局才会保留该状态。

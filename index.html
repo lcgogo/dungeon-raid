@@ -55,6 +55,7 @@
   <!-- 版本号由 dr.sh 在部署时注入到 public/index.html；这里不做运行时请求 -->
   <script>
     (()=>{
+      if('serviceWorker' in navigator) window.addEventListener('load',()=>navigator.serviceWorker.register('/sw.js').catch(()=>{}));
       const btn=document.getElementById('installHomeBtn');
       if(!btn) return;
       let installPromptEvt=null;
