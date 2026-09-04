@@ -68,6 +68,14 @@
   .shopBtn.skillBtn{background:linear-gradient(160deg,#5a2e85,#7d3cad); border-color:#c08bff; color:#fff; font-weight:700;}
   .shopBtn.skillBtn em{color:#e7c9ff;}
   .shopBtn.skillBtn:not(.off):hover{border-color:#e6c2ff;}
+  .shopBtn.auto-on{position:relative; isolation:isolate;}
+  .autoTrail{position:absolute; inset:-5px; pointer-events:none; z-index:2; overflow:visible;}
+  .autoTrail svg{display:block; width:100%; height:100%; overflow:visible;}
+  .autoTrail rect{fill:none; stroke:var(--gold); stroke-linecap:round; vector-effect:non-scaling-stroke;
+                  stroke-dasharray:8 12; animation:autoTrailFlow 15s linear infinite;}
+  .autoTrail rect:first-child{stroke:#fff3a3; stroke-width:4; opacity:.28; filter:blur(2px);}
+  .autoTrail rect:last-child{stroke:#fff3a3; stroke-width:2;}
+  @keyframes autoTrailFlow{to{stroke-dashoffset:-100;}}
 
   /* overlay */
   #overlay{position:fixed; inset:0; background:rgba(10,6,18,.82); backdrop-filter:blur(3px);
@@ -176,8 +184,8 @@
 (()=>{
 //==================== 配置 ====================
 // 版本号 v主.次.修：不影响 verify/replay 兼容边界的小改动改"修"；凡是影响 verify/replay/版本分桶/release 验证语义的改动都改"次"；大版本变更需先确认。页面底部显示。
-const VERSION='v1.69.2';
-const CHANGELOG_LINES=[{"ver": "v1.69.2", "zh": "精简饕餮的中英文技能描述，突出吸收怪物能量后发动全力一击的机制。", "en": "Shortened Devourer's Chinese and English description to emphasize absorbing monster energy before its full-power strike."}, {"ver": "v1.69.1", "zh": "为鞭笞者增加从 Boss 指向受影响普通怪的红色发光鞭痕特效，并复用通用棋盘连线特效。", "en": "Added a red glowing lash effect from Lashmaster to affected normal enemies, reusing the shared board tether effect."}, {"ver": "v1.69.0", "zh": "将「命运回响」改为通用周期被动：每 5 个有效回合自动触发，下一回合补子必定变成触发回合消除的非怪物棋子。", "en": "Reworked Echo of Fate into a general periodic passive: every 5 valid turns, the next refill is guaranteed to match the non-enemy tile cleared on the trigger turn."}, {"ver": "v1.68.0", "zh": "重做玄龟一阶主动「玄甲镇岳」：发动后 3 回合受到的所有伤害减半（向上取整，最低 1 点）；不再永久增加减伤，需选择时机使用。", "en": "Reworked Black Tortoise's tier-one active Tortoise Bastion: halve all incoming damage for 3 turns (rounded up, minimum 1); it no longer grants permanent reduction, so timing matters."}, {"ver": "v1.67.2", "zh": "统一日志简报和展开日志的显示顺序，最新日志显示在上方。", "en": "Unified the compact and expanded log views so the newest entries appear first."}];   /* auto-injected by dr.sh embed-changelog（勿手改） */
+const VERSION='v1.71.0';
+const CHANGELOG_LINES=[{"ver": "v1.71.0", "zh": "修复每回合结算顺序：敌人造成致命伤害后立即判定死亡，不再允许回合恢复在死亡后生效。", "en": "Fixed turn resolution order: lethal enemy damage now triggers death immediately, before per-turn healing can take effect."}, {"ver": "v1.70.6", "zh": "调整升级弹框时机：Boss 或主动技能的结算与视觉效果完成后，才显示升级选择。", "en": "Delayed upgrade popups until Boss or active-skill resolution and visual effects have finished."}, {"ver": "v1.70.5", "zh": "将自动释放边框流光周期放慢至 15 秒，进一步降低视觉干扰。", "en": "Slowed the auto-release border trail to a 15-second cycle to further reduce visual interference."}, {"ver": "v1.70.4", "zh": "进一步放慢自动释放边框流光，降低动态效果对操作的干扰。", "en": "Slowed the auto-release border trail further to reduce visual interference during play."}, {"ver": "v1.70.3", "zh": "将自动释放边框流光改为更短、更密、更慢的多段光线效果。", "en": "Tuned the auto-release border trail to use shorter, denser, slower-moving light segments."}];   /* auto-injected by dr.sh embed-changelog（勿手改） */
 const DEV=true;   // release build (DEV=false); dev build is dungeon-raid-dev.html (DEV=true)
 const REC_API='https://api.dungeonraid.win';   // 录像分享 API（Cloudflare Worker + KV）
 // 带种子随机数（mulberry32）：游戏全程用 rnd() 取代原生随机，配合录制种子可确定性重放
@@ -262,6 +270,7 @@ let replayResumeState=null;   // 进入回放前的 live 快照：退出回放�
 let headless=false;   // 无头机器人模式：抑制升级弹窗(及其抽池消耗RNG)，由机器人自行抽池+录制，保证录像可确定性重放
 let prophecySlotKey=null;   // 先知：当前弹框是来自一阶主动还是换装槽（heal/bomb），用于录制/进冷却
 const FX_FALL_HOLD=11;   // 特殊吸取/融化类效果：棋子先消失一小拍，再开始下落，避免和特效同时发生显得太突兀
+const ACTIVE_POPUP_WAIT=720;   // 主动技能结算后留出一拍，再显示升级/转职弹框
 let gravityFxHold=0;     // 下一次 applyGravity 要给下落棋子的起落前停顿（按帧计，纯视觉，不进录像）
 function holdNextGravity(frames=FX_FALL_HOLD){ if(headless||jumping) return; gravityFxHold=Math.max(gravityFxHold, frames|0); }
 
@@ -271,7 +280,7 @@ function newPlayer(){
     lifesteal:0, regen:0, coinXp:0, turns:0,
     race:null, tier1:null, tier2:null, t1Pending:false, t2Pending:false,   // 种族/转职
     tier2b:null, t3Pending:false,                                          // 200回合：本种族第二个被动
-    skill2:null, skill2Cd:0, t4Pending:false,                              // 350回合：任选主动替换治疗/炸弹槽
+    skill2:null, skill2Cd:0, t4Pending:false, autoUse:{heal:false,bomb:false}, // 350回合：任选主动替换治疗/炸弹槽；商店主动自动释放
     comboMult:1, swordMult:1, armorMult:1, maxHpUpMult:1, noArmor:false,
     chosenPerks:[],                                                      // 本局已选技能名（按选择顺序，供录像/展示用）
     prophecyPending:null, echoPendingType:null,                           // 先知 / 命运回响：下一次补子强制落下的类型
@@ -1001,6 +1010,7 @@ function chooseSwapSlot(skillId){
     b.onclick=()=>{
       recAct(['t', 4, skillId, slot]);
       player.skill2={id:skillId, slot}; player.skill2Cd=0;
+      if(player.autoUse) player.autoUse[slot]=false;
       player.awaitingTier=0;
       log(tr(`🔁 ${L(sk.name)} 已替换 ${slot==='heal'?'💊治疗':'💥炸弹'}！`,`🔁 ${L(sk.name)} now replaces ${slot==='heal'?'Heal':'Bomb'}!`), 'buff');
       if(pendingLevels){ showLevelUp(); } else { busy=false; hideOverlay(); }   // 同上：避免转职/换装与升级同回合时卡住
@@ -1207,7 +1217,7 @@ const NM_NOUN_EN=['Knight','Ranger','Rogue','Warden','Butcher','Wanderer','Hunte
 function genName(){ const pick=a=>a[Math.floor(Math.random()*a.length)]; return lang==='en' ? pick(NM_ADJ_EN)+' '+pick(NM_NOUN_EN) : pick(NM_ADJ_ZH)+'的'+pick(NM_NOUN_ZH); }
 const REC_KEY=DEV?'dr_rec_dev':'dr_rec', REC_LAST_KEY=DEV?'dr_rec_last_dev':'dr_rec_last';  // 进行中录像 / 上一局完整录像
 const SEED_POOL_KEY=DEV?'dr_seed_pool_dev':'dr_seed_pool';   // 预热的服务端种子：本地最多缓存 1 枚，优先给下次正式版开局复用
-// 录制一个玩家动作（回放中不录）。动作：['m',cells,baseType] 连线 / ['b',key] 购买 / ['b',key,'seer',type] 换装先知选择 / ['k'] 技能 / ['k','seer',type] 先知选择 / ['u',idx] 升级选择 / ['t',tier,id] 转职选择
+// 录制一个玩家动作（回放中不录）。动作：['m',cells,baseType] 连线 / ['b',key] 购买 / ['b',key,'seer',type] 换装先知选择 / ['k'] 技能 / ['k','seer',type] 先知选择 / ['a',key,on] 自动释放开关 / ['u',idx] 升级选择 / ['t',tier,id] 转职选择
 // 每个动作末尾追加一个时间戳（epoch ms，相对开局可算操作间隔）——仅供离线分析（后续黑盒判定是否 AI 录像），回放/校验按固定下标取值，忽略该尾元素，旧录像无此字段也能正常回放。
 function recAct(a){ if(rec && !replaying){ a.push(Date.now()-(rec.t0||0)); rec.acts.push(a); saveRec(); } }
 // 本局游玩时长（毫秒）：实时对局取 now−t0；回放取录像最后一步的时间戳（相对开局 ms）
@@ -1244,6 +1254,7 @@ function loadGame(){
     if(typeof data.rngState==='number') srand(data.rngState>>>0);   // 续局必须接回原 RNG 轨迹，否则后续补格/刷怪会让 replay 漂移
     else { __rng=null; __rngState=0; }   // 旧存档缺少 RNG 快照时，至少别误沿用本页残留状态
     player=normalizePlayerClassIds(data.player);
+    if(!player.autoUse) player.autoUse={heal:false,bomb:false};
     ended=false;   // 继续上局 = 恢复进行中的对局，重新允许存档
     pendingLevels=data.pendingLevels||0;
     grid=data.grid.map(row=>row.map(t=> t?{...t}:null));
@@ -1897,12 +1908,48 @@ function buyItem(key){
     if(pendingLevels){ showLevelUp(); return; }
     checkDeadlock();   // 用掉炸弹后若仍无棋可连且无就绪动作 → 判负，不卡死
   };
-  // 炸弹有爆炸特效：若同回合要弹转职/升级框，先等特效播完再弹，否则框直接盖住爆炸看不到（仅实玩；回放/无头/快进无特效，立即弹不影响确定性）
+  // 道具产生转职/升级时，先等治疗/炸弹结算表现完成再弹框，避免遮住主动效果。
   const hasPop = player.t1Pending||player.t2Pending||player.t3Pending||player.t4Pending||pendingLevels;
-  if(key==='bomb' && !replaying && !headless && bombFx.length && hasPop){
+  const popupWait = key==='bomb' && bombFx.length ? BOMB_FX_MS : key==='heal' && hasPop ? ACTIVE_POPUP_WAIT : 0;
+  if(!replaying && !headless && hasPop && popupWait){
     busy=true; updateHUD();   // pendingLevels/busy 已挡输入；等特效
-    setTimeout(()=>{ busy=false; pops(); }, BOMB_FX_MS);
+    setTimeout(()=>{ busy=false; pops(); }, popupWait);
   } else pops();
+}
+function canAutoUse(key){
+  if(!player || !grid || !player.autoUse || !player.autoUse[key]) return false;
+  if(player.skill2 && player.skill2.slot===key) return false;
+  if(player.frozen && player.frozen[key]>0) return false;
+  if(player.shopCd && player.shopCd[key]>0) return false;
+  if(key==='heal' && player.hp>=player.maxHp) return false;
+  return player.gold>=shopCost(key);
+}
+function autoReleaseItems(){
+  if(replaying || busy || pendingLevels || !player) return;
+  if(canAutoUse('heal')) buyItem('heal');
+  if(canAutoUse('bomb')) buyItem('bomb');
+}
+function setAutoUse(key, enabled, fromReplay){
+  if(!player || (key!=='heal' && key!=='bomb')) return;
+  if(player.skill2 && player.skill2.slot===key) return;
+  if(!player.autoUse) player.autoUse={heal:false,bomb:false};
+  player.autoUse[key]=!!enabled;
+  if(!fromReplay) recAct(['a',key,!!enabled]);
+  updateHUD();
+}
+function updateAutoTrail(btn, enabled){
+  const trail=btn.querySelector('.autoTrail');
+  if(!enabled){ if(trail) trail.remove(); return; }
+  if(trail) return;
+  const wrap=document.createElement('span'); wrap.className='autoTrail';
+  const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');
+  svg.setAttribute('viewBox','0 0 100 40'); svg.setAttribute('preserveAspectRatio','none');
+  for(let i=0;i<2;i++){
+    const rect=document.createElementNS('http://www.w3.org/2000/svg','rect');
+    rect.setAttribute('x','2'); rect.setAttribute('y','2'); rect.setAttribute('width','96'); rect.setAttribute('height','36'); rect.setAttribute('rx','8'); rect.setAttribute('pathLength','100');
+    svg.appendChild(rect);
+  }
+  wrap.appendChild(svg); btn.appendChild(wrap);
 }
 // 施放换装主动（占用 治疗/炸弹 槽）。走独立冷却 skill2Cd；录像用占用的槽位 key，回放经 buyItem 复现。
 function castSkill2(key){
@@ -1919,7 +1966,7 @@ function castSkill2(key){
   checkLevel(); updateHUD();
   if(player.t3Pending){ player.t3Pending=false; showTierSelect(3); return; }
   if(player.t4Pending){ player.t4Pending=false; showSkillSwap(); return; }
-  if(pendingLevels){ showLevelUp(); return; }
+  if(pendingLevels){ if(deferLevelUpAfterActive()) return; return; }
   checkDeadlock();   // 用掉换装主动后若仍无棋可连 → 判负，不卡死
 }
 document.querySelectorAll('.shopBtn[data-buy]').forEach(b=>{
@@ -1991,7 +2038,10 @@ function showShopInfo(key){
   const card=document.getElementById('card');
   card.innerHTML=`<h2>${info.icon} ${info.title}</h2><p style="font-size:13px;line-height:1.5">${info.desc}</p>
     <div style="text-align:left;font-size:13px;margin:0 0 14px">${rows}</div>
+    ${((key==='heal'||key==='bomb') && !(player.skill2&&player.skill2.slot===key)) ? `<button class="btn" id="autoToggle" style="width:100%;margin:0 0 8px">${player.autoUse&&player.autoUse[key]?'⏹️ '+tr('自动释放：已开启','Auto-release: On'):'▶️ '+tr('自动释放：已关闭','Auto-release: Off')}</button>` : ''}
     <button class="btn" id="infoClose" style="width:100%">${tr('关闭','Close')}</button>`;
+  const autoToggle=document.getElementById('autoToggle');
+  if(autoToggle) autoToggle.onclick=()=>{ setAutoUse(key,!(player.autoUse&&player.autoUse[key])); busy=false; hideOverlay(); updateHUD(); };
   document.getElementById('infoClose').onclick=()=>{ busy=false; hideOverlay(); updateHUD(); };
   showOverlay();
 }
@@ -2024,7 +2074,7 @@ function activateSeerSkill(type, fromReplay, slotKey){
   checkLevel(); busy=false; hideOverlay(); updateHUD();
   if(player.t3Pending){ player.t3Pending=false; showTierSelect(3); return true; }
   if(player.t4Pending){ player.t4Pending=false; showSkillSwap(); return true; }
-  if(pendingLevels){ showLevelUp(); return true; }
+  if(pendingLevels){ if(deferLevelUpAfterActive()) return true; return true; }
   checkDeadlock();
   return true;
 }
@@ -2055,7 +2105,7 @@ function activateSkill(){
   recAct(['k']);   // 录制技能发动
   if(r===undefined) log(tr(`✨ 【${L(sk.name)}】发动！`,`✨ ${L(sk.name)} activated!`), 'buff'); // 技能没自带日志才用通用日志
   checkLevel(); updateHUD();
-  if(pendingLevels){ showLevelUp(); return; }
+  if(pendingLevels){ if(deferLevelUpAfterActive()) return; return; }
   checkDeadlock();   // 用掉最后的改盘动作后若仍无棋可连 → 判负，不卡死
 }
 document.getElementById('skillBtn').onclick=()=>{ if(!replaying) activateSkill(); };   // 回放中技能不可点（重放经 dispatchReplayAct 直接调 activateSkill）
@@ -2136,6 +2186,7 @@ function resolve(){
   burnTick();   // 火焰链：已点燃目标每回合持续灼烧，直到死亡
   firewallTick();   // 火墙：底部三行的怪物每回合掉当前固定伤害 20%
   advanceEnemies();
+  if(player.hp<=0){ updateHUD(); gameOver(); return; }   // 敌人伤害先结算；致死后不能靠回合恢复复活
   if(player.tortoiseGuardTurns>0) player.tortoiseGuardTurns--;   // 玄甲镇岳：覆盖本回合敌人行动后递减
   if(player.tortoiseRegen && player.hp>0){ const rh=Math.max(1,Math.floor(player.hp*0.1)); const healed=gainHeal(rh); if(healed>0) log(tr(`🐢 恐鳌之心：恢复当前生命的 10%（+${healed}）`,`🐢 Heart of Tarrasque: restored 10% of current HP (+${healed})`), 'heal'); }
   if(player.goldLock>0){ player.goldLock--; if(player.goldLock===0){ const pay=Math.round(player.goldFrozen*1.2); player.gold+=pay; player.goldFrozen=0; log(tr(`🔓 囤金到期：返还 ${pay} 金币`,`🔓 Hoard matured: +${pay} gold`), 'buff'); } } // 守财奴囤金到期（1.2 倍）：放在敌人行动后，让「钱能买命」覆盖最后一回合
@@ -2168,6 +2219,8 @@ function resolve(){
   if(player.t3Pending){ player.t3Pending=false; showTierSelect(3); return; }   // 击败200回合Boss → 第二被动
   if(player.t4Pending){ player.t4Pending=false; showSkillSwap(); return; }     // 击败350回合Boss → 主动换装
   if(pendingLevels){ showLevelUp(); return; }
+  autoReleaseItems();   // 开启自动释放时，在回合结算后按当前可用条件使用治疗/炸弹
+  if(busy || pendingLevels) return;
   checkDeadlock();   // 无弹层待处理时：棋盘塞满怪、无棋可连且无就绪改盘动作 → 判负（含终局被Boss淹没）
 }
 
@@ -2420,6 +2473,15 @@ function rollUpgradePool(){
   return arr.slice(0,(player.upgradeChoices||3));  // 将军：四选一（确定性 Fisher-Yates，避免 sort 比较器跨引擎耗 RNG 不一致）
 }
 function applyUpgrade(u){ u.f(player); player.hp=Math.min(player.hp,player.maxHp); pendingLevels--; }
+function deferLevelUpAfterActive(){
+  if(!pendingLevels || replaying || headless) return false;
+  busy=true; updateHUD();
+  setTimeout(()=>{
+    if(ended || !player || player.hp<=0) return;
+    busy=false; showLevelUp();
+  }, ACTIVE_POPUP_WAIT);
+  return true;
+}
 function showLevelUp(){
   if(replaying||headless) return;   // 回放/无头：升级由动作序列(或机器人)驱动，不弹窗、不在此抽池（避免重复消耗RNG）
   busy=true;
@@ -2823,11 +2885,12 @@ function dispatchReplayAct(a){
     if(a[1]==='seer') activateSeerSkill(a[2], true);
     else activateSkill();
   }
+  else if(k==='a') setAutoUse(a[1],!!a[2],true);
   else if(k==='u'){ rollUpgradePool(); applyUpgrade(UPGRADES[a[1]]); updateHUD(); }   // 洗牌消耗等量 RNG（丢弃结果），按录像索引应用
   else if(k==='t'){ const tier=a[1], id=normalizeClassId(a[2]);
     if(tier===1){ player.tier1=id; }
     else if(tier===3){ player.tier2b=id; TIER2[id].f(player); player.hp=Math.min(player.hp,player.maxHp); }
-    else if(tier===4){ player.skill2={id, slot:a[3]}; player.skill2Cd=0; }
+    else if(tier===4){ player.skill2={id, slot:a[3]}; player.skill2Cd=0; if(player.autoUse) player.autoUse[a[3]]=false; }
     else { player.tier2=id; TIER2[id].f(player); player.hp=Math.min(player.hp,player.maxHp); }
     player.awaitingTier=0; updateHUD();
   }
@@ -3082,6 +3145,9 @@ function updateHUD(){
   const scd=(player.shopCd&&typeof player.shopCd==='object')?player.shopCd:{};
   document.querySelectorAll('.shopBtn[data-buy]').forEach(btn=>{
     const key=btn.dataset.buy;
+    const autoOn=!!(player.autoUse&&player.autoUse[key]);
+    btn.classList.toggle('auto-on', autoOn);
+    updateAutoTrail(btn, autoOn);
     if(player.skill2 && player.skill2.slot===key && TIER1[player.skill2.id]){   // 该槽已换成换装主动
       const sk=TIER1[player.skill2.id].skill;
       btn.querySelector('span').textContent=`✨${L(sk.name)}`;

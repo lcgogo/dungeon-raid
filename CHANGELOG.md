@@ -1,3 +1,47 @@
+## [v1.71.0]
+
+> Version-Impact: verify
+
+- 修复每回合结算顺序：敌人造成致命伤害后立即判定死亡，不再允许回合恢复在死亡后生效。
+- Fixed turn resolution order: lethal enemy damage now triggers death immediately, before per-turn healing can take effect.
+
+## [v1.70.6]
+
+- 调整升级弹框时机：Boss 或主动技能的结算与视觉效果完成后，才显示升级选择。
+- Delayed upgrade popups until Boss or active-skill resolution and visual effects have finished.
+
+## [v1.70.5]
+
+- 将自动释放边框流光周期放慢至 15 秒，进一步降低视觉干扰。
+- Slowed the auto-release border trail to a 15-second cycle to further reduce visual interference.
+
+## [v1.70.4]
+
+- 进一步放慢自动释放边框流光，降低动态效果对操作的干扰。
+- Slowed the auto-release border trail further to reduce visual interference during play.
+
+## [v1.70.3]
+
+- 将自动释放边框流光改为更短、更密、更慢的多段光线效果。
+- Tuned the auto-release border trail to use shorter, denser, slower-moving light segments.
+
+## [v1.70.2]
+
+- 修复自动释放提示：改用真正沿按钮圆角边框路径移动的短光段，不再使用渐变层旋转。
+- Fixed the auto-release indicator to use a short light segment moving along the actual rounded button border path instead of rotating a gradient layer.
+
+## [v1.70.1]
+
+- 调整自动释放提示效果：改为边框上的高亮线流动，不再呈现整个边框旋转。
+- Refined the auto-release indicator into a flowing highlight along the border instead of rotating the whole frame.
+
+## [v1.70.0]
+
+> Version-Impact: verify
+
+- 为治疗和炸弹增加自动释放开关；可在长按详情中开启，开启后会在回合结算后按可用条件自动使用，并以环绕边框显示状态。
+- Added auto-release toggles for Heal and Bomb. Enable them from the long-press details; they use automatically after turn resolution when available, with a rotating border indicator.
+
 ## [v1.69.2]
 
 - 精简饕餮的中英文技能描述，突出吸收怪物能量后发动全力一击的机制。
