@@ -33,6 +33,13 @@ cmd_check_version(){
   node version-gate.js "$@"
 }
 
+# ---------- 给当前 dev 版本的 CHANGELOG 节补发布日期 ----------
+cmd_stamp_changelog(){
+  local ver today
+  ver=$(ver_of dungeon-raid-dev.html); today=$(date +%F)
+  perl -i -pe "if (!\$done && /^## \[$ver\]\\s*$/) { s/\\]\\s*$/] - $today/; \$done=1; }" CHANGELOG.md
+}
+
 # ---------- 完整性：核对正式版文件的 sha256 是否与 engines.json 登记的一致 ----------
 cmd_integrity(){
   local ver hash want
@@ -185,6 +192,7 @@ cmd_gh_release(){
 # ---------- 晋级正式版 ----------
 cmd_release(){
   [ -f /tmp/dr_commit_msg.txt ] || { echo "缺少 /tmp/dr_commit_msg.txt（提交说明）"; exit 1; }
+  cmd_stamp_changelog
   cmd_check_version
   # 0) 把最新 CHANGELOG 摘要注入 dev（随后同步给正式版）
   cmd_embed_changelog dungeon-raid-dev.html

@@ -1,192 +1,192 @@
-## [v1.71.4]
+## [v1.71.4] - 2026-09-04
 
 - 修复 iOS Safari 的离线缓存错误：Service Worker 不再返回带重定向的导航响应。
 - Fixed the iOS Safari offline-cache error by preventing the Service Worker from returning redirected navigation responses.
 
-## [v1.71.3]
+## [v1.71.3] - 2026-09-04
 
 - 增加 PWA Service Worker 缓存：iOS 先联网打开一次页面后，完全断网时仍可打开游戏并使用本地随机开局。
 - Added a PWA Service Worker cache so iOS can reopen the game fully offline after one initial online visit, using the existing local-random fallback.
 
-## [v1.71.2]
+## [v1.71.2] - 2026-09-04
 
 - 修复新局错误继承上一局治疗/炸弹自动释放状态的问题；只有继续上局才会保留该状态。
 - Fixed new runs incorrectly inheriting the previous run's Heal/Bomb auto-release state; only continuing a run preserves it.
 
-## [v1.71.1]
+## [v1.71.1] - 2026-09-04
 
 - 移除结算页冗长的技能列表，改为默认显示最近 3 行、可展开查看完整内容的日志框。
 - Replaced the verbose settlement perk list with a compact 3-line log box that expands to the full history.
 
-## [v1.71.0]
+## [v1.71.0] - 2026-09-04
 
 > Version-Impact: verify
 
 - 修复每回合结算顺序：敌人造成致命伤害后立即判定死亡，不再允许回合恢复在死亡后生效。
 - Fixed turn resolution order: lethal enemy damage now triggers death immediately, before per-turn healing can take effect.
 
-## [v1.70.6]
+## [v1.70.6] - 2026-09-04
 
 - 调整升级弹框时机：Boss 或主动技能的结算与视觉效果完成后，才显示升级选择。
 - Delayed upgrade popups until Boss or active-skill resolution and visual effects have finished.
 
-## [v1.70.5]
+## [v1.70.5] - 2026-09-04
 
 - 将自动释放边框流光周期放慢至 15 秒，进一步降低视觉干扰。
 - Slowed the auto-release border trail to a 15-second cycle to further reduce visual interference.
 
-## [v1.70.4]
+## [v1.70.4] - 2026-09-04
 
 - 进一步放慢自动释放边框流光，降低动态效果对操作的干扰。
 - Slowed the auto-release border trail further to reduce visual interference during play.
 
-## [v1.70.3]
+## [v1.70.3] - 2026-09-04
 
 - 将自动释放边框流光改为更短、更密、更慢的多段光线效果。
 - Tuned the auto-release border trail to use shorter, denser, slower-moving light segments.
 
-## [v1.70.2]
+## [v1.70.2] - 2026-09-04
 
 - 修复自动释放提示：改用真正沿按钮圆角边框路径移动的短光段，不再使用渐变层旋转。
 - Fixed the auto-release indicator to use a short light segment moving along the actual rounded button border path instead of rotating a gradient layer.
 
-## [v1.70.1]
+## [v1.70.1] - 2026-09-04
 
 - 调整自动释放提示效果：改为边框上的高亮线流动，不再呈现整个边框旋转。
 - Refined the auto-release indicator into a flowing highlight along the border instead of rotating the whole frame.
 
-## [v1.70.0]
+## [v1.70.0] - 2026-09-04
 
 > Version-Impact: verify
 
 - 为治疗和炸弹增加自动释放开关；可在长按详情中开启，开启后会在回合结算后按可用条件自动使用，并以环绕边框显示状态。
 - Added auto-release toggles for Heal and Bomb. Enable them from the long-press details; they use automatically after turn resolution when available, with a rotating border indicator.
 
-## [v1.69.2]
+## [v1.69.2] - 2026-08-31
 
 - 精简饕餮的中英文技能描述，突出吸收怪物能量后发动全力一击的机制。
 - Shortened Devourer's Chinese and English description to emphasize absorbing monster energy before its full-power strike.
 
-## [v1.69.1]
+## [v1.69.1] - 2026-08-29
 
 - 为鞭笞者增加从 Boss 指向受影响普通怪的红色发光鞭痕特效，并复用通用棋盘连线特效。
 - Added a red glowing lash effect from Lashmaster to affected normal enemies, reusing the shared board tether effect.
 
-## [v1.69.0]
+## [v1.69.0] - 2026-08-26
 
 > Version-Impact: verify
 
 - 将「命运回响」改为通用周期被动：每 5 个有效回合自动触发，下一回合补子必定变成触发回合消除的非怪物棋子。
 - Reworked **Echo of Fate** into a general periodic passive: every 5 valid turns, the next refill is guaranteed to match the non-enemy tile cleared on the trigger turn.
 
-## [v1.68.0]
+## [v1.68.0] - 2026-08-19
 
 > Version-Impact: verify
 
 - 重做玄龟一阶主动「玄甲镇岳」：发动后 3 回合受到的所有伤害减半（向上取整，最低 1 点）；不再永久增加减伤，需选择时机使用。
 - Reworked Black Tortoise's tier-one active **Tortoise Bastion**: halve all incoming damage for 3 turns (rounded up, minimum 1); it no longer grants permanent reduction, so timing matters.
 
-## [v1.67.2]
+## [v1.67.2] - 2026-08-13
 
 - 统一日志简报和展开日志的显示顺序，最新日志显示在上方。
 - Unified the compact and expanded log views so the newest entries appear first.
 
-## [v1.67.1]
+## [v1.67.1] - 2026-08-13
 
 - 移除没有攻击行为的小偷左上角攻击力角标，避免与右上角逃走倒计时混淆。
 - Removed the Thief's non-functional top-left attack badge to avoid confusing it with the escape timer.
 
-## [v1.67.0]
+## [v1.67.0] - 2026-08-11
 
 > Version-Impact: verify
 
 - 龙威生效时，普通怪的攻击力显示和实际伤害统一为 `⌈攻击力/2⌉`，避免棋盘角标仍显示原始攻击力。
 - When Dragon Might is active, normal monsters now display and deal `ceil(attack / 2)` damage consistently.
 
-## [v1.66.0]
+## [v1.66.0] - 2026-08-11
 
 > Version-Impact: verify
 
 - 修复神兽青龙被动「龙威」未在治疗、炸弹及换装主动使用后触发的问题；这些主动现在都会正确开启普通怪攻击减半效果。
 - Fixed Mythic Beast Azure Dragon's **Dragon Might** so using Heal, Bomb, or a swapped active correctly enables the normal-monster attack-halving effect.
 
-## [v1.65.1]
+## [v1.65.1] - 2026-08-08
 
 - 测试工具 `playtest.js` 的全职业线扫描改为默认并行执行，并支持 `--parallel=N` 指定并发数；新增 v1.65.0 全量回归报告及历史报告归档。
 - The `playtest.js` full career-line sweep now runs in parallel by default, supports `--parallel=N`, and adds the v1.65.0 regression report with archived historical results.
 
-## [v1.65.0]
+## [v1.65.0] - 2026-08-08
 
 > Version-Impact: verify
 
 - 玄龟一阶主动「玄甲镇岳 Tortoise Bastion」改为立即填满当前护甲进度并升一级，不再直接增加 +1 减伤。
 - Black Tortoise’s tier-one active **Tortoise Bastion** now fills current Armor progress and immediately grants one Armor level instead of directly adding +1 damage reduction.
 
-## [v1.64.0]
+## [v1.64.0] - 2026-08-08
 
 > Version-Impact: verify
 
 - 白虎二阶被动「杀伐之心 Tiger Fury」改为动态追加 `⌊当前等级/2⌋` 点固定爪伤，随等级成长，不再是固定 +2。
 - White Tiger’s tier-two passive **Tiger Fury** now dynamically adds `⌊current level/2⌋` flat Claw damage, scaling with level instead of remaining at a fixed +2.
 
-## [v1.63.1]
+## [v1.63.1] - 2026-08-07
 
 - 朱雀主动「涅槃」的英文名改为 **Phoenix Rebirth**，更准确表达凤凰浴火重生，而不是佛教语境中超越生死的 Nirvana；内部技能 ID 和效果不变。
 - Renamed Vermilion Bird’s active from **Nirvana** to **Phoenix Rebirth** to match its phoenix-style revival effect; the internal skill ID and gameplay are unchanged.
 
-## [v1.63.0]
+## [v1.63.0] - 2026-08-07
 
 > Version-Impact: verify
 
 - 朱雀二阶被动改为「火羽 Fire Feather」：任何攻击朱雀的普通怪或 Boss 都会被点燃，复用火法师的点燃、持续伤害与叠层逻辑；移除原「不灭火种」的首次满血复生。
 - Vermilion Bird’s tier-two passive is now **Fire Feather**: any normal monster or boss that attacks Vermilion Bird is ignited using Flame Chain’s burn, duration, and stacking logic. The old first-death full-health revival is removed.
 
-## [v1.62.0]
+## [v1.62.0] - 2026-08-07
 
 > Version-Impact: verify
 
 - 朱雀主动改为「涅槃 Nirvana」：俏皮话为“死亡即新生！”。本回合被击败不会死亡，生命上限永久增加 ⌊当前等级/2⌋，并恢复到新生命上限的 50%。
 - Vermilion Bird’s active is now **Nirvana** with the quip “Death is new life!”. Lethal damage this turn no longer kills the player; max HP permanently increases by ⌊current level/2⌋ and HP is restored to 50% of the new max HP.
 
-## [v1.61.1]
+## [v1.61.1] - 2026-08-07
 
 - 玄龟二阶被动中文名改为「恐鳌之心」，英文名改为 **Heart of Tarrasque**；内部技能 ID 保持不变，不影响录像兼容。
 - Renamed the Black Tortoise tier-two passive to **Heart of Tarrasque** (恐鳌之心); the internal skill ID is unchanged, so replay compatibility is unaffected.
 
-## [v1.61.0]
+## [v1.61.0] - 2026-08-07
 
 > Version-Impact: verify
 
 - 玄龟二阶被动「厚土玄甲 Tortoise Heart」改为每回合恢复当前生命的 10%，不再填充护甲进度。
 - Black Tortoise’s tier-two passive **Tortoise Heart** now restores 10% of current HP each turn instead of filling Armor progress.
 
-## [v1.60.0]
+## [v1.60.0] - 2026-08-07
 
 > Version-Impact: verify
 
 - 岩浆魔现在每回合仍会融化棋盘上的全部盾牌，但不再把盾牌转化为自身生命；其原有的吸收火焰机制保持不变。该 Boss 机制变化会影响战斗结果与录像验证。
 - Magmafiend still melts every shield on the board each turn, but no longer converts those shields into HP. Its existing fire-absorption behavior is unchanged. This boss-mechanic change affects combat outcomes and replay verification.
 
-## [v1.59.0]
+## [v1.59.0] - 2026-08-07
 
 > Version-Impact: verify
 
 - 新增第六种族「神兽 Mythic Beasts」及 `🐾 爪 / Claw` 武器。共享特性「神识」使获得经验 ×2，弱点「阴阳失衡」使敌人攻击倒计时 -1（最低 1）；新增青龙「龙吟」（全场造成等同等级的伤害，100 级被动「龙威」使使用任意主动后普通怪攻击减半）、白虎「白虎破军」、玄龟「玄甲镇岳」（立即 +1 减伤）、朱雀「涅槃天火 Phoenixfire」四条职业线及对应二阶被动。白虎可让爪链命中爪免疫 Boss，朱雀具备群体伤害与复生能力；所有新动作均接入确定性录像回放路径。
 - Added the sixth race, **Mythic Beasts**, with the `🐾 Claw` weapon, **Divine Sense** (2× XP), and the Yin-Yang Imbalance countdown weakness. Added Azure Dragon (**Dragon Roar**, dealing level-based damage to all foes, with level-100 **Dragon Might** halving normal-monster attack after any active skill), White Tiger, Black Tortoise (**immediately gain +1 damage reduction**), and Vermilion Bird class paths with their tier-two passives; White Tiger can pierce Claw immunity, while Vermilion Bird has area damage and rebirth tools. All new actions are wired into deterministic replay.
 
-## [v1.58.0]
+## [v1.58.0] - 2026-08-07
 
 > Version-Impact: verify
 
 - 下调守财奴「囤金 Hoard」新版本金投资的收益：4 回合后返还倍率从 **2.5 倍** 降到 **1.2 倍**，保留“投入当前手头金币、期间新金币照常进账、商店/其它技能可用”的机制，但显著压低滚雪球速度。同时调整「钱能买命 Money Buys Life」为更简单的口径：囤金期间受伤时只扣**手头金币**，手头金币不够时剩余伤害才掉血，**不消耗囤金本金**；囤金到期结算也放到敌人行动之后，让最后一回合的伤害仍会先触发钱能买命，再结算返还。由于这会改变金币路径、受伤结果与后续决策，本次按 replay / verify 影响处理。
 - Reduced Miser **Hoard**’s new principal-investment payout from **2.5×** to **1.2×** after 4 turns. It still invests current gold while newly earned gold, shops, and other skills remain available, but the snowball is much smaller. **Money Buys Life** now uses the simpler rule while Hoard is active: incoming damage spends **wallet gold only**; if wallet gold runs out, the remainder spills into HP and invested Hoard gold is never spent. Hoard also matures after enemy actions, so damage on the last locked turn is still checked before the payout resolves. Because this changes gold paths, damage outcomes, and downstream decisions, this release is treated as replay / verify impacting.
 
-## [v1.57.1]
+## [v1.57.1] - 2026-08-03
 
 - 精简人物栏文案：HUD 里的「护甲进度」改为「护甲」，「等级经验」改为「经验」，角色属性弹框里的对应行也同步收短；同时把说明里的“攒满 +1 护甲”统一改成更准确的“攒满 +1 减伤”。英文对应从 “Armor XP / Level XP” 改为 “Armor / XP”，并用 “damage reduction” 解释实际效果。这是纯 UI 文案调整，不改数值、录像或 verify 兼容。
 - Simplified the character HUD labels: “Armor XP” is now “Armor”, “Level XP” is now “XP”, and the matching player-detail rows use the shorter labels too. The wording now says the bar grants “+1 damage reduction” instead of “+1 armor” to better describe the actual effect. This is UI text only; no numbers, replay, or verify behavior changed.
 
-## [v1.57.0]
+## [v1.57.0] - 2026-07-31
 
 > Version-Impact: verify
 
@@ -195,49 +195,49 @@
 - 补强人类榜自动改判的 AI 可疑度模型：新增“整局毫秒级操作间隔 / 长局超人类速度”的硬信号，并避免这类硬证据被 `cv` 波动或后期变慢等真人样软特征抵消；曾漏判的 `uplb2zcs`（350 回合、medianDt=1ms、p90=4ms）现在会打到 Very High。可疑度报告表格也新增 median / p90 / ≤20ms 比例，`dr.sh test` 与 Windows 脚本同步纳入 scorer 回归，避免自动改判工具再静默退化。该调整只影响榜单运营分类工具，不改游戏引擎、录像重放或 verify 结局。
 - Hardened the human-board auto-reclassification scorer with explicit impossible-timing signals: full-run millisecond action intervals and long-run sub-human reaction times now count as hard evidence, and those cases are no longer offset by high `cv` or late-run slowdown heuristics. The previously missed `uplb2zcs` run (350 turns, medianDt=1ms, p90=4ms) now scores Very High. Suspicion reports also show median / p90 / ≤20ms rate, and both `dr.sh test` and the Windows script include the scorer regression suite so the classifier cannot silently regress again. This only affects leaderboard operations tooling, not the game engine, replay, or verify outcomes.
 
-## [v1.56.4]
+## [v1.56.4] - 2026-07-24
 
 - 修正了回放跳转 / 步进时可能残留召唤师召唤线特效的问题：召唤师的纯视觉 SVG 连线现在和其它拉线特效一样，会在无头与回放快进阶段被抑制，并在退出回放或跳转回合时统一清理临时特效层，避免之前一路快进过的紫色召唤线堆在当前画面上。该修复只影响视觉特效，不改召唤结果、回合顺序、数值，也不影响录像 / verify 兼容。
 - Fixed a replay visual cleanup issue where Summoner summoning tethers could linger after replay jumps or step navigation. The Summoner’s SVG-only tether effect is now suppressed during headless / replay fast-forward paths like other tether effects, and transient effect layers are cleared when leaving replay or jumping turns, so purple lines from fast-forwarded turns no longer pile onto the current view. This only affects visuals, not spawn results, turn order, numbers, replay, or verify compatibility.
 
-## [v1.56.3]
+## [v1.56.3] - 2026-07-20
 
 - 下调了人类榜自动改判到 AI 榜的门槛：GitHub Actions 现在会把**前 200 条人类榜录像里所有 `score >= 25` 的条目**都自动改判到 AI 榜，而不再只处理 `Very High / score >= 65`。`Low / Medium / High / Very High` 这四档仍然保留为“可疑度标签”，不再等同于是否会自动改判；因此新策略会更激进，一部分 `Medium` / `High` 风险录像也会直接移到 AI 榜。此改动属于榜单运营策略调整，不改录像回放、战斗数值或 verify 语义。
 - Lowered the automatic human→AI leaderboard reclassification line: GitHub Actions now auto-reclassifies **every top-200 human-board replay with `score >= 25`** to the AI board, instead of only handling `Very High / score >= 65`. The existing `Low / Medium / High / Very High` buckets are still kept as suspicion labels only, so they no longer match the final reclassification boundary one-to-one; under this more aggressive policy, some `Medium` / `High` recordings will also move straight to the AI board. This is a leaderboard-operations policy change only — no replay engine, combat math, or verify semantics are altered.
 
-## [v1.56.2]
+## [v1.56.2] - 2026-07-18
 
 - 修正了 350 级跨界主动的一个纯视觉问题：当你把狙击这类带“从技能按钮发出连线”特效的主动换到 💊 治疗槽或 💥 炸弹槽后，连线现在会从**实际占用的那个槽位**发出，而不再错误地总是从左侧的一阶主动技能按钮发出。该修复只影响特效起点，不改技能效果、数值、顺序，也不影响录像 / verify 兼容。
 - Fixed a visual-origin bug for 350-level crossover actives: if you swap a beam/tether-style active such as Snipe into the 💊 Heal slot or 💥 Bomb slot, the effect now starts from the **actual occupied slot** instead of incorrectly always firing from the left-side tier-1 active button. This only changes the effect origin, not the skill’s behavior, numbers, turn order, or replay / verify compatibility.
 
-## [v1.56.1]
+## [v1.56.1] - 2026-07-18
 
 - 调整了火枪手（Musketeer）的俏皮话文案：把那句台词收紧为「有人为你出了个好价钱。」/ “Someone put a good price on you.”，去掉前缀式的“狙击—— / Snipe —”，让口吻更自然一点。这是纯文本润色，不改数值、顺序，也不影响录像 / verify 兼容。
 - Tightened the Musketeer quip text to “有人为你出了个好价钱。” / “Someone put a good price on you.”, removing the prefixed “狙击—— / Snipe —” so the line reads more naturally. This is text-only polish — no stat, turn-order, replay, or verify behavior changes.
 
-## [v1.56.0]
+## [v1.56.0] - 2026-07-18
 
 > Version-Impact: verify
 
 - 下调了斧王（Axe Lord）主动「嘲讽 Taunt」在承受集火时的滚雪球强度：现在在那一轮被你主动拉来的攻击中，只有**实际伤害的 10%** 会转化为**永久最大生命**，并保留**至少 +1** 的下限；原先是 50%。这样它仍然保留“挨打换成长”的职业身份，但不会再那么容易靠一轮集火把生命上限抬得过快。由于这个数值会改变同种子 + 同操作序列下的实际结局，这次按 verify / replay 影响处理，升 minor 并开启新的版本桶。
 - Nerfed Axe Lord’s active **Taunt** so its taunt-window snowball is much smaller: during the forced enemy volley, only **10% of the actual damage you take** is now converted into **permanent max HP**, while still keeping the **minimum +1** floor; previously it was 50%. That preserves the skill’s “get hit to grow” identity without letting a single focus-fire turn inflate max HP so aggressively. Because this value can change the real outcome of the same seed + action sequence, this release is treated as verify / replay impacting and therefore bumps the minor version bucket.
 
-## [v1.55.3]
+## [v1.55.3] - 2026-07-17
 
 - 正式版现在会把最近成功拿到的 1 枚服务端 seed 作为本地 warm seed 暂存起来：页面启动时只读取/清理本地缓存、不主动申请；当你下一次进入「选择种族」页时，若这枚 seed 仍未过期且版本匹配，就会优先把它留给下次开局直接消费，只有本地没有可用 warm seed 时才会再向 API 预取新的那 1 枚。这样既能把等待进一步藏到上一局之后或上一次访问期间，又不会像“首页一打开就囤 3–5 枚”那样平白放大 KV 写入与在线领票成本。若本地 warm seed 失效、版本变更、请求仍在路上或最终失败，依旧保留原来的现拉 + 本地随机兜底逻辑，因此不影响离线可玩性，也不改录像 / verify 兼容。
 - Release builds now keep at most one recently acquired server seed as a local warm seed. Page boot only reads / prunes that cache and never auto-requests more; the next time you enter race select, a still-valid same-version warm seed is held back for immediate consumption on the next run start, and only when no usable local warm seed exists do we prefetch a fresh replacement from the API. That hides even more of the wait in the time after the previous run or between visits, without turning page load into “stockpile 3–5 tickets” and needlessly amplifying KV writes or seed issuance. If the warm seed has expired, the version changed, the request is still in flight, or the fetch ultimately fails, the existing live-fetch + local-random fallback path still applies, so offline playability and replay / verify compatibility remain unchanged.
 
-## [v1.55.2]
+## [v1.55.2] - 2026-07-17
 
 - 正式版现在会在你进入「选择种族」页后先预取 1 枚服务端 seed，并在你真正点下种族时优先复用同 race + version 的那枚结果；这样大多数等待都会被藏在你浏览 / 犹豫选种族的那段时间里，不再把整段 seed 请求都暴露在「点种族后卡一下」这一步。若预取没命中、还在请求中或最终失败，仍保留原来的补拉与本地随机兜底逻辑，因此不影响离线可玩性，也不改录像 / verify 兼容。
 - Release builds now prefetch one server seed as soon as you enter the race-select screen, then try to reuse the matching race + version result when you actually tap a race. In practice that hides most of the wait inside the time you spend browsing / hesitating on the race picker instead of exposing the whole seed fetch right after the tap. If the prefetch misses, is still in flight, or ultimately fails, the old fallback path still applies (retry live, then fall back to a local random non-ranked run), so offline playability and replay / verify compatibility stay unchanged.
 
-## [v1.55.1]
+## [v1.55.1] - 2026-07-15
 
 - 普通怪同回合连续出手时，底部小日志现在会自动汇总成一条摘要，例如 `👹 2 只普通怪攻击：3 + 7 → 共掉 10 血！`。这样即使底部日志条仍然只显示最近两行，你也不会再只看到最后一只怪的攻击；想看更完整的逐步过程，仍可点开日志历史。此改动只调整日志呈现，不改战斗数值、顺序，也不影响录像 / verify 兼容。
 - Same-turn hits from multiple normal enemies are now collapsed into a single compact summary line in the bottom log, for example `👹 2 normal enemies attack: 3 + 7 → 10 HP lost!`. That means the two-line mini log no longer makes it look like only the last normal enemy attacked; if you want the full step-by-step history, you can still expand the log. This change is presentation-only: no combat math, turn order, replay, or verify behavior changed.
 
-## [v1.55.0]
+## [v1.55.0] - 2026-07-14
 
 > Version-Impact: verify
 
@@ -249,7 +249,7 @@
 - 会长（Guild Master）的「收买 Buyout」现在新增更直观的花钱反馈：当你成功花金币把全场普通怪买通成金币时，会从 HUD 上显示金币数量的位置向每只被买通的怪拉出金色连线，更容易看清这次钱是花到哪些怪身上了。这是纯视觉增强，不改数值、目标、顺序，也不影响录像 / verify 兼容。
 - Guild Master’s Buyout now has clearer spend feedback: when you successfully pay gold to bribe all regular enemies into coins, golden tethers stretch from the HUD gold counter to each bribed enemy so it is much easier to see where that money went. This is visual-only polish — no stat, targeting, turn-order, replay, or verify behavior changes.
 
-## [v1.54.3]
+## [v1.54.3] - 2026-07-13
 
 - 给僵尸（Zombie）的尸毒发作补上了更直观的绿线提示：当潜伏结束后它真的让你掉血时，现在会从僵尸所在格向 HP 条拉一条绿色感染线。这样你不仅能看见血条继续保持感染态的绿色，也能一眼看清这一下掉血就是哪只僵尸引发的。这是纯视觉增强，不改数值、顺序，也不影响录像 / verify 兼容。
 - Added clearer visual feedback to Zombie plague ticks: once incubation ends and the Zombie actually makes you lose HP, it now draws a green infection tether from the Zombie’s tile to the HP bar. That way you not only see the bar staying infected-green, but can also immediately tell which Zombie caused that HP loss. This is visual-only polish — no stat, turn-order, replay, or verify behavior changes.
@@ -264,7 +264,7 @@
 - 修正饕餮（Devourer）吞怪涨血特效的回归问题：此前共用吸取线函数把「宽高为 0、但 left/top 有效」的点目标也误判成无效，结果拉线终点若是饕餮本体格心，整条吸取线就会直接不画。现在恢复为：饕餮每次从普通怪身上吸血时，都会继续把吸取线拉回自身，方便看清它这回合到底吃了谁。这是纯视觉修复，不改数值、顺序，也不影响录像 / verify 兼容。
 - Fixed a Devourer growth-line regression: the shared drain-line helper was still rejecting valid point targets whose width/height were 0 even when their left/top coordinates were real, so if the tether was meant to end at the Devourer’s own board-center point the whole line was skipped. Devourer drains now correctly draw back into the boss again whenever it siphons regular enemies, making it clear what it fed on that turn. This is a visual-only fix — no stat, turn-order, replay, or verify behavior changes.
 
-## [v1.54.0]
+## [v1.54.0] - 2026-07-12
 
 > Version-Impact: verify
 
@@ -288,45 +288,45 @@
 - 修正吸血鬼每回合吸心的回归问题：上一版把“先消失一拍再落子”的判定抽到通用吸取线函数后，把“宽高为 0 的点目标”也误判成无效目标，导致吸血鬼本体作为吸取终点时整条吸取线直接不画。现在恢复为：吸血鬼吸心时，普通心 / 毒心都会继续分别拉向吸血鬼本体，同时仍保留“先消失一拍、再开始落子”的节奏。
 - Fixed a Vampire heart-drain regression: when the vanish-before-fall pacing check was generalized in the shared drain-line helper, it also rejected valid point targets with zero width/height, so the Vampire itself stopped qualifying as a drain destination and the tether never rendered. Vampire drains now correctly draw back into the boss again for both normal and poison hearts, while keeping the brief vanish-before-refill beat.
 
-## [v1.52.0]
+## [v1.52.0] - 2026-07-12
 
 > Version-Impact: verify
 
 - 亡灵新增第 4 职业「巫妖 Lich」：主动「冰封球 Frost Orb」会对全场怪物/Boss（终焉之主除外）造成一次当前固定伤害，并让它们的当前攻击倒计时 +1；锁定二阶被动为「冰甲 Ice Armor」，每次你受到怪物/Boss 攻击后会对攻击者反弹 50% 当前固定伤害（至少 1），并让它当前攻击倒计时 +1。与此同时，吸魂、吸血鬼吸心、岩浆魔融盾这几类“棋子先消失再补位”的特效，现在会让空格先短暂停留一拍，再开始落子，手机上更容易看清哪些棋子先被吸走或融掉。
 - Added a fourth Undead class, **Lich**. Its active **Frost Orb** deals your current flat damage once to all monsters/bosses on the board (excluding the Overlord) and adds +1 to their current attack countdown, while its locked tier-2 passive **Ice Armor** reflects 50% of your current flat damage back to attackers (minimum 1) and slows their next attack by +1 countdown. At the same time, Soul Drain, Vampire heart-drain, and Magmafiend shield-melt turns now briefly hold emptied cells before refill begins, making it much easier on mobile to read which pieces vanished before the falling tiles start.
 
-## [v1.51.1]
+## [v1.51.1] - 2026-07-12
 
 - 吸血鬼每回合吸心现在新增更清楚的视觉反馈：普通心与毒心会分别用不同颜色的吸取线拉向血条，吸血鬼本体也会在吸血/反噬时给出对应颜色的短脉冲，更容易一眼分辨这次吸心是回血还是中毒。
 - Vampire heart-drain turns now have clearer visuals: normal hearts and poison hearts use different-colored drain lines toward the HP bar, and the Vampire itself emits a matching short pulse on successful drain vs poisonous backlash, making the result of each drain much easier to read at a glance.
 
-## [v1.51.0]
+## [v1.51.0] - 2026-07-11
 
 > Version-Impact: verify
 
 - 新增功能性 Boss「岩浆魔 Magmafiend」：它每回合都会从自己身上向场上所有盾牌发出熔热线，把这些盾牌全部融掉，并按当前“每盾护甲进度”把每面盾转成自己的回血；同时它还会吸收火焰，点燃与火墙本应造成的火伤都会改为为它回血。这样它不仅克制护甲/盾流，也会对火法师的持续灼烧形成针对。
 - Added a new functional boss, **Magmafiend**. Each turn it sends molten tethers from itself to every shield on the board, melts them all away, and converts each shield into HP using the current “armor XP per shield” value; on top of that, it feeds on fire, so burn and Firewall damage heal it instead. This makes it a clear counter not only to shield/armor lines, but also to Fire Mage’s sustained fire damage.
 
-## [v1.50.1]
+## [v1.50.1] - 2026-07-11
 
 - 种族显示名由「活死人 Undead」统一收紧为「亡灵 Undead」，用于贴合当前种族下死灵 / 骷髅王 / 屠夫等整条职业生态；内部种族 id `undead` 保持不变，因此不影响存档、回放与测试兼容。
 - Tightened the race display name from “活死人 Undead” to “亡灵 Undead” to better match the current class ecosystem under that race (Necromancer / Skeleton King / Butcher); the internal race id `undead` stays unchanged, so save/replay/test compatibility is unaffected.
 
-## [v1.50.0]
+## [v1.50.0] - 2026-07-11
 
 > Version-Impact: verify
 
 - 新增功能性 Boss「鞭笞者 Lashmaster」：它和小丑一样属于每回合生效型 Boss，本体只吃炸弹；出场时会先让场上所有普通怪物的攻击倒计时 -1，之后每回合再让所有普通怪物的攻击倒计时 -1。它自己未必最疼，但会把整盘普通怪一起抽进暴走节奏，尤其会对冲活死人的“迷惑 +1 倒计时”缓冲。
 - Added a new functional boss, **Lashmaster**. Like the Clown, it is a per-turn utility boss and is bomb-only itself; on spawn it immediately gives all normal enemies -1 attack countdown, then repeats that -1 countdown push every turn after that. It is not necessarily the hardest hitter on its own, but it whips the whole board into a much faster rhythm and partially cancels out the Undead race’s “+1 enemy countdown” buffer.
 
-## [v1.49.0]
+## [v1.49.0] - 2026-07-11
 
 > Version-Impact: verify
 
 - 修正幽灵 Ghost 的实际血量成长：实现上它之前虽然吃的是普通怪模板，却仍额外乘上了 Boss 档位倍率，和“血量与同级普通怪一致”的文案不符。现在给幽灵补上 `noTierScale`，让它终于真正按同级普通怪血量生成；仍保留剑免疫、仅能被炸弹/非武器手段处理、倒计时重击等定位。
 - Fixed Ghost’s actual HP scaling: although it already used the normal-enemy HP template, the runtime was still multiplying that HP by the boss tier, which contradicted the “same HP as same-tier normal enemies” wording. Ghost now has `noTierScale`, so it truly spawns with normal-enemy HP while keeping its sword immunity, bomb/non-weapon weakness, and countdown heavy strike identity.
 
-## [v1.48.0]
+## [v1.48.0] - 2026-07-11
 
 > Version-Impact: verify
 
@@ -342,7 +342,7 @@
 - 活死人死灵的锁定二阶被动由「回春 Rejuvenation」重做为「竭心光环 Wither Aura」：不再提供主动技能冷却 -1，而是改为按你每回合恢复量（受治疗减半影响）先扣自己同等生命，再让全场敌人/Boss 各损失同等生命。也就是说，活死人会先把 regen 按减疗折算，再用这个折算后的数值同时结算自损与光环伤害；即使满血导致本回合实际没回上来，光环也仍按这档恢复量工作。顺手修正了录像在击败里程碑 Boss 后的状态快照：现在会在 `onBossKilled()` 后立刻更新并保存 `rec.maxHp/level/gold/turns`，避免像竭心光环这类“击败 Boss 才获得的新被动”被结算页继续沿用旧录像快照、导致提交时少算新效果。
 - Reworked the Undead Necromancer’s locked tier-2 passive from **Rejuvenation** into **Wither Aura**: instead of reducing active-skill cooldowns by 1, it now first drains the player for the regen amount after healing modifiers, then deals that same amount to all enemies/bosses. In practice, Undead first applies its healing penalty to regen, then uses that reduced value for both self-drain and aura damage; even when you were already full and healed 0 in practice, the aura still uses that modified regen value. Also fixed the recording snapshot after milestone-boss kills: `onBossKilled()` now immediately refreshes and saves `rec.maxHp/level/gold/turns`, preventing newly unlocked effects such as Wither Aura from being evaluated against a stale run snapshot on the result screen.
 
-## [v1.46.0]
+## [v1.46.0] - 2026-07-10
 
 > Version-Impact: verify
 
@@ -351,26 +351,26 @@
 - Reworked the upgrade **Channel Vitality** so it no longer gives a flat +1 regen every time. Instead it now scales by pick count: the 1st pick grants +1 per turn, the 2nd adds +2 more (total 3), the 3rd adds +3 more (total 6), and so on. This makes repeated investment meaningfully stronger instead of staying in the late-game “almost never worth taking” zone.
 - Tightened the Undead race wording: “attack countdown +1” now stands on its own without the extra “attack 1 turn slower” gloss, and the healing penalty no longer repeats the separate Rebirth exception that is already explained on the skill itself.
 
-## [v1.45.3]
+## [v1.45.3] - 2026-07-10
 
 - 清理误提交到仓库的本地回归报告 `.reports-local-scorer-regression.json`，并把 `.reports-local-*.json` 加入 `.gitignore`，避免这类本地产物再次随正式版一起进仓。
 - Cleaned up the accidentally committed local regression report `.reports-local-scorer-regression.json` and added `.reports-local-*.json` to `.gitignore`, so local report artifacts do not ride along with future releases.
 
-## [v1.45.2]
+## [v1.45.2] - 2026-07-10
 
 - 兽人职业 `berserker` 的显示名调整为「牛头人 / Tauren」，用于统一当前游戏与文档中的称呼；内部职业 id `berserker`、种族 id `orc` 保持不变，因此不影响存档、回放与测试兼容。
 - 兽人斗士锁定被动「血狂 Blood Frenzy」的说明去掉“无视护甲”字样：兽人本身无甲，这里直接写成每回合结束损失 5% 最大生命，避免重复强调不会实际生效的护甲交互。
 - Renamed the display name of the Orc class `berserker` to “牛头人 / Tauren” across the current game/docs; the internal class id `berserker` and race id `orc` stay unchanged, so save/replay/test compatibility is unaffected.
 - Removed the “ignores armor” wording from the Orc Fighter passive **Blood Frenzy** in game/docs: Orcs are already armorless, so the description now simply says it loses 5% max HP each turn instead of restating a non-interaction.
 
-## [v1.45.1]
+## [v1.45.1] - 2026-07-09
 
 - 回放/分享录像详情弹框新增「🏆 补交排行榜」按钮：只要录像仍带有效服务端种子 token，就能直接按原始成绩补交闯关榜或破关榜；若是离线录像，则仍只支持回放/分享、不支持上榜。
 - 游戏结束时会额外探测一次排行榜服务连通性；若当前无法连接 API，会明确提示“本局录像已保留，可稍后从回放详情里补交”，避免误以为过门槛却没自动上榜。
 - Replay/share detail popups now include a “🏆 Resubmit” button: if the recording still has a valid server-seed token, you can resubmit it directly to the survival or clear board using its original result; offline recordings remain replay/share only.
 - End-of-run result screens now probe leaderboard connectivity once; if the API is currently unreachable, the game explicitly tells you the recording was preserved and can be resubmitted later from replay details, instead of silently seeming to miss auto-upload.
 
-## [v1.45.0]
+## [v1.45.0] - 2026-07-09
 
 > Version-Impact: verify
 
@@ -379,7 +379,7 @@
 - Upload gates now allow a second path besides `upload_min_turns`: runs that reach the current race top 10 (same race, same agent, same current-minor bucket semantics) may also upload. This applies to both survival and clear submissions.
 - `/seed` threshold snapshots now include separate race-top10 cutoffs for score and clear submissions, and the result screen’s local pre-check now matches the Worker’s final gate; older snapshots without the new fields automatically fall back to the legacy `upload_min_turns`-only behavior.
 
-## [v1.44.0]
+## [v1.44.0] - 2026-07-09
 
 > Version-Impact: verify
 
@@ -388,17 +388,17 @@
 - Elf gains a new fourth class: **Seer**. Its active **Prophecy** lets you choose coin / shield / heart / sword / enemy in a modal, and the next refill makes every newly falling tile become that chosen type; if no refill happens this turn, the effect waits until the next refill. Choosing enemy creates only normal enemies, never bosses.
 - Seer’s locked tier-2 passive is **Echo of Fate**: after Prophecy actually resolves on a refill, 3 additional random non-boss tiles also transform into the chosen type (and if enemy was chosen, those 3 become normal enemies too).
 
-## [v1.43.3]
+## [v1.43.3] - 2026-07-08
 
 - 修正火法师锁定被动「火墙 Firewall」的说明文案：实际效果一直是底部 3 行目标每回合掉“当前固定伤害的 20%”（最少 1 点），README 与游戏内被动描述之前误写成了 10%，现已统一更正。
 - Fixed the wording for Fire Mage’s locked passive **Firewall**: its actual effect has been 20% of your current flat damage per turn (minimum 1) on foes in the bottom 3 rows; the README and in-game passive text had incorrectly said 10%, and are now corrected.
 
-## [v1.43.2]
+## [v1.43.2] - 2026-07-08
 
 - 精灵职业显示名由「森林长老 Forest Elder」更名为「树人 Treant」，用于统一当前游戏与文档中的职业称呼；内部职业 id `elder` 保持不变，因此不影响存档、回放与测试兼容。
 - Renamed the Elf class display name from “Forest Elder” to “Treant” across the current game/docs for naming consistency; the internal class id `elder` stays unchanged, so save/replay/test compatibility is unaffected.
 
-## [v1.43.1]
+## [v1.43.1] - 2026-07-08
 
 - 火法师「火焰链 Flame Chain」补齐点燃说明：点开被点燃目标时，现在会直接显示火焰层数、单层每回合掉血，以及当前总掉血（单层 × 层数）。
 - 修正火焰链对剑免疫 Boss 的表现：点燃后恢复原本的 Boss 底色，不再误显示成可被普通剑攻击的底色；但仍保留燃烧角标与光效提示。
@@ -407,12 +407,12 @@
 - Fixed Flame Chain visuals on sword-immune bosses: once ignited, they return to their original boss base color instead of looking normally sword-hittable, while still keeping burn badge/glow feedback.
 - Fixed Flame Chain targeting flow so sword-immune bosses can again serve as the first link target for the turn, matching Frenzy/Bloodthirst-style temporary targeting.
 
-## [v1.41.2]
+## [v1.41.2] - 2026-07-06
 
 - 战斗日志新增每回合自动回血提示：恢复量会显示为「💚 恢复 +N（每回合）」，方便追踪 regen 来源的持续回血。
 - Combat log now shows per-turn regen ticks: each regen heal is logged as "💚 恢复 +N（每回合）" so ongoing life recovery is visible in the log.
 
-## [v1.43.0]
+## [v1.43.0] - 2026-07-07
 
 > Version-Impact: verify
 
@@ -421,12 +421,12 @@
 - Human gains a new fourth class: **Fire Mage**. Its tier-1 active **Flame Chain** first makes eligible bosses glow fiery red and become chainable for the turn (like Frenzy’s temporary targeting override), then ignites every monster / boss your sword chain touches (including sword-immune targets such as Ghosts, excluding the Overlord); ignited targets lose **20% of the flat damage from the ignition turn** every turn (minimum 1) until they die.
 - Fire Mage’s locked tier-2 passive is **Firewall**: the bottom 3 rows become a visible red firewall, and monsters / bosses inside it (including sword-immune targets, excluding the Overlord) lose **10% of your current flat damage** every turn (minimum 1).
 
-## [v1.41.1]
+## [v1.41.1] - 2026-07-05
 
 - 死局判负时，死亡结算不再误把本回合零星伤害来源当成“致命回合伤害来源”；现在会直接显示「被怪物淹没，无路可走」或终局态的「被 Boss 淹没，无路可走」，更符合真实死因。
 - Deadlock losses no longer mislabel incidental damage from that turn as the “killing blow”; the result screen now explicitly says you were overrun with no way out (or overrun by bosses in the finale), which matches the actual cause of defeat.
 
-## [v1.41.0]
+## [v1.41.0] - 2026-07-05
 
 > Version-Impact: verify
 
@@ -435,21 +435,21 @@
 - The upload-threshold snapshot is now classified by **race + minor version bucket** with a fixed fallback ladder: same race + current minor → same race + recent 3 minors → all races + current minor → all races + recent 3 minors. This stops one global gate from crudely mixing unlike races/versions while still falling back to stable samples when a bucket is sparse.
 - Release runs now request `/seed` **after race selection**, letting the server freeze the correct race/version-aware upload-threshold snapshot directly into the seed token and recording; if the token’s stored gate no longer matches the submitted recording, the server re-resolves it through the same fallback ladder.
 
-## [v1.40.0]
+## [v1.40.0] - 2026-07-03
 
 > Version-Impact: verify
 
 - 把「钱能买命 Money Buys Life」再收紧成更纯粹的囤金联动：囤金期间，受到的伤害现在**只会优先扣冻结金币**，不再动手头现金；只有冻结金币不够时，剩余部分才继续掉血。这样更符合“囤起来的钱替你挡刀”的直觉，也避免把平时钱包一起卷进去。
 - Tighten “Money Buys Life” into a purer Hoard-only shield: while Hoard is active, incoming damage is now paid from **frozen gold only** and no longer drains wallet gold; only any remainder spills into HP once the stockpile is exhausted. This better matches the fantasy that only the hoarded stash buys survival, without dipping into your normal wallet.
 
-## [v1.39.0]
+## [v1.39.0] - 2026-07-03
 
 > Version-Impact: verify
 
 - 重做矮人守财奴的锁定二阶被动：财阀 Tycoon 改名为「钱能买命 Money Buys Life」，不再是“金币转经验”。新效果是：只要囤金 Hoard 还在生效，受到的伤害会优先扣**冻结金币**，不够再扣手头金币，金币仍不够时才继续掉血。这样守财奴的二阶被动终于和囤金本体直接联动，形成“用囤起来的钱挡刀”的明确流派。
 - Redesign the Dwarf Miser’s locked tier-2 passive: Tycoon is renamed to “Money Buys Life” and no longer converts gold into XP. Its new effect is: while Hoard is active, incoming damage is paid from **frozen gold first**, then wallet gold, and only any remainder spills into HP. This gives Miser a direct, coherent tier-2 synergy — stockpiled money now literally buys survival.
 
-## [v1.38.0]
+## [v1.38.0] - 2026-07-02
 
 > Version-Impact: verify
 
@@ -461,82 +461,82 @@
 - 把选种族页的文案收紧成两行：尽量一行只写「特性：…」，另一行只写「削弱：…」，并去掉句号收尾，让手机上一屏更好扫、重点更明确。
 - Tighten the race-selection copy into two short lines: one for “Trait: …” and one for “Weakness: …”, while removing sentence-ending periods so the mobile screen scans more cleanly and the key info stands out faster.
 
-## [v1.37.0]
+## [v1.37.0] - 2026-07-01
 
 > Version-Impact: verify
 
 - 补齐财阀 Tycoon 的经验触发口径：之前「获得金币时额外按一半转为经验」主要只覆盖了金币链，击杀赏金/抓小偷/盗贼额外掉金等来源不一定加经验。现在统一成**所有金币收入**都按一半转经验，而且守财奴囤金期间即使金币先进冻结池，这部分经验也会照常拿到。
 - Complete Tycoon’s XP trigger coverage: previously “gold gained also grants half as XP” mostly applied to coin chains, while kill rewards / thief recovery / Rogue bonus gold did not consistently grant XP. It now applies to **all gold income** uniformly, and the XP still arrives normally even when Miser’s Hoard stockpiles the gold instead of adding it to your wallet immediately.
 
-## [v1.36.0]
+## [v1.36.0] - 2026-07-01
 
 > Version-Impact: verify
 
 - 修复守财奴「囤金 Hoard」只冻结金币链收入、却放跑击杀赏金/偷回金币/盗贼额外掉金的问题。现在囤金期间的**所有金币收入**（连金币、击杀普通怪/Boss、抓小偷、妙手空空等）都会先转入冻结池，锁定结束后再统一按 2.5 倍返还，终于和技能描述一致。
 - Fix Miser’s “Hoard” so it no longer freezes only coin-chain income while letting kill rewards / recovered thief gold / Rogue bonus drops bypass the lock. During Hoard, **all gold income** (coin chains, normal/boss kill rewards, thief recovery, Empty Pockets bonus gold, etc.) is now routed into the frozen pool first and then returned at 2.5× when the lock ends, matching the skill description at last.
 
-## [v1.35.0]
+## [v1.35.0] - 2026-06-30
 
 > Version-Impact: verify
 
 - 牧师二阶被动「神圣打击 Holy Strike」不再随机乱打：现在会像火枪手的「狙击」一样**优先攻击 Boss**，若场上有多个 Boss，则命中**生命最低**的那个；没有 Boss 时才回退到普通怪。并补了单点命中特效与更明确的日志，能直接看出这次神圣打击打到了谁、造成了多少伤害、有没有击杀。
 - Priest’s tier-2 passive “Holy Strike” no longer picks a random victim: it now **prioritizes bosses** like Musketeer’s Snipe, choosing the **lowest-HP boss** when multiple bosses are present and only falling back to normal enemies when no boss exists. It also now shows a single-target hit effect and clearer log text so you can tell exactly what was struck, how much damage landed, and whether it killed.
 
-## [v1.34.3]
+## [v1.34.3] - 2026-06-30
 
 - 澄清污染怪的毒心说明：不是“以后不再产生新毒心”，而是**炸掉污染怪后，场上的绿毒心会立刻复原成普通红心**。同步修正游戏内毒心说明卡与 README 中英描述，避免把光环复原机制理解成“只停产、不回红”。
 - Clarify the Corruptor poison-heart wording: it is not merely that “no new poison hearts are created” — **once the Corruptor is bombed away, the existing green poison hearts immediately revert to normal hearts**. Updated both the in-game poison-heart tooltip and the Chinese/English README text so the aura-reset behavior is no longer mistaken for “stop creating new ones only.”
 
-## [v1.34.2]
+## [v1.34.2] - 2026-06-30
 
 - 把「📲 放到桌面」按钮挪到首页左上角（正式版 / DEV 选择页），不再放在游戏页内部；支持安装弹窗的浏览器可直接拉起安装，不支持时仍会给出简短的“添加到主屏幕 / 安装应用”指引。主屏模式启动时继续自动隐藏。
 - Move the “📲 Add to Home Screen” button to the top-left corner of the landing page (the Release / Dev chooser) instead of showing it inside the game page; browsers with an install prompt can launch it directly, while unsupported browsers still get a short “Add to Home Screen / Install App” hint. The button still hides itself automatically when already running in standalone mode.
 
-## [v1.34.1]
+## [v1.34.1] - 2026-06-30
 
 - 50 回合选职业时，长按职业卡现在会弹出预览，直接告诉你这个职业在 100 回合锁定拿到的二阶被动是什么、效果如何；这样不用背表，也不用等升到 100 才知道自己后面会拿到什么。
 - At the turn-50 class selection, long-pressing a class card now opens a preview that shows which locked tier-2 passive the class will gain at turn 100 and what it does, so you no longer have to memorize the table or wait until turn 100 to see the payoff.
 
-## [v1.34.0]
+## [v1.34.0] - 2026-06-30
 
 > Version-Impact: verify
 
 - 重做盗贼 Rogue：主动技能改为「妙手空空 Empty Pockets」——本回合用剑链攻击到的每个敌人，都会额外掉落其命中前血量 20% 的金币（向下取整，至少 1 金），连线会变金色；若这回合没用剑打到敌人，则白开。盗贼的锁定二阶被动改为「乾坤一掷 All-In」——买完炸弹后，再额外扣当前金币的 20%，并把这笔数额加到这次炸弹伤害上。
 - Redesign Rogue: its active skill becomes “Empty Pockets” — for this turn, every enemy hit by your sword chain drops extra gold equal to 20% of its pre-hit HP (rounded down, minimum 1), and the chain turns gold; if the turn ends without hitting anything, the buff is wasted. Rogue’s locked tier-2 passive becomes “All-In” — after buying a bomb, also spend 20% of your current gold and add exactly that amount to this bomb’s damage.
 
-## [v1.33.4]
+## [v1.33.4] - 2026-06-29
 
 - 澄清中文里治疗涨价的描述：把容易误读成“获得 1 金”的「耗金 +1 / +1 金」统一改成「下次多花 1 金」，明确表达是下次购买更贵，而不是返还金币。
 - Clarify the Chinese wording for potion price scaling: phrases that could be misread as “gain 1 gold” are now rewritten as “the next use costs 1 more gold,” making it explicit that the potion gets more expensive instead of refunding gold.
 
-## [v1.33.3]
+## [v1.33.3] - 2026-06-29
 
 - 修复矮人「一锤打出 0 伤」的违和边界：保留武器总伤 ×0.85 并继续向下取整，但只要这次连线是一次合法的武器攻击，就至少保底造成 1 点伤害，避免前期单锤命中怪物却完全不掉血。
 - Fix the awkward Dwarf “single hammer deals 0 damage” edge case: weapon damage still uses the ×0.85 penalty and still rounds down overall, but any legal weapon attack now deals at least 1 damage so an early one-hammer hit no longer lands for zero.
 
-## [v1.33.2]
+## [v1.33.2] - 2026-06-29
 
 - 把「📲 放到桌面」从开始页入口改成左上角小按钮，位置与右上角语言切换呼应；支持安装弹窗的浏览器可直接触发安装，iPhone / iPad Safari 与不支持一键安装的浏览器仍弹出简短指引。若已经从主屏模式启动，按钮会自动隐藏。
 - Move “📲 Add to Home Screen” from the start-screen entry into a small top-left button that mirrors the language toggle on the right; browsers with an install prompt can launch it directly, while iPhone / iPad Safari and unsupported browsers still show a short instruction sheet. The button hides itself automatically when the game is already running in standalone mode.
 
-## [v1.33.1]
+## [v1.33.1] - 2026-06-28
 
 - 开始页新增「📲 放到桌面」入口：支持安装弹窗的浏览器可直接触发安装；iPhone / iPad Safari 或不支持一键安装的浏览器则弹出简短指引，告诉你去点分享菜单里的「添加到主屏幕 / 安装应用」。入口只显示在未以主屏模式运行时，不占对局中的 HUD 空间。
 - Add a new “📲 Add to Home Screen” entry on the start screen: browsers that expose an install prompt can launch it directly, while iPhone / iPad Safari and unsupported browsers show a short instruction sheet pointing to “Add to Home Screen” / “Install App” in the browser share/menu UI. The entry only appears when the game is not already running in standalone mode, so it does not consume in-run HUD space.
 
-## [v1.33.0]
+## [v1.33.0] - 2026-06-28
 
 > Version-Impact: verify
 
 - 修复「继续上局」后录像会悄悄漂移：本地存档现在会连同 RNG 内部状态一起保存/恢复，续局后的补格、刷怪、Boss 落点与升级洗牌都会沿着原来的随机轨迹继续，不再出现实玩能打到高回合、导出/上传后 replay 却从中途开始对不上棋盘的问题。
 - Fix replay drift after using Continue Last Run: local saves now persist and restore the RNG internal state together with the board, so refills, enemy spawns, boss placement, and upgrade shuffles resume on the original random path instead of desyncing mid-run when the recording is exported or verified.
 
-## [v1.32.1]
+## [v1.32.1] - 2026-06-28
 
 - 给屠夫的「钩子 Hook」补了一条短暂的铁灰色拖拽线特效，并在末端加了更清晰的钩尖，让怪物被拉到底排时的方向感更直观；纯视觉，不改变技能结算与 replay 逻辑。
 - Add a short iron-gray drag line to Butcher’s Hook, with a clearer hook-head at the pulled end so the downward drag reads more clearly; this is purely visual and does not change skill resolution or replay behavior.
 
-## [v1.32.0]
+## [v1.32.0] - 2026-06-28
 
 > Version-Impact: verify
 
@@ -547,50 +547,50 @@
 - Rework the Snowman boss’s freeze ladder: Lv1 freezes 1 skill for 1 turn, Lv2 freezes 2 for 1 turn, Lv3 freezes 1 for 2 turns, Lv4 freezes 2 for 2 turns, Lv5 freezes 2 skills for 3 turns, Lv6 freezes 3 for 3 turns, Lv7 freezes 3 for 4 turns, Lv8 freezes 3 for 5 turns, and Lv9 freezes 3 for 6 turns.
 - Because both changes alter outcomes for the same seed + action sequence, they now ship as a **minor** release rather than a patch under the current replay/versioning policy.
 
-## [v1.31.7]
+## [v1.31.7] - 2026-06-28
 
 - 排行榜上传失败现在会弹更明确的提示：区分服务端种子过期、种子已用、seed 不匹配、未达上传门槛，以及通用网络/服务异常，不再只显示一句模糊的“上传失败”。
 - Ranking upload failures now show specific toast reasons: expired server seed, already-used seed, seed mismatch, below-threshold runs, and generic network/service issues instead of one vague failure message.
 
-## [v1.31.6]
+## [v1.31.6] - 2026-06-28
 
 - 服务端种子 token 的有效期从 2 小时延长到 **72 小时（现实时间）**，高回合/破关后有更宽松的补交窗口；token 仍然是一次性使用，消费后继续短 TTL 保留防复用。
 - Extend server-seed token validity from 2 hours to **72 real-time hours**, giving high-turn / clear runs a much wider resubmission window; tokens remain one-shot and still collapse to a short TTL after use to prevent reuse.
 - 录像详情与结算页现在会明确提示：服务端种子是**现实时间 72 小时**有效，过期后旧录像即使可 replay，也不能再补交排行榜。
 - Record details and end screens now explicitly say that server-seed tokens are valid for **72 real-time hours** and that old recordings may remain replayable after expiry but can no longer be resubmitted to the leaderboard.
 
-## [v1.31.5]
+## [v1.31.5] - 2026-06-27
 
 - 为 Android / Chrome 安装图标补上标准 PNG 尺寸：新增 `icon-192.png` 与 `icon-512.png`，并写入 `manifest.webmanifest` 的 `icons` 列表，避免主屏图标继续回退到浏览器自行猜测。
 - Add standard Android / Chrome install icon sizes by introducing `icon-192.png` and `icon-512.png` and wiring them into the `icons` array in `manifest.webmanifest`, so home-screen installs no longer rely on browser fallbacks.
 - `dr.sh` / `dr.ps1` 的 deploy 流程现在会把这两个 PNG 一并复制到 `public/`，确保发布后的 manifest 不会引用缺失文件。
 - `dr.sh` / `dr.ps1` now copy both PNG icon files into `public/`, ensuring the released manifest never points at missing assets.
 
-## [v1.31.4]
+## [v1.31.4] - 2026-06-27
 
 - 新增 `manifest.webmanifest`，并让首页、正式版、开发版三个入口页都显式声明 `<link rel="manifest">`，让 Android / Chrome 添加到主屏时的名称、主题色与图标来源更稳定。
 - Add `manifest.webmanifest` and link it from the landing page plus both game entry pages, giving Android / Chrome a stable source of install metadata (name, theme color, and icon) instead of relying on browser fallbacks.
 - `dr.sh` / `dr.ps1` 的 deploy 流程现在会把 manifest 一起复制到 `public/`，避免每次部署后静态安装元数据丢失。
 - `dr.sh` / `dr.ps1` now copy the manifest into `public/` during deploy so install metadata survives every dev/prod deployment.
 
-## [v1.31.3]
+## [v1.31.3] - 2026-06-27
 
 - 修复 replay / verify 在升级三选一上的随机漂移：升级池原先用 `sort(() => rnd() - 0.5)` 洗牌，不同 JS 引擎/实现下会以不同顺序和次数调用比较器，导致相同 seed 的 live 对局与 replay/verify 在升级点后消耗 RNG 不一致。现改为确定性的 Fisher-Yates 洗牌，避免录像明明打到高回合、回放却在升级后提前跑偏。
 - Fix replay / verify RNG drift in the upgrade-choice pool: upgrade shuffling previously used `sort(() => rnd() - 0.5)`, whose comparator order/count can vary across JS engines, causing the same seed to consume RNG differently after level-up in live play versus replay/verification. It now uses a deterministic Fisher-Yates shuffle so long runs no longer desync and die early after upgrade points.
 
-## [v1.31.2]
+## [v1.31.2] - 2026-06-27
 
 - 强化 `playtest.js` 的竞技型 AI：提交模式现在会优先走更强的 build（如精灵长老线、矮人会长线），并改进升级、技能、商店与连线选择逻辑，目标是稳定冲过 live 上传门槛，而不再只是普通贪心乱跑。
 - Strengthen the competitive AI in `playtest.js`: submit mode now prioritizes stronger builds (such as Elf Elder and Dwarf Guild Master lines) and uses improved upgrade, skill, shop, and chain-selection logic so it can consistently challenge the live upload threshold instead of acting like a generic greedy bot.
 - 新增 `submit-ai-until-posted.js` 轮询器：会按强势组合依次尝试真实 AI 提交，并在打出可上传成绩后轮询当前版本 AI 榜，方便直接验证 live 提交流程。
 - Add `submit-ai-until-posted.js`, a strong-build portfolio runner that cycles through real AI submissions and then polls the current-version AI leaderboard once a score clears the upload gate.
 
-## [v1.31.1]
+## [v1.31.1] - 2026-06-27
 
 - 修复 AI / 无头提交在结算时丢失服务端 seed token：录像原本在开局已拿到 `rec.token`，但死亡结算会被 `player.token||''` 覆盖成空串，导致 `/score` / `/clear` 误报 `ranked play requires a server seed`。现在结算会保留已有 `rec.token`，自动提交流程可正常进入验证链。
 - Fix server-seed token loss at the end of AI / headless runs: recordings already had `rec.token` at game start, but death cleanup overwrote it with `player.token||''`, causing `/score` / `/clear` to fail with `ranked play requires a server seed`. The end-of-run snapshot now preserves an existing `rec.token`, so automated submissions can enter the verification pipeline correctly.
 
-## [v1.31.0]
+## [v1.31.0] - 2026-06-27
 
 > Version-Impact: verify
 
@@ -599,36 +599,36 @@
 - `dr.sh` / `dr.ps1` 新增 **check-version** 版本闸门；`release` 会先执行该校验，若 CHANGELOG 版本节标记 `Version-Impact: verify` 却只升了 patch，会直接拒绝发版。
 - `dr.sh` / `dr.ps1` now include a **check-version** release gate; `release` runs it first and refuses to ship a patch-only bump when the changelog marks the release with `Version-Impact: verify`.
 
-## [v1.30.23]
+## [v1.30.23] - 2026-06-27
 
 - 游戏内内嵌 changelog 现缩减为最近 **5** 条，并支持按当前语言显示中英文摘要：中文界面看中文，英文界面看英文；若某条缺失英文，则自动回退到中文。
 - The in-game embedded changelog is now trimmed to the latest **5** entries and supports bilingual summaries: Chinese UI shows Chinese text, English UI shows English text, and missing EN summaries gracefully fall back to Chinese.
 
-## [v1.30.22]
+## [v1.30.22] - 2026-06-27
 
 - 修复排行榜上传门槛提示偶尔误判：结算页现在会先把最终回合/等级/金币写回录像，再缓存 `REC_LAST_KEY` 并做门槛判断，不再出现“实际 216 回合却被当成低于 169 门槛”的串值问题。
 - Fix intermittent leaderboard-threshold misclassification on the result screen: the final turns/level/gold are now written back into the recording before `REC_LAST_KEY` is cached and checked, so a 216-turn run is no longer mistaken as being below a 169-turn gate.
 
-## [v1.30.21]
+## [v1.30.21] - 2026-06-27
 
 - 血狂 Blood Frenzy 新增负面效果：每回合结束损失 5% 最大生命（无视护甲，至少 1 点）。保留现有效果——吸血/嗜血溢出生命上限时，仍把其中的 30% 转为永久最大生命。
 - Blood Frenzy now has a downside: at the end of every turn, lose 5% of max HP (ignores armor, minimum 1). Its existing upside remains unchanged: 30% of Lifesteal/Bloodthirst overflow still becomes permanent max HP.
 
-## [v1.30.20]
+## [v1.30.20] - 2026-06-26
 
 - 排行榜验证链升级为“**按版本快照选引擎**”：release 会把正式版自动归档到 `engines/<version>.html`，验证器优先按录像自己的 `rec.ver` 选精确引擎，不再只能拿当前正式版硬验旧录像。
 - Upgrade the leaderboard verifier to **select engines by archived release snapshot**: every release now stores the formal build as `engines/<version>.html`, and replay verification prefers the exact engine matching `rec.ver` instead of forcing old recordings through the current build.
 - 顶尖成绩的**即时验证 push 加上版本同步闸门**：只有当 render 验证器健康端点报告的 `engineVersion` 与本次成绩版本完全一致时，Worker 才触发 `/verify-now`；否则保留 `verified=0`，交给轮询 / GitHub cron 安全兜底，避免发版窗口里旧引擎误杀新成绩。
 - Add a version-sync gate to **instant verification pushes**: Worker only calls `/verify-now` when the render verifier reports the exact same `engineVersion` as the submitted run; otherwise the score stays `verified=0` and safely falls back to polling / GitHub cron, avoiding release-window false negatives.
 
-## [v1.30.19]
+## [v1.30.19] - 2026-06-26
 
 - 修复偶发棋盘缺块：商店治疗触发「神圣打击」击杀敌人后，若盘面留下空洞，会立刻补格，不再把空白格留在实战棋盘上。
 - Fix intermittent missing board tiles: when shop Heal triggers Holy Strike and kills something, any hole left on the board is now refilled immediately instead of lingering as an empty cell.
 - 修复看完回放后技能槽串台：退出 replay 现在会恢复进入回放前的 live 状态，不再把录像里的跨界技能（如把治疗变成「点金」）泄漏回实战。
 - Fix replay state leakage: exiting replay now restores the pre-replay live state, so replayed crossover skills (for example replacing Heal with Gold Touch) no longer bleed back into real play.
 
-## [v1.30.18]
+## [v1.30.18] - 2026-06-26
 
 - 火枪手的「狙击 Snipe」现在**优先攻击 Boss**；若场上有多个 Boss，则命中**生命最低**的那个，场上没有 Boss 时才回退到原先的最高血量目标。
 - Musketeer's **Snipe** now prioritizes bosses; when multiple bosses are present, it targets the one with the **lowest HP**, and only falls back to the old highest-HP target rule when there is no boss on the board.
@@ -638,83 +638,83 @@
 - 屠夫 Butcher 的「钩子 Hook」现在在把怪/Boss 拉到底排后，会按**离底线的距离**追加伤害：最底排吃 1× 固定伤害、倒数第二排吃 2×，依此类推；无目标时仍无效、不进冷却。
 - 火枪手的「狙击 Snipe」现在**优先攻击 Boss**；若场上有多个 Boss，则命中**生命最低**的那个，场上没有 Boss 时才回退到原先的最高血量目标。
 
-## [v1.30.16]
+## [v1.30.16] - 2026-06-25
 
 - 首页版本号改为**构建期静态注入**：不再在 `index.html` 里运行时请求 `versions.json`，而是在部署脚本里直接把正式版/开发版版本号写进首页 HTML；弱网/离线缓存下也能立刻看到版本号。并同步删掉 `public/versions.json` 的生成，Windows 的 `dr.ps1` / `dr.bat` 与 Bash 脚本保持同一行为。
 - 鸟人 Boss 的信息面板与棋盘左上角现在会明确显示**实际啄击伤害**（= 基础攻击力的一半，向上取整），不再只写「每回合啄你一下」却不给数值，方便判断能不能硬吃。
 - 分享录像自动入待验证的门槛不再被榜首抬到不可达：原先按 `max(榜首×1.5, 榜首+30)`，当榜首接近 511/512 回合上限时门槛会涨到 768、永远触发不了。现加上终局可达范围封顶，高回合分享录像仍能进入验证队列。
 
-## [v1.30.15]
+## [v1.30.15] - 2026-06-23
 
 - 切换语言时日志不再残留旧语言：日志条目是翻译好的定文（含「−5」等动态值，无法逐条回译），切语言会清空日志，后续事件按新语言记。开局/继续本就会清并重记，所以开局前切语言完全正常；这里修的是对局中途切换会中英混排的问题。
 
-## [v1.30.14]
+## [v1.30.14] - 2026-06-23
 
 - 顶部标题不再中英都印：原 h1 中文模式下同时显示「地牢突袭·网页版」+ 英文副标「Dungeon Raid」。现按语言只显示一个——中文「🏰 地牢突袭·网页版」/ 英文「🏰 Dungeon Raid · Web」。
 
-## [v1.30.13]
+## [v1.30.13] - 2026-06-23
 
 - 修复游戏内「更新日志」久不更新（一直停在 v1.27.4）：dr.sh 的注入脚本只认旧的 `[vX]: 描述` 引用格式，而 CHANGELOG 早已改用 `## [vX]` 标题 + 要点格式，导致新版本全被漏掉。现解析器两种格式都认（新格式取每版第一条要点），点版本号即可看到最新更新。
 
-## [v1.30.12]
+## [v1.30.12] - 2026-06-23
 
 - 修复「死了之后『继续上局』又能玩」：gameOver/onClear 已清存档，但结束后若还有延迟的 updateHUD（如双击连线的 setTimeout）会把死局重新存回去。新增 ended 标记，本局结束后 saveGame 直接拒绝写入；开新局/继续上局时重置。
 
-## [v1.30.11]
+## [v1.30.11] - 2026-06-23
 
 - 排行榜详情里 ▶回放 / 🔗分享 两个按钮改为 flex 同一行、等宽居中（原来因 .choice 默认 block 各占一行、左对齐显得没对齐）。
 
-## [v1.30.10]
+## [v1.30.10] - 2026-06-23
 
 - 排行榜详情弹框重做：去掉常显 `--` / `0` 的「最终血量/金币」（旧录像没存这俩），改为显示**回合 + 等级**（取自已验证的榜单条目，永远可靠）+ **职业线**（从录像 acts 解析一阶/二阶/跨界，id 取值跨版本稳定，旧录像也认）+ 技能(升级 perks，新录像有)+ 是否破关 + ▶回放/🔗分享。
 
-## [v1.30.9]
+## [v1.30.9] - 2026-06-23
 
 - 破关榜改为「历代全部」：不再只看最近 3 个版本——破关是稀有里程碑成就，频繁发版会把老版本的真破关挤出窗口。现展示所有版本的已验证破关（每行带版本标签），副标题相应改为「历代全部」。（修复：有玩家 v1.27.4 的破关因版本窗口被埋。）
 
-## [v1.30.8]
+## [v1.30.8] - 2026-06-23
 
 - 破关榜空状态改为说明性文案：「🏆 还没有人破关 · 撑过第 500 回合的终局 10 波即可登顶」，不再只是干巴巴的「暂无记录」（破关榜只收已验证的真破关，目前确实还没人到 510 回合）。
 - 没拿到服务端种子时给出醒目提示：顶部 toast + 日志，讲清「本局用本地随机开局，照常可玩，只是不计排行榜」（原来只有一条容易被忽略的日志）。
 
-## [v1.30.7]
+## [v1.30.7] - 2026-06-23
 
 - 修复 350 跨界技能列表 / 技能详情里「收买」重复显示两次「无冷却」：其短描述里自带的「（无冷却）」与统一追加的冷却标记重复，已从短描述去掉，冷却由统一标记显示。
 
-## [v1.30.6]
+## [v1.30.6] - 2026-06-23
 
 - 小丑不再冒新怪：它的「重洗」原本把资源格换成随机新格、会按正常概率滚出怪，与召唤师职能重合。现强制只重洗成资源（剑/盾/心/金），纯搅乱连线、绝不出怪。Boss 描述同步更新。
 
-## [v1.30.5]
+## [v1.30.5] - 2026-06-23
 
 - 充实「吸魂大法」技能详情：分点讲清——可吸 {W} 免疫特殊 Boss、吸力随你的生命上限成长（越高越能一发吸死）、回血封顶在上限（活死人治疗减半也生效）、与溅射/汲取生命的协同、以及打法定位。长按技能块查看。
 
-## [v1.30.4]
+## [v1.30.4] - 2026-06-23
 
 - 修复 iOS「添加到主屏幕」图标显示成「地」字：原 apple-touch-icon 用的是 SVG（iOS 主屏不认），换成真实的 180×180 PNG 城堡 logo（`apple-touch-icon.png`，随 Pages 部署），并加短标题「地牢突袭」。游戏页与首页都接上。
 
-## [v1.30.3]
+## [v1.30.3] - 2026-06-23
 
 - 双击贪心连线不再漏掉起点旁的格子：上一版「先吃最长一臂、再补另一臂」会把另一侧本该留的格子占掉。改为穷举「过起点」的最长简单路径（前臂×后臂所有组合），起点两侧联合最优。6×6 实测连满整个同类连通块 59%→69%；实战单类型块小、单次 <5ms（最坏约 40ms 封顶）。
 
-## [v1.30.2]
+## [v1.30.2] - 2026-06-22
 
 - 双击贪心连线少漏格：原 Warnsdorff 单路径常把分叉/斜线另一侧的同类格落下。改为带预算的 DFS 最长路径、从起点向两侧各伸一条臂——起点两边都抓。6×6 随机测试平均连 7.9→10.0 格、59% 直接连满整个同类连通块，单次约 1.6ms 仍瞬时。
 
-## [v1.30.1]
+## [v1.30.1] - 2026-06-26
 
 - 双击贪心连线现在**会先把连线亮出来一拍（约 0.26s）再结算**，能看到划出的那条线（原先同拍结算、线没机会渲染就被清掉了）。
 
-## [v1.30.0]
+## [v1.30.0] - 2026-06-22
 
 - 新增快捷操作 **双击 盾/心/金 棋子 → 自动贪心连线**：从该棋子沿 8 向两头延伸出一条尽量长的同类连线并直接结算，省去手动长拖。仅限资源棋子（剑链与怪/Boss 不触发，攻击仍由玩家自己控制）。
 - 实现：双击检测靠「轻触延迟弹信息 280ms 留窗口 + 同格二次 pointerdown」；连线走 Warnsdorff 式贪心；最终格子由 resolve 录制，回放无关、防作弊不受影响。
 
-## [v1.29.1]
+## [v1.29.1] - 2026-06-22
 
 - 修复排行榜点不开详情：原先只有玩家名那一小段可点（窄、且内联 onclick 在 iOS 偶发不触发）。改为**整行可点**、JS 绑定事件、行尾加 ⓘ 提示，点哪都能弹出详情框。
 
-## [v1.29.0]
+## [v1.29.0] - 2026-06-22
 
 - 锻造师二阶锁定被动改为 **盾击 Shield Bash**：把「护甲减伤量」加到固定剑伤上（护甲越厚剑伤越高），与「锻甲」吸盾成甲形成攻坦一体。原「爆破手」移交新职业火枪手。
 - 新增矮人第四职业 **火枪手 Musketeer**：
@@ -722,50 +722,50 @@
   - 二阶锁定被动 **爆破手 Demolitionist**（沿用）。炸弹伤害提取为统一 `bombDamage()`，爆破手强化炸弹时狙击同步增强。
 - 矮人职业线扩为 4 条（锻造师/守财奴/会长/火枪手）。
 
-## [v1.28.2]
+## [v1.28.2] - 2026-06-22
 
 - 修复「收买」学了小气鬼后花费没减半：收买花费在自己的技能里算、绕过了只作用于商店治疗/炸弹的小气鬼减半。现改为小气鬼也让收买花费减半（会长 100 回合必得小气鬼，本是配套）。技能按钮显示的 💰花费、扣款、日志全部按减半计；小气鬼/收买说明同步。
 
-## [v1.28.1]
+## [v1.28.1] - 2026-06-22
 
 - 弹层卡片内容超一屏时可在卡片内上下滑动（`.card` 加 max-height:88vh + overflow，兜底所有长列表）——修复 350 回合「跨界技能」列表过长顶出屏外、底部选项/返回点不到。
 - 修复 350 跨界技能排除本种族技能的写死表漏了矮人/活死人：改用 RACE_PATHS，矮人/活死人不再把自己种族的主动列进「跨界」列表，列表回到应有长度。
 
-## [v1.28.0]
+## [v1.28.0] - 2026-06-22
 
 - 新增活死人第三职业 **屠夫 Butcher**（活死人原本只有两条职业线，补齐到三条）。
   - 一阶主动 **钩子 Hook**（CD 5）：把场上所有怪/Boss（含剑免疫，终焉之主除外）顺着各自所在列拉到最底排，其余棋子上浮——把敌人聚到底排，便于一条剑链穿杀或集中处理；场上无可拉敌人时无效、不进冷却。纯重排、不消耗随机数，重放确定。
   - 二阶锁定被动 **积累腐肉 Carrion Feast**：每杀死一个敌人/Boss，生命上限永久 +1（剑/炸弹/溅射/Boss 击杀均触发）。
 - 屠夫的「钩子」计入逃生判定（ESCAPE_ACTIVES），死局前可用它改盘自救。
 
-## [v1.27.11]
+## [v1.27.11] - 2026-06-22
 
 - 会长「收买」按钮现在显示当前花费（💰=全场怪总血量），当金币 < 总血量（或场上无怪）时按钮置灰，一眼可知能不能发动。
 
-## [v1.27.10]
+## [v1.27.10] - 2026-06-22
 
 - 弱网下选完种族不再卡顿：进选种族页就**后台预取**服务端种子，把网络耗时藏在挑种族的时间里，点种族通常瞬开。
 - 明确离线（navigator.onLine=false）直接秒开本地局；服务端种子等待超时 4s→2.5s。
 - 行为不变：拿到服务端种子才计排名，拿不到则本地随机（可玩不计名），DEV 版照旧不取种子。
 
-## [v1.27.9]
+## [v1.27.9] - 2026-06-22
 
 - 排行榜瘦身：榜单行不再显示金币，只保留回合与等级。
 - 记录详情改为弹框：点击玩家名弹出详情框（技能列表 / 最终血量 / 金币 / 破关·可验证标记 / ▶回放 / 🔗分享），取代原先点整行的行内展开。
 - 顺带修复详情里回放/分享按钮引用全局 rec 的隐患（改为闭包绑定本条记录）。
 
-## [v1.27.8]
+## [v1.27.8] - 2026-06-22
 
 - 修复 Boss 投放漏洞：场上已有 Boss 时，到下一个 10 回合节点不再「跳过」新 Boss，而是必降临（强制叠加）。此前可囤一只早期弱 Boss 压制后续强 Boss，在 50/100/200/350 里程碑轻松击杀晋级——已堵死。
 - 炸弹基础伤害 6→5。
 - 爆破手（矮人二阶）重做：从「固定 +2 伤害 / ×2 花费」改为「每用一次炸弹：伤害 +1、花费 +5 金」（累计递增，越炸越强也越贵）——早期更弱、中后期反超旧版固定值。
 
-## [v1.27.7]
+## [v1.27.7] - 2026-06-22
 
 - 恢复单格轻触弹棋子信息（位移<10px判定为轻触，拖拽后松手不弹）
 - 新增 dragStartX/dragStartY 记录 pointerdown 坐标区分轻触/拖拽
 
-## [v1.27.6]
+## [v1.27.6] - 2026-06-21
 
 - 小偷不再出现在里程碑Boss关（50/100/200/350），回归普通每10回合Boss池
 - 小丑Boss混乱不再影响怪物格子（scrambleTiles增加excludeTypes参数）

@@ -203,6 +203,17 @@ function cmd_embed_changelog($files) {
     node embed-changelog.js @argList
 }
 
+# ---------- stamp changelog date ----------
+function cmd_stamp_changelog {
+    $ver = ver_of "dungeon-raid-dev.html"
+    $today = Get-Date -Format "yyyy-MM-dd"
+    $path = "CHANGELOG.md"
+    $content = Get-Content $path -Raw
+    $pattern = "(?m)^## \[$([regex]::Escape($ver))\]\s*$"
+    $content = [regex]::Replace($content, $pattern, "## [$ver] - $today", 1)
+    Set-Content $path $content -Encoding utf8
+}
+
 # ---------- deploy ----------
 function cmd_deploy {
     # dev 站更新前先注入最新更新日志（只动 dev）
@@ -281,6 +292,7 @@ function cmd_gh_release($VER="") {
 # ---------- release ----------
 function cmd_release {
     require_commit_msg
+    cmd_stamp_changelog
     cmd_check_version
 
     # 0) 把最新 CHANGELOG 摘要注入 dev
