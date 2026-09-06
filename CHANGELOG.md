@@ -1,3 +1,7 @@
+## [v1.71.5] - 2026-09-06
+- 调整结算日志：死亡/破关页面直接显示与游戏内相同风格的 3 行日志简报，点击简报区域展开完整日志。
+- Refined settlement logs to show a 3-line in-game-style summary directly, with the summary area expanding to the full history.
+
 ## [v1.71.4] - 2026-09-04
 
 - 修复 iOS Safari 的离线缓存错误：Service Worker 不再返回带重定向的导航响应。
