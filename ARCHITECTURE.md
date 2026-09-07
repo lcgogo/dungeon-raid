@@ -9,6 +9,7 @@
 | 组件 | 平台 | 作用 | 代码/位置 |
 |---|---|---|---|
 | 游戏静态页 | **Cloudflare Pages** | `dungeon-raid.html`(正式版)/ `dungeon-raid-dev.html`(开发版)/ `index.html` | 仓库根；`deploy/dr.sh deploy/release` 部署 |
+| 离线应用壳 | **Service Worker** | 首次联网后缓存首页、双版本游戏页、manifest 和图标；断网时从缓存启动 | `sw.js`；由 `deploy/dr.sh` / `deploy/dr.ps1` 一并部署 |
 | 榜单 API | **Cloudflare Worker** (`api.dungeonraid.win`) | 收成绩、存档、算名次、`/pending`·`/verify`、推送验证 | 源码 `worker/src/index.js`；配置 `deploy/worker/wrangler.toml`；`npx wrangler deploy --config deploy/worker/wrangler.toml` |
 | 录像存储 | **Cloudflare KV**(`REC` 命名空间) | key=8位id，value=录像 JSON（种子+操作序列 ≈2–4KB） | — |
 | 成绩元数据 | **Cloudflare D1**(`dungeon-raid-scores`) | turns/level/gold/version/verified/source… | `worker/migrations/` |
@@ -29,6 +30,14 @@
 **三层兜底**：① render 每 7s 轮询 `/pending`；② GitHub cron 每 5 分钟跑 `verify.js`（**完全不依赖 render**）；③ GitHub keepalive 每 10 分钟 ping render 防免费档休眠。
 
 **防作弊根基**：服务端发一次性种子(防离线刷幸运种子)；确定性重放(伪造结局对不上→verified=-1)；按 `rec.ver` 版本分桶(只在对应版本引擎上验)；验证通过也用重放真实值**校正**上报值；榜单严格 `verified=1`。
+
+## 离线与移动端
+
+- 页面首次联网加载后注册 `sw.js`，Service Worker 缓存 `/`、`index.html`、正式版、开发版、manifest 和图标。
+- 导航请求采用 network-first：有网时获取最新页面并更新缓存；网络失败时回退到缓存。缓存版本变化会清理旧缓存，避免移动端长期停留在旧壳。
+- Service Worker 不缓存排行榜、seed、录像等 API 请求。正式版联网时仍优先获取服务端 seed；完全断网时沿用本地随机 fallback，录像可玩但不参与排行榜。
+- iOS 添加到主屏幕前必须先联网打开一次页面并让 Service Worker 安装完成；Android Chrome/Edge 逻辑相同，安装入口可能由浏览器自动显示。
+- Service Worker 不能用 `file://` 验证，必须通过 HTTPS 网站地址访问。若移动端仍显示旧缓存，先联网刷新一次，必要时删除主屏幕网页后重新添加。
 
 ## 免费额度 / 限额（不超限则永久免费）
 
@@ -59,6 +68,7 @@
 ## 运维速查
 
 - 发版（游戏）：`bash deploy/dr.sh release`（dev→正式版同步 + 提交 + push + 部署 Pages + GitHub Release）；只发 dev：`bash deploy/dr.sh deploy`；完整性核对：`bash deploy/dr.sh integrity`。
+- CHANGELOG 版本节使用 `## [vX.Y.Z] - YYYY-MM-DD`；release 会自动给当前 dev 版本节补当天日期。历史节日期以 Git 标签/提交可确认的日期为准，无法确认的旧条目不臆造。
 - 部署 Worker：从仓库根执行 `npx wrangler deploy --config deploy/worker/wrangler.toml`。
 - 应用 D1 迁移：迁移 SQL 放 `worker/migrations/`，从仓库根执行 `npx wrangler d1 migrations apply dungeon-raid-scores --remote --config deploy/worker/wrangler.toml`。
 - Worker secret：从仓库根执行 `npx wrangler secret list --config deploy/worker/wrangler.toml` 查看名称；用 `npx wrangler secret put <NAME> --config deploy/worker/wrangler.toml` 覆盖值。
@@ -72,3 +82,9 @@
 ## 数据流向小结
 
 录像 → **KV**；成绩 → **D1**；二者按同一 `id` 关联。render/分享链接/回放都按 id 从 Worker 拉 `/rec/:id`。游戏页与 api 都是 Cloudflare 原生（边缘直出），只有 `verify` 子域回源到外部（render）。
+
+## 游戏状态与回放边界
+
+- 治疗/炸弹自动释放开关保存在进行中的本地存档；“继续上局”会恢复它们，新局会重置为关闭。开关切换记录为 replay 动作 `['a', key, enabled]`，实际自动使用仍记录为普通 `['b', key]`，因此服务端可以按同一时序重放。
+- 纯视觉效果（流光边框、结算日志展开、Service Worker 缓存）不进入录像状态；任何会改变生命、金币、冷却、棋盘或结局的自动动作都必须进入 replay 热路径。
+- 影响结算顺序、自动动作或录像解释的改动升 minor 并在 CHANGELOG 标记 `Version-Impact: verify`；纯文案/纯视觉通常升 patch。
