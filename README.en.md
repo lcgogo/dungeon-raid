@@ -30,13 +30,13 @@ The two builds keep **separate, non-overwriting saves** (Dev uses its own localS
 
   | Tile | Effect |
   |---|---|
-  | 🔪 / 🐾 Weapon | Attack enemies (Sword for ordinary races, Claw for Mythic Beasts) |
+  | ⚔️ Weapon | Attack enemies (each race has its own weapon icon) |
   | 🔰 Shield | Gain armor (absorbs damage before health) |
   | 💗 Heart | Restore health |
   | 💰 Coin | Earn gold for the shop |
   | 👹 Enemy | A monster |
 
-- A **weapon chain can be dragged straight through 👹**. Every enemy on the chain takes the **full** chain damage **independently** — enough damage means an instant kill. Ordinary races show their weapon as 🔪 Sword; Mythic Beasts show 🐾 Claw. A chain must include **at least one weapon tile** to deal damage (chaining only monsters with no weapon isn't an attack and costs no turn).
+- A **weapon chain can be dragged straight through 👹**. Every enemy on the chain takes the **full** chain damage **independently** — enough damage means an instant kill. Human/Elf/Dwarf/Orc/Undead/Mythic Beasts use Sword/Arrow/Hammer/Axe/Bone/Claw icons respectively. A chain must include **at least one weapon tile** to deal damage (chaining only monsters with no weapon isn't an attack and costs no turn).
 - While dragging, any enemy that **would die** turns into 💀 as a live preview.
 
 ## 👹 Enemy Info
