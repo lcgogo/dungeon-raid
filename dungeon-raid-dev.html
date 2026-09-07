@@ -191,8 +191,8 @@
 if('serviceWorker' in navigator) window.addEventListener('load',()=>navigator.serviceWorker.register('/sw.js').catch(()=>{}));
 //==================== 配置 ====================
 // 版本号 v主.次.修：不影响 verify/replay 兼容边界的小改动改"修"；凡是影响 verify/replay/版本分桶/release 验证语义的改动都改"次"；大版本变更需先确认。页面底部显示。
-const VERSION='v1.71.5';
-const CHANGELOG_LINES=[{"ver": "v1.71.5", "zh": "调整结算日志：死亡/破关页面直接显示与游戏内相同风格的 3 行日志简报，点击简报区域展开完整日志。", "en": "Refined settlement logs to show a 3-line in-game-style summary directly, with the summary area expanding to the full history."}, {"ver": "v1.71.4", "zh": "修复 iOS Safari 的离线缓存错误：Service Worker 不再返回带重定向的导航响应。", "en": "Fixed the iOS Safari offline-cache error by preventing the Service Worker from returning redirected navigation responses."}, {"ver": "v1.71.3", "zh": "增加 PWA Service Worker 缓存：iOS 先联网打开一次页面后，完全断网时仍可打开游戏并使用本地随机开局。", "en": "Added a PWA Service Worker cache so iOS can reopen the game fully offline after one initial online visit, using the existing local-random fallback."}, {"ver": "v1.71.2", "zh": "修复新局错误继承上一局治疗/炸弹自动释放状态的问题；只有继续上局才会保留该状态。", "en": "Fixed new runs incorrectly inheriting the previous run's Heal/Bomb auto-release state; only continuing a run preserves it."}, {"ver": "v1.71.1", "zh": "移除结算页冗长的技能列表，改为默认显示最近 3 行、可展开查看完整内容的日志框。", "en": "Replaced the verbose settlement perk list with a compact 3-line log box that expands to the full history."}];   /* auto-injected by dr.sh embed-changelog（勿手改） */
+const VERSION='v1.71.6';
+const CHANGELOG_LINES=[{"ver": "v1.71.6", "zh": "澄清炸弹、蔓藤缠绕与竭心光环的战斗日志：明确显示扣除的是全场怪物/敌人的血量，避免把 `−5` 误读为其他属性变化。", "en": "Clarified Bomb, Vine Coil, and Wither Aura combat logs to explicitly say they reduce all foes' HP, avoiding ambiguity around values such as `−5`."}, {"ver": "v1.71.5", "zh": "调整结算日志：死亡/破关页面直接显示与游戏内相同风格的 3 行日志简报，点击简报区域展开完整日志。", "en": "Refined settlement logs to show a 3-line in-game-style summary directly, with the summary area expanding to the full history."}, {"ver": "v1.71.4", "zh": "修复 iOS Safari 的离线缓存错误：Service Worker 不再返回带重定向的导航响应。", "en": "Fixed the iOS Safari offline-cache error by preventing the Service Worker from returning redirected navigation responses."}, {"ver": "v1.71.3", "zh": "增加 PWA Service Worker 缓存：iOS 先联网打开一次页面后，完全断网时仍可打开游戏并使用本地随机开局。", "en": "Added a PWA Service Worker cache so iOS can reopen the game fully offline after one initial online visit, using the existing local-random fallback."}, {"ver": "v1.71.2", "zh": "修复新局错误继承上一局治疗/炸弹自动释放状态的问题；只有继续上局才会保留该状态。", "en": "Fixed new runs incorrectly inheriting the previous run's Heal/Bomb auto-release state; only continuing a run preserves it."}];   /* auto-injected by dr.sh embed-changelog（勿手改） */
 const DEV=true;   // release build (DEV=false); dev build is dungeon-raid-dev.html (DEV=true)
 const REC_API='https://api.dungeonraid.win';   // 录像分享 API（Cloudflare Worker + KV）
 // 带种子随机数（mulberry32）：游戏全程用 rnd() 取代原生随机，配合录制种子可确定性重放
@@ -1889,7 +1889,7 @@ const SHOP={
         if(t.hp<=0){ const isBoss=t.type==='boss'; grid[r][c]=null;
           if(isBoss){ thiefRecover(t); boss++; addXp(player,15); gainGold(20); onBossKilled(); } else { kills++; addXp(player,3+(player.killXp||0)); if(player.rotflesh) player.maxHp++; } } } }   // 屠夫·积累腐肉：炸弹击杀也 +1 上限
     const lifeHeal=lifestealHeal(kills+boss);   // 汲取生命：炸弹击杀也回血
-    log(tr(`💥 投掷炸弹，全场 −${D}`+(extra?`（乾坤一掷 +${extra}）`:''),`💥 Bomb: all foes −${D}`+(extra?` (All-In +${extra})`:'')) + (kills?tr(`，击杀 ${kills} 只👹`,`, ${kills} killed`):'') + (lifeHeal?tr(`，吸血 +${lifeHeal}`,`, +${lifeHeal} lifesteal`):'') + (boss?tr(`，击败 ${boss} 个 Boss`,`, ${boss} boss(es) down`):''));   // Boss 奖励日志由 onBossKilled 统一报
+    log(tr(`💥 投掷炸弹，全场怪血量 −${D}`+(extra?`（乾坤一掷 +${extra}）`:''),`💥 Bomb: all foes lose ${D} HP`+(extra?` (All-In +${extra})`:'')) + (kills?tr(`，击杀 ${kills} 只👹`,`, ${kills} killed`):'') + (lifeHeal?tr(`，吸血 +${lifeHeal}`,`, +${lifeHeal} lifesteal`):'') + (boss?tr(`，击败 ${boss} 个 Boss`,`, ${boss} boss(es) down`):''));   // Boss 奖励日志由 onBossKilled 统一报
     if(player.bombBoost) player.bombUses=(player.bombUses||0)+1;   // 爆破手：每用一次 → 下次 伤害+1、花费+5
     applyGravity(); syncPositions(false); }},
 };
@@ -2402,7 +2402,7 @@ function deathCoilTick(){
       if(t.hp<=0){ const isB=t.type==='boss'; grid[r][c]=null; kills++; if(isB){thiefRecover(t);addXp(player,15);gainGold(20);onBossKilled();} else {addXp(player,3+(player.killXp||0));gainGold(1);} } } }
   if(!hit) return;
   const lh=lifestealHeal(kills);
-  log(tr(`🟢 蔓藤缠绕：全场怪 −${dmg}`+(kills?`，击杀 ${kills}`:'')+(lh?`，吸血 +${lh}`:''),`🟢 Vine Coil: all foes −${dmg}`+(kills?`, ${kills} killed`:'')+(lh?`, +${lh} lifesteal`:'')));
+  log(tr(`🟢 蔓藤缠绕：全场怪血量 −${dmg}`+(kills?`，击杀 ${kills}`:'')+(lh?`，吸血 +${lh}`:''),`🟢 Vine Coil: all foes lose ${dmg} HP`+(kills?`, ${kills} killed`:'')+(lh?`, +${lh} lifesteal`:'')));
 }
 // 竭心光环（死灵二阶被动）：按本回合恢复量（受治疗减半影响）让全场敌人/Boss（排除终焉）各掉同等生命；可击杀（给奖励+吸血）
 function witherAuraTick(healed){
@@ -2417,7 +2417,7 @@ function witherAuraTick(healed){
   }
   if(!hit) return;
   const lh=lifestealHeal(kills);
-  log(tr(`🪦 竭心光环：全场敌人 −${healed}`+(kills?`，击杀 ${kills}`:'')+(lh?`，吸血 +${lh}`:''),`🪦 Wither Aura: all foes −${healed}`+(kills?`, ${kills} killed`:'')+(lh?`, +${lh} lifesteal`:'')));
+  log(tr(`🪦 竭心光环：全场敌人血量 −${healed}`+(kills?`，击杀 ${kills}`:'')+(lh?`，吸血 +${lh}`:''),`🪦 Wither Aura: all foes lose ${healed} HP`+(kills?`, ${kills} killed`:'')+(lh?`, +${lh} lifesteal`:'')));
 }
 function reflectThorns(amt, atkr){
   let r=-1,c=-1,t=null;

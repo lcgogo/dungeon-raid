@@ -1,3 +1,7 @@
+## [v1.71.6] - 2026-09-07
+- 澄清炸弹、蔓藤缠绕与竭心光环的战斗日志：明确显示扣除的是全场怪物/敌人的血量，避免把 `−5` 误读为其他属性变化。
+- Clarified Bomb, Vine Coil, and Wither Aura combat logs to explicitly say they reduce all foes' HP, avoiding ambiguity around values such as `−5`.
+
 ## [v1.71.5] - 2026-09-06
 - 调整结算日志：死亡/破关页面直接显示与游戏内相同风格的 3 行日志简报，点击简报区域展开完整日志。
 - Refined settlement logs to show a 3-line in-game-style summary directly, with the summary area expanding to the full history.
