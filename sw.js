@@ -1,4 +1,4 @@
-const CACHE_NAME = 'dungeon-raid-shell-v2';
+const CACHE_NAME = 'dungeon-raid-shell-v3';
 const APP_SHELL = [
   '/',
   '/index.html',
@@ -43,7 +43,16 @@ async function networkFirst(request) {
     }
     return response;
   }catch(e){
-    return caches.match(request);
+    const cached = await caches.match(request)
+      || await caches.match(new URL('/', self.location.origin).href)
+      || await caches.match(new URL('/dungeon-raid.html', self.location.origin).href);
+    // respondWith() must always receive a Response, including on a first-ever
+    // offline visit where the shell has not been cached yet.
+    return cached || new Response(
+      '<!doctype html><meta charset="utf-8"><title>Dungeon Raid offline</title>' +
+      '<p>游戏尚未完成离线缓存，请联网打开一次后再试。</p>',
+      { status: 503, headers: { 'Content-Type': 'text/html; charset=utf-8' } }
+    );
   }
 }
 

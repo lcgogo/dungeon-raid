@@ -1,3 +1,8 @@
+## [v1.71.7] - 2026-09-07
+
+- 修复 iOS Safari 离线导航偶发报错：Service Worker 在网络失败且精确缓存未命中时，现在会使用页面壳兜底或返回明确的离线响应，不再把空值交给 `respondWith()`。
+- Fixed an intermittent iOS Safari offline navigation error: when the network fails and the exact cache entry is missing, the Service Worker now falls back to the app shell or returns an explicit offline response instead of passing a null value to `respondWith()`.
+
 ## [v1.71.6] - 2026-09-07
 - 澄清炸弹、蔓藤缠绕与竭心光环的战斗日志：明确显示扣除的是全场怪物/敌人的血量，避免把 `−5` 误读为其他属性变化。
 - Clarified Bomb, Vine Coil, and Wither Aura combat logs to explicitly say they reduce all foes' HP, avoiding ambiguity around values such as `−5`.

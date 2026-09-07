@@ -164,7 +164,7 @@ function cmd_seed_debug {
 # ---------- test ----------
 function cmd_test {
     $fail = 0
-    $tests = @("finaletest", "milestonetest", "savetest", "sticktest", "fxpointtest")
+    $tests = @("finaletest", "milestonetest", "savetest", "sticktest", "fxpointtest", "swtest")
     foreach ($t in $tests) {
         Write-Host ("{0,-14}" -f $t) -NoNewline
         $jsPath = "test\$t.js"

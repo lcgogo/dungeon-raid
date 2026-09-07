@@ -97,7 +97,7 @@ cmd_seed_debug(){
 # ---------- 跑测试 ----------
 cmd_test(){
   local fail=0
-  for t in finaletest milestonetest savetest sticktest fxpointtest; do
+  for t in finaletest milestonetest savetest sticktest fxpointtest swtest; do
     printf "%-14s " "$t"
     if node "test/$t.js" >/dev/null 2>&1; then echo PASS; else echo FAIL; fail=1; fi
   done
