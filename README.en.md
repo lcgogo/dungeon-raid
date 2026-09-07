@@ -30,14 +30,13 @@ The two builds keep **separate, non-overwriting saves** (Dev uses its own localS
 
   | Tile | Effect |
   |---|---|
-  | 🔪 Sword | Attack enemies |
+  | 🔪 / 🐾 Weapon | Attack enemies (Sword for ordinary races, Claw for Mythic Beasts) |
   | 🔰 Shield | Gain armor (absorbs damage before health) |
   | 💗 Heart | Restore health |
   | 💰 Coin | Earn gold for the shop |
-  | 🐾 Claw | The Mythic Beasts' weapon for attacking foes |
   | 👹 Enemy | A monster |
 
-- A **sword chain can be dragged straight through 👹**. Every enemy on the chain takes the **full** chain damage **independently** — enough damage means an instant kill. The sword is your weapon, so a chain must include **at least one 🔪** to deal damage (chaining only monsters with no sword isn't an attack and costs no turn).
+- A **weapon chain can be dragged straight through 👹**. Every enemy on the chain takes the **full** chain damage **independently** — enough damage means an instant kill. Ordinary races show their weapon as 🔪 Sword; Mythic Beasts show 🐾 Claw. A chain must include **at least one weapon tile** to deal damage (chaining only monsters with no weapon isn't an attack and costs no turn).
 - While dragging, any enemy that **would die** turns into 💀 as a live preview.
 
 ## 👹 Enemy Info
@@ -88,26 +87,26 @@ Each race has **several** classes; every skill has a **5-turn cooldown** (except
 |---|---|---|---|
 | 🧑 Human | 🛡️ Knight | Aegis | Immune to all damage this turn |
 | 🧑 Human | 💗 Priest | Blessing | Clear all hearts on the board; each becomes 3 XP **and also heals you (by your heal-per-heart)** |
-| 🧑 Human | 🔥 Fire Mage | Flame Chain | Highlights and enables bosses this turn, including sword-immune bosses as the first target; every enemy hit by your sword chain is ignited and then loses **20% of the ignition-turn flat damage** each turn (minimum 1, stacks, until death) |
+| 🧑 Human | 🔥 Fire Mage | Flame Chain | Highlights and enables bosses this turn, including weapon-immune bosses as the first target; every enemy hit by your weapon chain is ignited and then loses **20% of the ignition-turn flat damage** each turn (minimum 1, stacks, until death) |
 | 🧑 Human | ⚔️ Sword Saint | Bladeshift | Turn every heart and coin into swords (its signature passive "Anything a Blade" unlocks at level 100, see below) |
 | 🧝 Elf | 🏹 Ranger | Arrow Rain | Deal "sword power ×2" damage to all enemies |
-| 🧝 Elf | 💰 Rogue | Empty Pockets | For this turn, each enemy hit by your sword chain drops extra gold equal to 20% of its pre-hit HP (rounded down, minimum 1); the chain turns gold |
-| 🧝 Elf | 🌿 Treant | Vine Coil | For the next 3 turns, all enemies/bosses (incl. sword-immune; Overlord excluded) lose 30% of your max HP each turn; cursed foes glow green |
+| 🧝 Elf | 💰 Rogue | Empty Pockets | For this turn, each enemy hit by your weapon chain drops extra gold equal to 20% of its pre-hit HP (rounded down, minimum 1); the chain turns gold |
+| 🧝 Elf | 🌿 Treant | Vine Coil | For the next 3 turns, all enemies/bosses (incl. weapon-immune; Overlord excluded) lose 30% of your max HP each turn; cursed foes glow green |
 | 🧝 Elf | 🔮 Seer | Prophecy | Opens a modal to choose coin / shield / heart / sword / enemy; during the next refill, all newly falling tiles become that type. If no refill happens this turn, the effect waits until the next refill. Choosing enemy creates only normal enemies, never bosses |
 | 🎅 Dwarf | 🔰 Blacksmith | Forge Armor | Absorb all shields on the board into armor progress |
 | 🎅 Dwarf | 🔒 Miser | Hoard | Invest **all current gold** into Hoard; after **4 turns**, the remaining invested gold is paid back at **1.2×**. New gold earned during Hoard is banked normally, and shops / other skills remain usable |
 | 🎅 Dwarf | 💼 Guild Master | Buyout | **Pay gold equal to the total HP of all enemies** to bribe them all **into coins** (only if you can afford it; **no cooldown** — reuse it as long as you have gold; bosses unaffected; costs half once you have Cheapskate) |
-| 🎅 Dwarf | 🔫 Musketeer | Snipe | Prioritizes bosses; if there are multiple bosses, it shoots the one with the **lowest HP**. If there is no boss, it falls back to the current **highest-HP** monster/boss (bomb-type — hits sword-immune & special bosses; not the Overlord) for **2× your Bomb damage**; a kill grants **triple XP + triple gold** (CD 5; scales with Demolitionist) |
+| 🎅 Dwarf | 🔫 Musketeer | Snipe | Prioritizes bosses; if there are multiple bosses, it shoots the one with the **lowest HP**. If there is no boss, it falls back to the current **highest-HP** monster/boss (bomb-type — hits weapon-immune & special bosses; not the Overlord) for **2× your Bomb damage**; a kill grants **triple XP + triple gold** (CD 5; scales with Demolitionist) |
 | 🧌 Orc | 🔪 Tauren | Frenzy | Halve HP and become **Undying** (**this turn only**: keep ≥1 HP no matter the damage); also **permanently** enables low-HP scaling — lower HP means higher sword damage (up to +60%) |
-| 🧌 Orc | 🩸 Fighter | Bloodthirst | **Drain 3 HP per monster / boss hit** by your sword chain this turn, **and your sword can hit sword-immune bosses (Ghost/Clown)** |
-| 🧌 Orc | 🧪 Witch Doctor | Hex | **Burns every red heart on the board into a black poison heart 🖤**; linking them heals nothing and poisons **all foes (incl. sword-immune; Overlord excluded)** instead (its signature passive "All is Poison" unlocks at level 100, see below) |
+| 🧌 Orc | 🩸 Fighter | Bloodthirst | **Drain 3 HP per monster / boss hit** by your weapon chain this turn, **and your weapon can hit weapon-immune bosses (Ghost/Clown)** |
+| 🧌 Orc | 🧪 Witch Doctor | Hex | **Burns every red heart on the board into a black poison heart 🖤**; linking them heals nothing and poisons **all foes (incl. weapon-immune; Overlord excluded)** instead (its signature passive "All is Poison" unlocks at level 100, see below) |
 | 🧌 Orc | 🪓 Axe Lord | Taunt | Set all enemies/bosses on the board (excluding the Overlord) to attack on the **next turn** by forcing their countdown to **1**; the skill card short text also notes that during that volley, **10% of the actual damage you take** becomes **permanent max HP** (**minimum +1**) |
-| 🪦 Undead | 🪄 Necromancer | Soul Drain | Drain HP from 2 random targets (monsters or bosses — **including sword-immune ones, like the bomb**; Overlord excluded) to heal yourself; per-target drain = your max HP, so any target with HP ≤ your max HP dies |
+| 🪦 Undead | 🪄 Necromancer | Soul Drain | Drain HP from 2 random targets (monsters or bosses — **including weapon-immune ones, like the bomb**; Overlord excluded) to heal yourself; per-target drain = your max HP, so any target with HP ≤ your max HP dies |
 | 🪦 Undead | 💀 Skeleton King | Rebirth | If slain this turn, cheat death and refill to full HP; afterward Rebirth's own cooldown grows +2 (each actual revive) |
-| 🪦 Undead | 🪝 Butcher | Hook | Drags every monster/boss (incl. sword-immune; Overlord excluded) down to the bottom of its column while other tiles float up; then deals damage by **distance from the bottom**: bottom row takes 1× flat damage, second-from-bottom takes 2×, and so on (CD 5) |
+| 🪦 Undead | 🪝 Butcher | Hook | Drags every monster/boss (incl. weapon-immune; Overlord excluded) down to the bottom of its column while other tiles float up; then deals damage by **distance from the bottom**: bottom row takes 1× flat damage, second-from-bottom takes 2×, and so on (CD 5) |
 | 🪦 Undead | 🧊 Lich | Frost Orb | Deal your **current flat damage** once to all monsters/bosses on the board (excluding the Overlord), then add **+1 to their current attack countdown** so their next attack is delayed by one extra turn |
 | 🐉 Mythic Beasts | 🐉 Azure Dragon | Dragon Roar | Deal damage equal to your level to all foes, including normal-attack-immune bosses |
-| 🐉 Mythic Beasts | 🐯 White Tiger | Tiger Breaker | Your next Claw chain can hit Claw-immune bosses and deals ×3 damage |
+| 🐉 Mythic Beasts | 🐯 White Tiger | Tiger Breaker | Your next weapon chain can hit weapon-immune bosses and deals ×3 damage |
 | 🐉 Mythic Beasts | 🐢 Black Tortoise | Tortoise Bastion | Fill Armor progress and gain one Armor level immediately |
 | 🐉 Mythic Beasts | 🐦‍🔥 Vermilion Bird | Phoenix Rebirth | Cannot die this turn; gain ⌊level/2⌋ max HP and revive at 50% of the new max HP |
 
@@ -119,9 +118,9 @@ At **level 100 (Tier-2 Skill)** you automatically get the passive **locked to yo
 |---|---|---|
 | 🧑 Human | Knight → General | Level-up offers 4 choices instead of 3 |
 | 🧑 Human | Priest → Holy Strike | Healing overflow **prioritizes bosses**; with multiple bosses it hits the **lowest-HP** one first, and only falls back to normal enemies when no boss is present (Overlord excluded) |
-| 🧑 Human | Fire Mage → Firewall | The bottom 3 rows become a visible firewall; monsters/bosses there (including sword-immune ones, excluding the Overlord) lose **20% of your current flat damage** each turn (minimum 1) |
+| 🧑 Human | Fire Mage → Firewall | The bottom 3 rows become a visible firewall; monsters/bosses there (including weapon-immune ones, excluding the Overlord) lose **20% of your current flat damage** each turn (minimum 1) |
 | 🧑 Human | Sword Saint → Anything a Blade | Each turn after the board settles, turn 3 non-enemy non-sword tiles into swords |
-| 🧝 Elf | Ranger → Sharpshooter | +2 extra XP per enemy killed by a sword chain |
+| 🧝 Elf | Ranger → Sharpshooter | +2 extra XP per enemy killed by a weapon chain |
 | 🧝 Elf | Rogue → All-In | After buying a bomb, also spend 20% of your current gold and add exactly that amount to this bomb’s damage |
 | 🧝 Elf | Treant → Thorns | When hit, reflect your current armor (damage-reduction) back to the attacker (more armor → more reflect; DoT/poison-backlash/Statue reflection do NOT trigger it) |
 | 🧝 Elf | Seer → Echo of Fate | Every 5 valid turns, the next refill is guaranteed to match the non-enemy tile cleared on the trigger turn |
@@ -134,21 +133,21 @@ At **level 100 (Tier-2 Skill)** you automatically get the passive **locked to yo
 | 🧌 Orc | Witch Doctor → All is Poison | Each turn burns 3 non-enemy non-heart tiles into 🖤 **black poison hearts**; linking them **only poisons all foes (no heal)** — red hearts still heal, your choice |
 | 🧌 Orc | Axe Lord → Unbroken | Whenever you take damage, gain **+1 permanent max HP**. Scars are a warrior's medals. |
 | 🪦 Undead | Necromancer → Wither Aura | Each turn, you first lose HP equal to your regen amount after healing modifiers, then all enemies/bosses lose that same amount; even at full HP, the aura still uses that modified regen value |
-| 🪦 Undead | Skeleton King → Splash | Overflow damage splashes to a random remaining foe (**including sword-immune bosses**); triggers from sword chains, Arrow Rain, and Soul Drain overflow |
+| 🪦 Undead | Skeleton King → Splash | Overflow damage splashes to a random remaining foe (**including weapon-immune bosses**); triggers from weapon chains, Arrow Rain, and Soul Drain overflow |
 | 🪦 Undead | Butcher → Carrion Feast | Each enemy/boss killed: +1 permanent max HP (carrion keeps piling up) |
 | 🪦 Undead | Lich → Ice Armor | Whenever a monster/boss hits you, deal **50% of your current flat damage** back to that attacker (minimum 1) and add **+1 to its current attack countdown** |
 | 🐉 Mythic Beasts | Azure Dragon → Dragon Might | After using any active skill, normal monsters deal half attack damage |
-| 🐉 Mythic Beasts | White Tiger → Tiger Fury | +⌊level/2⌋ flat Claw damage |
+| 🐉 Mythic Beasts | White Tiger → Tiger Fury | +⌊level/2⌋ flat weapon damage |
 | 🐉 Mythic Beasts | Black Tortoise → Heart of Tarrasque | Restore 10% of current HP each turn |
 | 🐉 Mythic Beasts | Vermilion Bird → Fire Feather | Any monster that attacks Vermilion Bird is ignited using Flame Chain’s burn logic |
 
 ## 👹 Bestiary
 
-Every **10 turns** a random boss is guaranteed to appear; **beating one by any means rewards 💰+20 and +15 XP** (announced in the log). **If you don't clear it in time the next one still comes and stacks** — no camping a weak boss to suppress the rest. Boss strength steps up one tier every **50 turns** (Lv2, Lv3…). **Ghost / Clown / Corruptor / Snowman can only be hit with the 💥 Bomb** (or bomb-like non-weapon damage such as poison/drain); all others can be attacked with sword chains too. **After you beat the turn-350 boss, a warning pops and from then on 2 different bosses descend together every 10 turns** — a ramp toward the turn-500 endgame.
+Every **10 turns** a random boss is guaranteed to appear; **beating one by any means rewards 💰+20 and +15 XP** (announced in the log). **If you don't clear it in time the next one still comes and stacks** — no camping a weak boss to suppress the rest. Boss strength steps up one tier every **50 turns** (Lv2, Lv3…). **Ghost / Clown / Corruptor / Snowman can only be hit with the 💥 Bomb** (or bomb-like non-weapon damage such as poison/drain); all others can be attacked with weapon chains too. **After you beat the turn-350 boss, a warning pops and from then on 2 different bosses descend together every 10 turns** — a ramp toward the turn-500 endgame.
 
 | Boss | How to hit | Gimmick |
 |---|---|---|
-| 👻 Ghost | Bomb only | Immune to sword chains; **its HP matches same-tier normal enemies (without the extra boss-tier HP multiplier)**; strikes you hard when its timer hits 0 |
+| 👻 Ghost | Bomb only | Immune to weapon chains; **its HP matches same-tier normal enemies (without the extra boss-tier HP multiplier)**; strikes you hard when its timer hits 0 |
 | 🤡 Clown | Bomb only | Re-rolls several non-monster tiles into other resources each turn, disrupting your chains; does NOT spawn monsters (that's the Summoner) |
 | 🪢 Lashmaster | Bomb only | On spawn, all normal enemies get **-1 attack countdown**, and each turn after that they get **-1 attack countdown** again. It may not be the deadliest foe by itself, but it drags the whole board into a frenzy the longer it lives. |
 | ♨️ Magmafiend | Sword / Bomb | **Every turn**, it melts all shields on the board but no longer restores HP from them; it also **feeds on fire** — instead of being ignited or hurt by Firewall, those fire effects heal it. It does not directly strip your current armor, but it makes it much harder to sustain a shield-based defense. |
@@ -183,7 +182,7 @@ Clearing shows a story-flavored congratulations screen; the Release build report
 - 📡 **Fully offline play**: after one initial online visit, the Service Worker caches the game shell so iOS can reopen it from Safari cache or the Home Screen and start a local-random run with no connection (offline runs are not ranked).
 - 🔨 **Dwarf minimum damage**: Dwarf weapon damage still applies the `×0.85` penalty and rounds down overall, but any legal hammer-chain attack now deals at least 1 damage so a lone early hammer hit no longer lands for zero.
 - 💡 **Tap any tile**: see its description and current live stats (e.g. your current sword power and flat bonus); tap the HUD to view all your stats and class details. **Long-press a shop/skill block** (Heal/Bomb/class active) for a detailed popup (with current values; works even while greyed-out on cooldown). **At the turn-50 class pick, long-press a class card** to preview its locked tier-2 passive before choosing. **Tap the log** for the full run history; the compact bottom strip still shows only the latest two lines, but same-turn hits from multiple normal enemies are now collapsed into one summary (for example, `👹 2 normal enemies attack: 3 + 7 → 10 HP lost!`) so you no longer lose sight of the earlier hits. Longer multi-step chains are still best read from the expanded history. Soul Drain, Vampire heart-drain, and Magmafiend shield-melt turns now leave emptied cells hanging for a brief beat before refill begins, so the drain/melt line effect and the later falling tiles are easier to read separately; Vampire and Devourer drain tethers now also have a compatibility fallback for mobile browsers that do not animate SVG lines, so you no longer get “the target vanished but the tether never appeared.” Zombie plague ticks now also draw a green infection tether from the Zombie’s tile to the HP bar when they actually make you lose HP, making the source of that drain much easier to read; Guild Master Buyout now sends golden tethers from the gold counter to the bribed enemies, so the spend is much easier to read at a glance. Another now-fixed combat edge case: movers such as Birdman no longer shove another same-turn ready foe out of its snapshotted cell and accidentally cause that later attacker to be skipped.
-- ⚡ **Double-tap a Shield / Heart / Coin tile**: auto-draws a greedy longest same-type chain through it, no manual dragging (resource tiles only — sword chains and monsters/bosses are left for you to control).
+- ⚡ **Double-tap a Shield / Heart / Coin tile**: auto-draws a greedy longest same-type chain through it, no manual dragging (resource tiles only — weapon chains and monsters/bosses are left for you to control).
 - 🔁 **Active auto-release**: long-press Heal or Bomb to open its details, then enable auto-release in the popup; it fires after turn resolution when usable, with a rotating border indicator.
 - 📜 **Settlement log**: death and clear screens keep the latest 3 log lines visible, with a tap-to-expand full run history.
 - 🩸 **Low-HP warning**: the screen edges redden as health drops, pulsing when critical, with the HP bar blinking too.
