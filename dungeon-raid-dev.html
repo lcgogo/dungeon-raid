@@ -187,12 +187,69 @@
 </div>
 
 <script>
+
 (()=>{
+/* CONTENT_BUNDLE_START */
+// Static game configuration bundled into the single-file engine.
+const DEF = {
+  sword:  {emoji:'🔪', color:'#e74c3c', glow:'#ff7a6b', name:'剑'},
+  shield: {emoji:'🔰', color:'#3498db', glow:'#6fb6ff', name:'盾'},
+  heart:  {emoji:'💗', color:'#e84393', glow:'#ff85c0', name:'心'},
+  coin:   {emoji:'💰', color:'#f1c40f', glow:'#ffe07a', name:'金'},
+  enemy:  {emoji:'👹', color:'#7d3cad', glow:'#c08bff', name:'怪'},
+  boss:   {emoji:'👻', color:'#1f6f5c', glow:'#7fffd4', name:'Boss'},
+};
+
+const WEAPON={
+  human: {e:'🔪', n:['剑','Sword']}, elf: {e:'🏹', n:['箭','Arrow']},
+  dwarf: {e:'🔨', n:['锤','Hammer']}, orc: {e:'🪓', n:['斧','Axe']},
+  undead:{e:'🦴', n:['骨','Bone']}, beast: {e:'🐾', n:['爪','Claw']},
+};
+
+const RACES=[
+  {id:'human', e:'🧑', n:['人族','Human'], d:['特性：无\n削弱：无','Trait: none\nWeakness: none'], f:p=>{}},
+  {id:'elf', e:'🧝', n:['精灵','Elf'], d:['特性：连击加成翻倍（每多连1个 +30%）\n削弱：「强化体魄」升级只 +3 上限','Trait: combo bonus doubled (+30%/tile)\nWeakness: Fortify Body upgrade gives only +3 max HP'], f:p=>{p.comboMult=2; p.maxHpUpMult=0.5;}},
+  {id:'dwarf', e:'🎅', n:['矮人','Dwarf'], d:['特性：护甲减伤翻倍（每点护甲抵 2 点）\n削弱：{WC}总伤 ×0.85（含固定伤害一起算）','Trait: armor counts double (each point blocks 2)\nWeakness: ×0.85 total {W} damage (flat included)'], f:p=>{p.armorMult=2; p.swordMult=0.85;}},
+  {id:'orc', e:'🧌', n:['兽人','Orc'], d:['特性：「强化体魄」升级时生命上限翻倍（每次 +12）\n削弱：无甲——永远无法获得护甲','Trait: Fortify Body upgrade gives double max HP (+12 each)\nWeakness: No Armor — can never gain armor'], f:p=>{p.maxHpUpMult=2; p.noArmor=true;}},
+  {id:'undead', e:'🪦', n:['亡灵','Undead'], d:['特性：迷惑——所有怪物（含 Boss）攻击倒计时 +1\n削弱：一切治疗效果减半（心/药水/吸魂）+ 主动技能冷却 +1','Trait: Confusion — all monsters (incl. bosses) get +1 attack countdown\nWeakness: all healing halved (hearts/potion/drain) + active-skill cooldowns +1'], f:p=>{p.foeCdBonus=1; p.skillCdMod=(p.skillCdMod||0)+1; p.healMult=0.5;}},
+  {id:'beast', e:'🐉', n:['神兽','Mythic Beasts'], d:['特性：神识——获得经验 ×2\n削弱：阴阳失衡——所有敌人攻击倒计时 −1（最低 1）','Trait: Divine Sense — gain 2× XP\nWeakness: Yin-Yang Imbalance — all foes get −1 attack countdown (minimum 1)'], f:p=>{p.foeCdBonus=-1;}},
+];
+
+// Player-facing descriptions. This file is bundled into the game HTML at build time.
+// Keep gameplay values and state-dependent rows in the engine; this module only owns copy.
+const CONTENT = {
+  tile: {
+    sword: [
+      `连接 2 个及以上的{W}攻击怪物。{WC}可直接拖过 👹；若火法师已开启「火焰链」，本回合还可划过幽灵等剑免疫 Boss 把它们点燃。`,
+      `Link 2+ {W} tiles to attack. A {WC} passes straight through 👹; if Fire Mage's Flame Chain is active, this turn it can also pass through sword-immune bosses such as Ghosts to ignite them.`
+    ],
+    shield: [
+      '连接盾累积「护甲」，攒满就 +1 减伤。受击时先用减伤抵消，剩下的才掉血，但每次至少掉 1 滴。',
+      'Linking shields fills Armor; fill the bar for +1 damage reduction. Damage reduction soaks each hit, but you always lose at least 1 HP.'
+    ],
+    poisonHeart: [
+      '被污染怪 🦠 染绿的心。连接它不再回血，反而按等量【扣血】（无视护甲）！炸掉污染怪后，场上的绿毒心会立刻复原成普通红心。',
+      'A heart corrupted by the Corruptor 🦠. Linking it DRAINS that much HP instead of healing (ignores armor)! Once the Corruptor is bombed away, the green poison hearts immediately revert to normal hearts.'
+    ],
+    blackHeart: [
+      '巫医「万物皆毒」把棋子燃成的黑毒心。连接它不回血，而是把这些生命当毒灌给全场怪（同蛊毒口径）。红心照常回血——按需取舍连红还是连黑。',
+      'Burned into being by the Witch Doctor\'s “All is Poison”. Linking it heals nothing — it poisons all foes instead (like Hex). Red hearts still heal; choose which to link.'
+    ],
+    heart: ['连接 2 颗及以上的心回复生命。', 'Link 2+ hearts to restore HP.'],
+    coin: ['连接 2 枚及以上的金币赚钱，用于商店购买。', 'Link 2+ coins to earn gold for the shop.'],
+    ignited: ['这个目标已被火焰链点燃，会在每回合持续掉血，直到死亡。', 'This target is ignited by Flame Chain and keeps taking burn damage every turn until it dies.'],
+    enemy: [
+      `左上是攻击力，右上是倒计时。每行动一次倒计时 −1，归零就攻击你：先用护甲抵消，剩下的才掉血，但每次至少掉 1 滴。用{WC}串过它就能攻击，伤害够高直接点杀。`,
+      `Top-left is its attack, top-right its timer. The timer drops by 1 each action; at 0 it attacks — your armor soaks most of it, but you always lose at least 1 HP. Drag a {WC} through it to attack; enough damage kills it.`
+    ]
+  }
+};
+/* CONTENT_BUNDLE_END */
 if('serviceWorker' in navigator) window.addEventListener('load',()=>navigator.serviceWorker.register('/sw.js').catch(()=>{}));
 //==================== 配置 ====================
 // 版本号 v主.次.修：不影响 verify/replay 兼容边界的小改动改"修"；凡是影响 verify/replay/版本分桶/release 验证语义的改动都改"次"；大版本变更需先确认。页面底部显示。
-const VERSION='v1.71.7';
-const CHANGELOG_LINES=[{"ver": "v1.71.7", "zh": "修复 iOS Safari 离线导航偶发报错：Service Worker 在网络失败且精确缓存未命中时，现在会使用页面壳兜底或返回明确的离线响应，不再把空值交给 `respondWith()`。", "en": "Fixed an intermittent iOS Safari offline navigation error: when the network fails and the exact cache entry is missing, the Service Worker now falls back to the app shell or returns an explicit offline response instead of passing a null value to `respondWith()`."}, {"ver": "v1.71.6", "zh": "澄清炸弹、蔓藤缠绕与竭心光环的战斗日志：明确显示扣除的是全场怪物/敌人的血量，避免把 `−5` 误读为其他属性变化。", "en": "Clarified Bomb, Vine Coil, and Wither Aura combat logs to explicitly say they reduce all foes' HP, avoiding ambiguity around values such as `−5`."}, {"ver": "v1.71.5", "zh": "调整结算日志：死亡/破关页面直接显示与游戏内相同风格的 3 行日志简报，点击简报区域展开完整日志。", "en": "Refined settlement logs to show a 3-line in-game-style summary directly, with the summary area expanding to the full history."}, {"ver": "v1.71.4", "zh": "修复 iOS Safari 的离线缓存错误：Service Worker 不再返回带重定向的导航响应。", "en": "Fixed the iOS Safari offline-cache error by preventing the Service Worker from returning redirected navigation responses."}, {"ver": "v1.71.3", "zh": "增加 PWA Service Worker 缓存：iOS 先联网打开一次页面后，完全断网时仍可打开游戏并使用本地随机开局。", "en": "Added a PWA Service Worker cache so iOS can reopen the game fully offline after one initial online visit, using the existing local-random fallback."}];   /* auto-injected by dr.sh embed-changelog（勿手改） */
+const VERSION='v1.71.8';
+const CHANGELOG_LINES=[{"ver": "v1.71.8", "zh": "将游戏源码按配置、内容、状态、战斗、回放和界面职责拆分到 `src/`，构建时仍生成可离线运行的单文件 HTML；DEV 启动页现在直接显示构建版本号。", "en": "Split the game source into `src/` modules for configuration, content, state, combat, replay, and UI while continuing to build a self-contained offline HTML file; the DEV start screen now shows the build version."}, {"ver": "v1.71.7", "zh": "修复 iOS Safari 离线导航偶发报错：Service Worker 在网络失败且精确缓存未命中时，现在会使用页面壳兜底或返回明确的离线响应，不再把空值交给 `respondWith()`。", "en": "Fixed an intermittent iOS Safari offline navigation error: when the network fails and the exact cache entry is missing, the Service Worker now falls back to the app shell or returns an explicit offline response instead of passing a null value to `respondWith()`."}, {"ver": "v1.71.6", "zh": "澄清炸弹、蔓藤缠绕与竭心光环的战斗日志：明确显示扣除的是全场怪物/敌人的血量，避免把 `−5` 误读为其他属性变化。", "en": "Clarified Bomb, Vine Coil, and Wither Aura combat logs to explicitly say they reduce all foes' HP, avoiding ambiguity around values such as `−5`."}, {"ver": "v1.71.5", "zh": "调整结算日志：死亡/破关页面直接显示与游戏内相同风格的 3 行日志简报，点击简报区域展开完整日志。", "en": "Refined settlement logs to show a 3-line in-game-style summary directly, with the summary area expanding to the full history."}, {"ver": "v1.71.4", "zh": "修复 iOS Safari 的离线缓存错误：Service Worker 不再返回带重定向的导航响应。", "en": "Fixed the iOS Safari offline-cache error by preventing the Service Worker from returning redirected navigation responses."}];   /* auto-injected by dr.sh embed-changelog（勿手改） */
 const DEV=true;   // release build (DEV=false); dev build is dungeon-raid-dev.html (DEV=true)
 const REC_API='https://api.dungeonraid.win';   // 录像分享 API（Cloudflare Worker + KV）
 // 带种子随机数（mulberry32）：游戏全程用 rnd() 取代原生随机，配合录制种子可确定性重放
@@ -204,23 +261,6 @@ let TILE=70;                       // 实际按画布宽度自适应
 // 显式 emoji 字体栈：让 canvas 测量宽度与彩色 emoji 实际渲染一致（移动端居中更稳）
 // 注：心/盾已改用原生彩色 emoji 💗/🔰（不带 FE0F 变体符），避免老符号在 canvas 里居中偏移
 const EMOJI_FONT="'Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji',sans-serif";
-const DEF = {
-  sword:  {emoji:'🔪', color:'#e74c3c', glow:'#ff7a6b', name:'剑'},
-  shield: {emoji:'🔰', color:'#3498db', glow:'#6fb6ff', name:'盾'},
-  heart:  {emoji:'💗', color:'#e84393', glow:'#ff85c0', name:'心'},
-  coin:   {emoji:'💰', color:'#f1c40f', glow:'#ffe07a', name:'金'},
-  enemy:  {emoji:'👹', color:'#7d3cad', glow:'#c08bff', name:'怪'},
-  boss:   {emoji:'👻', color:'#1f6f5c', glow:'#7fffd4', name:'Boss'},
-};
-// 各种族的武器（攻击格图标 + 名称）：人族剑 / 精灵箭 / 矮人锤 / 兽人斧 / 活死人骨 / 神兽爪
-const WEAPON={
-  human: {e:'🔪', n:['剑','Sword']},
-  elf:   {e:'🏹', n:['箭','Arrow']},
-  dwarf: {e:'🔨', n:['锤','Hammer']},
-  orc:   {e:'🪓', n:['斧','Axe']},
-  undead:{e:'🦴', n:['骨','Bone']},
-  beast: {e:'🐾', n:['爪','Claw']},
-};
 function weap(){ return WEAPON[player&&player.race] || WEAPON.human; }
 function wE(){ return weap().e; }                                       // 武器 emoji（攻击格图标）
 function wN(){ return tr(weap().n[0], weap().n[1]); }                   // 武器名（本地化）：剑/箭/锤/斧/骨（用 tr 避免与 L 的 token 替换递归）
@@ -637,14 +677,6 @@ function makeTile(type){
 
 //==================== 种族 / 转职职业 ====================
 // 开局选种族（特性≠通用升级，且各带削弱）；击败50回合Boss转一阶（主动），击败100回合Boss转二阶（被动）
-const RACES=[
-  {id:'human', e:'🧑', n:['人族','Human'], d:['特性：无\n削弱：无','Trait: none\nWeakness: none'], f:p=>{}},
-  {id:'elf',   e:'🧝', n:['精灵','Elf'],   d:['特性：连击加成翻倍（每多连1个 +30%）\n削弱：「强化体魄」升级只 +3 上限','Trait: combo bonus doubled (+30%/tile)\nWeakness: Fortify Body upgrade gives only +3 max HP'], f:p=>{p.comboMult=2; p.maxHpUpMult=0.5;}},
-  {id:'dwarf', e:'🎅', n:['矮人','Dwarf'], d:['特性：护甲减伤翻倍（每点护甲抵 2 点）\n削弱：{WC}总伤 ×0.85（含固定伤害一起算）','Trait: armor counts double (each point blocks 2)\nWeakness: ×0.85 total {W} damage (flat included)'], f:p=>{p.armorMult=2; p.swordMult=0.85;}},
-  {id:'orc',   e:'🧌', n:['兽人','Orc'],   d:['特性：「强化体魄」升级时生命上限翻倍（每次 +12）\n削弱：无甲——永远无法获得护甲','Trait: Fortify Body upgrade gives double max HP (+12 each)\nWeakness: No Armor — can never gain armor'], f:p=>{p.maxHpUpMult=2; p.noArmor=true;}},
-  {id:'undead',e:'🪦', n:['亡灵','Undead'], d:['特性：迷惑——所有怪物（含 Boss）攻击倒计时 +1\n削弱：一切治疗效果减半（心/药水/吸魂）+ 主动技能冷却 +1','Trait: Confusion — all monsters (incl. bosses) get +1 attack countdown\nWeakness: all healing halved (hearts/potion/drain) + active-skill cooldowns +1'], f:p=>{p.foeCdBonus=1; p.skillCdMod=(p.skillCdMod||0)+1; p.healMult=0.5;}},
-  {id:'beast', e:'🐉', n:['神兽','Mythic Beasts'], d:['特性：神识——获得经验 ×2\n削弱：阴阳失衡——所有敌人攻击倒计时 −1（最低 1）','Trait: Divine Sense — gain 2× XP\nWeakness: Yin-Yang Imbalance — all foes get −1 attack countdown (minimum 1)'], f:p=>{p.foeCdBonus=-1;}},
-];
 // 一阶职业：主动技能（f 返回 false 表示无效不发动；返回值表示自带日志）
 const LEGACY_CLASS_IDS={elder:'treant'};   // 树人历史内部 id：保留兼容旧存档 / 旧录像 / 工具参数
 function normalizeClassId(id){ return LEGACY_CLASS_IDS[id]||id; }
@@ -809,8 +841,8 @@ function showClassSelect(){
   busy=true;
   const card=document.getElementById('card');
   const verBadge = DEV
-    ? `<span style="background:#7d3cad;color:#fff;font-size:12px;font-weight:700;padding:3px 12px;border-radius:12px;letter-spacing:1px">🚧 DEV ${tr('开发版·最新','build · latest')}</span>`
-    : `<span style="background:#2e7d46;color:#fff;font-size:12px;font-weight:700;padding:3px 12px;border-radius:12px;letter-spacing:1px">✅ ${tr('正式版','Release')}</span>`;
+    ? `<span style="background:#7d3cad;color:#fff;font-size:12px;font-weight:700;padding:3px 12px;border-radius:12px;letter-spacing:1px">🚧 DEV ${VERSION} · ${tr('开发版','build')}</span>`
+    : `<span style="background:#2e7d46;color:#fff;font-size:12px;font-weight:700;padding:3px 12px;border-radius:12px;letter-spacing:1px">✅ ${VERSION} · ${tr('正式版','Release')}</span>`;
   // 版本徽标旁放一个「🏠 首页」按钮，回到版本选择页（index.html）
   const buildBadge = `<div style="display:flex;justify-content:center;align-items:center;gap:8px;margin-bottom:8px">${verBadge}<a href="index.html" style="font-size:12px;color:var(--dim);text-decoration:none;border:1px solid #4a3a63;border-radius:12px;padding:3px 11px">🏠 ${tr('首页','Home')}</a></div>`;
   card.innerHTML=`${buildBadge}
@@ -2982,40 +3014,40 @@ document.querySelectorAll('#replayBar .rbSpd').forEach(b=>{ b.onclick=()=>{ repl
 function tileInfo(t){
   const p=player;
   if(t.type==='sword') return {icon:wE(), title:tr(`${wN()} · 攻击`,`${wN()} · Attack`),
-    desc:tr(`连接 2 个及以上的${wN()}攻击怪物。${wChain()}可直接拖过 👹；若火法师已开启「火焰链」，本回合还可划过幽灵等剑免疫 Boss 把它们点燃。`,`Link 2+ ${wN()} tiles to attack. A ${wChain()} passes straight through 👹; if Fire Mage's Flame Chain is active, this turn it can also pass through sword-immune bosses such as Ghosts to ignite them.`),
+    desc:L(CONTENT.tile.sword),
     rows:[ [tr(`每个${wN()}威力`,`Power per ${wN()}`), `×${p.weaponPower}`],
       [tr('固定伤害','Flat damage'), `+${p.swordFlat}`],
       [tr('火法固定伤害','Fire flat damage'), `${currentSwordFlat()}`],
       [tr('多连奖励','Combo bonus'), tr(`每超出 2 个 +${Math.round(15*(p.comboMult||1))}%`,`+${Math.round(15*(p.comboMult||1))}% per tile over 2`)],
       [tr('伤害加成','Damage bonus'), ((p.lowHpDmg?tr('越缺血越猛','low HP↑'):'')+(p.titan?tr(` ·巨力+${Math.floor(p.maxHp/12)}`,` ·Titan+${Math.floor(p.maxHp/12)}`):'')).trim()||'—'] ]};
   if(t.type==='shield') return {icon:'🔰', title:tr('盾 · 减伤','Shield · Armor'),
-    desc:tr('连接盾累积「护甲」，攒满就 +1 减伤。受击时先用减伤抵消，剩下的才掉血，但每次至少掉 1 滴。','Linking shields fills Armor; fill the bar for +1 damage reduction. Damage reduction soaks each hit, but you always lose at least 1 HP.'),
+    desc:L(CONTENT.tile.shield),
     rows:[ [tr('当前减伤','Damage reduction'), p.noArmor?tr('无甲（兽人）','none (Orc)'):`${p.armor}`],
       [tr('护甲','Armor'), p.noArmor?'—':`${p.shieldXp} / ${armorNeeded(p.armor)}`],
       [tr('每个盾 +进度','Progress per shield'), `+${p.armorPerShield}`],
       [tr('减伤倍率(矮人)','Armor mult (Dwarf)'), p.armorMult>1?`×${p.armorMult}`:'—'] ]};
   if(t.type==='heart'&&pollutionActive()) return {icon:'💚', title:tr('毒心 · 危险','Poison Heart · Danger'),
-    desc:tr('被污染怪 🦠 染绿的心。连接它不再回血，反而按等量【扣血】（无视护甲）！炸掉污染怪后，场上的绿毒心会立刻复原成普通红心。','A heart corrupted by the Corruptor 🦠. Linking it DRAINS that much HP instead of healing (ignores armor)! Once the Corruptor is bombed away, the green poison hearts immediately revert to normal hearts.'),
+    desc:L(CONTENT.tile.poisonHeart),
     rows:[ [tr('连接后果','If linked'), tr('扣血（=本会回复的量）','HP loss (= would-be heal)')],
       [tr('解法','Fix'), tr('炸掉污染怪 / 别碰','Bomb Corruptor / avoid')] ]};
   if(t.type==='heart'&&t.poison) return {icon:'🖤', title:tr('黑毒心 · 万物皆毒','Black Poison Heart'),
-    desc:tr('巫医「万物皆毒」把棋子燃成的黑毒心。连接它不回血，而是把这些生命当毒灌给全场怪（同蛊毒口径）。红心照常回血——按需取舍连红还是连黑。','Burned into being by the Witch Doctor’s “All is Poison”. Linking it heals nothing — it poisons all foes instead (like Hex). Red hearts still heal; choose which to link.'),
+    desc:L(CONTENT.tile.blackHeart),
     rows:[ [tr('连接后果','If linked'), tr('毒全场怪（=本会回复的量）','Poison all foes (= would-be heal)')],
       [tr('每颗毒量','Poison each'), `${p.healPerHeart}`] ]};
   if(t.type==='heart') return {icon:'💗', title:tr('心 · 治疗','Heart · Heal'),
-    desc:tr('连接 2 颗及以上的心回复生命。','Link 2+ hearts to restore HP.'),
+    desc:L(CONTENT.tile.heart),
     rows:[ [tr('每颗心回复','Heal per heart'), `+${p.healPerHeart}`],
       [tr('当前生命','Current HP'), `${Math.round(p.hp)} / ${p.maxHp}`],
       [tr('每回合自动回复','Heal each turn'), p.regen?`+${p.regen}`:'—'],
       [tr('溢出攻击(神圣打击)','Overflow strikes (Holy Strike)'), p.holyStrike?tr('是','Yes'):'—'] ]};
   if(t.type==='coin') return {icon:'💰', title:tr('金币','Coin'),
-    desc:tr('连接 2 枚及以上的金币赚钱，用于商店购买。','Link 2+ coins to earn gold for the shop.'),
+    desc:L(CONTENT.tile.coin),
     rows:[ [tr('每枚金币','Gold per coin'), `+${p.goldPerCoin}`],
       [tr('当前金币','Current gold'), `${p.gold}`],
       [tr('囤金投入','Hoard invested'), p.goldLock>0?tr(`${p.goldFrozen} 金币，剩 ${p.goldLock} 回合`,`${p.goldFrozen} gold, ${p.goldLock} turns left`):'—'],
       [tr('钱能买命(财阀)','Money Buys Life (Tycoon)'), p.tycoonGoldShield?tr('只扣手头金币，不动囤金','Current gold only; Hoard untouched'):'—'] ]};
   if((t.type==='enemy'||t.type==='boss') && t.burnTurns) return {icon:'🔥', title:tr('点燃状态','Ignited'),
-    desc:tr('这个目标已被火焰链点燃，会在每回合持续掉血，直到死亡。','This target is ignited by Flame Chain and keeps taking burn damage every turn until it dies.'),
+    desc:L(CONTENT.tile.ignited),
     rows:[ [tr('火焰层数','Burn stacks'), `${t.burnStacks||0}`],
       [tr('单层每回合掉血','Burn / stack'), `${Math.max(1, Math.floor(currentSwordFlat()*0.2))}`],
       [tr('当前总掉血','Total burn / turn'), `${Math.max(1, Math.floor(currentSwordFlat()*0.2))} × ${Math.max(1, t.burnStacks||0)} = ${burnTickDamage(t)}`] ]};
@@ -3033,7 +3065,7 @@ function tileInfo(t){
     return {icon:def.emoji, title:'Boss · '+L(def.name)+` Lv${t.tier||1}`, desc:L(def.desc)+(def.quip?`<br><span style="color:#caa6e6;font-style:italic">「${L(def.quip)}」</span>`:''), rows};
   }
   return {icon:'👹', title:tr('怪物','Enemy'),
-    desc:tr(`左上是攻击力，右上是倒计时。每行动一次倒计时 −1，归零就攻击你：先用护甲抵消，剩下的才掉血，但每次至少掉 1 滴。用${wChain()}串过它就能攻击，伤害够高直接点杀。`,`Top-left is its attack, top-right its timer. The timer drops by 1 each action; at 0 it attacks — your armor soaks most of it, but you always lose at least 1 HP. Drag a ${wChain()} through it to attack; enough damage kills it.`),
+    desc:L(CONTENT.tile.enemy),
     rows:[ [tr('血量','HP'), `${t.hp} / ${t.maxHp}`],
       [tr('攻击力','Attack'), `${normalEnemyAttack(t)}`],
       [tr('倒计时','Timer'), `${t.cd} / ${t.baseCd}`] ]};

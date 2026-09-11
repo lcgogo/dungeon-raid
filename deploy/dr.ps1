@@ -195,6 +195,9 @@ function cmd_test {
     exit $fail
 }
 
+# ---------- build ----------
+function cmd_build { node build/build.js }
+
 # ---------- embed-changelog ----------
 function cmd_embed_changelog($files) {
     if (-not $files -or $files.Count -eq 0) { $files = @("dungeon-raid-dev.html") }
@@ -216,6 +219,7 @@ function cmd_stamp_changelog {
 
 # ---------- deploy ----------
 function cmd_deploy {
+    cmd_build
     # dev 站更新前先注入最新更新日志（只动 dev）
     cmd_embed_changelog @("dungeon-raid-dev.html")
 
@@ -431,6 +435,7 @@ $restArgs = @()
 if ($args.Count -gt 1) { $restArgs = $args[1..($args.Count-1)] }
 
 switch ($cmd) {
+    "build"             { cmd_build }
     "test"              { cmd_test }
     "deploy"            { cmd_deploy }
     "release"           { cmd_release }

@@ -23,6 +23,8 @@ Play online: **<https://dungeonraid.win>** (Dev build: <https://dungeonraid.win/
 
 The two builds keep **separate, non-overwriting saves** (Dev uses its own localStorage keys). The start screen and footer both label which build you are in. The home page’s Release / Dev version numbers are **statically injected at deploy time**, so they appear instantly even on weak connections without an extra fetch.
 
+The current Dev build is `v1.71.8`; the DEV start card shows the version directly so you can confirm whether a local or deployed page is up to date. Source lives under `src/` and the self-contained HTML is regenerated with `node build/build.js`.
+
 ## 🧩 Core Gameplay
 
 - **Drag to connect** 2 or more **adjacent same-type** tiles to clear them (horizontal, vertical, and diagonal — all 8 directions).

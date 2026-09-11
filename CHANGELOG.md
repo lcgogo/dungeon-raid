@@ -1,3 +1,8 @@
+## [v1.71.8] - 2026-09-11
+
+- 将游戏源码按配置、内容、状态、战斗、回放和界面职责拆分到 `src/`，构建时仍生成可离线运行的单文件 HTML；DEV 启动页现在直接显示构建版本号。
+- Split the game source into `src/` modules for configuration, content, state, combat, replay, and UI while continuing to build a self-contained offline HTML file; the DEV start screen now shows the build version.
+
 ## [v1.71.7] - 2026-09-07
 
 - 修复 iOS Safari 离线导航偶发报错：Service Worker 在网络失败且精确缓存未命中时，现在会使用页面壳兜底或返回明确的离线响应，不再把空值交给 `respondWith()`。

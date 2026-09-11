@@ -94,6 +94,9 @@ cmd_seed_debug(){
     -H 'Content-Type: application/json'; echo
 }
 
+# ---------- 构建 dev 单文件 ----------
+cmd_build(){ node build/build.js; }
+
 # ---------- 跑测试 ----------
 cmd_test(){
   local fail=0
@@ -148,6 +151,7 @@ PY
 
 # ---------- 部署 Pages（从干净 public/ 部署，绝不打包仓库根目录里的 SSH 私钥等） ----------
 cmd_deploy(){
+  cmd_build
   cmd_embed_changelog dungeon-raid-dev.html   # dev 站更新前先注入最新更新日志（只动 dev）
   rm -rf public
   mkdir -p public/functions
@@ -247,6 +251,7 @@ cmd_bind_domains(){
 }
 
 case "${1:-help}" in
+  build)             cmd_build ;;
   test)              cmd_test ;;
   deploy)            cmd_deploy ;;
   release)           cmd_release ;;
