@@ -1,7 +1,9 @@
 {
   "name": "地牢突袭 · Dungeon Raid",
   "short_name": "地牢突袭",
-  "start_url": "/dungeon-raid.html",
+  "id": "/",
+  "start_url": "/",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#241b30",
   "theme_color": "#241b30",

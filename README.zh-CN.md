@@ -23,7 +23,7 @@
 
 两个版本**存档相互独立、互不覆盖**（DEV 用单独的 localStorage 键）。开始界面与底部都会标明当前是「正式版」还是「DEV 开发版」。首页上的正式版 / 开发版版本号是**部署时静态写进 HTML** 的，不靠额外联网请求，弱网下也能直接看到。项目现在还提供 `manifest.webmanifest`：Android / Chrome 添加到主屏时会优先使用 `icon-192.png` / `icon-512.png` 及 manifest 元数据；iOS 仍继续使用 `apple-touch-icon.png`。
 
-当前开发版为 `v1.71.8`；DEV 启动卡片会直接显示版本号，便于确认本地文件或线上页面是否已更新。源码位于 `src/`，通过 `node build/build.js` 重新生成单文件 HTML。
+当前开发版为 `v1.71.9`；DEV 启动卡片会直接显示版本号，便于确认本地文件或线上页面是否已更新。PWA 主屏图标会先打开首页，再选择正式版或开发版。源码位于 `src/`，通过 `node build/build.js` 重新生成单文件 HTML。
 
 ## 🧩 核心玩法
 

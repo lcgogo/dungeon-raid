@@ -1,3 +1,8 @@
+## [v1.71.9] - 2026-09-11
+
+- 修复 PWA 安装后的启动入口：现在打开主屏图标会先进入首页，不再直接进入正式版游戏；同时升级 Service Worker 缓存版本，避免继续使用旧入口配置。
+- Fixed the PWA launch entry: opening the installed app now starts at the home page instead of going directly to the release game, and the Service Worker cache version was bumped so the old entry configuration is not reused.
+
 ## [v1.71.8] - 2026-09-11
 
 - 将游戏源码按配置、内容、状态、战斗、回放和界面职责拆分到 `src/`，构建时仍生成可离线运行的单文件 HTML；DEV 启动页现在直接显示构建版本号。
