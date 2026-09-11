@@ -248,8 +248,8 @@ const CONTENT = {
 if('serviceWorker' in navigator) window.addEventListener('load',()=>navigator.serviceWorker.register('/sw.js').catch(()=>{}));
 //==================== 配置 ====================
 // 版本号 v主.次.修：不影响 verify/replay 兼容边界的小改动改"修"；凡是影响 verify/replay/版本分桶/release 验证语义的改动都改"次"；大版本变更需先确认。页面底部显示。
-const VERSION='v1.71.9';
-const CHANGELOG_LINES=[{"ver": "v1.71.9", "zh": "修复 PWA 安装后的启动入口：现在打开主屏图标会先进入首页，不再直接进入正式版游戏；同时升级 Service Worker 缓存版本，避免继续使用旧入口配置。", "en": "Fixed the PWA launch entry: opening the installed app now starts at the home page instead of going directly to the release game, and the Service Worker cache version was bumped so the old entry configuration is not reused."}, {"ver": "v1.71.8", "zh": "将游戏源码按配置、内容、状态、战斗、回放和界面职责拆分到 `src/`，构建时仍生成可离线运行的单文件 HTML；DEV 启动页现在直接显示构建版本号。", "en": "Split the game source into `src/` modules for configuration, content, state, combat, replay, and UI while continuing to build a self-contained offline HTML file; the DEV start screen now shows the build version."}, {"ver": "v1.71.7", "zh": "修复 iOS Safari 离线导航偶发报错：Service Worker 在网络失败且精确缓存未命中时，现在会使用页面壳兜底或返回明确的离线响应，不再把空值交给 `respondWith()`。", "en": "Fixed an intermittent iOS Safari offline navigation error: when the network fails and the exact cache entry is missing, the Service Worker now falls back to the app shell or returns an explicit offline response instead of passing a null value to `respondWith()`."}, {"ver": "v1.71.6", "zh": "澄清炸弹、蔓藤缠绕与竭心光环的战斗日志：明确显示扣除的是全场怪物/敌人的血量，避免把 `−5` 误读为其他属性变化。", "en": "Clarified Bomb, Vine Coil, and Wither Aura combat logs to explicitly say they reduce all foes' HP, avoiding ambiguity around values such as `−5`."}, {"ver": "v1.71.5", "zh": "调整结算日志：死亡/破关页面直接显示与游戏内相同风格的 3 行日志简报，点击简报区域展开完整日志。", "en": "Refined settlement logs to show a 3-line in-game-style summary directly, with the summary area expanding to the full history."}];   /* auto-injected by dr.sh embed-changelog（勿手改） */
+const VERSION='v1.72.0';
+const CHANGELOG_LINES=[{"ver": "v1.72.0", "zh": "一次行动击杀多个普通怪时，额外获得与普通怪数量相同的金币；单杀和 Boss 奖励不变。武器链、炸弹、溅射及群体技能统一适用，并在日志中显示多杀奖励。", "en": "When one action kills multiple normal enemies, grant bonus gold equal to the number of normal enemies killed; single kills and boss rewards are unchanged. Weapon chains, bombs, splash, and area skills use the same rule and show the bonus in the log."}, {"ver": "v1.71.9", "zh": "修复 PWA 安装后的启动入口：现在打开主屏图标会先进入首页，不再直接进入正式版游戏；同时升级 Service Worker 缓存版本，避免继续使用旧入口配置。", "en": "Fixed the PWA launch entry: opening the installed app now starts at the home page instead of going directly to the release game, and the Service Worker cache version was bumped so the old entry configuration is not reused."}, {"ver": "v1.71.8", "zh": "将游戏源码按配置、内容、状态、战斗、回放和界面职责拆分到 `src/`，构建时仍生成可离线运行的单文件 HTML；DEV 启动页现在直接显示构建版本号。", "en": "Split the game source into `src/` modules for configuration, content, state, combat, replay, and UI while continuing to build a self-contained offline HTML file; the DEV start screen now shows the build version."}, {"ver": "v1.71.7", "zh": "修复 iOS Safari 离线导航偶发报错：Service Worker 在网络失败且精确缓存未命中时，现在会使用页面壳兜底或返回明确的离线响应，不再把空值交给 `respondWith()`。", "en": "Fixed an intermittent iOS Safari offline navigation error: when the network fails and the exact cache entry is missing, the Service Worker now falls back to the app shell or returns an explicit offline response instead of passing a null value to `respondWith()`."}, {"ver": "v1.71.6", "zh": "澄清炸弹、蔓藤缠绕与竭心光环的战斗日志：明确显示扣除的是全场怪物/敌人的血量，避免把 `−5` 误读为其他属性变化。", "en": "Clarified Bomb, Vine Coil, and Wither Aura combat logs to explicitly say they reduce all foes' HP, avoiding ambiguity around values such as `−5`."}];   /* auto-injected by dr.sh embed-changelog（勿手改） */
 const DEV=true;   // release build (DEV=false); dev build is dungeon-raid-dev.html (DEV=true)
 const REC_API='https://api.dungeonraid.win';   // 录像分享 API（Cloudflare Worker + KV）
 // 带种子随机数（mulberry32）：游戏全程用 rnd() 取代原生随机，配合录制种子可确定性重放
@@ -312,6 +312,12 @@ function applyStaticLang(){
 
 //==================== 状态 ====================
 let grid, player, selection, dragging, anim, busy=false, pendingLevels=0;
+// 一次行动击杀多个普通怪时，额外金币按普通怪数量计算；单杀和 Boss 不触发。
+function multiKillGold(normalKills){
+  const extra=normalKills>=2 ? normalKills : 0;
+  if(extra>0) gainGold(extra);
+  return extra;
+}
 let rec=null, replaying=false;   // rec=本局录像{v,seed,race,acts}；replaying=回放中（回放时不录、抑制弹窗）
 let replayResumeState=null;   // 进入回放前的 live 快照：退出回放时恢复，避免技能槽/职业/棋盘状态泄漏回实玩
 let headless=false;   // 无头机器人模式：抑制升级弹窗(及其抽池消耗RNG)，由机器人自行抽池+录制，保证录像可确定性重放
@@ -531,31 +537,31 @@ function fireChainIgnite(selection){
   return n;
 }
 function burnTick(){
-  let hit=0, kills=0, total=0, lh=0, healHit=0, healTotal=0;
+  let hit=0, kills=0, normalKills=0, total=0, lh=0, healHit=0, healTotal=0;
   for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){
     const t=grid[r][c]; if(!t||!t.burnTurns||!(t.burnStacks>0)) continue;
     const dmg=burnTickDamage(t), before=t.hp;
     if(t.type==='boss' && t.bossId==='magmafiend'){ t.hp=Math.min(t.maxHp, t.hp+dmg); hit++; healHit++; healTotal+=dmg; continue; }
     t.hp-=dmg; hit++; total+=Math.min(dmg, before);
-    if(t.hp<=0){ const isB=t.type==='boss'; grid[r][c]=null; kills++; if(isB){ thiefRecover(t); addXp(player,15); gainGold(20); onBossKilled(); } else { addXp(player,3+(player.killXp||0)); gainGold(1); } }
+    if(t.hp<=0){ const isB=t.type==='boss'; grid[r][c]=null; kills++; if(isB){ thiefRecover(t); addXp(player,15); gainGold(20); onBossKilled(); } else { normalKills++; addXp(player,3+(player.killXp||0)); gainGold(1); } }
   }
-  if(kills) lh=lifestealHeal(kills);
-  if(hit) log(tr(`🔥 点燃：${hit} 个目标结算`+(total?`，共掉 ${total}`:'')+(healHit?`，岩浆魔回血 ${healTotal}`:'')+(kills?`，击杀 ${kills}`:'')+(lh?`，吸血 +${lh}`:''),`🔥 Burn: ${hit} targets resolved`+(total?`, ${total} damage`:'')+(healHit?`, Magmafiend heals ${healTotal}`:'')+(kills?`, ${kills} killed`:'')+(lh?`, +${lh} lifesteal`:'')), 'bad');
+  const multiGold=multiKillGold(normalKills); if(kills) lh=lifestealHeal(kills);
+  if(hit) log(tr(`🔥 点燃：${hit} 个目标结算`+(total?`，共掉 ${total}`:'')+(healHit?`，岩浆魔回血 ${healTotal}`:'')+(kills?`，击杀 ${kills}`:'')+(multiGold?`，多杀奖励 +${multiGold} 金`:'')+(lh?`，吸血 +${lh}`:''),`🔥 Burn: ${hit} targets resolved`+(total?`, ${total} damage`:'')+(healHit?`, Magmafiend heals ${healTotal}`:'')+(kills?`, ${kills} killed`:'')+(multiGold?`, multi-kill +${multiGold} gold`:'')+(lh?`, +${lh} lifesteal`:'')), 'bad');
 }
 function firewallTick(){
   if(!player.firewall) return;
   const zone=fireWallRows();
-  let hit=0, kills=0, total=0, lh=0, healHit=0, healTotal=0;
+  let hit=0, kills=0, normalKills=0, total=0, lh=0, healHit=0, healTotal=0;
   for(let r=zone.start;r<=zone.end;r++)for(let c=0;c<COLS;c++){
     const t=grid[r][c]; if(!t||t.finale||!(t.type==='enemy'||t.type==='boss')) continue;
     if(!(t.type==='boss' && t.bossId==='magmafiend')) igniteTarget(t, 1);
     const dmg=firewallTickDamage(), before=t.hp;
     if(t.type==='boss' && t.bossId==='magmafiend'){ t.hp=Math.min(t.maxHp, t.hp+dmg); hit++; healHit++; healTotal+=dmg; continue; }
     t.hp-=dmg; hit++; total+=Math.min(dmg, before);
-    if(t.hp<=0){ const isB=t.type==='boss'; grid[r][c]=null; kills++; if(isB){ thiefRecover(t); addXp(player,15); gainGold(20); onBossKilled(); } else { addXp(player,3+(player.killXp||0)); gainGold(1); } }
+    if(t.hp<=0){ const isB=t.type==='boss'; grid[r][c]=null; kills++; if(isB){ thiefRecover(t); addXp(player,15); gainGold(20); onBossKilled(); } else { normalKills++; addXp(player,3+(player.killXp||0)); gainGold(1); } }
   }
-  if(kills) lh=lifestealHeal(kills);
-  if(hit) log(tr(`🧱 火墙：底部三行 ${hit} 个目标结算`+(total?`，共掉 ${total}`:'')+(healHit?`，岩浆魔回血 ${healTotal}`:'')+(kills?`，击杀 ${kills}`:'')+(lh?`，吸血 +${lh}`:''),`🧱 Firewall: ${hit} targets in the bottom rows resolved`+(total?`, ${total} damage`:'')+(healHit?`, Magmafiend heals ${healTotal}`:'')+(kills?`, ${kills} killed`:'')+(lh?`, +${lh} lifesteal`:'')), 'bad');
+  const multiGold=multiKillGold(normalKills); if(kills) lh=lifestealHeal(kills);
+  if(hit) log(tr(`🧱 火墙：底部三行 ${hit} 个目标结算`+(total?`，共掉 ${total}`:'')+(healHit?`，岩浆魔回血 ${healTotal}`:'')+(kills?`，击杀 ${kills}`:'')+(multiGold?`，多杀奖励 +${multiGold} 金`:'')+(lh?`，吸血 +${lh}`:''),`🧱 Firewall: ${hit} targets in the bottom rows resolved`+(total?`, ${total} damage`:'')+(healHit?`, Magmafiend heals ${healTotal}`:'')+(kills?`, ${kills} killed`:'')+(multiGold?`, multi-kill +${multiGold} gold`:'')+(lh?`, +${lh} lifesteal`:'')), 'bad');
 }
 function loseGoldForShield(g){
   g=g|0; if(g<=0) return 0;
@@ -720,20 +726,20 @@ const TIER1={
     const foes=[]; for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const t=grid[r][c]; if(t&&(t.type==='enemy'||(t.type==='boss'&&!t.finale))) foes.push([r,c]); }
     if(!foes.length) return false;
     for(let i=foes.length-1;i>0;i--){ const j=Math.floor(rnd()*(i+1)); [foes[i],foes[j]]=[foes[j],foes[i]]; }
-    let healed=0, kills=0; const pick=foes.slice(0,2); const splashes=[];
+    let healed=0, kills=0, normalKills=0; const pick=foes.slice(0,2); const splashes=[];
     for(const [r,c] of pick){ const t=grid[r][c]; const before=t.hp; const drain=Math.min(p.maxHp, before); t.hp-=drain; healed+=drain; statueReflect(t, drain);   // 石像：吸魂的伤害也会反弹
-      if(t.hp<=0){ const isB=t.type==='boss'; grid[r][c]=null; kills++; if(isB){thiefRecover(t);addXp(p,15);gainGold(20);onBossKilled();} else {addXp(p,3+(p.killXp||0));gainGold(1);}
+      if(t.hp<=0){ const isB=t.type==='boss'; grid[r][c]=null; kills++; if(isB){thiefRecover(t);addXp(p,15);gainGold(20);onBossKilled();} else {normalKills++;addXp(p,3+(p.killXp||0));gainGold(1);}
         if(p.splash && p.maxHp>before) splashes.push(p.maxHp-before); } }   // 溅射：吸魂的溢出（吸力上限−目标血量）也砸向剩余敌人
     holdNextGravity(); holdVisibleBoard();
     soulDrainFx(pick);   // 特效：从每个被吸目标的格子画一条红线指向血条（纯视觉，不影响逻辑/重放）
-    let splashK=0; for(const over of splashes){ splashK+=splashHit(over).kills; }   // 溅射独立结算（含剑免疫 Boss，排除终焉）
+    let splashK=0; for(const over of splashes){ const sr=splashHit(over); splashK+=sr.kills; normalKills+=sr.normalKills; }   // 溅射独立结算（含剑免疫 Boss，排除终焉）
     kills+=splashK;
-    const h=gainHeal(healed); const lh=lifestealHeal(kills); applyGravity(); syncPositions(false);
-    log(tr(`🪄 吸魂大法：吸取 ${pick.length} 个目标 ${healed} 生命，回血 ${h}`+(kills?`，击杀 ${kills} 只`:'')+(lh?`，吸血 +${lh}`:'')+(splashes.length?`，溅射 ${splashes.length} 次`:''),`🪄 Soul Drain: drained ${healed} from ${pick.length}, +${h} HP`+(kills?`, ${kills} killed`:'')+(lh?`, +${lh} lifesteal`:'')+(splashes.length?`, ${splashes.length} splash`:'')), 'heal'); return true; }}},
+    const multiGold=multiKillGold(normalKills), h=gainHeal(healed); const lh=lifestealHeal(kills); applyGravity(); syncPositions(false);
+    log(tr(`🪄 吸魂大法：吸取 ${pick.length} 个目标 ${healed} 生命，回血 ${h}`+(kills?`，击杀 ${kills} 只`:'')+(multiGold?`，多杀奖励 +${multiGold} 金`:'')+(lh?`，吸血 +${lh}`:'')+(splashes.length?`，溅射 ${splashes.length} 次`:''),`🪄 Soul Drain: drained ${healed} from ${pick.length}, +${h} HP`+(kills?`, ${kills} killed`:'')+(multiGold?`, multi-kill +${multiGold} gold`:'')+(lh?`, +${lh} lifesteal`:'')+(splashes.length?`, ${splashes.length} splash`:'')), 'heal'); return true; }}},
   skeletonking:{n:['骷髅王','Skeleton King'], quip:['死过一次，再死一次又何妨。','Died once already — what is one more?'], skill:{name:['重生','Rebirth'], short:['本回合致死则满血复活(此后冷却+2)','Cheat death this turn, full heal'], desc:['发动后本回合若受到致命伤害，会立刻满血复活而非死亡。每触发一次，重生的冷却永久 +2。发动即进入冷却（无论本回合是否真的触发）。','Armed this turn: if a lethal blow lands, you revive at full HP instead of dying. Each trigger permanently raises Rebirth’s cooldown by 2. Goes on cooldown when cast, whether or not it triggers.'], cd:5, f:p=>{ p.rebirthTurn=true; log(tr('💀 重生待命：本回合若被击败，将满血复活！','💀 Rebirth armed: if slain this turn, revive at full HP!'), 'buff'); return true; }}},
-  lich:{n:['巫妖','Lich'], quip:['感受死亡的寒冷吧。','Feel the cold of death.'], skill:{name:['冰封球','Frost Orb'], short:['全场固定伤害+全体减速','Flat damage + slow all foes'], desc:['对场上所有怪物/Boss（终焉之主除外）造成一次当前固定伤害，并让它们的当前攻击倒计时 +1。也就是说，它们下一次出手会额外慢一回合；被减速的目标会短暂染上冰蓝底色。属于冰霜攻击，可命中剑免疫 Boss。','Deals your current flat damage once to all monsters/bosses on the board (excluding the Overlord), then adds +1 to their current attack countdown. In other words, their next attack is delayed by one extra turn, and slowed targets are briefly tinted icy blue. This is a frost attack and can hit sword-immune bosses.'], cd:5, f:p=>{ addBossFx(Math.floor(ROWS/2), Math.floor(COLS/2), false, '#7fd3ff', true); let hit=0, kills=0, total=0, lh=0; const dmg=frostOrbDamage(); for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const t=grid[r][c]; if(!t||t.finale||!(t.type==='enemy'||t.type==='boss')) continue; const before=t.hp; t.hp-=dmg; t.cd+=1; t.frostTurns=3; hit++; total+=Math.min(dmg, before); if(t.hp<=0){ const isB=t.type==='boss'; grid[r][c]=null; kills++; if(isB){ thiefRecover(t); addXp(player,15); gainGold(20); onBossKilled(); } else { addXp(player,3+(player.killXp||0)); gainGold(1); } } } if(kills) lh=lifestealHeal(kills); applyGravity(); syncPositions(false); log(tr(`🧊 冰封球：全场 ${hit} 个目标共掉 ${total}`+(kills?`，击杀 ${kills}`:'')+(lh?`，吸血 +${lh}`:'')+`，下一次出手更慢`,`🧊 Frost Orb: ${hit} targets lose ${total}`+(kills?`, ${kills} killed`:'')+(lh?`, +${lh} lifesteal`:'')+`, next attacks delayed`), 'buff'); return hit||kills||lh; }}},
+  lich:{n:['巫妖','Lich'], quip:['感受死亡的寒冷吧。','Feel the cold of death.'], skill:{name:['冰封球','Frost Orb'], short:['全场固定伤害+全体减速','Flat damage + slow all foes'], desc:['对场上所有怪物/Boss（终焉之主除外）造成一次当前固定伤害，并让它们的当前攻击倒计时 +1。也就是说，它们下一次出手会额外慢一回合；被减速的目标会短暂染上冰蓝底色。属于冰霜攻击，可命中剑免疫 Boss。','Deals your current flat damage once to all monsters/bosses on the board (excluding the Overlord), then adds +1 to their current attack countdown. In other words, their next attack is delayed by one extra turn, and slowed targets are briefly tinted icy blue. This is a frost attack and can hit sword-immune bosses.'], cd:5, f:p=>{ addBossFx(Math.floor(ROWS/2), Math.floor(COLS/2), false, '#7fd3ff', true); let hit=0, kills=0, normalKills=0, total=0, lh=0; const dmg=frostOrbDamage(); for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const t=grid[r][c]; if(!t||t.finale||!(t.type==='enemy'||t.type==='boss')) continue; const before=t.hp; t.hp-=dmg; t.cd+=1; t.frostTurns=3; hit++; total+=Math.min(dmg, before); if(t.hp<=0){ const isB=t.type==='boss'; grid[r][c]=null; kills++; if(isB){ thiefRecover(t); addXp(player,15); gainGold(20); onBossKilled(); } else { normalKills++; addXp(player,3+(player.killXp||0)); gainGold(1); } } } const multiGold=multiKillGold(normalKills); if(kills) lh=lifestealHeal(kills); applyGravity(); syncPositions(false); log(tr(`🧊 冰封球：全场 ${hit} 个目标共掉 ${total}`+(kills?`，击杀 ${kills}`:'')+(multiGold?`，多杀奖励 +${multiGold} 金`:'')+(lh?`，吸血 +${lh}`:'')+`，下一次出手更慢`,`🧊 Frost Orb: ${hit} targets lose ${total}`+(kills?`, ${kills} killed`:'')+(multiGold?`, multi-kill +${multiGold} gold`:'')+(lh?`, +${lh} lifesteal`:'')+`, next attacks delayed`), 'buff'); return hit||kills||lh; }}},
   butcher:{n:['屠夫','Butcher'], quip:['钩子一甩，肉就乖乖到底。','One swing of the hook, and the meat comes to me.'], skill:{name:['钩子','Hook'], short:['拉到底排；离底越远伤害越高','Drag down; farther from bottom = more damage'], desc:['一钩把棋盘上所有的怪和 Boss（含{W}免疫，终焉之主除外）顺着各自所在列拉到尽可能底部，其余棋子上浮；随后按【离底线的距离】造成伤害：最底排吃 1× 固定伤害、倒数第二排吃 2×，依此类推。场上没有可拉的敌人时无效、不进冷却。','Hooks every monster & boss (incl. {W}-immune; not the Overlord) down to the bottom of its column while other tiles float up; then deals damage by【distance from the bottom】— bottom row takes 1× flat damage, second-from-bottom 2×, and so on. No effect — and no cooldown — when there is nothing to pull.'], cd:5, f:p=>{
-    let moved=0, any=false, dmg=0, kills=0; const isMon=t=>t&&(t.type==='enemy'||t.type==='boss')&&!t.finale; const hookBase=Math.max(1, p.swordFlat||0); const lines=[];
+    let moved=0, any=false, dmg=0, kills=0, normalKills=0; const isMon=t=>t&&(t.type==='enemy'||t.type==='boss')&&!t.finale; const hookBase=Math.max(1, p.swordFlat||0); const lines=[];
     for(let c=0;c<COLS;c++){
       const col=[]; for(let r=0;r<ROWS;r++) col.push(grid[r][c]); if(!col.some(isMon)) continue; any=true;
       const mons=[]; for(let r=0;r<ROWS;r++){ const t=grid[r][c]; if(isMon(t)) mons.push({tile:t, from:r}); }
@@ -746,9 +752,9 @@ const TIER1={
     if(!any) return false;
     for(let r=ROWS-1;r>=0;r--)for(let c=0;c<COLS;c++){ const t=grid[r][c]; if(!isMon(t)) continue;
       const hit=Math.min(t.hp, hookBase*(ROWS-r)); t.hp-=hit; dmg+=hit; statueReflect(t, hit);
-      if(t.hp<=0){ const isB=t.type==='boss'; grid[r][c]=null; kills++; if(isB){ thiefRecover(t); addXp(player,15); gainGold(20); onBossKilled(); } else { addXp(player,3+(player.killXp||0)); gainGold(1); if(player.rotflesh) player.maxHp++; } } }
-    const lh=lifestealHeal(kills); applyGravity(); syncPositions(false);   // 满盘时 applyGravity 为空操作、不消耗 RNG；纯重排，重放确定
-    log(tr(`🪝 钩子：把全场怪/Boss 拉到底排，造成 ${dmg} 伤害`+(kills?`，击杀 ${kills}`:'')+(lh?`，吸血 +${lh}`:''),`🪝 Hook: dragged all foes down for ${dmg} damage`+(kills?`, ${kills} killed`:'')+(lh?`, +${lh} lifesteal`:'')), moved?'buff':''); return true; }}},
+      if(t.hp<=0){ const isB=t.type==='boss'; grid[r][c]=null; kills++; if(isB){ thiefRecover(t); addXp(player,15); gainGold(20); onBossKilled(); } else { normalKills++; addXp(player,3+(player.killXp||0)); gainGold(1); if(player.rotflesh) player.maxHp++; } } }
+    const multiGold=multiKillGold(normalKills), lh=lifestealHeal(kills); applyGravity(); syncPositions(false);   // 满盘时 applyGravity 为空操作、不消耗 RNG；纯重排，重放确定
+    log(tr(`🪝 钩子：把全场怪/Boss 拉到底排，造成 ${dmg} 伤害`+(kills?`，击杀 ${kills}`:'')+(multiGold?`，多杀奖励 +${multiGold} 金`:'')+(lh?`，吸血 +${lh}`:''),`🪝 Hook: dragged all foes down for ${dmg} damage`+(kills?`, ${kills} killed`:'')+(multiGold?`, multi-kill +${multiGold} gold`:'')+(lh?`, +${lh} lifesteal`:'')), moved?'buff':''); return true; }}},
   azuredragon:{n:['青龙','Azure Dragon'], quip:['接受来自远古的绝对威压吧！','Accept the absolute pressure of the ancients!'], skill:{name:['龙吟','Dragon Roar'], short:['全场造成等级伤害','Deal level damage to all foes'], desc:['对全场所有怪物（包括普攻免疫 Boss）造成等同当前等级的伤害。','Deal damage equal to your current level to every foe, including normal-attack-immune bosses.'], cd:5, f:p=>{ addBossFx(Math.floor(ROWS/2), Math.floor(COLS/2), false, '#f5b041', true); const r=dealDamage(p.level,null,true); applyGravity(); syncPositions(false); log(tr(`🐉 龙吟：全场 ${r.dmg} 伤害`+ (r.kills?`，击杀 ${r.kills}`:''),`🐉 Dragon Roar: ${r.dmg} damage to all foes`+(r.kills?`, ${r.kills} killed`:'')), 'buff'); return true; }}},
   whitetiger:{n:['白虎','White Tiger'], quip:['杀意先到，爪锋随后。','The killing intent arrives before the claw.'], skill:{name:['白虎破军','Tiger Breaker'], short:['下一次爪链可破免疫且伤害×3','Next Claw chain pierces immunity and deals ×3'], desc:['下一次爪链可以攻击平时爪免疫的 Boss，并使该次爪链伤害 ×3；效果会保留到下一次使用爪链。','Your next Claw chain can hit normally Claw-immune bosses and deals ×3 damage; the effect remains until a Claw chain is used.'], cd:5, f:p=>{ p.pierceTurn=1; p.beastDamageMult=3; log(tr('🐾 白虎破军：下一次爪链可破免疫，伤害 ×3','🐾 Tiger Breaker: your next Claw chain pierces immunity for ×3 damage'), 'buff'); return true; }}},
   blackturtle:{n:['玄龟','Black Tortoise'], quip:['山岳不动，风雷自止。','The mountain does not move; storms pass around it.'], skill:{name:['玄甲镇岳','Tortoise Bastion'], short:['3回合所受伤害减半','Halve damage taken for 3 turns'], desc:['发动后 3 回合内，受到的所有伤害减半（向上取整，最低 1 点）。效果结束后恢复原状，冷却 5 回合。','For 3 turns, halve all incoming damage (rounded up, minimum 1). The effect then expires, with a 5-turn cooldown.'], cd:5, f:p=>{ if(p.noArmor) return false; p.tortoiseGuardTurns=3; log(tr('🐢 玄甲镇岳：未来 3 回合所受伤害减半（最低 1）','🐢 Tortoise Bastion: damage taken is halved for the next 3 turns (minimum 1)'), 'buff'); return true; }}},
@@ -1920,8 +1926,9 @@ const SHOP={
       if(t&&(t.type==='enemy'||t.type==='boss')){ if(t.finale) continue; addBombFx(r,c); const dd=Math.min(D,t.hp); t.hp-=D; statueReflect(t, dd);   // 终焉之主打不掉；石像反弹；每个命中格爆一下特效
         if(t.hp<=0){ const isBoss=t.type==='boss'; grid[r][c]=null;
           if(isBoss){ thiefRecover(t); boss++; addXp(player,15); gainGold(20); onBossKilled(); } else { kills++; addXp(player,3+(player.killXp||0)); if(player.rotflesh) player.maxHp++; } } } }   // 屠夫·积累腐肉：炸弹击杀也 +1 上限
+    const multiGold=multiKillGold(kills);
     const lifeHeal=lifestealHeal(kills+boss);   // 汲取生命：炸弹击杀也回血
-    log(tr(`💥 投掷炸弹，全场怪血量 −${D}`+(extra?`（乾坤一掷 +${extra}）`:''),`💥 Bomb: all foes lose ${D} HP`+(extra?` (All-In +${extra})`:'')) + (kills?tr(`，击杀 ${kills} 只👹`,`, ${kills} killed`):'') + (lifeHeal?tr(`，吸血 +${lifeHeal}`,`, +${lifeHeal} lifesteal`):'') + (boss?tr(`，击败 ${boss} 个 Boss`,`, ${boss} boss(es) down`):''));   // Boss 奖励日志由 onBossKilled 统一报
+    log(tr(`💥 投掷炸弹，全场怪血量 −${D}`+(extra?`（乾坤一掷 +${extra}）`:''),`💥 Bomb: all foes lose ${D} HP`+(extra?` (All-In +${extra})`:'')) + (kills?tr(`，击杀 ${kills} 只👹`,`, ${kills} killed`):'') + (multiGold?tr(`，多杀奖励 +${multiGold} 金`,`，multi-kill bonus +${multiGold} gold`):'') + (lifeHeal?tr(`，吸血 +${lifeHeal}`,`, +${lifeHeal} lifesteal`):'') + (boss?tr(`，击败 ${boss} 个 Boss`,`, ${boss} boss(es) down`):''));   // Boss 奖励日志由 onBossKilled 统一报
     if(player.bombBoost) player.bombUses=(player.bombUses||0)+1;   // 爆破手：每用一次 → 下次 伤害+1、花费+5
     applyGravity(); syncPositions(false); }},
 };
@@ -2169,15 +2176,15 @@ function resolve(){
     if(player.beastDamageMult && player.beastDamageMult!==1) pool*=player.beastDamageMult; // 白虎破军：下一次爪链爆发
     pool=Math.floor(pool);
     if(targets.length && nS>0) pool=Math.max(1, pool);   // 矮人 ×0.85 等减伤仍按 floor；但合法武器攻击至少造成 1 点伤害，避免一锤打出 0 伤
-    let dmg=0, kills=0, bonusGold=0;
-    if(targets.length){ ({dmg,kills,bonusGold}=dealDamage(pool, targets)); }
+    let dmg=0, kills=0, bonusGold=0, multiGold=0;
+    if(targets.length){ ({dmg,kills,bonusGold,multiGold}=dealDamage(pool, targets)); }
     const ignited = fireChainIgnite(selection);
     const lifeHeal=lifestealHeal(kills);   // 汲取生命：每杀一只回血（含溅射击杀，kills 已含）
     let blood=0;
     if(player.bloodthirst && targets.length){ blood=vampGain(targets.length*3); player.bloodthirst=0; } // 斗士嗜血（血狂时溢出转上限）
     const comboTxt=combo>1?tr(` 连击×${combo.toFixed(2)}`,` combo×${combo.toFixed(2)}`):'';
     msg=`${wE()}×${nS}${comboTxt}` + (targets.length
-      ? tr(` 直击 ${targets.length} 只怪 → ${dmg} 伤害`,` hit ${targets.length} → ${dmg} dmg`) + (kills?tr(`，击杀 ${kills} 只👹`,`, ${kills} killed`):'') + (bonusGold?tr(`，妙手空空 +${bonusGold} 金`,`，Empty Pockets +${bonusGold} gold`):'') + (ignited?tr(`，点燃 ${ignited} 个目标`,`，ignited ${ignited}`):'') + (lifeHeal?tr(`，吸血 +${lifeHeal}`,`, +${lifeHeal} lifesteal`):'') + (blood?tr(`，回血 ${blood}`,`, +${blood} HP`):'')
+      ? tr(` 直击 ${targets.length} 只怪 → ${dmg} 伤害`,` hit ${targets.length} → ${dmg} dmg`) + (kills?tr(`，击杀 ${kills} 只👹`,`, ${kills} killed`):'') + (multiGold?tr(`，多杀奖励 +${multiGold} 金`,`，multi-kill bonus +${multiGold} gold`):'') + (bonusGold?tr(`，妙手空空 +${bonusGold} 金`,`，Empty Pockets +${bonusGold} gold`):'') + (ignited?tr(`，点燃 ${ignited} 个目标`,`，ignited ${ignited}`):'') + (lifeHeal?tr(`，吸血 +${lifeHeal}`,`, +${lifeHeal} lifesteal`):'') + (blood?tr(`，回血 ${blood}`,`, +${blood} HP`):'')
       : tr('（未串到怪）','(no enemy hit)'));
   } else {
     const count=selection.length;
@@ -2201,7 +2208,7 @@ function resolve(){
         const redN=count-blackN, poisonN=blackN+(hex?redN:0), healN=hex?0:redN;   // 黑毒心 + 蛊毒下的红心 → 放毒；其余红心 → 回血
         const parts=[];
         if(poisonN>0){ const r=dealDamage(Math.round(poisonN*per), null, true); const lh=lifestealHeal(r.kills); applyGravity(); syncPositions(false);   // allFoes：毒灌全场怪含剑免疫 Boss
-          parts.push(tr(`🧪 毒全场 ${r.dmg}`+(r.kills?`、击杀 ${r.kills}`:'')+(lh?`、吸血 +${lh}`:''),`🧪 ${r.dmg} poison to all`+(r.kills?`, ${r.kills} killed`:'')+(lh?`, +${lh} lifesteal`:''))); }
+          parts.push(tr(`🧪 毒全场 ${r.dmg}`+(r.kills?`、击杀 ${r.kills}`:'')+(r.multiGold?`、多杀奖励 +${r.multiGold} 金`:'')+(lh?`、吸血 +${lh}`:''),`🧪 ${r.dmg} poison to all`+(r.kills?`, ${r.kills} killed`:'')+(r.multiGold?`, multi-kill +${r.multiGold} gold`:'')+(lh?`, +${lh} lifesteal`:''))); }
         if(healN>0){ const h=gainHeal(Math.round(healN*per)); parts.push(tr(`回复 ${h} 生命`,`+${h} HP`)); }
         mk = poisonN>0 ? '' : 'heal';   // 连黑/蛊毒心毒怪=攻击(白)，纯回血=绿
         msg=`${blackN?'🖤':d.emoji}×${count}${comboTxt} → `+(parts.join(tr('，',', '))||tr('（无效果）','(no effect)')); } }
@@ -2291,7 +2298,7 @@ function holyStrikeDamage(amt){
 }
 
 function dealDamage(pool, targets, allFoes){
-  let dmg=0, kills=0, bonusGold=0;
+  let dmg=0, kills=0, normalKills=0, bonusGold=0;
   const list=[];
   const seen=new Set();
   // allFoes=true：命中全场怪含【剑免疫 Boss】（蛊毒/黑毒心「灌给全场怪」，与炸弹/吸魂一致，仅排除终焉之主）；否则只命中可剑攻击目标
@@ -2310,23 +2317,24 @@ function dealDamage(pool, targets, allFoes){
     statueReflect(e.t, hit);   // 石像：等量真实伤害反弹给玩家
     if(e.t.hp<=0){ grid[e.r][e.c]=null; kills++;
       if(e.t.type==='boss'){ thiefRecover(e.t); addXp(player,15); gainGold(20); onBossKilled(); }  // 剑杀 Boss：厚赏 + 可能触发转职
-      else { addXp(player,3+(player.killXp||0)); gainGold(1); if(player.rotflesh) player.maxHp++; }   // 神射手：击杀额外经验；屠夫·积累腐肉：+1 生命上限
+      else { normalKills++; addXp(player,3+(player.killXp||0)); gainGold(1); if(player.rotflesh) player.maxHp++; }   // 神射手：击杀额外经验；屠夫·积累腐肉：+1 生命上限
       if(player.splash && pool>before) splashes.push(pool-before);   // 溅射：本次击杀的溢出留待砸向其它敌人
     }
   }
   if(bonusGold>0) gainGold(bonusGold);
   // 溅射（骷髅王被动）：每份溢出随机砸到棋盘上剩余的一个敌人/Boss（含剑免疫，排除终焉之主）
-  for(const over of splashes){ const r=splashHit(over); dmg+=r.dmg; kills+=r.kills; }
-  return {dmg,kills,bonusGold};
+  for(const over of splashes){ const r=splashHit(over); dmg+=r.dmg; kills+=r.kills; normalKills+=r.normalKills; }
+  const multiGold=multiKillGold(normalKills);
+  return {dmg,kills,bonusGold,multiGold};
 }
 // 溅射落点：随机选一个剩余敌人/Boss（含剑免疫，排除终焉之主），造成 over 伤害
 function splashHit(over){
   const foes=[]; for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const t=grid[r][c]; if(t&&(t.type==='enemy'||(t.type==='boss'&&!t.finale))) foes.push([r,c]); }
-  if(!foes.length) return {dmg:0,kills:0};
+  if(!foes.length) return {dmg:0,kills:0,normalKills:0};
   const [r,c]=foes[Math.floor(rnd()*foes.length)]; const t=grid[r][c];
-  const hit=Math.min(over,t.hp); t.hp-=hit; statueReflect(t, hit); let kills=0;
-  if(t.hp<=0){ const isB=t.type==='boss'; grid[r][c]=null; kills=1; if(isB){thiefRecover(t);addXp(player,15);gainGold(20);onBossKilled();} else {addXp(player,3+(player.killXp||0));gainGold(1);if(player.rotflesh)player.maxHp++;} }   // 屠夫·积累腐肉：溅射击杀也 +1 上限
-  return {dmg:hit, kills};
+  const hit=Math.min(over,t.hp); t.hp-=hit; statueReflect(t, hit); let kills=0, normalKills=0;
+  if(t.hp<=0){ const isB=t.type==='boss'; grid[r][c]=null; kills=1; if(isB){thiefRecover(t);addXp(player,15);gainGold(20);onBossKilled();} else {normalKills=1;addXp(player,3+(player.killXp||0));gainGold(1);if(player.rotflesh)player.maxHp++;} }   // 屠夫·积累腐肉：溅射击杀也 +1 上限
+  return {dmg:hit, kills, normalKills};
 }
 
 function advanceEnemies(){
@@ -2428,28 +2436,28 @@ function vampGain(amount){
 }
 // 蔓藤缠绕（树人主动）：当回合让全场怪/Boss（排除终焉）流失 30% 玩家最大生命；可击杀（给奖励+吸血）
 function deathCoilTick(){
-  const dmg=Math.max(1, Math.floor(player.maxHp*0.3)); let kills=0, hit=0;
+  const dmg=Math.max(1, Math.floor(player.maxHp*0.3)); let kills=0, normalKills=0, hit=0;
   for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const t=grid[r][c];
     if(t&&(t.type==='enemy'||(t.type==='boss'&&!t.finale))){ t.hp-=dmg; hit++;
-      if(t.hp<=0){ const isB=t.type==='boss'; grid[r][c]=null; kills++; if(isB){thiefRecover(t);addXp(player,15);gainGold(20);onBossKilled();} else {addXp(player,3+(player.killXp||0));gainGold(1);} } } }
+      if(t.hp<=0){ const isB=t.type==='boss'; grid[r][c]=null; kills++; if(isB){thiefRecover(t);addXp(player,15);gainGold(20);onBossKilled();} else {normalKills++;addXp(player,3+(player.killXp||0));gainGold(1);} } } }
   if(!hit) return;
-  const lh=lifestealHeal(kills);
-  log(tr(`🟢 蔓藤缠绕：全场怪血量 −${dmg}`+(kills?`，击杀 ${kills}`:'')+(lh?`，吸血 +${lh}`:''),`🟢 Vine Coil: all foes lose ${dmg} HP`+(kills?`, ${kills} killed`:'')+(lh?`, +${lh} lifesteal`:'')));
+  const multiGold=multiKillGold(normalKills), lh=lifestealHeal(kills);
+  log(tr(`🟢 蔓藤缠绕：全场怪血量 −${dmg}`+(kills?`，击杀 ${kills}`:'')+(multiGold?`，多杀奖励 +${multiGold} 金`:'')+(lh?`，吸血 +${lh}`:''),`🟢 Vine Coil: all foes lose ${dmg} HP`+(kills?`, ${kills} killed`:'')+(multiGold?`, multi-kill +${multiGold} gold`:'')+(lh?`, +${lh} lifesteal`:'')));
 }
 // 竭心光环（死灵二阶被动）：按本回合恢复量（受治疗减半影响）让全场敌人/Boss（排除终焉）各掉同等生命；可击杀（给奖励+吸血）
 function witherAuraTick(healed){
   if(!healed || healed<=0) return;
-  let kills=0, hit=0;
+  let kills=0, normalKills=0, hit=0;
   for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){
     const t=grid[r][c];
     if(t&&(t.type==='enemy'||(t.type==='boss'&&!t.finale))){
       t.hp-=healed; hit++;
-      if(t.hp<=0){ const isB=t.type==='boss'; grid[r][c]=null; kills++; if(isB){ thiefRecover(t); addXp(player,15); gainGold(20); onBossKilled(); } else { addXp(player,3+(player.killXp||0)); gainGold(1); } }
+      if(t.hp<=0){ const isB=t.type==='boss'; grid[r][c]=null; kills++; if(isB){ thiefRecover(t); addXp(player,15); gainGold(20); onBossKilled(); } else { normalKills++; addXp(player,3+(player.killXp||0)); gainGold(1); } }
     }
   }
   if(!hit) return;
-  const lh=lifestealHeal(kills);
-  log(tr(`🪦 竭心光环：全场敌人血量 −${healed}`+(kills?`，击杀 ${kills}`:'')+(lh?`，吸血 +${lh}`:''),`🪦 Wither Aura: all foes lose ${healed} HP`+(kills?`, ${kills} killed`:'')+(lh?`, +${lh} lifesteal`:'')));
+  const multiGold=multiKillGold(normalKills), lh=lifestealHeal(kills);
+  log(tr(`🪦 竭心光环：全场敌人血量 −${healed}`+(kills?`，击杀 ${kills}`:'')+(multiGold?`，多杀奖励 +${multiGold} 金`:'')+(lh?`，吸血 +${lh}`:''),`🪦 Wither Aura: all foes lose ${healed} HP`+(kills?`, ${kills} killed`:'')+(multiGold?`, multi-kill +${multiGold} gold`:'')+(lh?`, +${lh} lifesteal`:'')));
 }
 function reflectThorns(amt, atkr){
   let r=-1,c=-1,t=null;

@@ -1,5 +1,11 @@
 //==================== 状态 ====================
 let grid, player, selection, dragging, anim, busy=false, pendingLevels=0;
+// 一次行动击杀多个普通怪时，额外金币按普通怪数量计算；单杀和 Boss 不触发。
+function multiKillGold(normalKills){
+  const extra=normalKills>=2 ? normalKills : 0;
+  if(extra>0) gainGold(extra);
+  return extra;
+}
 let rec=null, replaying=false;   // rec=本局录像{v,seed,race,acts}；replaying=回放中（回放时不录、抑制弹窗）
 let replayResumeState=null;   // 进入回放前的 live 快照：退出回放时恢复，避免技能槽/职业/棋盘状态泄漏回实玩
 let headless=false;   // 无头机器人模式：抑制升级弹窗(及其抽池消耗RNG)，由机器人自行抽池+录制，保证录像可确定性重放

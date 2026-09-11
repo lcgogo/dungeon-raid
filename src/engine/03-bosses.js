@@ -178,31 +178,31 @@ function fireChainIgnite(selection){
   return n;
 }
 function burnTick(){
-  let hit=0, kills=0, total=0, lh=0, healHit=0, healTotal=0;
+  let hit=0, kills=0, normalKills=0, total=0, lh=0, healHit=0, healTotal=0;
   for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){
     const t=grid[r][c]; if(!t||!t.burnTurns||!(t.burnStacks>0)) continue;
     const dmg=burnTickDamage(t), before=t.hp;
     if(t.type==='boss' && t.bossId==='magmafiend'){ t.hp=Math.min(t.maxHp, t.hp+dmg); hit++; healHit++; healTotal+=dmg; continue; }
     t.hp-=dmg; hit++; total+=Math.min(dmg, before);
-    if(t.hp<=0){ const isB=t.type==='boss'; grid[r][c]=null; kills++; if(isB){ thiefRecover(t); addXp(player,15); gainGold(20); onBossKilled(); } else { addXp(player,3+(player.killXp||0)); gainGold(1); } }
+    if(t.hp<=0){ const isB=t.type==='boss'; grid[r][c]=null; kills++; if(isB){ thiefRecover(t); addXp(player,15); gainGold(20); onBossKilled(); } else { normalKills++; addXp(player,3+(player.killXp||0)); gainGold(1); } }
   }
-  if(kills) lh=lifestealHeal(kills);
-  if(hit) log(tr(`🔥 点燃：${hit} 个目标结算`+(total?`，共掉 ${total}`:'')+(healHit?`，岩浆魔回血 ${healTotal}`:'')+(kills?`，击杀 ${kills}`:'')+(lh?`，吸血 +${lh}`:''),`🔥 Burn: ${hit} targets resolved`+(total?`, ${total} damage`:'')+(healHit?`, Magmafiend heals ${healTotal}`:'')+(kills?`, ${kills} killed`:'')+(lh?`, +${lh} lifesteal`:'')), 'bad');
+  const multiGold=multiKillGold(normalKills); if(kills) lh=lifestealHeal(kills);
+  if(hit) log(tr(`🔥 点燃：${hit} 个目标结算`+(total?`，共掉 ${total}`:'')+(healHit?`，岩浆魔回血 ${healTotal}`:'')+(kills?`，击杀 ${kills}`:'')+(multiGold?`，多杀奖励 +${multiGold} 金`:'')+(lh?`，吸血 +${lh}`:''),`🔥 Burn: ${hit} targets resolved`+(total?`, ${total} damage`:'')+(healHit?`, Magmafiend heals ${healTotal}`:'')+(kills?`, ${kills} killed`:'')+(multiGold?`, multi-kill +${multiGold} gold`:'')+(lh?`, +${lh} lifesteal`:'')), 'bad');
 }
 function firewallTick(){
   if(!player.firewall) return;
   const zone=fireWallRows();
-  let hit=0, kills=0, total=0, lh=0, healHit=0, healTotal=0;
+  let hit=0, kills=0, normalKills=0, total=0, lh=0, healHit=0, healTotal=0;
   for(let r=zone.start;r<=zone.end;r++)for(let c=0;c<COLS;c++){
     const t=grid[r][c]; if(!t||t.finale||!(t.type==='enemy'||t.type==='boss')) continue;
     if(!(t.type==='boss' && t.bossId==='magmafiend')) igniteTarget(t, 1);
     const dmg=firewallTickDamage(), before=t.hp;
     if(t.type==='boss' && t.bossId==='magmafiend'){ t.hp=Math.min(t.maxHp, t.hp+dmg); hit++; healHit++; healTotal+=dmg; continue; }
     t.hp-=dmg; hit++; total+=Math.min(dmg, before);
-    if(t.hp<=0){ const isB=t.type==='boss'; grid[r][c]=null; kills++; if(isB){ thiefRecover(t); addXp(player,15); gainGold(20); onBossKilled(); } else { addXp(player,3+(player.killXp||0)); gainGold(1); } }
+    if(t.hp<=0){ const isB=t.type==='boss'; grid[r][c]=null; kills++; if(isB){ thiefRecover(t); addXp(player,15); gainGold(20); onBossKilled(); } else { normalKills++; addXp(player,3+(player.killXp||0)); gainGold(1); } }
   }
-  if(kills) lh=lifestealHeal(kills);
-  if(hit) log(tr(`🧱 火墙：底部三行 ${hit} 个目标结算`+(total?`，共掉 ${total}`:'')+(healHit?`，岩浆魔回血 ${healTotal}`:'')+(kills?`，击杀 ${kills}`:'')+(lh?`，吸血 +${lh}`:''),`🧱 Firewall: ${hit} targets in the bottom rows resolved`+(total?`, ${total} damage`:'')+(healHit?`, Magmafiend heals ${healTotal}`:'')+(kills?`, ${kills} killed`:'')+(lh?`, +${lh} lifesteal`:'')), 'bad');
+  const multiGold=multiKillGold(normalKills); if(kills) lh=lifestealHeal(kills);
+  if(hit) log(tr(`🧱 火墙：底部三行 ${hit} 个目标结算`+(total?`，共掉 ${total}`:'')+(healHit?`，岩浆魔回血 ${healTotal}`:'')+(kills?`，击杀 ${kills}`:'')+(multiGold?`，多杀奖励 +${multiGold} 金`:'')+(lh?`，吸血 +${lh}`:''),`🧱 Firewall: ${hit} targets in the bottom rows resolved`+(total?`, ${total} damage`:'')+(healHit?`, Magmafiend heals ${healTotal}`:'')+(kills?`, ${kills} killed`:'')+(multiGold?`, multi-kill +${multiGold} gold`:'')+(lh?`, +${lh} lifesteal`:'')), 'bad');
 }
 function loseGoldForShield(g){
   g=g|0; if(g<=0) return 0;

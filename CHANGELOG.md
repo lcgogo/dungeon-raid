@@ -1,3 +1,10 @@
+## [v1.72.0] - 2026-09-11
+
+> Version-Impact: verify
+
+- 一次行动击杀多个普通怪时，额外获得与普通怪数量相同的金币；单杀和 Boss 奖励不变。武器链、炸弹、溅射及群体技能统一适用，并在日志中显示多杀奖励。
+- When one action kills multiple normal enemies, grant bonus gold equal to the number of normal enemies killed; single kills and boss rewards are unchanged. Weapon chains, bombs, splash, and area skills use the same rule and show the bonus in the log.
+
 ## [v1.71.9] - 2026-09-11
 
 - 修复 PWA 安装后的启动入口：现在打开主屏图标会先进入首页，不再直接进入正式版游戏；同时升级 Service Worker 缓存版本，避免继续使用旧入口配置。

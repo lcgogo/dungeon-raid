@@ -57,6 +57,14 @@ G.buyItem('bomb');
 ok(h.skill2Cd>0,'点炸弹槽→施放换装主动(进冷却 skill2Cd>0)');
 ok(h.gold===goldBefore,'施放主动不花金币(炸弹槽未被当消耗品买)');
 
+// 跨界技能替换治疗槽时，满血也必须能施放，不能被普通治疗的满血限制拦截
+G.replayRec={seed:1711,race:'human',acts:[]}; G.replaying=true; G.startGame(G.raceById('human')); G.replaying=false;
+const hs=G.player; hs.hp=hs.maxHp=999999; hs.tier1='knight'; hs.tier2='holystrike'; hs.tier2b='general'; hs.turns=350; hs.shopCd={heal:0,bomb:0}; G.busy=false; G.pendingLevels=0;
+G.onBossKilled(); hs.t4Pending=false; G.dispatchReplayAct(['t',4,'ranger','heal']);
+const healGoldBefore=hs.gold; hs.skill2Cd=0; G.buyItem('heal');
+ok(hs.skill2Cd>0,'满血时点击治疗槽仍能施放跨界主动');
+ok(hs.gold===healGoldBefore,'满血施放治疗槽跨界主动不花金币');
+
 // 神兽龙威：治疗和炸弹也属于主动使用，应激活普通怪攻击减半窗口
 G.replayRec={seed:171,race:'beast',acts:[]}; G.replaying=true; G.startGame(G.raceById('beast')); G.replaying=false;
 const dm=G.player; dm.hp=dm.maxHp=100; dm.hp=80; dm.gold=100; dm.dragonMight=true; dm.dragonMightActive=false; dm.shopCd={heal:0,bomb:0}; dm.frozen={}; G.busy=false; G.pendingLevels=0;
