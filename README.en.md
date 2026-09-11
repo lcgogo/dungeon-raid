@@ -23,7 +23,7 @@ Play online: **<https://dungeonraid.win>** (Dev build: <https://dungeonraid.win/
 
 The two builds keep **separate, non-overwriting saves** (Dev uses its own localStorage keys). The start screen and footer both label which build you are in. The home page’s Release / Dev version numbers are **statically injected at deploy time**, so they appear instantly even on weak connections without an extra fetch.
 
-The current Dev build is `v1.72.0`; multi-kills of normal enemies now grant bonus gold equal to the number killed, and the DEV start card shows the version directly. The installed PWA now opens the home page first, where you can choose Release or Dev. Source lives under `src/` and the self-contained HTML is regenerated with `node build/build.js`.
+The current Dev build is `v1.72.1`; multi-kills of normal enemies now grant bonus gold equal to the number killed, and turn-350 Crossover Skill choices now have an `ⓘ` details button. The DEV start card shows the version directly. The installed PWA now opens the home page first, where you can choose Release or Dev. Source lives under `src/` and the self-contained HTML is regenerated with `node build/build.js`.
 
 ## 🧩 Core Gameplay
 

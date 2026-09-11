@@ -337,6 +337,20 @@ function canChooseSwapSkill(id, p){
   if(id==='blacksmith' && p && p.noArmor) return false;
   return true;
 }
+function showCrossoverPreview(skillId){
+  const def=TIER1[skillId], sk=def&&def.skill;
+  if(!sk) return;
+  const card=document.getElementById('card');
+  const rows=[
+    [tr('技能','Skill'), L(sk.name)],
+    [tr('说明','Description'), L(sk.desc||sk.short)],
+    [tr('冷却','Cooldown'), sk.noCd?tr('无冷却','No cooldown'):`${sk.cd} ${tr('回合','turns')}`],
+    [tr('用法','Use'), tr('替换治疗或炸弹槽后点击该槽施放','Replace Heal or Bomb, then tap that slot to cast')],
+  ].map(([k,v])=>`<div style="display:flex;justify-content:space-between;gap:10px;padding:7px 2px;border-bottom:1px solid #3a2d4d"><span style="color:var(--dim)">${k}</span><b style="text-align:right;max-width:70%">${v}</b></div>`).join('');
+  card.innerHTML=`<h2>✨ ${L(sk.name)}</h2><p style="font-size:13px;line-height:1.5;text-align:left">${L(sk.desc||sk.short)}</p><div style="text-align:left;font-size:13px;margin:0 0 14px">${rows}</div><button class="btn" id="crossPrevClose" style="width:100%">${tr('返回技能列表','Back to skills')}</button>`;
+  document.getElementById('crossPrevClose').onclick=showSkillSwap;
+  showOverlay();
+}
 // 350回合：从全种族全职业的主动里选一个，替换掉商店的 治疗 或 炸弹 槽
 function showSkillSwap(){
   if(replaying) return;
@@ -353,10 +367,14 @@ function showSkillSwap(){
     if(excludeIds.has(id)) return;   // 排除本种族职业技能
     // 排除对当前玩家永久无效的技能（如兽人无甲→锻甲无效）；其它主动只按当前角色属性结算，不做职业限定。
     const def=TIER1[id], sk=def.skill;
-    const b=document.createElement('button'); b.className='choice'; b.style.cssText='padding:8px 12px;margin:0 0 6px';
+    const row=document.createElement('div'); row.style.cssText='display:flex;gap:6px;align-items:stretch;margin:0 0 6px';
+    const b=document.createElement('button'); b.className='choice'; b.style.cssText='padding:8px 12px;margin:0;flex:1;min-width:0';
     b.innerHTML=`<b style="display:inline">✨ ${L(sk.name)}</b> <span style="color:var(--dim);font-size:12px">${L(sk.short)} · ${sk.noCd?tr('无冷却','no CD'):'CD'+sk.cd}</span>`;
     b.onclick=()=>chooseSwapSlot(id);
-    card.appendChild(b);
+    const info=document.createElement('button'); info.type='button'; info.textContent='ⓘ'; info.title=tr('查看技能详情','View skill details');
+    info.style.cssText='flex:none;width:42px;background:var(--panel2);border:1px solid #4a3a63;border-radius:10px;color:var(--gold);font-size:18px;cursor:pointer';
+    info.onclick=e=>{ e.preventDefault(); e.stopPropagation(); showCrossoverPreview(id); };
+    row.appendChild(b); row.appendChild(info); card.appendChild(row);
   });
   showOverlay();
 }

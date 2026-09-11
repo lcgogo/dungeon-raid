@@ -248,8 +248,8 @@ const CONTENT = {
 if('serviceWorker' in navigator) window.addEventListener('load',()=>navigator.serviceWorker.register('/sw.js').catch(()=>{}));
 //==================== 配置 ====================
 // 版本号 v主.次.修：不影响 verify/replay 兼容边界的小改动改"修"；凡是影响 verify/replay/版本分桶/release 验证语义的改动都改"次"；大版本变更需先确认。页面底部显示。
-const VERSION='v1.72.0';
-const CHANGELOG_LINES=[{"ver": "v1.72.0", "zh": "一次行动击杀多个普通怪时，额外获得与普通怪数量相同的金币；单杀和 Boss 奖励不变。武器链、炸弹、溅射及群体技能统一适用，并在日志中显示多杀奖励。", "en": "When one action kills multiple normal enemies, grant bonus gold equal to the number of normal enemies killed; single kills and boss rewards are unchanged. Weapon chains, bombs, splash, and area skills use the same rule and show the bonus in the log."}, {"ver": "v1.71.9", "zh": "修复 PWA 安装后的启动入口：现在打开主屏图标会先进入首页，不再直接进入正式版游戏；同时升级 Service Worker 缓存版本，避免继续使用旧入口配置。", "en": "Fixed the PWA launch entry: opening the installed app now starts at the home page instead of going directly to the release game, and the Service Worker cache version was bumped so the old entry configuration is not reused."}, {"ver": "v1.71.8", "zh": "将游戏源码按配置、内容、状态、战斗、回放和界面职责拆分到 `src/`，构建时仍生成可离线运行的单文件 HTML；DEV 启动页现在直接显示构建版本号。", "en": "Split the game source into `src/` modules for configuration, content, state, combat, replay, and UI while continuing to build a self-contained offline HTML file; the DEV start screen now shows the build version."}, {"ver": "v1.71.7", "zh": "修复 iOS Safari 离线导航偶发报错：Service Worker 在网络失败且精确缓存未命中时，现在会使用页面壳兜底或返回明确的离线响应，不再把空值交给 `respondWith()`。", "en": "Fixed an intermittent iOS Safari offline navigation error: when the network fails and the exact cache entry is missing, the Service Worker now falls back to the app shell or returns an explicit offline response instead of passing a null value to `respondWith()`."}, {"ver": "v1.71.6", "zh": "澄清炸弹、蔓藤缠绕与竭心光环的战斗日志：明确显示扣除的是全场怪物/敌人的血量，避免把 `−5` 误读为其他属性变化。", "en": "Clarified Bomb, Vine Coil, and Wither Aura combat logs to explicitly say they reduce all foes' HP, avoiding ambiguity around values such as `−5`."}];   /* auto-injected by dr.sh embed-changelog（勿手改） */
+const VERSION='v1.72.1';
+const CHANGELOG_LINES=[{"ver": "v1.72.1", "zh": "350 层跨界技能选择界面增加 `ⓘ` 详情按钮，可查看完整技能说明、冷却和使用方式后再选择。", "en": "Added an `ⓘ` details button to each turn-350 Crossover Skill choice, showing its full description, cooldown, and usage before selection."}, {"ver": "v1.72.0", "zh": "一次行动击杀多个普通怪时，额外获得与普通怪数量相同的金币；单杀和 Boss 奖励不变。武器链、炸弹、溅射及群体技能统一适用，并在日志中显示多杀奖励。", "en": "When one action kills multiple normal enemies, grant bonus gold equal to the number of normal enemies killed; single kills and boss rewards are unchanged. Weapon chains, bombs, splash, and area skills use the same rule and show the bonus in the log."}, {"ver": "v1.71.9", "zh": "修复 PWA 安装后的启动入口：现在打开主屏图标会先进入首页，不再直接进入正式版游戏；同时升级 Service Worker 缓存版本，避免继续使用旧入口配置。", "en": "Fixed the PWA launch entry: opening the installed app now starts at the home page instead of going directly to the release game, and the Service Worker cache version was bumped so the old entry configuration is not reused."}, {"ver": "v1.71.8", "zh": "将游戏源码按配置、内容、状态、战斗、回放和界面职责拆分到 `src/`，构建时仍生成可离线运行的单文件 HTML；DEV 启动页现在直接显示构建版本号。", "en": "Split the game source into `src/` modules for configuration, content, state, combat, replay, and UI while continuing to build a self-contained offline HTML file; the DEV start screen now shows the build version."}, {"ver": "v1.71.7", "zh": "修复 iOS Safari 离线导航偶发报错：Service Worker 在网络失败且精确缓存未命中时，现在会使用页面壳兜底或返回明确的离线响应，不再把空值交给 `respondWith()`。", "en": "Fixed an intermittent iOS Safari offline navigation error: when the network fails and the exact cache entry is missing, the Service Worker now falls back to the app shell or returns an explicit offline response instead of passing a null value to `respondWith()`."}];   /* auto-injected by dr.sh embed-changelog（勿手改） */
 const DEV=true;   // release build (DEV=false); dev build is dungeon-raid-dev.html (DEV=true)
 const REC_API='https://api.dungeonraid.win';   // 录像分享 API（Cloudflare Worker + KV）
 // 带种子随机数（mulberry32）：游戏全程用 rnd() 取代原生随机，配合录制种子可确定性重放
@@ -1020,6 +1020,20 @@ function canChooseSwapSkill(id, p){
   if(id==='blacksmith' && p && p.noArmor) return false;
   return true;
 }
+function showCrossoverPreview(skillId){
+  const def=TIER1[skillId], sk=def&&def.skill;
+  if(!sk) return;
+  const card=document.getElementById('card');
+  const rows=[
+    [tr('技能','Skill'), L(sk.name)],
+    [tr('说明','Description'), L(sk.desc||sk.short)],
+    [tr('冷却','Cooldown'), sk.noCd?tr('无冷却','No cooldown'):`${sk.cd} ${tr('回合','turns')}`],
+    [tr('用法','Use'), tr('替换治疗或炸弹槽后点击该槽施放','Replace Heal or Bomb, then tap that slot to cast')],
+  ].map(([k,v])=>`<div style="display:flex;justify-content:space-between;gap:10px;padding:7px 2px;border-bottom:1px solid #3a2d4d"><span style="color:var(--dim)">${k}</span><b style="text-align:right;max-width:70%">${v}</b></div>`).join('');
+  card.innerHTML=`<h2>✨ ${L(sk.name)}</h2><p style="font-size:13px;line-height:1.5;text-align:left">${L(sk.desc||sk.short)}</p><div style="text-align:left;font-size:13px;margin:0 0 14px">${rows}</div><button class="btn" id="crossPrevClose" style="width:100%">${tr('返回技能列表','Back to skills')}</button>`;
+  document.getElementById('crossPrevClose').onclick=showSkillSwap;
+  showOverlay();
+}
 // 350回合：从全种族全职业的主动里选一个，替换掉商店的 治疗 或 炸弹 槽
 function showSkillSwap(){
   if(replaying) return;
@@ -1036,10 +1050,14 @@ function showSkillSwap(){
     if(excludeIds.has(id)) return;   // 排除本种族职业技能
     // 排除对当前玩家永久无效的技能（如兽人无甲→锻甲无效）；其它主动只按当前角色属性结算，不做职业限定。
     const def=TIER1[id], sk=def.skill;
-    const b=document.createElement('button'); b.className='choice'; b.style.cssText='padding:8px 12px;margin:0 0 6px';
+    const row=document.createElement('div'); row.style.cssText='display:flex;gap:6px;align-items:stretch;margin:0 0 6px';
+    const b=document.createElement('button'); b.className='choice'; b.style.cssText='padding:8px 12px;margin:0;flex:1;min-width:0';
     b.innerHTML=`<b style="display:inline">✨ ${L(sk.name)}</b> <span style="color:var(--dim);font-size:12px">${L(sk.short)} · ${sk.noCd?tr('无冷却','no CD'):'CD'+sk.cd}</span>`;
     b.onclick=()=>chooseSwapSlot(id);
-    card.appendChild(b);
+    const info=document.createElement('button'); info.type='button'; info.textContent='ⓘ'; info.title=tr('查看技能详情','View skill details');
+    info.style.cssText='flex:none;width:42px;background:var(--panel2);border:1px solid #4a3a63;border-radius:10px;color:var(--gold);font-size:18px;cursor:pointer';
+    info.onclick=e=>{ e.preventDefault(); e.stopPropagation(); showCrossoverPreview(id); };
+    row.appendChild(b); row.appendChild(info); card.appendChild(row);
   });
   showOverlay();
 }

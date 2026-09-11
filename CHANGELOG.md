@@ -1,3 +1,8 @@
+## [v1.72.1] - 2026-09-11
+
+- 350 层跨界技能选择界面增加 `ⓘ` 详情按钮，可查看完整技能说明、冷却和使用方式后再选择。
+- Added an `ⓘ` details button to each turn-350 Crossover Skill choice, showing its full description, cooldown, and usage before selection.
+
 ## [v1.72.0] - 2026-09-11
 
 > Version-Impact: verify
