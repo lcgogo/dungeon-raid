@@ -49,14 +49,14 @@
   /* board */
   #board{display:block; width:100%; touch-action:none; border-radius:12px;
          background:var(--panel2); border:1px solid #3a2d4d;}
-  #log{font-size:11px; color:var(--dim); height:44px; box-sizing:border-box; overflow:hidden; margin:6px 0; line-height:1.4; cursor:pointer;
+  #log{font-size:11px; color:var(--dim); height:44px; box-sizing:border-box; overflow:hidden; overflow-wrap:anywhere; word-break:break-word; margin:6px 0; line-height:1.4; cursor:pointer;
        background:var(--panel2); border:1px solid #3a2d4d; border-radius:10px; padding:5px 9px;}
   #log:hover{border-color:#6a4fa3;}
   .settlementLog{background:var(--panel2); border:1px solid #3a2d4d; border-radius:10px; margin:4px 0 10px; text-align:left; overflow:hidden;}
   .settlementLog summary{padding:0; color:var(--dim); font-size:11px; cursor:pointer; list-style:none;}
   .settlementLog summary::-webkit-details-marker{display:none;}
   .settlementLogPreview{padding:5px 9px; height:56px; overflow:hidden; font-size:11px; line-height:1.45;}
-  .settlementLogPreview div,.settlementLogFull div{white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .settlementLogPreview div,.settlementLogFull div{white-space:normal; overflow-wrap:anywhere; word-break:break-word; overflow:hidden; text-overflow:ellipsis;}
   .settlementLogFull{border-top:1px solid #3a2d4d; padding:4px 9px 6px; max-height:180px; overflow-y:auto; font-size:11px; line-height:1.55;}
 
   /* shop */
@@ -248,8 +248,8 @@ const CONTENT = {
 if('serviceWorker' in navigator) window.addEventListener('load',()=>navigator.serviceWorker.register('/sw.js').catch(()=>{}));
 //==================== 配置 ====================
 // 版本号 v主.次.修：不影响 verify/replay 兼容边界的小改动改"修"；凡是影响 verify/replay/版本分桶/release 验证语义的改动都改"次"；大版本变更需先确认。页面底部显示。
-const VERSION='v1.72.1';
-const CHANGELOG_LINES=[{"ver": "v1.72.1", "zh": "350 层跨界技能选择界面增加 `ⓘ` 详情按钮，可查看完整技能说明、冷却和使用方式后再选择。", "en": "Added an `ⓘ` details button to each turn-350 Crossover Skill choice, showing its full description, cooldown, and usage before selection."}, {"ver": "v1.72.0", "zh": "一次行动击杀多个普通怪时，额外获得与普通怪数量相同的金币；单杀和 Boss 奖励不变。武器链、炸弹、溅射及群体技能统一适用，并在日志中显示多杀奖励。", "en": "When one action kills multiple normal enemies, grant bonus gold equal to the number of normal enemies killed; single kills and boss rewards are unchanged. Weapon chains, bombs, splash, and area skills use the same rule and show the bonus in the log."}, {"ver": "v1.71.9", "zh": "修复 PWA 安装后的启动入口：现在打开主屏图标会先进入首页，不再直接进入正式版游戏；同时升级 Service Worker 缓存版本，避免继续使用旧入口配置。", "en": "Fixed the PWA launch entry: opening the installed app now starts at the home page instead of going directly to the release game, and the Service Worker cache version was bumped so the old entry configuration is not reused."}, {"ver": "v1.71.8", "zh": "将游戏源码按配置、内容、状态、战斗、回放和界面职责拆分到 `src/`，构建时仍生成可离线运行的单文件 HTML；DEV 启动页现在直接显示构建版本号。", "en": "Split the game source into `src/` modules for configuration, content, state, combat, replay, and UI while continuing to build a self-contained offline HTML file; the DEV start screen now shows the build version."}, {"ver": "v1.71.7", "zh": "修复 iOS Safari 离线导航偶发报错：Service Worker 在网络失败且精确缓存未命中时，现在会使用页面壳兜底或返回明确的离线响应，不再把空值交给 `respondWith()`。", "en": "Fixed an intermittent iOS Safari offline navigation error: when the network fails and the exact cache entry is missing, the Service Worker now falls back to the app shell or returns an explicit offline response instead of passing a null value to `respondWith()`."}];   /* auto-injected by dr.sh embed-changelog（勿手改） */
+const VERSION='v1.73.1';
+const CHANGELOG_LINES=[{"ver": "v1.73.1", "zh": "修复长战斗日志不自动换行的问题：主日志和结算日志现在会在长伤害串、连续数字或窄屏上自动断行，避免内容横向溢出。", "en": "Fixed long combat logs not wrapping: the main and settlement logs now break long damage sequences, continuous numbers, and narrow-screen content instead of overflowing horizontally."}, {"ver": "v1.73.0", "zh": "修复雪人封印自动释放：主动封印剩余回合内，治疗/炸弹不会被自动释放；冻结倒计时现在会在本次玩家行动（包括自动释放）完成后再递减。", "en": "Fixed Snowman freezes with auto-release enabled: Heal/Bomb can no longer auto-cast while the active remains frozen, and the freeze countdown now decrements after the full player action, including auto-release."}, {"ver": "v1.72.1", "zh": "350 层跨界技能选择界面增加 `ⓘ` 详情按钮，可查看完整技能说明、冷却和使用方式后再选择。", "en": "Added an `ⓘ` details button to each turn-350 Crossover Skill choice, showing its full description, cooldown, and usage before selection."}, {"ver": "v1.72.0", "zh": "一次行动击杀多个普通怪时，额外获得与普通怪数量相同的金币；单杀和 Boss 奖励不变。武器链、炸弹、溅射及群体技能统一适用，并在日志中显示多杀奖励。", "en": "When one action kills multiple normal enemies, grant bonus gold equal to the number of normal enemies killed; single kills and boss rewards are unchanged. Weapon chains, bombs, splash, and area skills use the same rule and show the bonus in the log."}, {"ver": "v1.71.9", "zh": "修复 PWA 安装后的启动入口：现在打开主屏图标会先进入首页，不再直接进入正式版游戏；同时升级 Service Worker 缓存版本，避免继续使用旧入口配置。", "en": "Fixed the PWA launch entry: opening the installed app now starts at the home page instead of going directly to the release game, and the Service Worker cache version was bumped so the old entry configuration is not reused."}];   /* auto-injected by dr.sh embed-changelog（勿手改） */
 const DEV=true;   // release build (DEV=false); dev build is dungeon-raid-dev.html (DEV=true)
 const REC_API='https://api.dungeonraid.win';   // 录像分享 API（Cloudflare Worker + KV）
 // 带种子随机数（mulberry32）：游戏全程用 rnd() 取代原生随机，配合录制种子可确定性重放
@@ -2246,7 +2246,6 @@ function resolve(){
   if(typeof player.shopCd==='object') for(const k in player.shopCd){ if(player.shopCd[k]>0) player.shopCd[k]--; } // 各商品冷却递减
   if(player.skillCd>0) player.skillCd--; // 技能冷却递减
   if(player.skill2Cd>0) player.skill2Cd--; // 换装主动冷却递减
-  if(player.frozen) for(const k in player.frozen){ if(player.frozen[k]>0) player.frozen[k]--; }   // 雪人冰封倒数解冻
   if(player.deathCoil>0){ deathCoilTick(); player.deathCoil--; }   // 蔓藤缠绕：未来 3 回合每回合全场怪流失 30% 最大生命
   burnTick();   // 火焰链：已点燃目标每回合持续灼烧，直到死亡
   firewallTick();   // 火墙：底部三行的怪物每回合掉当前固定伤害 20%
@@ -2285,6 +2284,7 @@ function resolve(){
   if(player.t4Pending){ player.t4Pending=false; showSkillSwap(); return; }     // 击败350回合Boss → 主动换装
   if(pendingLevels){ showLevelUp(); return; }
   autoReleaseItems();   // 开启自动释放时，在回合结算后按当前可用条件使用治疗/炸弹
+  if(player.frozen) for(const k in player.frozen){ if(player.frozen[k]>0) player.frozen[k]--; }   // 雪人冰封完整覆盖本次玩家行动（含自动释放）后再倒数解冻
   if(busy || pendingLevels) return;
   checkDeadlock();   // 无弹层待处理时：棋盘塞满怪、无棋可连且无就绪改盘动作 → 判负（含终局被Boss淹没）
 }

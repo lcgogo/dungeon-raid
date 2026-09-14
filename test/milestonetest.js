@@ -4,7 +4,7 @@ const fs = require('fs');
 const path = require('path');
 const file = fs.existsSync('dungeon-raid-dev.html') ? 'dungeon-raid-dev.html' : path.join('..', 'dungeon-raid-dev.html');
 let s = fs.readFileSync(file, 'utf8').match(/<script>([\s\S]*?)<\/script>/)[1];
-const EXPORT = `globalThis.__G={startGame,raceById,onBossKilled,dispatchReplayAct,buyItem,resolve,applyGravity,advanceEnemies,activateSkill,makeTile,isSwordTarget,normalEnemyAttack,
+const EXPORT = `globalThis.__G={startGame,raceById,onBossKilled,dispatchReplayAct,buyItem,resolve,applyGravity,advanceEnemies,activateSkill,autoReleaseItems,makeTile,isSwordTarget,normalEnemyAttack,
   TIER1,TIER2,RACE_PATHS, CLASS_T2, WEAPON, gainGold, gainHeal, addXp, currentSwordFlat, witherAuraTick, hurtPlayer, frostOrbDamage,
   get player(){return player}, get grid(){return grid}, get logHistory(){return logHistory}, set selection(v){selection=v},
   set busy(v){busy=v}, set pendingLevels(v){pendingLevels=v}, set replaying(v){replaying=v}, set replayRec(v){replayRec=v}};`;
@@ -64,6 +64,12 @@ G.onBossKilled(); hs.t4Pending=false; G.dispatchReplayAct(['t',4,'ranger','heal'
 const healGoldBefore=hs.gold; hs.skill2Cd=0; G.buyItem('heal');
 ok(hs.skill2Cd>0,'满血时点击治疗槽仍能施放跨界主动');
 ok(hs.gold===healGoldBefore,'满血施放治疗槽跨界主动不花金币');
+
+// 雪人封印炸弹时，自动释放必须等待封印完整结束，不能在剩余 1 回合时提前释放
+hs.autoUse={heal:false,bomb:true}; hs.frozen={bomb:1}; hs.shopCd={bomb:0,heal:3}; hs.gold=100; hs.hp=hs.maxHp=999999;
+const frozenGold=hs.gold; G.autoReleaseItems();
+ok(hs.gold===frozenGold,'雪人封印炸弹时自动释放不会提前使用');
+ok(hs.frozen.bomb===1,'自动释放检查不会提前消耗雪人封印回合');
 
 // 神兽龙威：治疗和炸弹也属于主动使用，应激活普通怪攻击减半窗口
 G.replayRec={seed:171,race:'beast',acts:[]}; G.replaying=true; G.startGame(G.raceById('beast')); G.replaying=false;

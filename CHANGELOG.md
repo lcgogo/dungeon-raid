@@ -1,3 +1,15 @@
+## [v1.73.1] - 2026-09-14
+
+- 修复长战斗日志不自动换行的问题：主日志和结算日志现在会在长伤害串、连续数字或窄屏上自动断行，避免内容横向溢出。
+- Fixed long combat logs not wrapping: the main and settlement logs now break long damage sequences, continuous numbers, and narrow-screen content instead of overflowing horizontally.
+
+## [v1.73.0] - 2026-09-14
+
+> Version-Impact: verify
+
+- 修复雪人封印自动释放：主动封印剩余回合内，治疗/炸弹不会被自动释放；冻结倒计时现在会在本次玩家行动（包括自动释放）完成后再递减。
+- Fixed Snowman freezes with auto-release enabled: Heal/Bomb can no longer auto-cast while the active remains frozen, and the freeze countdown now decrements after the full player action, including auto-release.
+
 ## [v1.72.1] - 2026-09-11
 
 - 350 层跨界技能选择界面增加 `ⓘ` 详情按钮，可查看完整技能说明、冷却和使用方式后再选择。

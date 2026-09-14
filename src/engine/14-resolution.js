@@ -68,7 +68,6 @@ function resolve(){
   if(typeof player.shopCd==='object') for(const k in player.shopCd){ if(player.shopCd[k]>0) player.shopCd[k]--; } // 各商品冷却递减
   if(player.skillCd>0) player.skillCd--; // 技能冷却递减
   if(player.skill2Cd>0) player.skill2Cd--; // 换装主动冷却递减
-  if(player.frozen) for(const k in player.frozen){ if(player.frozen[k]>0) player.frozen[k]--; }   // 雪人冰封倒数解冻
   if(player.deathCoil>0){ deathCoilTick(); player.deathCoil--; }   // 蔓藤缠绕：未来 3 回合每回合全场怪流失 30% 最大生命
   burnTick();   // 火焰链：已点燃目标每回合持续灼烧，直到死亡
   firewallTick();   // 火墙：底部三行的怪物每回合掉当前固定伤害 20%
@@ -107,6 +106,7 @@ function resolve(){
   if(player.t4Pending){ player.t4Pending=false; showSkillSwap(); return; }     // 击败350回合Boss → 主动换装
   if(pendingLevels){ showLevelUp(); return; }
   autoReleaseItems();   // 开启自动释放时，在回合结算后按当前可用条件使用治疗/炸弹
+  if(player.frozen) for(const k in player.frozen){ if(player.frozen[k]>0) player.frozen[k]--; }   // 雪人冰封完整覆盖本次玩家行动（含自动释放）后再倒数解冻
   if(busy || pendingLevels) return;
   checkDeadlock();   // 无弹层待处理时：棋盘塞满怪、无棋可连且无就绪改盘动作 → 判负（含终局被Boss淹没）
 }
