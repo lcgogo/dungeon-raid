@@ -248,8 +248,8 @@ const CONTENT = {
 if('serviceWorker' in navigator) window.addEventListener('load',()=>navigator.serviceWorker.register('/sw.js').catch(()=>{}));
 //==================== 配置 ====================
 // 版本号 v主.次.修：不影响 verify/replay 兼容边界的小改动改"修"；凡是影响 verify/replay/版本分桶/release 验证语义的改动都改"次"；大版本变更需先确认。页面底部显示。
-const VERSION='v1.73.1';
-const CHANGELOG_LINES=[{"ver": "v1.73.1", "zh": "修复长战斗日志不自动换行的问题：主日志和结算日志现在会在长伤害串、连续数字或窄屏上自动断行，避免内容横向溢出。", "en": "Fixed long combat logs not wrapping: the main and settlement logs now break long damage sequences, continuous numbers, and narrow-screen content instead of overflowing horizontally."}, {"ver": "v1.73.0", "zh": "修复雪人封印自动释放：主动封印剩余回合内，治疗/炸弹不会被自动释放；冻结倒计时现在会在本次玩家行动（包括自动释放）完成后再递减。", "en": "Fixed Snowman freezes with auto-release enabled: Heal/Bomb can no longer auto-cast while the active remains frozen, and the freeze countdown now decrements after the full player action, including auto-release."}, {"ver": "v1.72.1", "zh": "350 层跨界技能选择界面增加 `ⓘ` 详情按钮，可查看完整技能说明、冷却和使用方式后再选择。", "en": "Added an `ⓘ` details button to each turn-350 Crossover Skill choice, showing its full description, cooldown, and usage before selection."}, {"ver": "v1.72.0", "zh": "一次行动击杀多个普通怪时，额外获得与普通怪数量相同的金币；单杀和 Boss 奖励不变。武器链、炸弹、溅射及群体技能统一适用，并在日志中显示多杀奖励。", "en": "When one action kills multiple normal enemies, grant bonus gold equal to the number of normal enemies killed; single kills and boss rewards are unchanged. Weapon chains, bombs, splash, and area skills use the same rule and show the bonus in the log."}, {"ver": "v1.71.9", "zh": "修复 PWA 安装后的启动入口：现在打开主屏图标会先进入首页，不再直接进入正式版游戏；同时升级 Service Worker 缓存版本，避免继续使用旧入口配置。", "en": "Fixed the PWA launch entry: opening the installed app now starts at the home page instead of going directly to the release game, and the Service Worker cache version was bumped so the old entry configuration is not reused."}];   /* auto-injected by dr.sh embed-changelog（勿手改） */
+const VERSION='v1.73.4';
+const CHANGELOG_LINES=[{"ver": "v1.73.4", "zh": "优化 50 回合转职长按详情的“效果”布局：固定左侧标签列，长文本在右侧内容列内稳定换行，不再挤压标签。", "en": "Improved the turn-50 advancement long-press details layout: the left label column is fixed and long effects wrap consistently in the content column."}, {"ver": "v1.73.3", "zh": "50、100、200 回合转职提示中明确显示“长按候选卡查看详情”。", "en": "Added an explicit “Long-press a choice for details” hint to the turn-50, turn-100, and turn-200 advancement prompts."}, {"ver": "v1.73.2", "zh": "50、100、200 回合的转职卡现在都支持长按查看候选技能详情，查看后可返回列表继续选择。", "en": "Turn-50, turn-100, and turn-200 advancement cards now support long-press details, with a return action to continue choosing."}, {"ver": "v1.73.1", "zh": "修复长战斗日志不自动换行的问题：主日志和结算日志现在会在长伤害串、连续数字或窄屏上自动断行，避免内容横向溢出。", "en": "Fixed long combat logs not wrapping: the main and settlement logs now break long damage sequences, continuous numbers, and narrow-screen content instead of overflowing horizontally."}, {"ver": "v1.73.0", "zh": "修复雪人封印自动释放：主动封印剩余回合内，治疗/炸弹不会被自动释放；冻结倒计时现在会在本次玩家行动（包括自动释放）完成后再递减。", "en": "Fixed Snowman freezes with auto-release enabled: Heal/Bomb can no longer auto-cast while the active remains frozen, and the freeze countdown now decrements after the full player action, including auto-release."}];   /* auto-injected by dr.sh embed-changelog（勿手改） */
 const DEV=true;   // release build (DEV=false); dev build is dungeon-raid-dev.html (DEV=true)
 const REC_API='https://api.dungeonraid.win';   // 录像分享 API（Cloudflare Worker + KV）
 // 带种子随机数（mulberry32）：游戏全程用 rnd() 取代原生随机，配合录制种子可确定性重放
@@ -950,26 +950,24 @@ const TRANSFORM_BLESS={
   4:['🌌 经过漫长的修炼，你已经突破种族的极限！','🌌 Through long training, you have broken past your race’s limits!'],
 };
 function tierPreviewData(tier, id){
-  if(tier!==1) return null;
-  const t1=TIER1[id], t2Id=CLASS_T2[id], t2=t2Id&&TIER2[t2Id];
-  if(!t1||!t1.skill||!t2) return null;
-  return {
-    icon:'🌟',
-    title:`${L(t1.n)} → ${L(t2.n)}`,
-    desc:`${tr('100回合锁定二阶技能','Locked Tier-2 passive at turn 100')}<br><span style="color:#caa6e6">${tr('主动','Active')}：${L(t1.skill.name)} · ${L(t1.skill.short)}</span>`,
-    rows:[
-      [tr('职业主动','Active'), `${L(t1.skill.name)} · ${L(t1.skill.short)}`],
-      [tr('锁定二阶','Locked Tier-2'), `${L(t2.n)}`],
-      [tr('效果','Effect'), `${L(t2.d)}`],
-    ],
-  };
+  if(tier===1){
+    const t1=TIER1[id], t2Id=CLASS_T2[id], t2=t2Id&&TIER2[t2Id];
+    if(!t1||!t1.skill||!t2) return null;
+    return {icon:'🌟', title:`${L(t1.n)} → ${L(t2.n)}`,
+      desc:`${tr('100回合锁定二阶技能','Locked Tier-2 passive at turn 100')}<br><span style="color:#caa6e6">${tr('主动','Active')}：${L(t1.skill.name)} · ${L(t1.skill.short)}</span>`,
+      rows:[[tr('职业主动','Active'),`${L(t1.skill.name)} · ${L(t1.skill.short)}`],[tr('锁定二阶','Locked Tier-2'),`${L(t2.n)}`],[tr('效果','Effect'),`${L(t2.d)}`]]};
+  }
+  const def=TIER2[id];
+  if(!def) return null;
+  return {icon:tier===2?'🌟':'⚡', title:L(def.n),
+    desc:tier===2?tr('100回合获得的职业专属被动','Class passive gained at turn 100'):tr('200回合获得的本族被动','Race passive gained at turn 200'),
+    rows:[[tr('技能','Skill'),L(def.n)],[tr('效果','Effect'),L(def.d)]]};
 }
 function attachTierChoicePreview(el, tier, id){
-  if(tier!==1) return;
   let timer=null, fired=false, sx=0, sy=0;
   const clear=()=>{ if(timer){ clearTimeout(timer); timer=null; } };
   el.addEventListener('pointerdown', e=>{ if(replaying) return; fired=false; sx=e.clientX; sy=e.clientY; clear();
-    timer=setTimeout(()=>{ timer=null; const info=tierPreviewData(tier,id); if(!info) return; fired=true; busy=true; const rows=info.rows.map(([k,v])=>`<div style="display:flex;justify-content:space-between;gap:10px;padding:7px 2px;border-bottom:1px solid #3a2d4d"><span style="color:var(--dim)">${k}</span><b style="text-align:right">${v}</b></div>`).join(''); const card=document.getElementById('card'); card.innerHTML=`<h2>${info.icon} ${info.title}</h2><p style="font-size:13px;line-height:1.5">${info.desc}</p><div style="text-align:left;font-size:13px;margin:0 0 14px">${rows}</div><button class="btn" id="tierPrevClose" style="width:100%">${tr('关闭','Close')}</button>`; document.getElementById('tierPrevClose').onclick=()=>showTierSelect(tier); showOverlay(); }, 450); });
+    timer=setTimeout(()=>{ timer=null; const info=tierPreviewData(tier,id); if(!info) return; fired=true; busy=true; const rows=info.rows.map(([k,v])=>`<div style="display:grid;grid-template-columns:72px minmax(0,1fr);gap:10px;align-items:start;padding:7px 2px;border-bottom:1px solid #3a2d4d"><span style="color:var(--dim);min-width:0">${k}</span><b style="min-width:0;text-align:right;overflow-wrap:anywhere;word-break:break-word">${v}</b></div>`).join(''); const card=document.getElementById('card'); card.innerHTML=`<h2>${info.icon} ${info.title}</h2><p style="font-size:13px;line-height:1.5">${info.desc}</p><div style="text-align:left;font-size:13px;margin:0 0 14px">${rows}</div><button class="btn" id="tierPrevClose" style="width:100%">${tr('关闭','Close')}</button>`; document.getElementById('tierPrevClose').onclick=()=>showTierSelect(tier); showOverlay(); }, 450); });
   el.addEventListener('pointermove', e=>{ if(timer && (Math.abs(e.clientX-sx)>10 || Math.abs(e.clientY-sy)>10)) clear(); });
   el.addEventListener('pointerup', clear);
   el.addEventListener('pointercancel', clear);
@@ -990,7 +988,7 @@ function showTierSelect(tier){
              : tier===3 ? tr('再获得一项本族技能（本种族的另一项被动）','Gain another Race Skill (your race’s other passive)')
              : tr('你的职业觉醒了专属二阶技能（被动）','Your class awakens its signature Tier-2 Skill (passive)');
   const card=document.getElementById('card');
-  card.innerHTML=`<h2>${head}</h2><p>${sub}</p><p style="color:#caa6e6;font-style:italic;font-size:13px;margin:-4px 0 10px">${L(TRANSFORM_BLESS[tier])}</p>`;
+  card.innerHTML=`<h2>${head}</h2><p>${sub}<br><span style="color:var(--gold);font-size:11px">${tr('长按候选卡查看详情','Long-press a choice for details')}</span></p><p style="color:#caa6e6;font-style:italic;font-size:13px;margin:-4px 0 10px">${L(TRANSFORM_BLESS[tier])}</p>`;
   ids.forEach(id=>{
     const def=pool[id];
     const b=document.createElement('button'); b.className='choice';

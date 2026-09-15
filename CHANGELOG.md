@@ -1,3 +1,18 @@
+## [v1.73.4] - 2026-09-15
+
+- 优化 50 回合转职长按详情的“效果”布局：固定左侧标签列，长文本在右侧内容列内稳定换行，不再挤压标签。
+- Improved the turn-50 advancement long-press details layout: the left label column is fixed and long effects wrap consistently in the content column.
+
+## [v1.73.3] - 2026-09-15
+
+- 50、100、200 回合转职提示中明确显示“长按候选卡查看详情”。
+- Added an explicit “Long-press a choice for details” hint to the turn-50, turn-100, and turn-200 advancement prompts.
+
+## [v1.73.2] - 2026-09-15
+
+- 50、100、200 回合的转职卡现在都支持长按查看候选技能详情，查看后可返回列表继续选择。
+- Turn-50, turn-100, and turn-200 advancement cards now support long-press details, with a return action to continue choosing.
+
 ## [v1.73.1] - 2026-09-14
 
 - 修复长战斗日志不自动换行的问题：主日志和结算日志现在会在长伤害串、连续数字或窄屏上自动断行，避免内容横向溢出。

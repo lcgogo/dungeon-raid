@@ -267,26 +267,24 @@ const TRANSFORM_BLESS={
   4:['🌌 经过漫长的修炼，你已经突破种族的极限！','🌌 Through long training, you have broken past your race’s limits!'],
 };
 function tierPreviewData(tier, id){
-  if(tier!==1) return null;
-  const t1=TIER1[id], t2Id=CLASS_T2[id], t2=t2Id&&TIER2[t2Id];
-  if(!t1||!t1.skill||!t2) return null;
-  return {
-    icon:'🌟',
-    title:`${L(t1.n)} → ${L(t2.n)}`,
-    desc:`${tr('100回合锁定二阶技能','Locked Tier-2 passive at turn 100')}<br><span style="color:#caa6e6">${tr('主动','Active')}：${L(t1.skill.name)} · ${L(t1.skill.short)}</span>`,
-    rows:[
-      [tr('职业主动','Active'), `${L(t1.skill.name)} · ${L(t1.skill.short)}`],
-      [tr('锁定二阶','Locked Tier-2'), `${L(t2.n)}`],
-      [tr('效果','Effect'), `${L(t2.d)}`],
-    ],
-  };
+  if(tier===1){
+    const t1=TIER1[id], t2Id=CLASS_T2[id], t2=t2Id&&TIER2[t2Id];
+    if(!t1||!t1.skill||!t2) return null;
+    return {icon:'🌟', title:`${L(t1.n)} → ${L(t2.n)}`,
+      desc:`${tr('100回合锁定二阶技能','Locked Tier-2 passive at turn 100')}<br><span style="color:#caa6e6">${tr('主动','Active')}：${L(t1.skill.name)} · ${L(t1.skill.short)}</span>`,
+      rows:[[tr('职业主动','Active'),`${L(t1.skill.name)} · ${L(t1.skill.short)}`],[tr('锁定二阶','Locked Tier-2'),`${L(t2.n)}`],[tr('效果','Effect'),`${L(t2.d)}`]]};
+  }
+  const def=TIER2[id];
+  if(!def) return null;
+  return {icon:tier===2?'🌟':'⚡', title:L(def.n),
+    desc:tier===2?tr('100回合获得的职业专属被动','Class passive gained at turn 100'):tr('200回合获得的本族被动','Race passive gained at turn 200'),
+    rows:[[tr('技能','Skill'),L(def.n)],[tr('效果','Effect'),L(def.d)]]};
 }
 function attachTierChoicePreview(el, tier, id){
-  if(tier!==1) return;
   let timer=null, fired=false, sx=0, sy=0;
   const clear=()=>{ if(timer){ clearTimeout(timer); timer=null; } };
   el.addEventListener('pointerdown', e=>{ if(replaying) return; fired=false; sx=e.clientX; sy=e.clientY; clear();
-    timer=setTimeout(()=>{ timer=null; const info=tierPreviewData(tier,id); if(!info) return; fired=true; busy=true; const rows=info.rows.map(([k,v])=>`<div style="display:flex;justify-content:space-between;gap:10px;padding:7px 2px;border-bottom:1px solid #3a2d4d"><span style="color:var(--dim)">${k}</span><b style="text-align:right">${v}</b></div>`).join(''); const card=document.getElementById('card'); card.innerHTML=`<h2>${info.icon} ${info.title}</h2><p style="font-size:13px;line-height:1.5">${info.desc}</p><div style="text-align:left;font-size:13px;margin:0 0 14px">${rows}</div><button class="btn" id="tierPrevClose" style="width:100%">${tr('关闭','Close')}</button>`; document.getElementById('tierPrevClose').onclick=()=>showTierSelect(tier); showOverlay(); }, 450); });
+    timer=setTimeout(()=>{ timer=null; const info=tierPreviewData(tier,id); if(!info) return; fired=true; busy=true; const rows=info.rows.map(([k,v])=>`<div style="display:grid;grid-template-columns:72px minmax(0,1fr);gap:10px;align-items:start;padding:7px 2px;border-bottom:1px solid #3a2d4d"><span style="color:var(--dim);min-width:0">${k}</span><b style="min-width:0;text-align:right;overflow-wrap:anywhere;word-break:break-word">${v}</b></div>`).join(''); const card=document.getElementById('card'); card.innerHTML=`<h2>${info.icon} ${info.title}</h2><p style="font-size:13px;line-height:1.5">${info.desc}</p><div style="text-align:left;font-size:13px;margin:0 0 14px">${rows}</div><button class="btn" id="tierPrevClose" style="width:100%">${tr('关闭','Close')}</button>`; document.getElementById('tierPrevClose').onclick=()=>showTierSelect(tier); showOverlay(); }, 450); });
   el.addEventListener('pointermove', e=>{ if(timer && (Math.abs(e.clientX-sx)>10 || Math.abs(e.clientY-sy)>10)) clear(); });
   el.addEventListener('pointerup', clear);
   el.addEventListener('pointercancel', clear);
@@ -307,7 +305,7 @@ function showTierSelect(tier){
              : tier===3 ? tr('再获得一项本族技能（本种族的另一项被动）','Gain another Race Skill (your race’s other passive)')
              : tr('你的职业觉醒了专属二阶技能（被动）','Your class awakens its signature Tier-2 Skill (passive)');
   const card=document.getElementById('card');
-  card.innerHTML=`<h2>${head}</h2><p>${sub}</p><p style="color:#caa6e6;font-style:italic;font-size:13px;margin:-4px 0 10px">${L(TRANSFORM_BLESS[tier])}</p>`;
+  card.innerHTML=`<h2>${head}</h2><p>${sub}<br><span style="color:var(--gold);font-size:11px">${tr('长按候选卡查看详情','Long-press a choice for details')}</span></p><p style="color:#caa6e6;font-style:italic;font-size:13px;margin:-4px 0 10px">${L(TRANSFORM_BLESS[tier])}</p>`;
   ids.forEach(id=>{
     const def=pool[id];
     const b=document.createElement('button'); b.className='choice';
