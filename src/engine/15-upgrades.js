@@ -52,18 +52,20 @@ function gameOver(){
   busy=true;
   const durMs=playMs();   // 游玩时长（须在 stopReplay 清空 replayRec 之前取）
   const wasReplay=replaying;
+  const endRec=wasReplay ? replayRec : null;
+  const endPlayer=wasReplay ? JSON.parse(JSON.stringify(player)) : player;   // stopReplay 会恢复回放前状态，结算页必须使用回放终点快照
   if(rec){ rec.maxHp=player.maxHp; rec.level=player.level; rec.gold=player.gold; rec.turns=player.turns; rec.cleared=!!player.cleared; rec.token=rec.token||(player.token||''); rec.perks=player.chosenPerks.slice(); }
   if(wasReplay){ stopReplay(); }                 // 回放播到死亡：停止回放，照常显示死亡报告
   else { saveBest(); clearSave();
     try{ if(rec) localStorage.setItem(REC_LAST_KEY, JSON.stringify(rec)); }catch(e){}  // 保存本局完整录像供回放
   }
   // 死亡报告：血死时列伤害来源；死局时直接说明“被怪物淹没，无路可走”，避免把本回合零星伤害误当成死因
-  const dmg=player.dmgBy||{};
+  const dmg=endPlayer.dmgBy||{};
   const ents=Object.entries(dmg).filter(([k,v])=>v>0).sort((a,b)=>b[1]-a[1]);
   const tot=ents.reduce((s,[,v])=>s+v,0);
   let report='';
-  if(player.deathMode==='deadlock'){
-    report=`<div style="text-align:left;margin:4px 0 10px;background:var(--panel2);border-radius:10px;padding:8px 10px;font-size:12px;color:var(--dim);line-height:1.7">${player.finaleStarted
+  if(endPlayer.deathMode==='deadlock'){
+    report=`<div style="text-align:left;margin:4px 0 10px;background:var(--panel2);border-radius:10px;padding:8px 10px;font-size:12px;color:var(--dim);line-height:1.7">${endPlayer.finaleStarted
       ? tr('👑 被 Boss 淹没，无路可走。','👑 Overrun by bosses — no way out.')
       : tr('🪦 被怪物淹没，无路可走。','🪦 Overrun by monsters — no way out.')}</div>`;
   }else if(ents.length){
@@ -77,7 +79,7 @@ function gameOver(){
   const card=document.getElementById('card');
   card.innerHTML=`<h2 style="color:var(--hp);margin-bottom:4px">${tr('💀 你倒下了','💀 You fell')}</h2>
     <p style="margin-bottom:8px">${tr('地牢吞噬了又一位冒险者…','The dungeon claims another adventurer…')}</p>
-    <div style="font-size:14px;margin-bottom:8px">${tr('等级','Lv')} <b style="color:var(--gold)">${player.level}</b> · 💰<b style="color:var(--gold)">${player.gold}</b> · <b style="color:var(--gold)">${player.turns}</b> ${tr('回合','turns')}</div>
+    <div style="font-size:14px;margin-bottom:8px">${tr('等级','Lv')} <b style="color:var(--gold)">${endPlayer.level}</b> · 💰<b style="color:var(--gold)">${endPlayer.gold}</b> · <b style="color:var(--gold)">${endPlayer.turns}</b> ${tr('回合','turns')}</div>
     <div style="font-size:12px;color:var(--dim);margin:-4px 0 8px">⏱ ${tr('用时','Played')} ${fmtDur(durMs)}</div>
     ${report}
     ${settlementLogBox()}
@@ -91,7 +93,7 @@ function gameOver(){
     </div>
     <button class="btn" id="again">${tr('换个职业再来','Play again')}</button>`;
   document.getElementById('again').onclick=showRaceSelect;   // 重开直接到选种族（落地页仅 boot 看）
-  const finished=getLastRec();
+  const finished=endRec||getLastRec();
   wireEndButtons(finished);
   showOverlay();
   if(!DEV && !wasReplay && !headless && finished){
@@ -107,6 +109,8 @@ function onClear(){
   busy=true; player.cleared=true; ended=true;   // 破关也结束本局，封死后续存档
   const durMs=playMs();   // 游玩时长（须在 stopReplay 前取）
   const wasReplay=replaying;
+  const endRec=wasReplay ? replayRec : null;
+  const endPlayer=wasReplay ? JSON.parse(JSON.stringify(player)) : player;   // stopReplay 会恢复回放前状态，结算页必须使用回放终点快照
   for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const t=grid[r][c]; if(t&&t.bossId==='finale') grid[r][c]=null; }  // 移除终焉之主
   if(rec){ rec.maxHp=player.maxHp; rec.level=player.level; rec.gold=player.gold; rec.turns=player.turns; rec.cleared=!!player.cleared; rec.perks=player.chosenPerks.slice(); }
   if(wasReplay){ stopReplay(); }
@@ -114,7 +118,7 @@ function onClear(){
   const card=document.getElementById('card');
   card.innerHTML=`<h2 style="color:var(--gold);margin-bottom:4px">🏆 ${tr('破关！','CLEARED!')}</h2>
     <p style="line-height:1.6;margin-bottom:8px">${tr('🎉 终焉之主的浪潮退去，你撑过全部 10 波，成为第一个活着走出地牢的冒险者——「再无人生还」的传说终于有了结局。','🎉 The Overlord’s waves recede; you survived all 10 and became the first to walk out of the dungeon alive — the legend that “none returned” finally has its ending.')} <span style="color:var(--dim)">${tr('感谢游玩这份致敬之作 🙏','Thanks for playing this tribute 🙏')}</span></p>
-    <div style="font-size:14px;margin-bottom:8px">${tr('破关等级','Clear Lv')} <b style="color:var(--gold)">${player.level}</b> <span style="color:var(--dim);font-size:11px">${tr('越低越强','lower=better')}</span> · 💰<b style="color:var(--gold)">${player.gold}</b> · <b style="color:var(--gold)">${player.turns}</b> ${tr('回合','t')}</div>
+    <div style="font-size:14px;margin-bottom:8px">${tr('破关等级','Clear Lv')} <b style="color:var(--gold)">${endPlayer.level}</b> <span style="color:var(--dim);font-size:11px">${tr('越低越强','lower=better')}</span> · 💰<b style="color:var(--gold)">${endPlayer.gold}</b> · <b style="color:var(--gold)">${endPlayer.turns}</b> ${tr('回合','t')}</div>
     <div style="font-size:12px;color:var(--dim);margin:-4px 0 8px">⏱ ${tr('用时','Played')} ${fmtDur(durMs)}</div>
     ${settlementLogBox()}
     ${DEV?'':`<div id="rankBox" style="text-align:left;margin:4px 0 12px;background:var(--panel2);border-radius:10px;padding:6px 4px;min-height:20px"></div>`}
@@ -127,7 +131,7 @@ function onClear(){
     </div>
     <button class="btn" id="again">${tr('再来一局','Play again')}</button>`;
   document.getElementById('again').onclick=showRaceSelect;   // 重开直接到选种族（落地页仅 boot 看）
-  const finished=getLastRec();
+  const finished=endRec||getLastRec();
   wireEndButtons(finished);
   showOverlay();
   if(!DEV && !wasReplay && !headless && finished){

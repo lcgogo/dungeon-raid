@@ -248,8 +248,8 @@ const CONTENT = {
 if('serviceWorker' in navigator) window.addEventListener('load',()=>navigator.serviceWorker.register('/sw.js').catch(()=>{}));
 //==================== 配置 ====================
 // 版本号 v主.次.修：不影响 verify/replay 兼容边界的小改动改"修"；凡是影响 verify/replay/版本分桶/release 验证语义的改动都改"次"；大版本变更需先确认。页面底部显示。
-const VERSION='v1.73.4';
-const CHANGELOG_LINES=[{"ver": "v1.73.4", "zh": "优化 50 回合转职长按详情的“效果”布局：固定左侧标签列，长文本在右侧内容列内稳定换行，不再挤压标签。", "en": "Improved the turn-50 advancement long-press details layout: the left label column is fixed and long effects wrap consistently in the content column."}, {"ver": "v1.73.3", "zh": "50、100、200 回合转职提示中明确显示“长按候选卡查看详情”。", "en": "Added an explicit “Long-press a choice for details” hint to the turn-50, turn-100, and turn-200 advancement prompts."}, {"ver": "v1.73.2", "zh": "50、100、200 回合的转职卡现在都支持长按查看候选技能详情，查看后可返回列表继续选择。", "en": "Turn-50, turn-100, and turn-200 advancement cards now support long-press details, with a return action to continue choosing."}, {"ver": "v1.73.1", "zh": "修复长战斗日志不自动换行的问题：主日志和结算日志现在会在长伤害串、连续数字或窄屏上自动断行，避免内容横向溢出。", "en": "Fixed long combat logs not wrapping: the main and settlement logs now break long damage sequences, continuous numbers, and narrow-screen content instead of overflowing horizontally."}, {"ver": "v1.73.0", "zh": "修复雪人封印自动释放：主动封印剩余回合内，治疗/炸弹不会被自动释放；冻结倒计时现在会在本次玩家行动（包括自动释放）完成后再递减。", "en": "Fixed Snowman freezes with auto-release enabled: Heal/Bomb can no longer auto-cast while the active remains frozen, and the freeze countdown now decrements after the full player action, including auto-release."}];   /* auto-injected by dr.sh embed-changelog（勿手改） */
+const VERSION='v1.73.5';
+const CHANGELOG_LINES=[{"ver": "v1.73.5", "zh": "修复回放结束时结算统计错误：死亡/破关页面现在显示录像真实结局的等级、金币、回合数和死亡信息。", "en": "Fixed incorrect replay settlement stats: death/clear screens now show the replay's actual final level, gold, turns, and death details."}, {"ver": "v1.73.4", "zh": "优化 50 回合转职长按详情的“效果”布局：固定左侧标签列，长文本在右侧内容列内稳定换行，不再挤压标签。", "en": "Improved the turn-50 advancement long-press details layout: the left label column is fixed and long effects wrap consistently in the content column."}, {"ver": "v1.73.3", "zh": "50、100、200 回合转职提示中明确显示“长按候选卡查看详情”。", "en": "Added an explicit “Long-press a choice for details” hint to the turn-50, turn-100, and turn-200 advancement prompts."}, {"ver": "v1.73.2", "zh": "50、100、200 回合的转职卡现在都支持长按查看候选技能详情，查看后可返回列表继续选择。", "en": "Turn-50, turn-100, and turn-200 advancement cards now support long-press details, with a return action to continue choosing."}, {"ver": "v1.73.1", "zh": "修复长战斗日志不自动换行的问题：主日志和结算日志现在会在长伤害串、连续数字或窄屏上自动断行，避免内容横向溢出。", "en": "Fixed long combat logs not wrapping: the main and settlement logs now break long damage sequences, continuous numbers, and narrow-screen content instead of overflowing horizontally."}];   /* auto-injected by dr.sh embed-changelog（勿手改） */
 const DEV=true;   // release build (DEV=false); dev build is dungeon-raid-dev.html (DEV=true)
 const REC_API='https://api.dungeonraid.win';   // 录像分享 API（Cloudflare Worker + KV）
 // 带种子随机数（mulberry32）：游戏全程用 rnd() 取代原生随机，配合录制种子可确定性重放
@@ -2570,18 +2570,20 @@ function gameOver(){
   busy=true;
   const durMs=playMs();   // 游玩时长（须在 stopReplay 清空 replayRec 之前取）
   const wasReplay=replaying;
+  const endRec=wasReplay ? replayRec : null;
+  const endPlayer=wasReplay ? JSON.parse(JSON.stringify(player)) : player;   // stopReplay 会恢复回放前状态，结算页必须使用回放终点快照
   if(rec){ rec.maxHp=player.maxHp; rec.level=player.level; rec.gold=player.gold; rec.turns=player.turns; rec.cleared=!!player.cleared; rec.token=rec.token||(player.token||''); rec.perks=player.chosenPerks.slice(); }
   if(wasReplay){ stopReplay(); }                 // 回放播到死亡：停止回放，照常显示死亡报告
   else { saveBest(); clearSave();
     try{ if(rec) localStorage.setItem(REC_LAST_KEY, JSON.stringify(rec)); }catch(e){}  // 保存本局完整录像供回放
   }
   // 死亡报告：血死时列伤害来源；死局时直接说明“被怪物淹没，无路可走”，避免把本回合零星伤害误当成死因
-  const dmg=player.dmgBy||{};
+  const dmg=endPlayer.dmgBy||{};
   const ents=Object.entries(dmg).filter(([k,v])=>v>0).sort((a,b)=>b[1]-a[1]);
   const tot=ents.reduce((s,[,v])=>s+v,0);
   let report='';
-  if(player.deathMode==='deadlock'){
-    report=`<div style="text-align:left;margin:4px 0 10px;background:var(--panel2);border-radius:10px;padding:8px 10px;font-size:12px;color:var(--dim);line-height:1.7">${player.finaleStarted
+  if(endPlayer.deathMode==='deadlock'){
+    report=`<div style="text-align:left;margin:4px 0 10px;background:var(--panel2);border-radius:10px;padding:8px 10px;font-size:12px;color:var(--dim);line-height:1.7">${endPlayer.finaleStarted
       ? tr('👑 被 Boss 淹没，无路可走。','👑 Overrun by bosses — no way out.')
       : tr('🪦 被怪物淹没，无路可走。','🪦 Overrun by monsters — no way out.')}</div>`;
   }else if(ents.length){
@@ -2595,7 +2597,7 @@ function gameOver(){
   const card=document.getElementById('card');
   card.innerHTML=`<h2 style="color:var(--hp);margin-bottom:4px">${tr('💀 你倒下了','💀 You fell')}</h2>
     <p style="margin-bottom:8px">${tr('地牢吞噬了又一位冒险者…','The dungeon claims another adventurer…')}</p>
-    <div style="font-size:14px;margin-bottom:8px">${tr('等级','Lv')} <b style="color:var(--gold)">${player.level}</b> · 💰<b style="color:var(--gold)">${player.gold}</b> · <b style="color:var(--gold)">${player.turns}</b> ${tr('回合','turns')}</div>
+    <div style="font-size:14px;margin-bottom:8px">${tr('等级','Lv')} <b style="color:var(--gold)">${endPlayer.level}</b> · 💰<b style="color:var(--gold)">${endPlayer.gold}</b> · <b style="color:var(--gold)">${endPlayer.turns}</b> ${tr('回合','turns')}</div>
     <div style="font-size:12px;color:var(--dim);margin:-4px 0 8px">⏱ ${tr('用时','Played')} ${fmtDur(durMs)}</div>
     ${report}
     ${settlementLogBox()}
@@ -2609,7 +2611,7 @@ function gameOver(){
     </div>
     <button class="btn" id="again">${tr('换个职业再来','Play again')}</button>`;
   document.getElementById('again').onclick=showRaceSelect;   // 重开直接到选种族（落地页仅 boot 看）
-  const finished=getLastRec();
+  const finished=endRec||getLastRec();
   wireEndButtons(finished);
   showOverlay();
   if(!DEV && !wasReplay && !headless && finished){
@@ -2625,6 +2627,8 @@ function onClear(){
   busy=true; player.cleared=true; ended=true;   // 破关也结束本局，封死后续存档
   const durMs=playMs();   // 游玩时长（须在 stopReplay 前取）
   const wasReplay=replaying;
+  const endRec=wasReplay ? replayRec : null;
+  const endPlayer=wasReplay ? JSON.parse(JSON.stringify(player)) : player;   // stopReplay 会恢复回放前状态，结算页必须使用回放终点快照
   for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const t=grid[r][c]; if(t&&t.bossId==='finale') grid[r][c]=null; }  // 移除终焉之主
   if(rec){ rec.maxHp=player.maxHp; rec.level=player.level; rec.gold=player.gold; rec.turns=player.turns; rec.cleared=!!player.cleared; rec.perks=player.chosenPerks.slice(); }
   if(wasReplay){ stopReplay(); }
@@ -2632,7 +2636,7 @@ function onClear(){
   const card=document.getElementById('card');
   card.innerHTML=`<h2 style="color:var(--gold);margin-bottom:4px">🏆 ${tr('破关！','CLEARED!')}</h2>
     <p style="line-height:1.6;margin-bottom:8px">${tr('🎉 终焉之主的浪潮退去，你撑过全部 10 波，成为第一个活着走出地牢的冒险者——「再无人生还」的传说终于有了结局。','🎉 The Overlord’s waves recede; you survived all 10 and became the first to walk out of the dungeon alive — the legend that “none returned” finally has its ending.')} <span style="color:var(--dim)">${tr('感谢游玩这份致敬之作 🙏','Thanks for playing this tribute 🙏')}</span></p>
-    <div style="font-size:14px;margin-bottom:8px">${tr('破关等级','Clear Lv')} <b style="color:var(--gold)">${player.level}</b> <span style="color:var(--dim);font-size:11px">${tr('越低越强','lower=better')}</span> · 💰<b style="color:var(--gold)">${player.gold}</b> · <b style="color:var(--gold)">${player.turns}</b> ${tr('回合','t')}</div>
+    <div style="font-size:14px;margin-bottom:8px">${tr('破关等级','Clear Lv')} <b style="color:var(--gold)">${endPlayer.level}</b> <span style="color:var(--dim);font-size:11px">${tr('越低越强','lower=better')}</span> · 💰<b style="color:var(--gold)">${endPlayer.gold}</b> · <b style="color:var(--gold)">${endPlayer.turns}</b> ${tr('回合','t')}</div>
     <div style="font-size:12px;color:var(--dim);margin:-4px 0 8px">⏱ ${tr('用时','Played')} ${fmtDur(durMs)}</div>
     ${settlementLogBox()}
     ${DEV?'':`<div id="rankBox" style="text-align:left;margin:4px 0 12px;background:var(--panel2);border-radius:10px;padding:6px 4px;min-height:20px"></div>`}
@@ -2645,7 +2649,7 @@ function onClear(){
     </div>
     <button class="btn" id="again">${tr('再来一局','Play again')}</button>`;
   document.getElementById('again').onclick=showRaceSelect;   // 重开直接到选种族（落地页仅 boot 看）
-  const finished=getLastRec();
+  const finished=endRec||getLastRec();
   wireEndButtons(finished);
   showOverlay();
   if(!DEV && !wasReplay && !headless && finished){
@@ -2734,6 +2738,7 @@ function approxPctLine(th, turns, level, gold, cleared){
   const pct = turns>=th.p5?5 : turns>=th.p10?10 : turns>=th.p30?30 : turns>=th.p50?50 : turns>=th.p70?70 : turns>=th.p90?90 : 100;
   return tr(`📊 本局未达上传门槛（需至少 ${th.upload_min_turns} 回合，或进入当前口径种族前10）；按开局快照估算，约超过 ${pct}% 对局`,`📊 Below upload threshold (need at least ${th.upload_min_turns} turns, or a current-scope race top 10); launch-time snapshot estimates you beat about ${pct}% of runs`);
 }
+
 // ==================== 排行榜浏览（人类 / AI 切换） ====================
 let lbAgent='human', lbBoard='top', lbRace='';   // 当前查看：human|ai，top(闯关·按回合)|clear(破关·按最低等级)，lbRace=''为全部种族
 function medal(i){ return i===0?'🥇':i===1?'🥈':i===2?'🥉':`#${i+1}`; }
