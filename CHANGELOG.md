@@ -1,3 +1,8 @@
+## [v1.74.1] - 2026-09-16
+
+- 修复种族选择卡长按不弹出详情的问题；短按仍直接开始该种族的新局。
+- Fixed race cards not opening their details on long press; a short press still starts a new run with that race.
+
 ## [v1.74.0] - 2026-09-16
 
 > Version-Impact: verify

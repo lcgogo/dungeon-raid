@@ -224,6 +224,7 @@ function showRaceSelect(){
     const b=document.createElement('button'); b.className='choice';
     b.innerHTML=`<b>${rc.e} ${L(rc.n)}</b><small style="white-space:pre-line">${L(rc.d)}</small>`;
     b.onclick=()=>freshStart(rc);
+    attachRaceChoicePreview(b, rc);
     if(idx===0){
       b.onpointerenter=()=>prefetchServerSeed(rc);
       b.onfocus=()=>prefetchServerSeed(rc);
@@ -239,6 +240,19 @@ function showRaceSelect(){
   back.onclick=()=>showClassSelect();
   card.appendChild(back);
   showOverlay();
+}
+function attachRaceChoicePreview(el, rc){
+  let timer=null, fired=false, sx=0, sy=0;
+  const clear=()=>{ if(timer){ clearTimeout(timer); timer=null; } };
+  el.addEventListener('pointerdown', e=>{ fired=false; sx=e.clientX; sy=e.clientY; clear();
+    timer=setTimeout(()=>{ timer=null; fired=true; busy=true; const card=document.getElementById('card');
+      card.innerHTML=`<h2>${rc.e} ${L(rc.n)}</h2><p style="font-size:13px;line-height:1.7;white-space:pre-line;text-align:left">${L(rc.d)}</p><button class="btn" id="racePrevClose" style="width:100%">${tr('返回种族列表','Back to races')}</button>`;
+      document.getElementById('racePrevClose').onclick=showRaceSelect; showOverlay(); }, 450); });
+  el.addEventListener('pointermove', e=>{ if(timer && (Math.abs(e.clientX-sx)>10 || Math.abs(e.clientY-sy)>10)) clear(); });
+  el.addEventListener('pointerup', clear);
+  el.addEventListener('pointercancel', clear);
+  el.addEventListener('pointerleave', clear);
+  el.addEventListener('click', e=>{ if(fired){ e.preventDefault(); e.stopImmediatePropagation(); fired=false; } }, true);
 }
 function importReplay(){
   const s=prompt(tr('粘贴录像 JSON：','Paste recording JSON:')); if(!s) return;
