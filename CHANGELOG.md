@@ -1,3 +1,10 @@
+## [v1.74.0] - 2026-09-16
+
+> Version-Impact: verify
+
+- 加强石像 Boss：生命值提高至同等级基础值的 2 倍，保留其无档位倍率和伤害反弹机制。
+- Strengthened the Statue boss: its HP is now 2× the same-level base value while retaining its no-tier-scaling and damage-reflection mechanics.
+
 ## [v1.73.5] - 2026-09-16
 
 - 修复回放结束时结算统计错误：死亡/破关页面现在显示录像真实结局的等级、金币、回合数和死亡信息。

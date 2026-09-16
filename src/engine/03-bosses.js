@@ -76,7 +76,7 @@ const BOSSES=[
         if(rr>=0) zombiePlagueFx({r:rr,c:cc});
         log(tr(`🧟 尸毒发作：流失 ${dmg} 生命（${Math.round(pct*100)}%）`,`🧟 Plague: −${dmg} HP (${Math.round(pct*100)}%)`), 'bad'); }
     } },
-  { id:'statue', emoji:'🗿', name:['石像','Statue'], quip:['打我？你打的是你自己。','Hit me? You are hitting yourself.'], monster:true, swordable:true, noTierScale:true,
+  { id:'statue', emoji:'🗿', name:['石像','Statue'], quip:['打我？你打的是你自己。','Hit me? You are hitting yourself.'], monster:true, swordable:true, noTierScale:true, hpMult:2,
     special:['受到的伤害真实反弹给你','Reflects damage taken as TRUE damage'],
     desc:['可以用{W}攻击它，但它【受到多少伤害，就把等量伤害当作真实伤害（无视护甲）反弹给你】！想杀它得先确保自己血够厚——别一刀连自己也送走。倒计时归零也会重击你。','You CAN hit it with a {WC}, but【whatever damage it takes is reflected back at you as TRUE damage (ignoring armor)】! Make sure you have the HP to survive the kill — do not one-shot yourself. It also strikes you when its timer hits 0.'] },
   { id:'pollution', emoji:'🦠', name:['污染怪','Corruptor'], quip:['你的心，我给染绿了。','I dyed your hearts rotten green.'], monster:true, noTierScale:true,
@@ -130,7 +130,8 @@ function spawnRandomBossTile(){
   const def=randomBossDef(), tier=1;   // 终焉浪潮用基础档：可被清掉，挑战在数量而非单体肉度
   const s=def.monster?enemyStats():bossStats();
   const cdv=Math.max(1,(s.cd!=null?s.cd:s.baseCd)+extraFoeCd());
-  grid[r][c]={type:'boss', bossId:def.id, tier, hp:s.hp, maxHp:s.hp, atk:s.atk, cd:cdv, baseCd:cdv};
+  const hp=s.hp*(def.hpMult||1);
+  grid[r][c]={type:'boss', bossId:def.id, tier, hp, maxHp:hp, atk:s.atk, cd:cdv, baseCd:cdv};
   if(def.onSpawn) def.onSpawn(grid[r][c]);
   addBossFx(r,c,false);
   return true;
@@ -302,7 +303,7 @@ function spawnBoss(force, exclude){
   const s = def.monster ? enemyStats() : bossStats();   // 怪属性型 Boss 用怪物数值
   const cdv = Math.max(1,(s.cd!=null ? s.cd : s.baseCd) + extraFoeCd());
   const mult = def.noTierScale ? 1 : tier;              // 刺客等：血量/攻击始终同级怪物，不吃档位倍率
-  const hp=s.hp*mult, atk=s.atk*mult;
+  const hp=s.hp*mult*(def.hpMult||1), atk=s.atk*mult;
   grid[r][c]={type:'boss', bossId:def.id, tier, hp, maxHp:hp, atk, cd:cdv, baseCd:cdv};
   addBossFx(r,c,false);
   const tlabel = ` Lv${tier}`;   // 始终标注档位（含一阶 Lv1）

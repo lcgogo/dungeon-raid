@@ -248,8 +248,8 @@ const CONTENT = {
 if('serviceWorker' in navigator) window.addEventListener('load',()=>navigator.serviceWorker.register('/sw.js').catch(()=>{}));
 //==================== 配置 ====================
 // 版本号 v主.次.修：不影响 verify/replay 兼容边界的小改动改"修"；凡是影响 verify/replay/版本分桶/release 验证语义的改动都改"次"；大版本变更需先确认。页面底部显示。
-const VERSION='v1.73.5';
-const CHANGELOG_LINES=[{"ver": "v1.73.5", "zh": "修复回放结束时结算统计错误：死亡/破关页面现在显示录像真实结局的等级、金币、回合数和死亡信息。", "en": "Fixed incorrect replay settlement stats: death/clear screens now show the replay's actual final level, gold, turns, and death details."}, {"ver": "v1.73.4", "zh": "优化 50 回合转职长按详情的“效果”布局：固定左侧标签列，长文本在右侧内容列内稳定换行，不再挤压标签。", "en": "Improved the turn-50 advancement long-press details layout: the left label column is fixed and long effects wrap consistently in the content column."}, {"ver": "v1.73.3", "zh": "50、100、200 回合转职提示中明确显示“长按候选卡查看详情”。", "en": "Added an explicit “Long-press a choice for details” hint to the turn-50, turn-100, and turn-200 advancement prompts."}, {"ver": "v1.73.2", "zh": "50、100、200 回合的转职卡现在都支持长按查看候选技能详情，查看后可返回列表继续选择。", "en": "Turn-50, turn-100, and turn-200 advancement cards now support long-press details, with a return action to continue choosing."}, {"ver": "v1.73.1", "zh": "修复长战斗日志不自动换行的问题：主日志和结算日志现在会在长伤害串、连续数字或窄屏上自动断行，避免内容横向溢出。", "en": "Fixed long combat logs not wrapping: the main and settlement logs now break long damage sequences, continuous numbers, and narrow-screen content instead of overflowing horizontally."}];   /* auto-injected by dr.sh embed-changelog（勿手改） */
+const VERSION='v1.74.0';
+const CHANGELOG_LINES=[{"ver": "v1.74.0", "zh": "加强石像 Boss：生命值提高至同等级基础值的 2 倍，保留其无档位倍率和伤害反弹机制。", "en": "Strengthened the Statue boss: its HP is now 2× the same-level base value while retaining its no-tier-scaling and damage-reflection mechanics."}, {"ver": "v1.73.5", "zh": "修复回放结束时结算统计错误：死亡/破关页面现在显示录像真实结局的等级、金币、回合数和死亡信息。", "en": "Fixed incorrect replay settlement stats: death/clear screens now show the replay's actual final level, gold, turns, and death details."}, {"ver": "v1.73.4", "zh": "优化 50 回合转职长按详情的“效果”布局：固定左侧标签列，长文本在右侧内容列内稳定换行，不再挤压标签。", "en": "Improved the turn-50 advancement long-press details layout: the left label column is fixed and long effects wrap consistently in the content column."}, {"ver": "v1.73.3", "zh": "50、100、200 回合转职提示中明确显示“长按候选卡查看详情”。", "en": "Added an explicit “Long-press a choice for details” hint to the turn-50, turn-100, and turn-200 advancement prompts."}, {"ver": "v1.73.2", "zh": "50、100、200 回合的转职卡现在都支持长按查看候选技能详情，查看后可返回列表继续选择。", "en": "Turn-50, turn-100, and turn-200 advancement cards now support long-press details, with a return action to continue choosing."}];   /* auto-injected by dr.sh embed-changelog（勿手改） */
 const DEV=true;   // release build (DEV=false); dev build is dungeon-raid-dev.html (DEV=true)
 const REC_API='https://api.dungeonraid.win';   // 录像分享 API（Cloudflare Worker + KV）
 // 带种子随机数（mulberry32）：游戏全程用 rnd() 取代原生随机，配合录制种子可确定性重放
@@ -435,7 +435,7 @@ const BOSSES=[
         if(rr>=0) zombiePlagueFx({r:rr,c:cc});
         log(tr(`🧟 尸毒发作：流失 ${dmg} 生命（${Math.round(pct*100)}%）`,`🧟 Plague: −${dmg} HP (${Math.round(pct*100)}%)`), 'bad'); }
     } },
-  { id:'statue', emoji:'🗿', name:['石像','Statue'], quip:['打我？你打的是你自己。','Hit me? You are hitting yourself.'], monster:true, swordable:true, noTierScale:true,
+  { id:'statue', emoji:'🗿', name:['石像','Statue'], quip:['打我？你打的是你自己。','Hit me? You are hitting yourself.'], monster:true, swordable:true, noTierScale:true, hpMult:2,
     special:['受到的伤害真实反弹给你','Reflects damage taken as TRUE damage'],
     desc:['可以用{W}攻击它，但它【受到多少伤害，就把等量伤害当作真实伤害（无视护甲）反弹给你】！想杀它得先确保自己血够厚——别一刀连自己也送走。倒计时归零也会重击你。','You CAN hit it with a {WC}, but【whatever damage it takes is reflected back at you as TRUE damage (ignoring armor)】! Make sure you have the HP to survive the kill — do not one-shot yourself. It also strikes you when its timer hits 0.'] },
   { id:'pollution', emoji:'🦠', name:['污染怪','Corruptor'], quip:['你的心，我给染绿了。','I dyed your hearts rotten green.'], monster:true, noTierScale:true,
@@ -489,7 +489,8 @@ function spawnRandomBossTile(){
   const def=randomBossDef(), tier=1;   // 终焉浪潮用基础档：可被清掉，挑战在数量而非单体肉度
   const s=def.monster?enemyStats():bossStats();
   const cdv=Math.max(1,(s.cd!=null?s.cd:s.baseCd)+extraFoeCd());
-  grid[r][c]={type:'boss', bossId:def.id, tier, hp:s.hp, maxHp:s.hp, atk:s.atk, cd:cdv, baseCd:cdv};
+  const hp=s.hp*(def.hpMult||1);
+  grid[r][c]={type:'boss', bossId:def.id, tier, hp, maxHp:hp, atk:s.atk, cd:cdv, baseCd:cdv};
   if(def.onSpawn) def.onSpawn(grid[r][c]);
   addBossFx(r,c,false);
   return true;
@@ -661,7 +662,7 @@ function spawnBoss(force, exclude){
   const s = def.monster ? enemyStats() : bossStats();   // 怪属性型 Boss 用怪物数值
   const cdv = Math.max(1,(s.cd!=null ? s.cd : s.baseCd) + extraFoeCd());
   const mult = def.noTierScale ? 1 : tier;              // 刺客等：血量/攻击始终同级怪物，不吃档位倍率
-  const hp=s.hp*mult, atk=s.atk*mult;
+  const hp=s.hp*mult*(def.hpMult||1), atk=s.atk*mult;
   grid[r][c]={type:'boss', bossId:def.id, tier, hp, maxHp:hp, atk, cd:cdv, baseCd:cdv};
   addBossFx(r,c,false);
   const tlabel = ` Lv${tier}`;   // 始终标注档位（含一阶 Lv1）
