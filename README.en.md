@@ -25,7 +25,7 @@ The two builds keep **separate, non-overwriting saves** (Dev uses its own localS
 
 The current Dev build is `v1.74.2`; fixed mobile browser gestures canceling turn-50 class-card long-press previews, while short taps still select the class. Race cards support long-press details for their traits and weaknesses, and the Statue boss has 2× the same-level base HP. Replay settlement screens show the replay's actual final level, gold, and turns instead of the state from before replay started. Turn-50 advancement details use a stable label/content layout so long effects wrap consistently. Turn-50, turn-100, and turn-200 advancement prompts tell players to long-press a choice for details, while turn-350 Crossover Skill choices have an `ⓘ` details button. Long combat logs wrap automatically. Frozen Heal/Bomb actives do not auto-cast during a Snowman freeze. Multi-kills of normal enemies grant bonus gold equal to the number killed. The DEV start card shows the version directly. The installed PWA opens the home page first, where you can choose Release or Dev. Source lives under `src/` and the self-contained HTML is regenerated with `node build/build.js`.
 
-Turn-50 class choices also have an `ⓘ` entry for full details, including the Tier-1 active and the Tier-2 passive locked at turn 100.
+The current Dev build is `v1.74.5`; the race list now uses a dedicated scroll box with the Back button outside it. Race selection supports long-press or `ⓘ` details for every turn-50 class, active skill, and full effect. Turn-50 class choices also have an `ⓘ` entry for full details, including the Tier-1 active and the Tier-2 passive locked at turn 100.
 
 ## 🧩 Core Gameplay
 

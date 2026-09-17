@@ -1,3 +1,13 @@
+## [v1.74.5] - 2026-09-17
+
+- 选种族列表改为独立滚动框，返回按钮固定在列表外；小屏幕上也不会被种族卡遮住。
+- Made the race choices a dedicated scroll box with the Back button outside it, keeping navigation visible on small screens.
+
+## [v1.74.4] - 2026-09-17
+
+- 选种族时支持长按或点 `ⓘ` 查看该种族全部 50 回合职业、主动技能和完整效果。
+- Race selection now supports long-press or `ⓘ` details for every turn-50 class, active skill, and full effect in that race.
+
 ## [v1.74.3] - 2026-09-17
 
 - 重做 50 回合转职详情入口：候选卡支持长按和 `ⓘ` 点击，详情明确显示一阶主动技能与 100 回合锁定的二阶被动及效果。

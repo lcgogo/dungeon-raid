@@ -248,8 +248,8 @@ const CONTENT = {
 if('serviceWorker' in navigator) window.addEventListener('load',()=>navigator.serviceWorker.register('/sw.js').catch(()=>{}));
 //==================== 配置 ====================
 // 版本号 v主.次.修：不影响 verify/replay 兼容边界的小改动改"修"；凡是影响 verify/replay/版本分桶/release 验证语义的改动都改"次"；大版本变更需先确认。页面底部显示。
-const VERSION='v1.74.3';
-const CHANGELOG_LINES=[{"ver": "v1.74.3", "zh": "重做 50 回合转职详情入口：候选卡支持长按和 `ⓘ` 点击，详情明确显示一阶主动技能与 100 回合锁定的二阶被动及效果。", "en": "Reworked turn-50 class details: each choice now supports long-press and an `ⓘ` button, clearly showing its Tier-1 active and the Tier-2 passive locked at turn 100."}, {"ver": "v1.74.2", "zh": "修复 50 回合转职候选卡在移动端长按时可能被系统手势取消的问题；长按预览二阶被动，轻点仍正常选择职业。", "en": "Fixed mobile long-press previews on turn-50 class choices being canceled by browser gestures; short taps still select the class."}, {"ver": "v1.74.1", "zh": "修复种族选择卡长按不弹出详情的问题；短按仍直接开始该种族的新局。", "en": "Fixed race cards not opening their details on long press; a short press still starts a new run with that race."}, {"ver": "v1.74.0", "zh": "加强石像 Boss：生命值提高至同等级基础值的 2 倍，保留其无档位倍率和伤害反弹机制。", "en": "Strengthened the Statue boss: its HP is now 2× the same-level base value while retaining its no-tier-scaling and damage-reflection mechanics."}, {"ver": "v1.73.5", "zh": "修复回放结束时结算统计错误：死亡/破关页面现在显示录像真实结局的等级、金币、回合数和死亡信息。", "en": "Fixed incorrect replay settlement stats: death/clear screens now show the replay's actual final level, gold, turns, and death details."}];   /* auto-injected by dr.sh embed-changelog（勿手改） */
+const VERSION='v1.74.5';
+const CHANGELOG_LINES=[{"ver": "v1.74.5", "zh": "选种族列表改为独立滚动框，返回按钮固定在列表外；小屏幕上也不会被种族卡遮住。", "en": "Made the race choices a dedicated scroll box with the Back button outside it, keeping navigation visible on small screens."}, {"ver": "v1.74.4", "zh": "选种族时支持长按或点 `ⓘ` 查看该种族全部 50 回合职业、主动技能和完整效果。", "en": "Race selection now supports long-press or `ⓘ` details for every turn-50 class, active skill, and full effect in that race."}, {"ver": "v1.74.3", "zh": "重做 50 回合转职详情入口：候选卡支持长按和 `ⓘ` 点击，详情明确显示一阶主动技能与 100 回合锁定的二阶被动及效果。", "en": "Reworked turn-50 class details: each choice now supports long-press and an `ⓘ` button, clearly showing its Tier-1 active and the Tier-2 passive locked at turn 100."}, {"ver": "v1.74.2", "zh": "修复 50 回合转职候选卡在移动端长按时可能被系统手势取消的问题；长按预览二阶被动，轻点仍正常选择职业。", "en": "Fixed mobile long-press previews on turn-50 class choices being canceled by browser gestures; short taps still select the class."}, {"ver": "v1.74.1", "zh": "修复种族选择卡长按不弹出详情的问题；短按仍直接开始该种族的新局。", "en": "Fixed race cards not opening their details on long press; a short press still starts a new run with that race."}];   /* auto-injected by dr.sh embed-changelog（勿手改） */
 const DEV=true;   // release build (DEV=false); dev build is dungeon-raid-dev.html (DEV=true)
 const REC_API='https://api.dungeonraid.win';   // 录像分享 API（Cloudflare Worker + KV）
 // 带种子随机数（mulberry32）：游戏全程用 rnd() 取代原生随机，配合录制种子可确定性重放
@@ -902,13 +902,17 @@ function showRaceSelect(){
   const bestLine = best ? `<p>${tr('🏆 最佳纪录：等级','🏆 Best: Level')} ${best.level} · 💰${best.gold}</p>` : '';
   card.innerHTML=`<h2>${tr('选择种族','Choose your race')}</h2>${bestLine}
     <p style="font-size:12px;color:var(--dim);line-height:1.6">${tr('击败第 50 回合的 Boss 即可转职，解锁职业的主动技能；之后随着探险深入，还会解锁更强大的技能……','Beat the turn-50 boss to advance to a class and unlock its active skill; delve deeper to unlock ever more powerful skills…')}</p>`;
+  const raceList=document.createElement('div');
+  raceList.style.cssText='max-height:52vh;overflow-y:auto;overscroll-behavior:contain;padding:1px 3px 2px;touch-action:pan-y;';
+  card.appendChild(raceList);
   const firstRc=preferredSeedRace();
   if(firstRc) prefetchServerSeed(firstRc);
   RACES.forEach((rc,idx)=>{
     const b=document.createElement('button'); b.className='choice';
-    b.innerHTML=`<b>${rc.e} ${L(rc.n)}</b><small style="white-space:pre-line">${L(rc.d)}</small>`;
+    b.innerHTML=`<b>${rc.e} ${L(rc.n)} <span class="raceInfo" aria-label="${tr('查看种族与职业详情','View race and class details')}" style="float:right;color:var(--gold);font-size:16px">ⓘ</span></b><small style="white-space:pre-line">${L(rc.d)}</small>`;
     b.onclick=()=>freshStart(rc);
     attachRaceChoicePreview(b, rc);
+    b.addEventListener('click', e=>{ if(e.target.closest('.raceInfo')){ e.preventDefault(); e.stopImmediatePropagation(); showRacePreview(rc); } }, true);
     if(idx===0){
       b.onpointerenter=()=>prefetchServerSeed(rc);
       b.onfocus=()=>prefetchServerSeed(rc);
@@ -917,7 +921,7 @@ function showRaceSelect(){
       b.onpointerenter=()=>prefetchServerSeed(rc);
       b.onfocus=()=>prefetchServerSeed(rc);
     }
-    card.appendChild(b);
+    raceList.appendChild(b);
   });
   const back=document.createElement('button'); back.className='btn'; back.style.marginTop='4px';
   back.textContent='← '+tr('返回','Back');
@@ -925,17 +929,33 @@ function showRaceSelect(){
   card.appendChild(back);
   showOverlay();
 }
+function racePreviewData(rc){
+  const path=RACE_PATHS[rc.id];
+  const classes=(path&&path.t1||[]).map(id=>{
+    const def=TIER1[id];
+    return def&&def.skill ? {name:L(def.n), skill:L(def.skill.name), short:L(def.skill.short), desc:L(def.skill.desc||def.skill.short)} : null;
+  }).filter(Boolean);
+  return {classes};
+}
+function showRacePreview(rc){
+  const info=racePreviewData(rc);
+  busy=true;
+  const classes=info.classes.map((c,i)=>`<section style="text-align:left;padding:8px 2px;border-bottom:1px solid #3a2d4d"><b style="color:var(--gold)">${i+1}. ${c.name}</b><div style="margin-top:3px"><strong>${c.skill}</strong> · ${c.short}</div><small style="display:block;margin-top:3px;color:var(--dim);line-height:1.45">${c.desc}</small></section>`).join('');
+  const card=document.getElementById('card');
+  card.innerHTML=`<h2>${rc.e} ${L(rc.n)}</h2><p style="font-size:13px;line-height:1.6;white-space:pre-line;text-align:left">${L(rc.d)}</p><h3 style="margin:8px 0 2px;color:var(--gold);font-size:14px;text-align:left">${tr('50回合职业与主动技能','Turn-50 classes and active skills')}</h3><div>${classes}</div><button class="btn" id="racePrevClose" style="width:100%">${tr('返回种族列表','Back to races')}</button>`;
+  document.getElementById('racePrevClose').onclick=showRaceSelect;
+  showOverlay();
+}
 function attachRaceChoicePreview(el, rc){
+  if(el.style){ el.style.touchAction='pan-y'; el.style.webkitTouchCallout='none'; }
   let timer=null, fired=false, sx=0, sy=0;
   const clear=()=>{ if(timer){ clearTimeout(timer); timer=null; } };
+  el.addEventListener('contextmenu', e=>{ e.preventDefault(); });
   el.addEventListener('pointerdown', e=>{ fired=false; sx=e.clientX; sy=e.clientY; clear();
-    timer=setTimeout(()=>{ timer=null; fired=true; busy=true; const card=document.getElementById('card');
-      card.innerHTML=`<h2>${rc.e} ${L(rc.n)}</h2><p style="font-size:13px;line-height:1.7;white-space:pre-line;text-align:left">${L(rc.d)}</p><button class="btn" id="racePrevClose" style="width:100%">${tr('返回种族列表','Back to races')}</button>`;
-      document.getElementById('racePrevClose').onclick=showRaceSelect; showOverlay(); }, 450); });
+    timer=setTimeout(()=>{ timer=null; showRacePreview(rc); fired=true; }, 450); });
   el.addEventListener('pointermove', e=>{ if(timer && (Math.abs(e.clientX-sx)>10 || Math.abs(e.clientY-sy)>10)) clear(); });
   el.addEventListener('pointerup', clear);
   el.addEventListener('pointercancel', clear);
-  el.addEventListener('pointerleave', clear);
   el.addEventListener('click', e=>{ if(fired){ e.preventDefault(); e.stopImmediatePropagation(); fired=false; } }, true);
 }
 function importReplay(){

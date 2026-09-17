@@ -218,13 +218,17 @@ function showRaceSelect(){
   const bestLine = best ? `<p>${tr('🏆 最佳纪录：等级','🏆 Best: Level')} ${best.level} · 💰${best.gold}</p>` : '';
   card.innerHTML=`<h2>${tr('选择种族','Choose your race')}</h2>${bestLine}
     <p style="font-size:12px;color:var(--dim);line-height:1.6">${tr('击败第 50 回合的 Boss 即可转职，解锁职业的主动技能；之后随着探险深入，还会解锁更强大的技能……','Beat the turn-50 boss to advance to a class and unlock its active skill; delve deeper to unlock ever more powerful skills…')}</p>`;
+  const raceList=document.createElement('div');
+  raceList.style.cssText='max-height:52vh;overflow-y:auto;overscroll-behavior:contain;padding:1px 3px 2px;touch-action:pan-y;';
+  card.appendChild(raceList);
   const firstRc=preferredSeedRace();
   if(firstRc) prefetchServerSeed(firstRc);
   RACES.forEach((rc,idx)=>{
     const b=document.createElement('button'); b.className='choice';
-    b.innerHTML=`<b>${rc.e} ${L(rc.n)}</b><small style="white-space:pre-line">${L(rc.d)}</small>`;
+    b.innerHTML=`<b>${rc.e} ${L(rc.n)} <span class="raceInfo" aria-label="${tr('查看种族与职业详情','View race and class details')}" style="float:right;color:var(--gold);font-size:16px">ⓘ</span></b><small style="white-space:pre-line">${L(rc.d)}</small>`;
     b.onclick=()=>freshStart(rc);
     attachRaceChoicePreview(b, rc);
+    b.addEventListener('click', e=>{ if(e.target.closest('.raceInfo')){ e.preventDefault(); e.stopImmediatePropagation(); showRacePreview(rc); } }, true);
     if(idx===0){
       b.onpointerenter=()=>prefetchServerSeed(rc);
       b.onfocus=()=>prefetchServerSeed(rc);
@@ -233,7 +237,7 @@ function showRaceSelect(){
       b.onpointerenter=()=>prefetchServerSeed(rc);
       b.onfocus=()=>prefetchServerSeed(rc);
     }
-    card.appendChild(b);
+    raceList.appendChild(b);
   });
   const back=document.createElement('button'); back.className='btn'; back.style.marginTop='4px';
   back.textContent='← '+tr('返回','Back');
@@ -241,17 +245,33 @@ function showRaceSelect(){
   card.appendChild(back);
   showOverlay();
 }
+function racePreviewData(rc){
+  const path=RACE_PATHS[rc.id];
+  const classes=(path&&path.t1||[]).map(id=>{
+    const def=TIER1[id];
+    return def&&def.skill ? {name:L(def.n), skill:L(def.skill.name), short:L(def.skill.short), desc:L(def.skill.desc||def.skill.short)} : null;
+  }).filter(Boolean);
+  return {classes};
+}
+function showRacePreview(rc){
+  const info=racePreviewData(rc);
+  busy=true;
+  const classes=info.classes.map((c,i)=>`<section style="text-align:left;padding:8px 2px;border-bottom:1px solid #3a2d4d"><b style="color:var(--gold)">${i+1}. ${c.name}</b><div style="margin-top:3px"><strong>${c.skill}</strong> · ${c.short}</div><small style="display:block;margin-top:3px;color:var(--dim);line-height:1.45">${c.desc}</small></section>`).join('');
+  const card=document.getElementById('card');
+  card.innerHTML=`<h2>${rc.e} ${L(rc.n)}</h2><p style="font-size:13px;line-height:1.6;white-space:pre-line;text-align:left">${L(rc.d)}</p><h3 style="margin:8px 0 2px;color:var(--gold);font-size:14px;text-align:left">${tr('50回合职业与主动技能','Turn-50 classes and active skills')}</h3><div>${classes}</div><button class="btn" id="racePrevClose" style="width:100%">${tr('返回种族列表','Back to races')}</button>`;
+  document.getElementById('racePrevClose').onclick=showRaceSelect;
+  showOverlay();
+}
 function attachRaceChoicePreview(el, rc){
+  if(el.style){ el.style.touchAction='pan-y'; el.style.webkitTouchCallout='none'; }
   let timer=null, fired=false, sx=0, sy=0;
   const clear=()=>{ if(timer){ clearTimeout(timer); timer=null; } };
+  el.addEventListener('contextmenu', e=>{ e.preventDefault(); });
   el.addEventListener('pointerdown', e=>{ fired=false; sx=e.clientX; sy=e.clientY; clear();
-    timer=setTimeout(()=>{ timer=null; fired=true; busy=true; const card=document.getElementById('card');
-      card.innerHTML=`<h2>${rc.e} ${L(rc.n)}</h2><p style="font-size:13px;line-height:1.7;white-space:pre-line;text-align:left">${L(rc.d)}</p><button class="btn" id="racePrevClose" style="width:100%">${tr('返回种族列表','Back to races')}</button>`;
-      document.getElementById('racePrevClose').onclick=showRaceSelect; showOverlay(); }, 450); });
+    timer=setTimeout(()=>{ timer=null; showRacePreview(rc); fired=true; }, 450); });
   el.addEventListener('pointermove', e=>{ if(timer && (Math.abs(e.clientX-sx)>10 || Math.abs(e.clientY-sy)>10)) clear(); });
   el.addEventListener('pointerup', clear);
   el.addEventListener('pointercancel', clear);
-  el.addEventListener('pointerleave', clear);
   el.addEventListener('click', e=>{ if(fired){ e.preventDefault(); e.stopImmediatePropagation(); fired=false; } }, true);
 }
 function importReplay(){
