@@ -284,15 +284,25 @@ function tierPreviewData(tier, id){
   if(tier===1){
     const t1=TIER1[id], t2Id=CLASS_T2[id], t2=t2Id&&TIER2[t2Id];
     if(!t1||!t1.skill||!t2) return null;
-    return {icon:'🌟', title:`${L(t1.n)} → ${L(t2.n)}`,
-      desc:`${tr('100回合锁定二阶技能','Locked Tier-2 passive at turn 100')}<br><span style="color:#caa6e6">${tr('主动','Active')}：${L(t1.skill.name)} · ${L(t1.skill.short)}</span>`,
-      rows:[[tr('职业主动','Active'),`${L(t1.skill.name)} · ${L(t1.skill.short)}`],[tr('锁定二阶','Locked Tier-2'),`${L(t2.n)}`],[tr('效果','Effect'),`${L(t2.d)}`]]};
+    return {icon:'🌟', title:`${L(t1.n)} · ${tr('技能详情','Skill details')}`,
+      desc:tr('50回合获得一阶主动；100回合自动获得该职业锁定的二阶被动','Gain the Tier-1 active at turn 50; the class-locked Tier-2 passive is granted automatically at turn 100'),
+      rows:[[tr('50回合·一阶主动','Turn 50 · Tier 1 active'),`${L(t1.skill.name)} · ${L(t1.skill.short)}`],[tr('100回合·二阶被动','Turn 100 · Tier 2 passive'),`${L(t2.n)}`],[tr('二阶效果','Tier-2 effect'),`${L(t2.d)}`]]};
   }
   const def=TIER2[id];
   if(!def) return null;
   return {icon:tier===2?'🌟':'⚡', title:L(def.n),
     desc:tier===2?tr('100回合获得的职业专属被动','Class passive gained at turn 100'):tr('200回合获得的本族被动','Race passive gained at turn 200'),
     rows:[[tr('技能','Skill'),L(def.n)],[tr('效果','Effect'),L(def.d)]]};
+}
+function showTierPreview(tier, id){
+  const info=tierPreviewData(tier,id); if(!info) return false;
+  busy=true;
+  const rows=info.rows.map(([k,v])=>`<div style="display:grid;grid-template-columns:116px minmax(0,1fr);gap:10px;align-items:start;padding:8px 2px;border-bottom:1px solid #3a2d4d"><span style="color:var(--dim);min-width:0">${k}</span><b style="min-width:0;text-align:right;overflow-wrap:anywhere;word-break:break-word">${v}</b></div>`).join('');
+  const card=document.getElementById('card');
+  card.innerHTML=`<h2>${info.icon} ${info.title}</h2><p style="font-size:13px;line-height:1.5">${info.desc}</p><div style="text-align:left;font-size:13px;margin:0 0 14px">${rows}</div><button class="btn" id="tierPrevClose" style="width:100%">${tr('返回职业列表','Back to classes')}</button>`;
+  document.getElementById('tierPrevClose').onclick=()=>showTierSelect(tier);
+  showOverlay();
+  return true;
 }
 function attachTierChoicePreview(el, tier, id){
   // Keep mobile long-presses from becoming scroll/context-menu gestures.
@@ -302,7 +312,7 @@ function attachTierChoicePreview(el, tier, id){
   el.addEventListener('contextmenu', e=>{ e.preventDefault(); });
   el.addEventListener('pointerdown', e=>{ if(replaying) return; fired=false; sx=e.clientX; sy=e.clientY; clear();
     try{ el.setPointerCapture(e.pointerId); }catch(_){}
-    timer=setTimeout(()=>{ timer=null; const info=tierPreviewData(tier,id); if(!info) return; fired=true; busy=true; const rows=info.rows.map(([k,v])=>`<div style="display:grid;grid-template-columns:72px minmax(0,1fr);gap:10px;align-items:start;padding:7px 2px;border-bottom:1px solid #3a2d4d"><span style="color:var(--dim);min-width:0">${k}</span><b style="min-width:0;text-align:right;overflow-wrap:anywhere;word-break:break-word">${v}</b></div>`).join(''); const card=document.getElementById('card'); card.innerHTML=`<h2>${info.icon} ${info.title}</h2><p style="font-size:13px;line-height:1.5">${info.desc}</p><div style="text-align:left;font-size:13px;margin:0 0 14px">${rows}</div><button class="btn" id="tierPrevClose" style="width:100%">${tr('关闭','Close')}</button>`; document.getElementById('tierPrevClose').onclick=()=>showTierSelect(tier); showOverlay(); }, 450); });
+    timer=setTimeout(()=>{ timer=null; if(showTierPreview(tier,id)) fired=true; }, 450); });
   el.addEventListener('pointermove', e=>{ if(timer && (Math.abs(e.clientX-sx)>10 || Math.abs(e.clientY-sy)>10)) clear(); });
   el.addEventListener('pointerup', clear);
   el.addEventListener('pointercancel', clear);
@@ -331,8 +341,9 @@ function showTierSelect(tier){
         + `<br>${tr('主动','Active')}【${L(def.skill.name)}】${L(def.skill.short)}`
         + (def.passive?`<br>${tr('被动','Passive')}：${L(def.passive)}`:'')
       : L(def.d);
-    b.innerHTML=`<b>${L(def.n)}</b><small>${detail}</small>`;
+    b.innerHTML=`<b>${L(def.n)} <span class="tierInfo" aria-label="${tr('查看技能详情','View skill details')}" style="float:right;color:var(--gold);font-size:16px">ⓘ</span></b><small>${detail}</small>`;
     attachTierChoicePreview(b, tier, id);
+    b.addEventListener('click', e=>{ if(e.target.closest('.tierInfo')){ e.preventDefault(); e.stopImmediatePropagation(); showTierPreview(tier,id); } }, true);
     b.onclick=()=>{
       recAct(['t', tier, id]);   // 录制转职选择
       if(tier===1){ player.tier1=normalizeClassId(id); }

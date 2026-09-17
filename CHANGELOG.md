@@ -1,3 +1,8 @@
+## [v1.74.3] - 2026-09-17
+
+- 重做 50 回合转职详情入口：候选卡支持长按和 `ⓘ` 点击，详情明确显示一阶主动技能与 100 回合锁定的二阶被动及效果。
+- Reworked turn-50 class details: each choice now supports long-press and an `ⓘ` button, clearly showing its Tier-1 active and the Tier-2 passive locked at turn 100.
+
 ## [v1.74.2] - 2026-09-17
 
 - 修复 50 回合转职候选卡在移动端长按时可能被系统手势取消的问题；长按预览二阶被动，轻点仍正常选择职业。
