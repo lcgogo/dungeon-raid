@@ -1,3 +1,8 @@
+## [v1.74.6] - 2026-09-17
+
+- 修复种族详情中职业列表过长导致内容遮挡的问题；职业详情改为卡片内部独立滚动，返回按钮始终可见。
+- Fixed race-detail overlap from long class lists by putting class details in an inner scroll area while keeping Back visible.
+
 ## [v1.74.5] - 2026-09-17
 
 - 选种族列表改为独立滚动框，返回按钮固定在列表外；小屏幕上也不会被种族卡遮住。

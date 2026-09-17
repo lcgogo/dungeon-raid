@@ -258,7 +258,7 @@ function showRacePreview(rc){
   busy=true;
   const classes=info.classes.map((c,i)=>`<section style="text-align:left;padding:8px 2px;border-bottom:1px solid #3a2d4d"><b style="color:var(--gold)">${i+1}. ${c.name}</b><div style="margin-top:3px"><strong>${c.skill}</strong> · ${c.short}</div><small style="display:block;margin-top:3px;color:var(--dim);line-height:1.45">${c.desc}</small></section>`).join('');
   const card=document.getElementById('card');
-  card.innerHTML=`<h2>${rc.e} ${L(rc.n)}</h2><p style="font-size:13px;line-height:1.6;white-space:pre-line;text-align:left">${L(rc.d)}</p><h3 style="margin:8px 0 2px;color:var(--gold);font-size:14px;text-align:left">${tr('50回合职业与主动技能','Turn-50 classes and active skills')}</h3><div>${classes}</div><button class="btn" id="racePrevClose" style="width:100%">${tr('返回种族列表','Back to races')}</button>`;
+  card.innerHTML=`<h2>${rc.e} ${L(rc.n)}</h2><p style="font-size:13px;line-height:1.6;white-space:pre-line;text-align:left">${L(rc.d)}</p><h3 style="margin:8px 0 2px;color:var(--gold);font-size:14px;text-align:left">${tr('50回合职业与主动技能','Turn-50 classes and active skills')}</h3><div style="max-height:45vh;overflow-y:auto;overscroll-behavior:contain;padding:0 4px 2px;text-align:left;touch-action:pan-y">${classes}</div><button class="btn" id="racePrevClose" style="width:100%">${tr('返回种族列表','Back to races')}</button>`;
   document.getElementById('racePrevClose').onclick=showRaceSelect;
   showOverlay();
 }

@@ -27,6 +27,8 @@ The current Dev build is `v1.74.2`; fixed mobile browser gestures canceling turn
 
 The current Dev build is `v1.74.5`; the race list now uses a dedicated scroll box with the Back button outside it. Race selection supports long-press or `ⓘ` details for every turn-50 class, active skill, and full effect. Turn-50 class choices also have an `ⓘ` entry for full details, including the Tier-1 active and the Tier-2 passive locked at turn 100.
 
+The race-detail class list uses an inner scroll area so the Back button remains visible.
+
 ## 🧩 Core Gameplay
 
 - **Drag to connect** 2 or more **adjacent same-type** tiles to clear them (horizontal, vertical, and diagonal — all 8 directions).
