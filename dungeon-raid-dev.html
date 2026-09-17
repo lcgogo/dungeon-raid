@@ -248,8 +248,8 @@ const CONTENT = {
 if('serviceWorker' in navigator) window.addEventListener('load',()=>navigator.serviceWorker.register('/sw.js').catch(()=>{}));
 //==================== 配置 ====================
 // 版本号 v主.次.修：不影响 verify/replay 兼容边界的小改动改"修"；凡是影响 verify/replay/版本分桶/release 验证语义的改动都改"次"；大版本变更需先确认。页面底部显示。
-const VERSION='v1.74.1';
-const CHANGELOG_LINES=[{"ver": "v1.74.1", "zh": "修复种族选择卡长按不弹出详情的问题；短按仍直接开始该种族的新局。", "en": "Fixed race cards not opening their details on long press; a short press still starts a new run with that race."}, {"ver": "v1.74.0", "zh": "加强石像 Boss：生命值提高至同等级基础值的 2 倍，保留其无档位倍率和伤害反弹机制。", "en": "Strengthened the Statue boss: its HP is now 2× the same-level base value while retaining its no-tier-scaling and damage-reflection mechanics."}, {"ver": "v1.73.5", "zh": "修复回放结束时结算统计错误：死亡/破关页面现在显示录像真实结局的等级、金币、回合数和死亡信息。", "en": "Fixed incorrect replay settlement stats: death/clear screens now show the replay's actual final level, gold, turns, and death details."}, {"ver": "v1.73.4", "zh": "优化 50 回合转职长按详情的“效果”布局：固定左侧标签列，长文本在右侧内容列内稳定换行，不再挤压标签。", "en": "Improved the turn-50 advancement long-press details layout: the left label column is fixed and long effects wrap consistently in the content column."}, {"ver": "v1.73.3", "zh": "50、100、200 回合转职提示中明确显示“长按候选卡查看详情”。", "en": "Added an explicit “Long-press a choice for details” hint to the turn-50, turn-100, and turn-200 advancement prompts."}];   /* auto-injected by dr.sh embed-changelog（勿手改） */
+const VERSION='v1.74.2';
+const CHANGELOG_LINES=[{"ver": "v1.74.2", "zh": "修复 50 回合转职候选卡在移动端长按时可能被系统手势取消的问题；长按预览二阶被动，轻点仍正常选择职业。", "en": "Fixed mobile long-press previews on turn-50 class choices being canceled by browser gestures; short taps still select the class."}, {"ver": "v1.74.1", "zh": "修复种族选择卡长按不弹出详情的问题；短按仍直接开始该种族的新局。", "en": "Fixed race cards not opening their details on long press; a short press still starts a new run with that race."}, {"ver": "v1.74.0", "zh": "加强石像 Boss：生命值提高至同等级基础值的 2 倍，保留其无档位倍率和伤害反弹机制。", "en": "Strengthened the Statue boss: its HP is now 2× the same-level base value while retaining its no-tier-scaling and damage-reflection mechanics."}, {"ver": "v1.73.5", "zh": "修复回放结束时结算统计错误：死亡/破关页面现在显示录像真实结局的等级、金币、回合数和死亡信息。", "en": "Fixed incorrect replay settlement stats: death/clear screens now show the replay's actual final level, gold, turns, and death details."}, {"ver": "v1.73.4", "zh": "优化 50 回合转职长按详情的“效果”布局：固定左侧标签列，长文本在右侧内容列内稳定换行，不再挤压标签。", "en": "Improved the turn-50 advancement long-press details layout: the left label column is fixed and long effects wrap consistently in the content column."}];   /* auto-injected by dr.sh embed-changelog（勿手改） */
 const DEV=true;   // release build (DEV=false); dev build is dungeon-raid-dev.html (DEV=true)
 const REC_API='https://api.dungeonraid.win';   // 录像分享 API（Cloudflare Worker + KV）
 // 带种子随机数（mulberry32）：游戏全程用 rnd() 取代原生随机，配合录制种子可确定性重放
@@ -979,14 +979,17 @@ function tierPreviewData(tier, id){
     rows:[[tr('技能','Skill'),L(def.n)],[tr('效果','Effect'),L(def.d)]]};
 }
 function attachTierChoicePreview(el, tier, id){
+  // Keep mobile long-presses from becoming scroll/context-menu gestures.
+  if(el.style){ el.style.touchAction='none'; el.style.webkitTouchCallout='none'; }
   let timer=null, fired=false, sx=0, sy=0;
   const clear=()=>{ if(timer){ clearTimeout(timer); timer=null; } };
+  el.addEventListener('contextmenu', e=>{ e.preventDefault(); });
   el.addEventListener('pointerdown', e=>{ if(replaying) return; fired=false; sx=e.clientX; sy=e.clientY; clear();
+    try{ el.setPointerCapture(e.pointerId); }catch(_){}
     timer=setTimeout(()=>{ timer=null; const info=tierPreviewData(tier,id); if(!info) return; fired=true; busy=true; const rows=info.rows.map(([k,v])=>`<div style="display:grid;grid-template-columns:72px minmax(0,1fr);gap:10px;align-items:start;padding:7px 2px;border-bottom:1px solid #3a2d4d"><span style="color:var(--dim);min-width:0">${k}</span><b style="min-width:0;text-align:right;overflow-wrap:anywhere;word-break:break-word">${v}</b></div>`).join(''); const card=document.getElementById('card'); card.innerHTML=`<h2>${info.icon} ${info.title}</h2><p style="font-size:13px;line-height:1.5">${info.desc}</p><div style="text-align:left;font-size:13px;margin:0 0 14px">${rows}</div><button class="btn" id="tierPrevClose" style="width:100%">${tr('关闭','Close')}</button>`; document.getElementById('tierPrevClose').onclick=()=>showTierSelect(tier); showOverlay(); }, 450); });
   el.addEventListener('pointermove', e=>{ if(timer && (Math.abs(e.clientX-sx)>10 || Math.abs(e.clientY-sy)>10)) clear(); });
   el.addEventListener('pointerup', clear);
   el.addEventListener('pointercancel', clear);
-  el.addEventListener('pointerleave', clear);
   el.addEventListener('click', e=>{ if(fired){ e.preventDefault(); e.stopImmediatePropagation(); fired=false; } }, true);
 }
 function showTierSelect(tier){

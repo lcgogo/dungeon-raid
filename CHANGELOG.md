@@ -1,3 +1,8 @@
+## [v1.74.2] - 2026-09-17
+
+- 修复 50 回合转职候选卡在移动端长按时可能被系统手势取消的问题；长按预览二阶被动，轻点仍正常选择职业。
+- Fixed mobile long-press previews on turn-50 class choices being canceled by browser gestures; short taps still select the class.
+
 ## [v1.74.1] - 2026-09-16
 
 - 修复种族选择卡长按不弹出详情的问题；短按仍直接开始该种族的新局。

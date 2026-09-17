@@ -295,14 +295,17 @@ function tierPreviewData(tier, id){
     rows:[[tr('技能','Skill'),L(def.n)],[tr('效果','Effect'),L(def.d)]]};
 }
 function attachTierChoicePreview(el, tier, id){
+  // Keep mobile long-presses from becoming scroll/context-menu gestures.
+  if(el.style){ el.style.touchAction='none'; el.style.webkitTouchCallout='none'; }
   let timer=null, fired=false, sx=0, sy=0;
   const clear=()=>{ if(timer){ clearTimeout(timer); timer=null; } };
+  el.addEventListener('contextmenu', e=>{ e.preventDefault(); });
   el.addEventListener('pointerdown', e=>{ if(replaying) return; fired=false; sx=e.clientX; sy=e.clientY; clear();
+    try{ el.setPointerCapture(e.pointerId); }catch(_){}
     timer=setTimeout(()=>{ timer=null; const info=tierPreviewData(tier,id); if(!info) return; fired=true; busy=true; const rows=info.rows.map(([k,v])=>`<div style="display:grid;grid-template-columns:72px minmax(0,1fr);gap:10px;align-items:start;padding:7px 2px;border-bottom:1px solid #3a2d4d"><span style="color:var(--dim);min-width:0">${k}</span><b style="min-width:0;text-align:right;overflow-wrap:anywhere;word-break:break-word">${v}</b></div>`).join(''); const card=document.getElementById('card'); card.innerHTML=`<h2>${info.icon} ${info.title}</h2><p style="font-size:13px;line-height:1.5">${info.desc}</p><div style="text-align:left;font-size:13px;margin:0 0 14px">${rows}</div><button class="btn" id="tierPrevClose" style="width:100%">${tr('关闭','Close')}</button>`; document.getElementById('tierPrevClose').onclick=()=>showTierSelect(tier); showOverlay(); }, 450); });
   el.addEventListener('pointermove', e=>{ if(timer && (Math.abs(e.clientX-sx)>10 || Math.abs(e.clientY-sy)>10)) clear(); });
   el.addEventListener('pointerup', clear);
   el.addEventListener('pointercancel', clear);
-  el.addEventListener('pointerleave', clear);
   el.addEventListener('click', e=>{ if(fired){ e.preventDefault(); e.stopImmediatePropagation(); fired=false; } }, true);
 }
 function showTierSelect(tier){
