@@ -77,6 +77,13 @@ const TIER1={
   blackturtle:{n:['玄龟','Black Tortoise'], quip:['山岳不动，风雷自止。','The mountain does not move; storms pass around it.'], skill:{name:['玄甲镇岳','Tortoise Bastion'], short:['3回合所受伤害减半','Halve damage taken for 3 turns'], desc:['发动后 3 回合内，受到的所有伤害减半（向上取整，最低 1 点）。效果结束后恢复原状，冷却 5 回合。','For 3 turns, halve all incoming damage (rounded up, minimum 1). The effect then expires, with a 5-turn cooldown.'], cd:5, f:p=>{ if(p.noArmor) return false; p.tortoiseGuardTurns=3; log(tr('🐢 玄甲镇岳：未来 3 回合所受伤害减半（最低 1）','🐢 Tortoise Bastion: damage taken is halved for the next 3 turns (minimum 1)'), 'buff'); return true; }}},
   vermilion:{n:['朱雀','Vermilion Bird'], quip:['死亡即新生！','Death is new life!'], skill:{name:['涅槃','Phoenix Rebirth'], short:['本回合致死：恢复50%生命并增加生命上限','Lethal this turn: revive at 50% HP and raise max HP'], desc:['本回合被击败不会死亡：生命上限永久增加 ⌊当前等级/2⌋，并恢复到新的生命上限的 50%。','You cannot die this turn: permanently gain ⌊current level/2⌋ max HP, then revive at 50% of your new max HP if dealt lethal damage.'], cd:5, f:p=>{ p.nirvanaTurn=true; log(tr('🔥 涅槃：本回合死亡即新生！','🔥 Phoenix Rebirth: death is new life this turn!'), 'buff'); return true; }}}
 };
+// Skeleton King's Rebirth is a passive trigger, not an activatable skill.
+Object.assign(TIER1.skeletonking.skill, {
+  short:['被动：致死后满血复活，所有怪物 CD 重置','Passive: revive at full HP and reset all foes’ CDs on lethal damage'],
+  desc:['被动效果：受到致命伤害时自动满血复活，并将棋盘上所有怪物与 Boss 的攻击倒计时重置为初始值；触发后冷却 5 回合。','Passive: when dealt lethal damage, automatically revive at full HP and reset every monster and boss countdown on the board to its base value; enters a 5-turn cooldown.'],
+  passive:true,
+});
+TIER1.skeletonking.skill.f=p=>true;
 // 二阶职业：被动
 const TIER2={
   holystrike:{n:['神圣打击','Holy Strike'], d:['治疗溢出优先轰 Boss；多 Boss 取血最少','Healing overflow prioritizes bosses; lowest-HP boss first'], f:p=>{ p.holyStrike=true; }},
@@ -358,7 +365,7 @@ function showTierSelect(tier){
     const b=document.createElement('button'); b.className='choice';
     const detail = tier===1
       ? `<i style="color:#caa6e6">「${L(def.quip)}」</i>`
-        + `<br>${tr('主动','Active')}【${L(def.skill.name)}】${L(def.skill.short)}`
+        + `<br>${tr(def.skill.passive?'被动':'主动',def.skill.passive?'Passive':'Active')}【${L(def.skill.name)}】${L(def.skill.short)}`
         + (def.passive?`<br>${tr('被动','Passive')}：${L(def.passive)}`:'')
       : L(def.d);
     b.innerHTML=`<b>${L(def.n)} <span class="tierInfo" aria-label="${tr('查看技能详情','View skill details')}" style="float:right;color:var(--gold);font-size:16px">ⓘ</span></b><small>${detail}</small>`;

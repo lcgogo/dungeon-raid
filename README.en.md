@@ -29,6 +29,10 @@ The current Dev build is `v1.74.5`; the race list now uses a dedicated scroll bo
 
 The race-detail class list uses an inner scroll area so the Back button remains visible.
 
+The current Dev build is `v1.75.0`; Skeleton King's Rebirth is now a passive that automatically revives once at full HP on lethal damage and resets all foe cooldowns.
+
+The current Dev build is `v1.75.0`; Skeleton King's Rebirth is an automatic passive with a 5-turn cooldown, and expanded death/clear settlement logs now show only the full log.
+
 ## 🧩 Core Gameplay
 
 - **Drag to connect** 2 or more **adjacent same-type** tiles to clear them (horizontal, vertical, and diagonal — all 8 directions).

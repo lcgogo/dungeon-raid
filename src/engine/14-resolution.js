@@ -224,7 +224,7 @@ function advanceEnemies(){
   }
   if(player.shieldTurn) player.shieldTurn=false;   // 圣盾仅护本回合
   if(player.undyingTurn) player.undyingTurn=false; // 狂怒不屈仅本回合
-  if(player.rebirthTurn) player.rebirthTurn=false; // 骷髅王重生仅护本回合（未触发则失效）
+  if(player.rebirthTurn) player.rebirthTurn=false; // 兼容旧版本状态；新版骷髅王为被动触发
   if(player.nirvanaTurn) player.nirvanaTurn=false; // 朱雀涅槃仅护本回合（未触发则失效）
   if(player.tauntWindow) player.tauntWindow=false; // 斧王嘲讽：只覆盖被拉成 cd=1 的这一轮敌人动作
 }
@@ -252,8 +252,15 @@ function hurtPlayer(atk, sourceKey, ignoreArmor, attacker){
   }
   player.hp -= dmg;
   if(player.undyingTurn && player.hp<1) player.hp=1; // 狂怒不屈：本回合最低保留 1 血
-  if(player.rebirthTurn && player.hp<=0){ player.hp=player.maxHp; player.rebirthTurn=false; player.rebirthSaves=(player.rebirthSaves||0)+1; // 骷髅王重生：本回合致死则满血复活，此后重生冷却 +2
-    log(tr('💀 骷髅王重生！生命恢复至满（重生冷却 +2）','💀 Skeleton King reborn! Full HP (Rebirth cooldown +2)'), 'heal'); }
+  if(player.tier1==='skeletonking' && player.hp<=0 && player.skillCd<=0){
+    player.hp=player.maxHp; player.skillCd=effSkillCd('skeletonking');
+    let reset=0;
+    for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){
+      const foe=grid[r][c];
+      if(foe&&(foe.type==='enemy'||foe.type==='boss')){ foe.cd=foe.baseCd; reset++; }
+    }
+    log(tr(`💀 骷髅王重生！满血复活，${reset} 个怪物的 CD 已重置（技能冷却 ${player.skillCd} 回合）`,`💀 Skeleton King reborn! Full HP restored; reset CDs for ${reset} foes (skill cooldown: ${player.skillCd} turns)`), 'heal');
+  }
   if(player.nirvanaTurn && player.hp<=0){ const add=Math.floor(player.level/2); player.maxHp+=add; player.hp=Math.max(1,Math.ceil(player.maxHp*0.5)); player.nirvanaTurn=false; log(tr(`🔥 涅槃：死亡即新生！生命上限 +${add}，恢复至 ${player.hp} 生命`,`🔥 Nirvana: death is new life! Max HP +${add}, revived at ${player.hp} HP`), 'heal'); }
   addDmg(sourceKey, dmg);
   if(dmg>0 && player.tauntWindow){ const grow=Math.max(1, Math.floor(dmg*0.1)); player.maxHp+=grow; log(tr(`🪓 嘲讽吸收：永久最大生命 +${grow}`,`🪓 Taunt converts into +${grow} max HP`), 'buff'); }

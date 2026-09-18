@@ -1,3 +1,12 @@
+## [v1.75.0] - 2026-09-18
+
+> Version-Impact: verify
+
+- 重做骷髅王「重生」：改为自动触发的被动技能，受到致命伤害时满血复活，并将场上所有怪物与 Boss 的攻击倒计时重置为初始值；触发后进入 5 回合冷却，技能栏保留灰色状态显示。
+- Reworked Skeleton King's Rebirth as an automatic passive: lethal damage revives the player at full HP and resets every monster and boss countdown to its base value; it then enters a 5-turn cooldown and remains visible as a disabled skill-bar entry.
+- 修复死亡/破关结算日志展开后仍重复显示上方三行摘要的问题；展开时现在只显示全量日志。
+- Fixed settlement logs repeating the three-line preview after expansion; expanded state now shows only the full log.
+
 ## [v1.74.6] - 2026-09-17
 
 - 修复种族详情中职业列表过长导致内容遮挡的问题；职业详情改为卡片内部独立滚动，返回按钮始终可见。

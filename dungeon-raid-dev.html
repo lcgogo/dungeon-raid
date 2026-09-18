@@ -55,6 +55,7 @@
   .settlementLog{background:var(--panel2); border:1px solid #3a2d4d; border-radius:10px; margin:4px 0 10px; text-align:left; overflow:hidden;}
   .settlementLog summary{padding:0; color:var(--dim); font-size:11px; cursor:pointer; list-style:none;}
   .settlementLog summary::-webkit-details-marker{display:none;}
+  .settlementLog[open] summary{display:none;}
   .settlementLogPreview{padding:5px 9px; height:56px; overflow:hidden; font-size:11px; line-height:1.45;}
   .settlementLogPreview div,.settlementLogFull div{white-space:normal; overflow-wrap:anywhere; word-break:break-word; overflow:hidden; text-overflow:ellipsis;}
   .settlementLogFull{border-top:1px solid #3a2d4d; padding:4px 9px 6px; max-height:180px; overflow-y:auto; font-size:11px; line-height:1.55;}
@@ -248,8 +249,8 @@ const CONTENT = {
 if('serviceWorker' in navigator) window.addEventListener('load',()=>navigator.serviceWorker.register('/sw.js').catch(()=>{}));
 //==================== 配置 ====================
 // 版本号 v主.次.修：不影响 verify/replay 兼容边界的小改动改"修"；凡是影响 verify/replay/版本分桶/release 验证语义的改动都改"次"；大版本变更需先确认。页面底部显示。
-const VERSION='v1.74.6';
-const CHANGELOG_LINES=[{"ver": "v1.74.6", "zh": "修复种族详情中职业列表过长导致内容遮挡的问题；职业详情改为卡片内部独立滚动，返回按钮始终可见。", "en": "Fixed race-detail overlap from long class lists by putting class details in an inner scroll area while keeping Back visible."}, {"ver": "v1.74.5", "zh": "选种族列表改为独立滚动框，返回按钮固定在列表外；小屏幕上也不会被种族卡遮住。", "en": "Made the race choices a dedicated scroll box with the Back button outside it, keeping navigation visible on small screens."}, {"ver": "v1.74.4", "zh": "选种族时支持长按或点 `ⓘ` 查看该种族全部 50 回合职业、主动技能和完整效果。", "en": "Race selection now supports long-press or `ⓘ` details for every turn-50 class, active skill, and full effect in that race."}, {"ver": "v1.74.3", "zh": "重做 50 回合转职详情入口：候选卡支持长按和 `ⓘ` 点击，详情明确显示一阶主动技能与 100 回合锁定的二阶被动及效果。", "en": "Reworked turn-50 class details: each choice now supports long-press and an `ⓘ` button, clearly showing its Tier-1 active and the Tier-2 passive locked at turn 100."}, {"ver": "v1.74.2", "zh": "修复 50 回合转职候选卡在移动端长按时可能被系统手势取消的问题；长按预览二阶被动，轻点仍正常选择职业。", "en": "Fixed mobile long-press previews on turn-50 class choices being canceled by browser gestures; short taps still select the class."}];   /* auto-injected by dr.sh embed-changelog（勿手改） */
+const VERSION='v1.75.0';
+const CHANGELOG_LINES=[{"ver": "v1.75.0", "zh": "重做骷髅王「重生」：改为自动触发的被动技能，受到致命伤害时满血复活，并将场上所有怪物与 Boss 的攻击倒计时重置为初始值；触发后进入 5 回合冷却，技能栏保留灰色状态显示。", "en": "Reworked Skeleton King's Rebirth as an automatic passive: lethal damage revives the player at full HP and resets every monster and boss countdown to its base value; it then enters a 5-turn cooldown and remains visible as a disabled skill-bar entry."}, {"ver": "v1.74.6", "zh": "修复种族详情中职业列表过长导致内容遮挡的问题；职业详情改为卡片内部独立滚动，返回按钮始终可见。", "en": "Fixed race-detail overlap from long class lists by putting class details in an inner scroll area while keeping Back visible."}, {"ver": "v1.74.5", "zh": "选种族列表改为独立滚动框，返回按钮固定在列表外；小屏幕上也不会被种族卡遮住。", "en": "Made the race choices a dedicated scroll box with the Back button outside it, keeping navigation visible on small screens."}, {"ver": "v1.74.4", "zh": "选种族时支持长按或点 `ⓘ` 查看该种族全部 50 回合职业、主动技能和完整效果。", "en": "Race selection now supports long-press or `ⓘ` details for every turn-50 class, active skill, and full effect in that race."}, {"ver": "v1.74.3", "zh": "重做 50 回合转职详情入口：候选卡支持长按和 `ⓘ` 点击，详情明确显示一阶主动技能与 100 回合锁定的二阶被动及效果。", "en": "Reworked turn-50 class details: each choice now supports long-press and an `ⓘ` button, clearly showing its Tier-1 active and the Tier-2 passive locked at turn 100."}];   /* auto-injected by dr.sh embed-changelog（勿手改） */
 const DEV=true;   // release build (DEV=false); dev build is dungeon-raid-dev.html (DEV=true)
 const REC_API='https://api.dungeonraid.win';   // 录像分享 API（Cloudflare Worker + KV）
 // 带种子随机数（mulberry32）：游戏全程用 rnd() 取代原生随机，配合录制种子可确定性重放
@@ -761,6 +762,13 @@ const TIER1={
   blackturtle:{n:['玄龟','Black Tortoise'], quip:['山岳不动，风雷自止。','The mountain does not move; storms pass around it.'], skill:{name:['玄甲镇岳','Tortoise Bastion'], short:['3回合所受伤害减半','Halve damage taken for 3 turns'], desc:['发动后 3 回合内，受到的所有伤害减半（向上取整，最低 1 点）。效果结束后恢复原状，冷却 5 回合。','For 3 turns, halve all incoming damage (rounded up, minimum 1). The effect then expires, with a 5-turn cooldown.'], cd:5, f:p=>{ if(p.noArmor) return false; p.tortoiseGuardTurns=3; log(tr('🐢 玄甲镇岳：未来 3 回合所受伤害减半（最低 1）','🐢 Tortoise Bastion: damage taken is halved for the next 3 turns (minimum 1)'), 'buff'); return true; }}},
   vermilion:{n:['朱雀','Vermilion Bird'], quip:['死亡即新生！','Death is new life!'], skill:{name:['涅槃','Phoenix Rebirth'], short:['本回合致死：恢复50%生命并增加生命上限','Lethal this turn: revive at 50% HP and raise max HP'], desc:['本回合被击败不会死亡：生命上限永久增加 ⌊当前等级/2⌋，并恢复到新的生命上限的 50%。','You cannot die this turn: permanently gain ⌊current level/2⌋ max HP, then revive at 50% of your new max HP if dealt lethal damage.'], cd:5, f:p=>{ p.nirvanaTurn=true; log(tr('🔥 涅槃：本回合死亡即新生！','🔥 Phoenix Rebirth: death is new life this turn!'), 'buff'); return true; }}}
 };
+// Skeleton King's Rebirth is a passive trigger, not an activatable skill.
+Object.assign(TIER1.skeletonking.skill, {
+  short:['被动：致死后满血复活，所有怪物 CD 重置','Passive: revive at full HP and reset all foes’ CDs on lethal damage'],
+  desc:['被动效果：受到致命伤害时自动满血复活，并将棋盘上所有怪物与 Boss 的攻击倒计时重置为初始值；触发后冷却 5 回合。','Passive: when dealt lethal damage, automatically revive at full HP and reset every monster and boss countdown on the board to its base value; enters a 5-turn cooldown.'],
+  passive:true,
+});
+TIER1.skeletonking.skill.f=p=>true;
 // 二阶职业：被动
 const TIER2={
   holystrike:{n:['神圣打击','Holy Strike'], d:['治疗溢出优先轰 Boss；多 Boss 取血最少','Healing overflow prioritizes bosses; lowest-HP boss first'], f:p=>{ p.holyStrike=true; }},
@@ -1042,7 +1050,7 @@ function showTierSelect(tier){
     const b=document.createElement('button'); b.className='choice';
     const detail = tier===1
       ? `<i style="color:#caa6e6">「${L(def.quip)}」</i>`
-        + `<br>${tr('主动','Active')}【${L(def.skill.name)}】${L(def.skill.short)}`
+        + `<br>${tr(def.skill.passive?'被动':'主动',def.skill.passive?'Passive':'Active')}【${L(def.skill.name)}】${L(def.skill.short)}`
         + (def.passive?`<br>${tr('被动','Passive')}：${L(def.passive)}`:'')
       : L(def.d);
     b.innerHTML=`<b>${L(def.n)} <span class="tierInfo" aria-label="${tr('查看技能详情','View skill details')}" style="float:right;color:var(--gold);font-size:16px">ⓘ</span></b><small>${detail}</small>`;
@@ -2160,11 +2168,10 @@ function showShopInfo(key){
 document.querySelectorAll('.shopBtn[data-buy]').forEach(b=>attachLongPress(b, b.dataset.buy));
 
 //==================== 职业主动技能 ====================
-// 实际冷却 = 技能基础冷却 + 全局修正（如活死人迷惑 +1），最低 1；骷髅王「重生」每实际复活一次再 +2（递增）。
+// 实际冷却 = 技能基础冷却 + 全局修正（如活死人迷惑 +1），最低 1。
 function effSkillCd(id){
   const sk=id&&TIER1[id]&&TIER1[id].skill; if(!sk) return 5;
   let cd=sk.cd+(player.skillCdMod||0);
-  if(id==='skeletonking') cd+=2*(player.rebirthSaves||0);
   return Math.max(1, cd);
 }
 function prophecyLabel(type, en){
@@ -2206,7 +2213,7 @@ function showProphecySelect(slotKey){
 function activateSkill(){
   if(busy||pendingLevels) return;
   prophecySlotKey=null;
-  const sk=player&&player.tier1&&TIER1[player.tier1]&&TIER1[player.tier1].skill; if(!sk) return;  // 一阶职业的主动
+  const sk=player&&player.tier1&&TIER1[player.tier1]&&TIER1[player.tier1].skill; if(!sk||sk.passive) return;  // 一阶职业的主动
   if(player.frozen && player.frozen.skill>0) return;   // 雪人冰封了一阶主动
   if(player.skillCd>0) return;
   const r=sk.f(player);
@@ -2449,7 +2456,7 @@ function advanceEnemies(){
   }
   if(player.shieldTurn) player.shieldTurn=false;   // 圣盾仅护本回合
   if(player.undyingTurn) player.undyingTurn=false; // 狂怒不屈仅本回合
-  if(player.rebirthTurn) player.rebirthTurn=false; // 骷髅王重生仅护本回合（未触发则失效）
+  if(player.rebirthTurn) player.rebirthTurn=false; // 兼容旧版本状态；新版骷髅王为被动触发
   if(player.nirvanaTurn) player.nirvanaTurn=false; // 朱雀涅槃仅护本回合（未触发则失效）
   if(player.tauntWindow) player.tauntWindow=false; // 斧王嘲讽：只覆盖被拉成 cd=1 的这一轮敌人动作
 }
@@ -2477,8 +2484,15 @@ function hurtPlayer(atk, sourceKey, ignoreArmor, attacker){
   }
   player.hp -= dmg;
   if(player.undyingTurn && player.hp<1) player.hp=1; // 狂怒不屈：本回合最低保留 1 血
-  if(player.rebirthTurn && player.hp<=0){ player.hp=player.maxHp; player.rebirthTurn=false; player.rebirthSaves=(player.rebirthSaves||0)+1; // 骷髅王重生：本回合致死则满血复活，此后重生冷却 +2
-    log(tr('💀 骷髅王重生！生命恢复至满（重生冷却 +2）','💀 Skeleton King reborn! Full HP (Rebirth cooldown +2)'), 'heal'); }
+  if(player.tier1==='skeletonking' && player.hp<=0 && player.skillCd<=0){
+    player.hp=player.maxHp; player.skillCd=effSkillCd('skeletonking');
+    let reset=0;
+    for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){
+      const foe=grid[r][c];
+      if(foe&&(foe.type==='enemy'||foe.type==='boss')){ foe.cd=foe.baseCd; reset++; }
+    }
+    log(tr(`💀 骷髅王重生！满血复活，${reset} 个怪物的 CD 已重置（技能冷却 ${player.skillCd} 回合）`,`💀 Skeleton King reborn! Full HP restored; reset CDs for ${reset} foes (skill cooldown: ${player.skillCd} turns)`), 'heal');
+  }
   if(player.nirvanaTurn && player.hp<=0){ const add=Math.floor(player.level/2); player.maxHp+=add; player.hp=Math.max(1,Math.ceil(player.maxHp*0.5)); player.nirvanaTurn=false; log(tr(`🔥 涅槃：死亡即新生！生命上限 +${add}，恢复至 ${player.hp} 生命`,`🔥 Nirvana: death is new life! Max HP +${add}, revived at ${player.hp} HP`), 'heal'); }
   addDmg(sourceKey, dmg);
   if(dmg>0 && player.tauntWindow){ const grow=Math.max(1, Math.floor(dmg*0.1)); player.maxHp+=grow; log(tr(`🪓 嘲讽吸收：永久最大生命 +${grow}`,`🪓 Taunt converts into +${grow} max HP`), 'buff'); }
@@ -3285,13 +3299,14 @@ function updateHUD(){
     const isBuyout = player.tier1==='guildmaster';
     const buyCost = isBuyout ? (player.cheapskate?Math.ceil(enemyHpSum()/2):enemyHpSum()) : 0;   // 收买花费 = 全怪血量（小气鬼减半）
     const cantAfford = isBuyout && (buyCost<=0 || player.gold<buyCost);   // 没怪或钱不够 → 置灰
-    sb.querySelector('em').textContent = fzs ? `❄️${player.frozen.skill}${tr('回合','t')}`
+    sb.querySelector('em').textContent = sk.passive ? (player.skillCd>0 ? `⏳${player.skillCd}${tr('回合','t')}` : tr('被动待命','Passive ready'))
+      : fzs ? `❄️${player.frozen.skill}${tr('回合','t')}`
       : hoarding ? `🔒${player.goldLock}${tr('回合','t')}`
       : player.skillCd>0 ? `⏳${player.skillCd}${tr('回合','t')}`
       : player.prophecyPending ? `🔮${prophecyLabel(player.prophecyPending)}`
       : isBuyout ? `💰${buyCost}`                                         // 收买：显示当前花费（全怪血量），钱不够时按钮置灰
       : tr('可发动','Ready');
-    sb.classList.toggle('off', busy || pendingLevels || player.skillCd>0 || hoarding || fzs || cantAfford);
+    sb.classList.toggle('off', sk.passive || busy || pendingLevels || player.skillCd>0 || hoarding || fzs || cantAfford);
   } else { sb.style.display='none'; }
   saveGame();
 }

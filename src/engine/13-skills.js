@@ -1,9 +1,8 @@
 //==================== 职业主动技能 ====================
-// 实际冷却 = 技能基础冷却 + 全局修正（如活死人迷惑 +1），最低 1；骷髅王「重生」每实际复活一次再 +2（递增）。
+// 实际冷却 = 技能基础冷却 + 全局修正（如活死人迷惑 +1），最低 1。
 function effSkillCd(id){
   const sk=id&&TIER1[id]&&TIER1[id].skill; if(!sk) return 5;
   let cd=sk.cd+(player.skillCdMod||0);
-  if(id==='skeletonking') cd+=2*(player.rebirthSaves||0);
   return Math.max(1, cd);
 }
 function prophecyLabel(type, en){
@@ -45,7 +44,7 @@ function showProphecySelect(slotKey){
 function activateSkill(){
   if(busy||pendingLevels) return;
   prophecySlotKey=null;
-  const sk=player&&player.tier1&&TIER1[player.tier1]&&TIER1[player.tier1].skill; if(!sk) return;  // 一阶职业的主动
+  const sk=player&&player.tier1&&TIER1[player.tier1]&&TIER1[player.tier1].skill; if(!sk||sk.passive) return;  // 一阶职业的主动
   if(player.frozen && player.frozen.skill>0) return;   // 雪人冰封了一阶主动
   if(player.skillCd>0) return;
   const r=sk.f(player);

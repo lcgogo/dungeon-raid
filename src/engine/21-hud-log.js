@@ -64,13 +64,14 @@ function updateHUD(){
     const isBuyout = player.tier1==='guildmaster';
     const buyCost = isBuyout ? (player.cheapskate?Math.ceil(enemyHpSum()/2):enemyHpSum()) : 0;   // 收买花费 = 全怪血量（小气鬼减半）
     const cantAfford = isBuyout && (buyCost<=0 || player.gold<buyCost);   // 没怪或钱不够 → 置灰
-    sb.querySelector('em').textContent = fzs ? `❄️${player.frozen.skill}${tr('回合','t')}`
+    sb.querySelector('em').textContent = sk.passive ? (player.skillCd>0 ? `⏳${player.skillCd}${tr('回合','t')}` : tr('被动待命','Passive ready'))
+      : fzs ? `❄️${player.frozen.skill}${tr('回合','t')}`
       : hoarding ? `🔒${player.goldLock}${tr('回合','t')}`
       : player.skillCd>0 ? `⏳${player.skillCd}${tr('回合','t')}`
       : player.prophecyPending ? `🔮${prophecyLabel(player.prophecyPending)}`
       : isBuyout ? `💰${buyCost}`                                         // 收买：显示当前花费（全怪血量），钱不够时按钮置灰
       : tr('可发动','Ready');
-    sb.classList.toggle('off', busy || pendingLevels || player.skillCd>0 || hoarding || fzs || cantAfford);
+    sb.classList.toggle('off', sk.passive || busy || pendingLevels || player.skillCd>0 || hoarding || fzs || cantAfford);
   } else { sb.style.display='none'; }
   saveGame();
 }
