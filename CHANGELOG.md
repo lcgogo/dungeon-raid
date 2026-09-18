@@ -1,3 +1,8 @@
+## [v1.75.1] - 2026-09-18
+
+- 修复构建流程：开发版和正式版每次构建都会从 `CHANGELOG.md` 自动注入最新更新日志，不再依赖源码中的过期副本。
+- Fixed the build flow so Dev and Release builds automatically inject the latest changelog from `CHANGELOG.md` instead of relying on a stale source copy.
+
 ## [v1.75.0] - 2026-09-18
 
 > Version-Impact: verify
