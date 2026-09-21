@@ -35,6 +35,8 @@ The current Dev build is `v1.75.0`; Skeleton King's Rebirth is an automatic pass
 
 The current Dev build is `v1.75.1`; builds now automatically inject the latest changelog from `CHANGELOG.md`.
 
+The current Dev build is `v1.75.2`; race and turn-50 class `ⓘ` details now use separate buttons so they cannot accidentally select the card.
+
 ## 🧩 Core Gameplay
 
 - **Drag to connect** 2 or more **adjacent same-type** tiles to clear them (horizontal, vertical, and diagonal — all 8 directions).

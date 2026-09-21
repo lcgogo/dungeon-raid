@@ -1,3 +1,8 @@
+## [v1.75.2] - 2026-09-21
+
+- 将种族卡和 50 回合职业卡里的 `ⓘ` 详情提示改为独立方框按钮，避免误触整张卡而直接开始/选择。
+- Moved race and turn-50 class `ⓘ` details into separate boxed buttons to avoid accidentally selecting the card.
+
 ## [v1.75.1] - 2026-09-18
 
 - 修复构建流程：开发版和正式版每次构建都会从 `CHANGELOG.md` 自动注入最新更新日志，不再依赖源码中的过期副本。

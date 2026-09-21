@@ -231,11 +231,14 @@ function showRaceSelect(){
   const firstRc=preferredSeedRace();
   if(firstRc) prefetchServerSeed(firstRc);
   RACES.forEach((rc,idx)=>{
-    const b=document.createElement('button'); b.className='choice';
-    b.innerHTML=`<b>${rc.e} ${L(rc.n)} <span class="raceInfo" aria-label="${tr('查看种族与职业详情','View race and class details')}" style="float:right;color:var(--gold);font-size:16px">ⓘ</span></b><small style="white-space:pre-line">${L(rc.d)}</small>`;
+    const row=document.createElement('div'); row.style.cssText='display:flex;gap:6px;align-items:stretch;margin:0 0 6px';
+    const b=document.createElement('button'); b.className='choice'; b.style.cssText='margin:0;flex:1;min-width:0';
+    b.innerHTML=`<b>${rc.e} ${L(rc.n)}</b><small style="white-space:pre-line">${L(rc.d)}</small>`;
     b.onclick=()=>freshStart(rc);
     attachRaceChoicePreview(b, rc);
-    b.addEventListener('click', e=>{ if(e.target.closest('.raceInfo')){ e.preventDefault(); e.stopImmediatePropagation(); showRacePreview(rc); } }, true);
+    const info=document.createElement('button'); info.type='button'; info.textContent='ⓘ'; info.title=tr('查看种族与职业详情','View race and class details');
+    info.style.cssText='flex:none;width:42px;background:var(--panel2);border:1px solid #4a3a63;border-radius:10px;color:var(--gold);font-size:18px;cursor:pointer';
+    info.onclick=e=>{ e.preventDefault(); e.stopPropagation(); showRacePreview(rc); };
     if(idx===0){
       b.onpointerenter=()=>prefetchServerSeed(rc);
       b.onfocus=()=>prefetchServerSeed(rc);
@@ -244,7 +247,7 @@ function showRaceSelect(){
       b.onpointerenter=()=>prefetchServerSeed(rc);
       b.onfocus=()=>prefetchServerSeed(rc);
     }
-    raceList.appendChild(b);
+    row.appendChild(b); row.appendChild(info); raceList.appendChild(row);
   });
   const back=document.createElement('button'); back.className='btn'; back.style.marginTop='4px';
   back.textContent='← '+tr('返回','Back');
@@ -362,15 +365,18 @@ function showTierSelect(tier){
   card.innerHTML=`<h2>${head}</h2><p>${sub}<br><span style="color:var(--gold);font-size:11px">${tr('长按候选卡查看详情','Long-press a choice for details')}</span></p><p style="color:#caa6e6;font-style:italic;font-size:13px;margin:-4px 0 10px">${L(TRANSFORM_BLESS[tier])}</p>`;
   ids.forEach(id=>{
     const def=pool[id];
-    const b=document.createElement('button'); b.className='choice';
+    const row=document.createElement('div'); row.style.cssText='display:flex;gap:6px;align-items:stretch;margin:0 0 6px';
+    const b=document.createElement('button'); b.className='choice'; b.style.cssText='margin:0;flex:1;min-width:0';
     const detail = tier===1
       ? `<i style="color:#caa6e6">「${L(def.quip)}」</i>`
         + `<br>${tr(def.skill.passive?'被动':'主动',def.skill.passive?'Passive':'Active')}【${L(def.skill.name)}】${L(def.skill.short)}`
         + (def.passive?`<br>${tr('被动','Passive')}：${L(def.passive)}`:'')
       : L(def.d);
-    b.innerHTML=`<b>${L(def.n)} <span class="tierInfo" aria-label="${tr('查看技能详情','View skill details')}" style="float:right;color:var(--gold);font-size:16px">ⓘ</span></b><small>${detail}</small>`;
+    b.innerHTML=`<b>${L(def.n)}</b><small>${detail}</small>`;
     attachTierChoicePreview(b, tier, id);
-    b.addEventListener('click', e=>{ if(e.target.closest('.tierInfo')){ e.preventDefault(); e.stopImmediatePropagation(); showTierPreview(tier,id); } }, true);
+    const info=document.createElement('button'); info.type='button'; info.textContent='ⓘ'; info.title=tr('查看技能详情','View skill details');
+    info.style.cssText='flex:none;width:42px;background:var(--panel2);border:1px solid #4a3a63;border-radius:10px;color:var(--gold);font-size:18px;cursor:pointer';
+    info.onclick=e=>{ e.preventDefault(); e.stopPropagation(); showTierPreview(tier,id); };
     b.onclick=()=>{
       recAct(['t', tier, id]);   // 录制转职选择
       if(tier===1){ player.tier1=normalizeClassId(id); }
@@ -381,7 +387,7 @@ function showTierSelect(tier){
       if(pendingLevels){ showLevelUp(); } else { busy=false; hideOverlay(); }   // 转职同时若有待升级，接着弹升级；否则会卡住不能划
       updateHUD();   // 必须在 busy 复位之后刷新，否则技能/商店按钮停留在禁用态（老问题：转职后技能用不了）
     };
-    card.appendChild(b);
+    row.appendChild(b); row.appendChild(info); card.appendChild(row);
   });
   showOverlay();
 }
