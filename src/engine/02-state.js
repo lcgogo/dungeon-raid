@@ -30,7 +30,8 @@ function newPlayer(){
     upgradeChoices:3, bombCd:3, goldLock:0, goldFrozen:0, healUses:0, bombUses:0, shadowBombGold:false, tycoonGoldShield:false, frozen:{},  // 转职被动相关；healUses：治疗递增；bombUses：爆破手炸弹递增；shadowBombGold：乾坤一掷；tycoonGoldShield：钱能买命；frozen：雪人冰封的主动剩余回合（skill/heal/bomb）
     finaleStarted:false, finaleWave:0, cleared:false};                      // 终局：终焉之主浪潮 / 破关
 }
-function addXp(p,n){ p.xp += n * (p.race==='beast' ? 2 : 1); }
+function addXp(p,n){ const gained=n * (p.race==='beast' ? 2 : 1); p.xp += gained; return gained; }
+function xpLog(gained){ return gained ? tr(`，经验 +${gained}`,`, +${gained} XP`) : ''; }
 function xpNeeded(lv){ return 10 + lv*6; }
 function armorNeeded(a){ return 3 + a*3; }   // 护甲像经验一样累积：每升 1 点护甲所需的盾进度递增（越往后越贵）
 

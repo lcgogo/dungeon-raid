@@ -1,3 +1,8 @@
+## [v1.75.3] - 2026-09-21
+
+- 补全击杀经验日志：连线、箭雨、龙吟和炸弹现在显示本次实际获得的经验，包含神射手额外经验、神兽双倍经验和多杀汇总经验。
+- Added kill-XP logging: chains, Arrow Rain, Dragon Roar, and Bomb now show actual XP gained, including Sharpshooter bonuses, Mythic Beasts’ 2× XP, and multi-kill totals.
+
 ## [v1.75.2] - 2026-09-21
 
 - 将种族卡和 50 回合职业卡里的 `ⓘ` 详情提示改为独立方框按钮，避免误触整张卡而直接开始/选择。
