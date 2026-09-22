@@ -92,7 +92,7 @@ function draw(){
       if(!t.finale) ctx.fillText(t.hp, isBoss?cx-TILE*0.15:cx, cy+TILE*0.10);
       else { ctx.fillStyle='#ffd54a'; ctx.fillText('∞', cx, cy+TILE*0.10); }
       if(t.burnStacks>0){
-        const bx=isBoss ? x+10 : x+g-4, by=y+g-4, br=TILE*0.16;
+        const bx=x+10, by=y+g-4, br=TILE*0.16;
         ctx.beginPath(); ctx.arc(bx,by,br,0,7);
         ctx.fillStyle='#ff5a36'; ctx.fill(); ctx.strokeStyle='#000'; ctx.lineWidth=1; ctx.stroke();
         ctx.fillStyle='#fff'; ctx.font='700 '+Math.floor(TILE*0.20)+'px system-ui';

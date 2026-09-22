@@ -1,3 +1,8 @@
+## [v1.76.3] - 2026-09-22
+
+- 统一普通怪与 Boss 的燃烧层数位置：所有怪物的燃烧层数都显示在左下角，Boss 右下角专门显示等级。
+- Unified burn-stack placement for normal monsters and bosses: all foes now show burn stacks in the lower-left corner, while boss levels stay in the lower-right.
+
 ## [v1.76.2] - 2026-09-22
 
 - Boss 棋子右下角等级改为圆形数字标记，不再显示 `Lv`；普通怪右下角仍用于燃烧层数。
