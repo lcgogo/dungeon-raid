@@ -1,3 +1,8 @@
+## [v1.76.2] - 2026-09-22
+
+- Boss 棋子右下角等级改为圆形数字标记，不再显示 `Lv`；普通怪右下角仍用于燃烧层数。
+- Changed the boss level badge to a circular number-only marker; normal monsters still use the lower-right corner for burn stacks.
+
 ## [v1.76.1] - 2026-09-22
 
 - 在 Boss 棋子右下角显示等级；燃烧层数移至左下角，避免与等级标记重叠。

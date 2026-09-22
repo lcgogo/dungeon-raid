@@ -37,7 +37,7 @@ The current Dev build is `v1.75.1`; builds now automatically inject the latest c
 
 The current Dev build is `v1.75.2`; race and turn-50 class `ⓘ` details now use separate buttons so they cannot accidentally select the card.
 
-The current Dev build is `v1.76.1`; the Matryoshka boss 🪆 has normal-monster stats and splits into two one-tier-lower copies on available non-monster tiles when defeated; only Lv1 grants boss rewards. Boss tiles show their level in the lower-right corner.
+The current Dev build is `v1.76.2`; the Matryoshka boss 🪆 has normal-monster stats and splits into two one-tier-lower copies on available non-monster tiles when defeated; only Lv1 grants boss rewards. Boss tiles show their level as a circular number badge in the lower-right corner.
 
 ## 🧩 Core Gameplay
 

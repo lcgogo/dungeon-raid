@@ -118,13 +118,13 @@ function draw(){
         ctx.fillText(perT ? '1' : t.cd, bx, by+1);
       }
       if(isBoss && !bdef.finale){
-        const bw=TILE*0.32, bh=TILE*0.17, bx=x+g-bw-1, by=y+g-bh+1;
-        roundRect(bx,by,bw,bh,3);
+        const bx=x+g-4, by=y+g-4, br=TILE*0.16;
+        ctx.beginPath(); ctx.arc(bx,by,br,0,7);
         ctx.fillStyle='rgba(12,20,30,.92)'; ctx.fill();
         ctx.strokeStyle='rgba(255,255,255,.65)'; ctx.lineWidth=1; ctx.stroke();
         ctx.fillStyle='#fff'; ctx.font='700 '+Math.floor(TILE*0.12)+'px system-ui';
         ctx.textAlign='center'; ctx.textBaseline='middle';
-        ctx.fillText('Lv'+(t.tier||1),bx+bw/2,by+bh/2);
+        ctx.fillText(t.tier||1,bx,by+1);
       }
     } else {
       ctx.font=Math.floor(TILE*0.46)+'px '+EMOJI_FONT;
