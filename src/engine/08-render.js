@@ -89,7 +89,7 @@ function draw(){
       ctx.fillText(doomed?'💀':(isBoss?bdef.emoji:'👹'), cx, y+TILE*0.30);
       // 血量（终焉之主无血、打不掉 → 显示 ∞ 而非 0）
       ctx.fillStyle='#fff'; ctx.font='700 '+Math.floor(TILE*0.34)+'px system-ui';
-      if(!t.finale) ctx.fillText(t.hp, isBoss?cx-TILE*0.15:cx, cy+TILE*0.10);
+      if(!t.finale) ctx.fillText(t.hp, cx, cy+TILE*0.10);
       else { ctx.fillStyle='#ffd54a'; ctx.fillText('∞', cx, cy+TILE*0.10); }
       if(t.burnStacks>0){
         const bx=x+10, by=y+g-4, br=TILE*0.16;

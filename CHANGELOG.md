@@ -1,3 +1,8 @@
+## [v1.76.4] - 2026-09-22
+
+- 修复 Boss 棋子生命数字偏左的问题，恢复居中显示。
+- Fixed boss HP values appearing left-shifted; they are centered again.
+
 ## [v1.76.3] - 2026-09-22
 
 - 统一普通怪与 Boss 的燃烧层数位置：所有怪物的燃烧层数都显示在左下角，Boss 右下角专门显示等级。
