@@ -1,5 +1,7 @@
 // ===== Boss 池：每 10 回合从中随机挑一个现身。剑链免疫，只能用炸弹炸，奖励丰厚 =====
 const BOSSES=[
+  { id:'matryoshka', emoji:'🪆', name:['套娃','Matryoshka'], quip:['里面还有一个。','There is another one inside.'], monster:true, noTierScale:true,
+    desc:['属性与同级普通怪一致。被击败后会在可用非怪物格分裂成 2 个低 1 级的套娃；Lv1 才会真正击败并获得 Boss 奖励。','Stats match a normal enemy. When defeated, it splits into two one-tier-lower copies on available non-monster tiles; only Lv1 is truly defeated and grants boss rewards.'] },
   { id:'ghost', emoji:'👻', name:['幽灵','Ghost'], quip:['{W}？穿过去了，挠痒痒都算不上。','{W}s? They pass right through me.'], monster:true, noTierScale:true,
     desc:['{WC}对它无效，只能用 💥炸弹 炸。血量与同级普通怪一致；倒计时归零会对你重击！','Immune to {WC} — only the 💥 Bomb hurts it. Its HP matches same-tier normal enemies, and it strikes you hard at 0!'] },
   { id:'clown', emoji:'🤡', name:['小丑','Clown'], quip:['笑一个嘛，反正棋盘已经乱了。','Smile! Your board is a mess anyway.'], perTurn:true,
@@ -31,7 +33,7 @@ const BOSSES=[
       vampireDrainFx(rr>=0?{r:rr,c:cc}:null, normalCells, poisonCells);
       const per=2+(t.tier||1), delta=(n-pois)*per;   // 净效果：正常−毒心
       t.hp += delta;
-      if(t.hp<=0){ for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ if(grid[r][c]===t) grid[r][c]=null; } thiefRecover(t); addXp(player,15); gainGold(20); onBossKilled(); applyGravity(); syncPositions(false); log(tr('🧛 吸血鬼吸到毒心，中毒身亡！','🧛 The Vampire drank poison hearts and died!')); }
+      if(t.hp<=0){ let rr=-1,cc=-1; for(let r=0;r<ROWS&&rr<0;r++)for(let c=0;c<COLS;c++)if(grid[r][c]===t){rr=r;cc=c;break;} if(rr>=0) defeatBoss(t,rr,cc); applyGravity(); syncPositions(false); log(tr('🧛 吸血鬼吸到毒心，中毒身亡！','🧛 The Vampire drank poison hearts and died!')); }
       else { if(t.hp>t.maxHp) t.hp=t.maxHp; let rr=-1, cc=-1; for(let r=0;r<ROWS&&rr<0;r++)for(let c=0;c<COLS;c++){ if(grid[r][c]===t){ rr=r; cc=c; break; } } if(rr>=0) addBossFx(rr,cc,false,delta<0?'#66d17a':'#ff4d6d'); applyGravity(); syncPositions(false);
         if(delta<0) log(tr(`🧛 吸血鬼吸到毒心，反中毒掉 ${-delta} 血（→${t.hp}）`,`🧛 Vampire drinks poison hearts: −${-delta} HP (→${t.hp})`));
         else log(tr(`🧛 吸血鬼吸取 ${tot} 颗心回血（→${t.hp}）`,`🧛 Vampire drains ${tot} hearts (→${t.hp})`), 'debuff'); } } },
@@ -300,7 +302,7 @@ function spawnBoss(force, exclude){
   const _ms=[50,100,200,350].includes(player.turns);   // 里程碑回合：排除小偷（跑了学不了技能）
   if(exclude || _ms){ let tries=0; while(((exclude && def.id===exclude)||(_ms&&def.id==='thief'))&& tries<8){ def=randomBossDef(); tries++; } }
   const tier=bossTier();
-  const s = def.monster ? enemyStats() : bossStats();   // 怪属性型 Boss 用怪物数值
+  const s = def.id==='matryoshka' ? enemyStats() : (def.monster ? enemyStats() : bossStats());   // 套娃按普通怪属性生成
   const cdv = Math.max(1,(s.cd!=null ? s.cd : s.baseCd) + extraFoeCd());
   const mult = def.noTierScale ? 1 : tier;              // 刺客等：血量/攻击始终同级怪物，不吃档位倍率
   const hp=s.hp*mult*(def.hpMult||1), atk=s.atk*mult;
@@ -310,6 +312,38 @@ function spawnBoss(force, exclude){
   log(tr(`${def.emoji} Boss【${L(def.name)}】${tlabel} 现身！轻点它查看打法。`,`${def.emoji} Boss [${L(def.name)}]${tlabel} appears! Tap it to see how to fight.`), 'bad');
   if(def.onSpawn) def.onSpawn(grid[r][c]);
   return def.id;
+}
+
+// A Matryoshka's children reuse the cleared cell first, then deterministic row-major non-monster cells.
+function splitMatryoshka(t){
+  if(!t || t.bossId!=='matryoshka' || t.tier<=1) return false;
+  let parent=null;
+  for(let r=0;r<ROWS&&!parent;r++)for(let c=0;c<COLS;c++)if(grid[r][c]===t){parent={r,c};break;}
+  if(parent) grid[parent.r][parent.c]=null;
+  const cells=[];
+  if(parent) cells.push([parent.r,parent.c]);
+  for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){
+    const x=grid[r][c];
+    if((!parent || parent.r!==r || parent.c!==c) && (!x || (x.type!=='enemy' && x.type!=='boss'))) cells.push([r,c]);
+  }
+  const pos=[];
+  for(let i=0;i<2 && cells.length;i++) pos.push(cells.shift());
+  for(const [r,c] of pos){
+    const tier=t.tier-1, stats=enemyStats(), cd=Math.max(1,stats.baseCd+extraFoeCd());
+    grid[r][c]={type:'boss',bossId:'matryoshka',tier,hp:stats.hp,maxHp:stats.hp,atk:stats.atk,cd,baseCd:cd};
+    addBossFx(r,c,false);
+  }
+  log(tr(`🪆 套娃分裂成 ${pos.length} 个 Lv${t.tier-1} 套娃！`,`🪆 Matryoshka splits into ${pos.length} Lv${t.tier-1} Matryoshka(s)!`), 'bad');
+  return pos.length===2;
+}
+function defeatBoss(t,r,c){
+  if(t.bossId==='matryoshka' && splitMatryoshka(t)) return 'split';
+  grid[r][c]=null; thiefRecover(t); addXp(player,15); gainGold(20); onBossKilled();
+  return 'killed';
+}
+function bossKillAt(r,c){
+  const t=grid[r][c]; if(!t || t.type!=='boss') return 'none';
+  return defeatBoss(t,r,c);
 }
 
 function makeTile(type){

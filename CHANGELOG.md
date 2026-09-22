@@ -1770,3 +1770,9 @@
 [v1.2]: 刺客平衡
 [v1.1]: Boss 档位升级
 [v1.0]: 首个版本
+## [v1.76.0] - 2026-09-22
+
+> Version-Impact: verify
+
+- 新增套娃 Boss 🪆：属性与普通怪一致；被击败后在可用非怪物格分裂成两个低 1 级套娃，直到 Lv1 才会真正击败并获得 Boss 奖励。
+- Added the Matryoshka boss 🪆: it has normal-monster stats and splits into two one-tier-lower copies on available non-monster tiles when defeated, until Lv1 is truly defeated and rewards are granted.

@@ -37,7 +37,7 @@ The current Dev build is `v1.75.1`; builds now automatically inject the latest c
 
 The current Dev build is `v1.75.2`; race and turn-50 class `ⓘ` details now use separate buttons so they cannot accidentally select the card.
 
-The current Dev build is `v1.75.3`; kill logs now show actual XP gained, including Sharpshooter bonuses, Mythic Beasts’ 2× XP, and multi-kill XP.
+The current Dev build is `v1.76.0`; the new Matryoshka boss 🪆 has normal-monster stats and splits into two one-tier-lower copies on available non-monster tiles when defeated; only Lv1 grants boss rewards.
 
 ## 🧩 Core Gameplay
 
@@ -163,6 +163,7 @@ Every **10 turns** a random boss is guaranteed to appear; **beating one by any m
 
 | Boss | How to hit | Gimmick |
 |---|---|---|
+| 🪆 Matryoshka | Sword / Bomb | Stats match a same-tier normal enemy; splits into two one-tier-lower copies on available non-monster tiles, until Lv1 is finally defeated |
 | 👻 Ghost | Bomb only | Immune to weapon chains; **its HP matches same-tier normal enemies (without the extra boss-tier HP multiplier)**; strikes you hard when its timer hits 0 |
 | 🤡 Clown | Bomb only | Re-rolls several non-monster tiles into other resources each turn, disrupting your chains; does NOT spawn monsters (that's the Summoner) |
 | 🪢 Lashmaster | Bomb only | On spawn, all normal enemies get **-1 attack countdown**, and each turn after that they get **-1 attack countdown** again. It may not be the deadliest foe by itself, but it drags the whole board into a frenzy the longer it lives. |
