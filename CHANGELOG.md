@@ -1,3 +1,8 @@
+## [v1.76.1] - 2026-09-22
+
+- 在 Boss 棋子右下角显示等级；燃烧层数移至左下角，避免与等级标记重叠。
+- Boss tiles now show their level in the lower-right corner; burn stacks move to the lower-left to avoid overlap.
+
 ## [v1.75.3] - 2026-09-21
 
 - 补全击杀经验日志：连线、箭雨、龙吟和炸弹现在显示本次实际获得的经验，包含神射手额外经验、神兽双倍经验和多杀汇总经验。

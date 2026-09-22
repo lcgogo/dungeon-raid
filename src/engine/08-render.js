@@ -89,10 +89,10 @@ function draw(){
       ctx.fillText(doomed?'💀':(isBoss?bdef.emoji:'👹'), cx, y+TILE*0.30);
       // 血量（终焉之主无血、打不掉 → 显示 ∞ 而非 0）
       ctx.fillStyle='#fff'; ctx.font='700 '+Math.floor(TILE*0.34)+'px system-ui';
-      if(!t.finale) ctx.fillText(t.hp, cx, cy+TILE*0.10);
+      if(!t.finale) ctx.fillText(t.hp, isBoss?cx-TILE*0.15:cx, cy+TILE*0.10);
       else { ctx.fillStyle='#ffd54a'; ctx.fillText('∞', cx, cy+TILE*0.10); }
       if(t.burnStacks>0){
-        const bx=x+g-4, by=y+g-4, br=TILE*0.16;
+        const bx=isBoss ? x+10 : x+g-4, by=y+g-4, br=TILE*0.16;
         ctx.beginPath(); ctx.arc(bx,by,br,0,7);
         ctx.fillStyle='#ff5a36'; ctx.fill(); ctx.strokeStyle='#000'; ctx.lineWidth=1; ctx.stroke();
         ctx.fillStyle='#fff'; ctx.font='700 '+Math.floor(TILE*0.20)+'px system-ui';
@@ -116,6 +116,15 @@ function draw(){
         ctx.fill(); ctx.strokeStyle='#000'; ctx.lineWidth=1; ctx.stroke();
         ctx.fillStyle='#fff'; ctx.font='700 '+Math.floor(TILE*0.20)+'px system-ui';
         ctx.fillText(perT ? '1' : t.cd, bx, by+1);
+      }
+      if(isBoss && !bdef.finale){
+        const bw=TILE*0.32, bh=TILE*0.17, bx=x+g-bw-1, by=y+g-bh+1;
+        roundRect(bx,by,bw,bh,3);
+        ctx.fillStyle='rgba(12,20,30,.92)'; ctx.fill();
+        ctx.strokeStyle='rgba(255,255,255,.65)'; ctx.lineWidth=1; ctx.stroke();
+        ctx.fillStyle='#fff'; ctx.font='700 '+Math.floor(TILE*0.12)+'px system-ui';
+        ctx.textAlign='center'; ctx.textBaseline='middle';
+        ctx.fillText('Lv'+(t.tier||1),bx+bw/2,by+bh/2);
       }
     } else {
       ctx.font=Math.floor(TILE*0.46)+'px '+EMOJI_FONT;

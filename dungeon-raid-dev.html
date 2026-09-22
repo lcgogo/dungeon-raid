@@ -249,9 +249,9 @@ const CONTENT = {
 if('serviceWorker' in navigator) window.addEventListener('load',()=>navigator.serviceWorker.register('/sw.js').catch(()=>{}));
 //==================== 配置 ====================
 // 版本号 v主.次.修：不影响 verify/replay 兼容边界的小改动改"修"；凡是影响 verify/replay/版本分桶/release 验证语义的改动都改"次"；大版本变更需先确认。页面底部显示。
-const VERSION='v1.76.0';
+const VERSION='v1.76.1';
 // CHANGELOG_LINES below is only a fallback for raw source inspection; build/build.js replaces it from CHANGELOG.md.
-const CHANGELOG_LINES=[{"ver": "v1.75.3", "zh": "补全击杀经验日志：连线、箭雨、龙吟和炸弹现在显示本次实际获得的经验，包含神射手额外经验、神兽双倍经验和多杀汇总经验。", "en": "Added kill-XP logging: chains, Arrow Rain, Dragon Roar, and Bomb now show actual XP gained, including Sharpshooter bonuses, Mythic Beasts’ 2× XP, and multi-kill totals."}, {"ver": "v1.75.2", "zh": "将种族卡和 50 回合职业卡里的 `ⓘ` 详情提示改为独立方框按钮，避免误触整张卡而直接开始/选择。", "en": "Moved race and turn-50 class `ⓘ` details into separate boxed buttons to avoid accidentally selecting the card."}, {"ver": "v1.75.1", "zh": "修复构建流程：开发版和正式版每次构建都会从 `CHANGELOG.md` 自动注入最新更新日志，不再依赖源码中的过期副本。", "en": "Fixed the build flow so Dev and Release builds automatically inject the latest changelog from `CHANGELOG.md` instead of relying on a stale source copy."}, {"ver": "v1.75.0", "zh": "重做骷髅王「重生」：改为自动触发的被动技能，受到致命伤害时满血复活，并将场上所有怪物与 Boss 的攻击倒计时重置为初始值；触发后进入 5 回合冷却，技能栏保留灰色状态显示。", "en": "Reworked Skeleton King's Rebirth as an automatic passive: lethal damage revives the player at full HP and resets every monster and boss countdown to its base value; it then enters a 5-turn cooldown and remains visible as a disabled skill-bar entry."}, {"ver": "v1.74.6", "zh": "修复种族详情中职业列表过长导致内容遮挡的问题；职业详情改为卡片内部独立滚动，返回按钮始终可见。", "en": "Fixed race-detail overlap from long class lists by putting class details in an inner scroll area while keeping Back visible."}];   /* auto-injected by dr.sh embed-changelog（勿手改） */
+const CHANGELOG_LINES=[{"ver": "v1.76.1", "zh": "在 Boss 棋子右下角显示等级；燃烧层数移至左下角，避免与等级标记重叠。", "en": "Boss tiles now show their level in the lower-right corner; burn stacks move to the lower-left to avoid overlap."}, {"ver": "v1.75.3", "zh": "补全击杀经验日志：连线、箭雨、龙吟和炸弹现在显示本次实际获得的经验，包含神射手额外经验、神兽双倍经验和多杀汇总经验。", "en": "Added kill-XP logging: chains, Arrow Rain, Dragon Roar, and Bomb now show actual XP gained, including Sharpshooter bonuses, Mythic Beasts’ 2× XP, and multi-kill totals."}, {"ver": "v1.75.2", "zh": "将种族卡和 50 回合职业卡里的 `ⓘ` 详情提示改为独立方框按钮，避免误触整张卡而直接开始/选择。", "en": "Moved race and turn-50 class `ⓘ` details into separate boxed buttons to avoid accidentally selecting the card."}, {"ver": "v1.75.1", "zh": "修复构建流程：开发版和正式版每次构建都会从 `CHANGELOG.md` 自动注入最新更新日志，不再依赖源码中的过期副本。", "en": "Fixed the build flow so Dev and Release builds automatically inject the latest changelog from `CHANGELOG.md` instead of relying on a stale source copy."}, {"ver": "v1.75.0", "zh": "重做骷髅王「重生」：改为自动触发的被动技能，受到致命伤害时满血复活，并将场上所有怪物与 Boss 的攻击倒计时重置为初始值；触发后进入 5 回合冷却，技能栏保留灰色状态显示。", "en": "Reworked Skeleton King's Rebirth as an automatic passive: lethal damage revives the player at full HP and resets every monster and boss countdown to its base value; it then enters a 5-turn cooldown and remains visible as a disabled skill-bar entry."}];   /* auto-injected by dr.sh embed-changelog（勿手改） */
 const DEV=true;   // release build (DEV=false); dev build is dungeon-raid-dev.html (DEV=true)
 const REC_API='https://api.dungeonraid.win';   // 录像分享 API（Cloudflare Worker + KV）
 // 带种子随机数（mulberry32）：游戏全程用 rnd() 取代原生随机，配合录制种子可确定性重放
@@ -1549,10 +1549,10 @@ function draw(){
       ctx.fillText(doomed?'💀':(isBoss?bdef.emoji:'👹'), cx, y+TILE*0.30);
       // 血量（终焉之主无血、打不掉 → 显示 ∞ 而非 0）
       ctx.fillStyle='#fff'; ctx.font='700 '+Math.floor(TILE*0.34)+'px system-ui';
-      if(!t.finale) ctx.fillText(t.hp, cx, cy+TILE*0.10);
+      if(!t.finale) ctx.fillText(t.hp, isBoss?cx-TILE*0.15:cx, cy+TILE*0.10);
       else { ctx.fillStyle='#ffd54a'; ctx.fillText('∞', cx, cy+TILE*0.10); }
       if(t.burnStacks>0){
-        const bx=x+g-4, by=y+g-4, br=TILE*0.16;
+        const bx=isBoss ? x+10 : x+g-4, by=y+g-4, br=TILE*0.16;
         ctx.beginPath(); ctx.arc(bx,by,br,0,7);
         ctx.fillStyle='#ff5a36'; ctx.fill(); ctx.strokeStyle='#000'; ctx.lineWidth=1; ctx.stroke();
         ctx.fillStyle='#fff'; ctx.font='700 '+Math.floor(TILE*0.20)+'px system-ui';
@@ -1576,6 +1576,15 @@ function draw(){
         ctx.fill(); ctx.strokeStyle='#000'; ctx.lineWidth=1; ctx.stroke();
         ctx.fillStyle='#fff'; ctx.font='700 '+Math.floor(TILE*0.20)+'px system-ui';
         ctx.fillText(perT ? '1' : t.cd, bx, by+1);
+      }
+      if(isBoss && !bdef.finale){
+        const bw=TILE*0.32, bh=TILE*0.17, bx=x+g-bw-1, by=y+g-bh+1;
+        roundRect(bx,by,bw,bh,3);
+        ctx.fillStyle='rgba(12,20,30,.92)'; ctx.fill();
+        ctx.strokeStyle='rgba(255,255,255,.65)'; ctx.lineWidth=1; ctx.stroke();
+        ctx.fillStyle='#fff'; ctx.font='700 '+Math.floor(TILE*0.12)+'px system-ui';
+        ctx.textAlign='center'; ctx.textBaseline='middle';
+        ctx.fillText('Lv'+(t.tier||1),bx+bw/2,by+bh/2);
       }
     } else {
       ctx.font=Math.floor(TILE*0.46)+'px '+EMOJI_FONT;
