@@ -45,6 +45,9 @@
 3. **等用户明确确认**（“发”）后才 `bash dr.sh release`。**绝不改完就自动推 prod。**
 4. 想让用户先在 dev 站实测：单独 `bash dr.sh deploy`（不动正式版）。
 - 固定顺序：**写完 CHANGELOG 新版本节，紧接着更新 README 两份语言文件（`README.zh-CN.md` / `README.en.md`）**；若入口摘要或导航有变化，再同步更新根 `README.md`。别只写 changelog 漏掉文档。提交免确认、用多段 `-m`。
+- CHANGELOG 版本节必须始终按版本号倒序排列（最新版本在最上方）；新增版本要插入正确位置，不能让 patch/minor 版本交错。
+- 每次准备修改仓库前，先检查 GitHub 上当前未关闭的 Issue，确认是否已有相关任务、冲突或协作约定，再开始编辑。
+- 每个 `vX.Y.0` 版本都必须创建对应的 GitHub Release；发版完成前确认 Release 已存在，不能只推送提交或部署 Pages。
 
 ---
 

@@ -37,7 +37,7 @@ The current Dev build is `v1.75.1`; builds now automatically inject the latest c
 
 The current Dev build is `v1.75.2`; race and turn-50 class `ⓘ` details now use separate buttons so they cannot accidentally select the card.
 
-The current Dev build is `v1.77.0`; bosses use a deterministic 30-card deck with two cards per boss and reshuffle when empty. The Matryoshka boss 🪆 still splits; boss levels use a circular number badge in the lower-right corner, and all foes show burn stacks in the lower-left.
+The current Dev build is `v1.78.0`; bosses use a deterministic 30-card deck with two cards per boss and reshuffle when empty. The Matryoshka boss 🪆 still splits; boss levels use a circular number badge in the lower-right corner, and all foes show burn stacks in the lower-left.
 
 ## 🧩 Core Gameplay
 
@@ -123,7 +123,7 @@ Each race has **several** classes; every skill has a **5-turn cooldown** (except
 | 🪦 Undead | 🧊 Lich | Frost Orb | Deal your **current flat damage** once to all monsters/bosses on the board (excluding the Overlord), then add **+1 to their current attack countdown** so their next attack is delayed by one extra turn |
 | 🐉 Mythic Beasts | 🐉 Azure Dragon | Dragon Roar | Deal damage equal to your level to all foes, including normal-attack-immune bosses |
 | 🐉 Mythic Beasts | 🐯 White Tiger | Tiger Breaker | Your next weapon chain can hit weapon-immune bosses and deals ×3 damage |
-| 🐉 Mythic Beasts | 🐢 Black Tortoise | Tortoise Bastion | Fill Armor progress and gain one Armor level immediately |
+| 🐉 Mythic Beasts | 🐢 Black Tortoise | Tortoise Bastion | Halve all incoming damage for 3 turns (minimum 1) |
 | 🐉 Mythic Beasts | 🐦‍🔥 Vermilion Bird | Phoenix Rebirth | Cannot die this turn; gain ⌊level/2⌋ max HP and revive at 50% of the new max HP |
 
 ## 🎖️ Tier-2 Skill / Race Skill · Passives (locked to class)
@@ -159,7 +159,7 @@ At **level 100 (Tier-2 Skill)** you automatically get the passive **locked to yo
 
 ## 👹 Bestiary
 
-Every **10 turns** a random boss is guaranteed to appear; **beating one by any means rewards 💰+20 and +15 XP** (announced in the log). **If you don't clear it in time the next one still comes and stacks** — no camping a weak boss to suppress the rest. Boss strength steps up one tier every **50 turns** (Lv2, Lv3…). **Ghost / Clown / Corruptor / Snowman can only be hit with the 💥 Bomb** (or bomb-like non-weapon damage such as poison/drain); all others can be attacked with weapon chains too. **After you beat the turn-350 boss, a warning pops and from then on 2 different bosses descend together every 10 turns** — a ramp toward the turn-500 endgame.
+Every **10 turns**, one boss is drawn from a **deterministic 30-card deck** containing two cards for each regular boss; the deck reshuffles when empty. **Beating one by any means rewards 💰+20 and +15 XP** (announced in the log). **If you don't clear it in time the next one still comes and stacks** — no camping a weak boss to suppress the rest. Boss strength steps up one tier every **50 turns** (Lv2, Lv3…). **Ghost / Clown / Corruptor / Snowman can only be hit with the 💥 Bomb** (or bomb-like non-weapon damage such as poison/drain); all others can be attacked with weapon chains too. **After you beat the turn-350 boss, a warning pops and from then on 2 different bosses descend together every 10 turns** — a ramp toward the turn-500 endgame.
 
 | Boss | How to hit | Gimmick |
 |---|---|---|
@@ -172,7 +172,7 @@ Every **10 turns** a random boss is guaranteed to appear; **beating one by any m
 | 🥷 Assassin | Sword / Bomb | Stats like a normal enemy, but its hits are **true damage** — ignore armor, straight to HP |
 | 🦖 Devourer | Sword / Bomb | When its countdown hits 0, it first strikes for **50% of its current HP**; only after that hit resolves does it drain half the HP from every regular enemy to grow |
 | 🧙 Summoner | Sword / Bomb | Turns a non-enemy tile into an enemy each turn — the longer it lives, the more enemies |
-| 🦹 Thief | Sword / Bomb | Steals a share of gold on arrival (20% at Lv1, 40% at Lv2…, capped at all you have at high tiers — never goes negative); kill it before its timer to recover, let it flee and the gold is gone forever |
+| 🦹 Thief | Sword / Bomb | Steals a share of gold on arrival (10% at Lv1, 20% at Lv2…, capped at all you have at high tiers — never goes negative); kill it before its timer to recover, let it flee and the gold is gone forever |
 | 🧟 Zombie | Sword / Bomb | Infects you on arrival (HP bar turns green); **after a 1-turn incubation** you lose a % of HP each turn (scaling per tier, capped at 30%/turn, ignoring armor); kill it during incubation to cure |
 | 🦅 Birdman | Sword / Bomb | **Every turn** it dives to peck you (half attack) and, at turn end, **swaps places with a random tile (teleport)** — elusive and nagging, so line up your chain where it lands and finish it fast |
 | 🗿 Statue | Sword / Bomb (careful!) | **Whatever damage it takes, it reflects back at you as TRUE damage (ignoring armor)** — attacking it hurts you. Make sure you have the HP to survive the kill; don't one-shot yourself (sword/bomb/splash/drain all reflect) |

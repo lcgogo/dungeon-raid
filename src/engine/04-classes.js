@@ -29,7 +29,7 @@ const TIER1={
     addBombFx(tr_,tc); t.hp-=D; statueReflect(t, dealt);   // 复用炸弹特效；石像会反弹
     let killed=false, lh=0;
     if(t.hp<=0){ killed=true;
-      if(isBoss){ if(defeatBoss(t,tr_,tc)==='killed'){ addXp(p,15*3); gainGold(20*3); } }
+      if(isBoss){ if(defeatBoss(t,tr_,tc)==='killed'){ addXp(p,15*2); gainGold(20*2); } }
       else { grid[tr_][tc]=null; addXp(p,(3+(p.killXp||0))*3); gainGold(1*3); if(p.rotflesh)p.maxHp++; }   // 击杀 3 倍奖励（普通怪）
       lh=lifestealHeal(1); applyGravity(); syncPositions(false);
     }

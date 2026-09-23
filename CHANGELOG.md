@@ -1,9 +1,10 @@
-## [v1.77.0] - 2026-09-23
+
+## [v1.78.0] - 2026-09-23
 
 > Version-Impact: verify
 
-- Boss 改用确定性 30 张牌堆：每个普通 Boss 各两张，抽空后重新洗牌；双 Boss 会抽取两张不同 Boss。
-- Bosses now use a deterministic 30-card deck: two cards per regular boss, reshuffled when empty; double-Boss turns draw two different bosses.
+- 修正文案与实现不一致：玄龟主动技能、玄龟二阶被动、小偷偷金比例和 Boss 牌堆说明；同时修正火枪手狙击 Boss 的奖励重复计算，使总奖励恢复为 3 倍。
+- Fixed mismatched race/class/Boss wording and corrected Musketeer’s Boss kill reward so the total is 3× instead of being counted twice.
 
 ## [v1.77.2] - 2026-09-23
 
@@ -14,6 +15,13 @@
 
 - 放大 Boss 等级圆圈内的数字，使其与攻击力数字大小一致。
 - Enlarged the boss-level badge number to match the attack-value badge size.
+
+## [v1.77.0] - 2026-09-23
+
+> Version-Impact: verify
+
+- Boss 改用确定性 30 张牌堆：每个普通 Boss 各两张，抽空后重新洗牌；双 Boss 会抽取两张不同 Boss。
+- Bosses now use a deterministic 30-card deck: two cards per regular boss, reshuffled when empty; double-Boss turns draw two different bosses.
 
 ## [v1.76.4] - 2026-09-22
 
