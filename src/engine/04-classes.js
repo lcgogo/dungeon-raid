@@ -180,12 +180,11 @@ function showClassSelect(){
     <div style="text-align:left;font-size:11.5px;line-height:1.6;background:var(--panel2);border-radius:10px;padding:9px 11px;margin-bottom:10px">
       <span style="color:var(--gold);font-weight:700">🕯️ ${tr('地牢之下','Beneath the Dungeon')}</span>
       <span style="color:var(--dim)"> ${tr('地心封印着「终焉之主」，历代冒险者潜入地牢、无人生还——轮到你了。拖动连接相邻同类符文：🔪斩怪、🔰凝甲、💗回血、💰补给。能走多深，看你自己。','The Overlord lies sealed at the world’s core; none who went in returned — your turn now. Link adjacent runes: 🔪 slay, 🔰 armor, 💗 heal, 💰 supplies. How deep you go is up to you.')}</span>
-      <div style="display:flex;justify-content:center;margin:8px 0 3px">
-        <div style="display:inline-grid;grid-template-columns:auto auto auto;justify-items:center;align-items:center;font-size:19px;column-gap:3px;row-gap:0">
-          <span>🔪</span><span></span><span></span>
-          <span style="color:var(--gold);font-size:15px">↘</span><span>👹</span><span><span style="color:var(--gold);font-size:15px">━</span>🔪</span>
-        </div></div>
-      <div style="color:var(--dim);text-align:center;font-size:10.5px">${tr('🔪剑链可穿过 👹——<b>横竖斜 8 向</b>连成一条线即可攻击，每只怪独立吃满整条伤害。<br>💡 <b>轻点方块</b>看说明；<b>长按商店/技能块</b>看数值。','A 🔪 chain cuts through 👹 — link <b>8 directions</b>; every monster takes the full chain’s damage.<br>💡 <b>Tap a tile</b> for info; <b>long-press a shop/skill block</b> for details.')}</div>
+      <div style="color:var(--dim);text-align:center;font-size:12px;line-height:1.9;margin:7px 0 2px">
+        <div>👆 ➜ 🗡️ ➜ 👹</div>
+        <div>👆 ×2 ➜ 💰　💗　🔰</div>
+      </div>
+      <div style="color:var(--dim);text-align:center;font-size:10.5px">${tr('🗡️ 武器链可穿过 👹，横竖斜 8 向均可；资源棋子连续点按 2 次可自动连线。<br>💡 <b>轻点方块</b>看说明；<b>长按商店/技能块</b>看数值。','A 🗡️ weapon chain can pass through 👹 in all 8 directions; double-tap a resource tile to auto-link it.<br>💡 <b>Tap a tile</b> for info; <b>long-press a shop/skill block</b> for details.')}</div>
     </div>`;
   // ▶ START（主按钮）→ 选种族页
   const start=document.createElement('button'); start.className='btn';

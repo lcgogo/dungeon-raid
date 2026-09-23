@@ -249,9 +249,9 @@ const CONTENT = {
 if('serviceWorker' in navigator) window.addEventListener('load',()=>navigator.serviceWorker.register('/sw.js').catch(()=>{}));
 //==================== 配置 ====================
 // 版本号 v主.次.修：不影响 verify/replay 兼容边界的小改动改"修"；凡是影响 verify/replay/版本分桶/release 验证语义的改动都改"次"；大版本变更需先确认。页面底部显示。
-const VERSION='v1.79.0';
+const VERSION='v1.79.1';
 // CHANGELOG_LINES below is only a fallback for raw source inspection; build/build.js replaces it from CHANGELOG.md.
-const CHANGELOG_LINES=[{"ver": "v1.79.0", "zh": "修复验证器只按当前引擎版本拉取待验证成绩的问题；旧版本录像现在会按 `rec.ver` 加载对应引擎快照并继续验证。", "en": "Fixed the verifier so pending scores are no longer limited to the current engine version; legacy recordings are replayed with the engine snapshot matching `rec.ver`."}, {"ver": "v1.78.4", "zh": "反馈板新增管理员状态管理：可标记为已解决/无效并隐藏，或永久删除明显垃圾内容。", "en": "Added feedback moderation commands to hide resolved/invalid posts or permanently delete obvious spam."}, {"ver": "v1.78.3", "zh": "开发版新增公开反馈板：玩家可匿名发布建议、Bug、平衡和文案反馈，并查看其他留言。", "en": "Added a public feedback board to the dev build for anonymous ideas, bugs, balance notes, and copy feedback."}, {"ver": "v1.78.2", "zh": "调淡安卓端武器和普通怪棋子的底色，避免与心棋子的粉色底色混淆。", "en": "Lightened weapon and normal-monster tile backgrounds on Android to distinguish them from pink heart tiles."}, {"ver": "v1.78.1", "zh": "修复回放最后一回合仍可能响应棋盘拖拽的问题；回放期间所有拖拽阶段均会被锁定。", "en": "Fixed a replay-end input race where the board could still respond to a drag on the final turn; all drag phases are now locked during replay."}];   /* auto-injected by dr.sh embed-changelog（勿手改） */
+const CHANGELOG_LINES=[{"ver": "v1.79.1", "zh": "首页操作示意改为两行：鼠标箭头 → 武器 → 怪物，以及鼠标箭头 ×2 → 金币/心/盾。", "en": "Reworked the home-screen gameplay diagram into two lines: mouse → weapon → monster, and mouse ×2 → coin/heart/shield."}, {"ver": "v1.79.0", "zh": "修复验证器只按当前引擎版本拉取待验证成绩的问题；旧版本录像现在会按 `rec.ver` 加载对应引擎快照并继续验证。", "en": "Fixed the verifier so pending scores are no longer limited to the current engine version; legacy recordings are replayed with the engine snapshot matching `rec.ver`."}, {"ver": "v1.78.4", "zh": "反馈板新增管理员状态管理：可标记为已解决/无效并隐藏，或永久删除明显垃圾内容。", "en": "Added feedback moderation commands to hide resolved/invalid posts or permanently delete obvious spam."}, {"ver": "v1.78.3", "zh": "开发版新增公开反馈板：玩家可匿名发布建议、Bug、平衡和文案反馈，并查看其他留言。", "en": "Added a public feedback board to the dev build for anonymous ideas, bugs, balance notes, and copy feedback."}, {"ver": "v1.78.2", "zh": "调淡安卓端武器和普通怪棋子的底色，避免与心棋子的粉色底色混淆。", "en": "Lightened weapon and normal-monster tile backgrounds on Android to distinguish them from pink heart tiles."}];   /* auto-injected by dr.sh embed-changelog（勿手改） */
 const DEV=true;   // release build (DEV=false); dev build is dungeon-raid-dev.html (DEV=true)
 const REC_API='https://api.dungeonraid.win';   // 录像分享 API（Cloudflare Worker + KV）
 // 带种子随机数（mulberry32）：游戏全程用 rnd() 取代原生随机，配合录制种子可确定性重放
@@ -914,12 +914,11 @@ function showClassSelect(){
     <div style="text-align:left;font-size:11.5px;line-height:1.6;background:var(--panel2);border-radius:10px;padding:9px 11px;margin-bottom:10px">
       <span style="color:var(--gold);font-weight:700">🕯️ ${tr('地牢之下','Beneath the Dungeon')}</span>
       <span style="color:var(--dim)"> ${tr('地心封印着「终焉之主」，历代冒险者潜入地牢、无人生还——轮到你了。拖动连接相邻同类符文：🔪斩怪、🔰凝甲、💗回血、💰补给。能走多深，看你自己。','The Overlord lies sealed at the world’s core; none who went in returned — your turn now. Link adjacent runes: 🔪 slay, 🔰 armor, 💗 heal, 💰 supplies. How deep you go is up to you.')}</span>
-      <div style="display:flex;justify-content:center;margin:8px 0 3px">
-        <div style="display:inline-grid;grid-template-columns:auto auto auto;justify-items:center;align-items:center;font-size:19px;column-gap:3px;row-gap:0">
-          <span>🔪</span><span></span><span></span>
-          <span style="color:var(--gold);font-size:15px">↘</span><span>👹</span><span><span style="color:var(--gold);font-size:15px">━</span>🔪</span>
-        </div></div>
-      <div style="color:var(--dim);text-align:center;font-size:10.5px">${tr('🔪剑链可穿过 👹——<b>横竖斜 8 向</b>连成一条线即可攻击，每只怪独立吃满整条伤害。<br>💡 <b>轻点方块</b>看说明；<b>长按商店/技能块</b>看数值。','A 🔪 chain cuts through 👹 — link <b>8 directions</b>; every monster takes the full chain’s damage.<br>💡 <b>Tap a tile</b> for info; <b>long-press a shop/skill block</b> for details.')}</div>
+      <div style="color:var(--dim);text-align:center;font-size:12px;line-height:1.9;margin:7px 0 2px">
+        <div>👆 ➜ 🗡️ ➜ 👹</div>
+        <div>👆 ×2 ➜ 💰　💗　🔰</div>
+      </div>
+      <div style="color:var(--dim);text-align:center;font-size:10.5px">${tr('🗡️ 武器链可穿过 👹，横竖斜 8 向均可；资源棋子连续点按 2 次可自动连线。<br>💡 <b>轻点方块</b>看说明；<b>长按商店/技能块</b>看数值。','A 🗡️ weapon chain can pass through 👹 in all 8 directions; double-tap a resource tile to auto-link it.<br>💡 <b>Tap a tile</b> for info; <b>long-press a shop/skill block</b> for details.')}</div>
     </div>`;
   // ▶ START（主按钮）→ 选种族页
   const start=document.createElement('button'); start.className='btn';

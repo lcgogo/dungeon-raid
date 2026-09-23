@@ -37,7 +37,7 @@ The current Dev build is `v1.75.1`; builds now automatically inject the latest c
 
 The current Dev build is `v1.75.2`; race and turn-50 class `ⓘ` details now use separate buttons so they cannot accidentally select the card.
 
-The current Dev build is `v1.79.0`; the verifier replays each recording with its matching engine snapshot so legacy pending scores are not stranded after releases. Feedback-board admins can hide resolved/invalid posts or permanently delete obvious spam.
+The current Dev build is `v1.79.1`; the home-screen gameplay diagram now has two lines: mouse → weapon → monster, and mouse ×2 → coin/heart/shield. The verifier replays each recording with its matching engine snapshot.
 
 ## 🧩 Core Gameplay
 

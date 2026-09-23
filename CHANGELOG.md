@@ -1,4 +1,9 @@
 
+## [v1.79.1] - 2026-09-24
+
+- 首页操作示意改为两行：鼠标箭头 → 武器 → 怪物，以及鼠标箭头 ×2 → 金币/心/盾。
+- Reworked the home-screen gameplay diagram into two lines: mouse → weapon → monster, and mouse ×2 → coin/heart/shield.
+
 ## [v1.79.0] - 2026-09-24
 
 > Version-Impact: verify
