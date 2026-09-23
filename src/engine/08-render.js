@@ -122,7 +122,7 @@ function draw(){
         ctx.beginPath(); ctx.arc(bx,by,br,0,7);
         ctx.fillStyle='rgba(12,20,30,.92)'; ctx.fill();
         ctx.strokeStyle='rgba(255,255,255,.65)'; ctx.lineWidth=1; ctx.stroke();
-        ctx.fillStyle='#fff'; ctx.font='700 '+Math.floor(TILE*0.12)+'px system-ui';
+        ctx.fillStyle='#fff'; ctx.font='700 '+Math.floor(TILE*0.20)+'px system-ui';
         ctx.textAlign='center'; ctx.textBaseline='middle';
         ctx.fillText(t.tier||1,bx,by+1);
       }

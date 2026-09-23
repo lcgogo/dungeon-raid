@@ -1,3 +1,15 @@
+## [v1.77.0] - 2026-09-23
+
+> Version-Impact: verify
+
+- Boss 改用确定性 30 张牌堆：每个普通 Boss 各两张，抽空后重新洗牌；双 Boss 会抽取两张不同 Boss。
+- Bosses now use a deterministic 30-card deck: two cards per regular boss, reshuffled when empty; double-Boss turns draw two different bosses.
+
+## [v1.77.1] - 2026-09-23
+
+- 放大 Boss 等级圆圈内的数字，使其与攻击力数字大小一致。
+- Enlarged the boss-level badge number to match the attack-value badge size.
+
 ## [v1.76.4] - 2026-09-22
 
 - 修复 Boss 棋子生命数字偏左的问题，恢复居中显示。

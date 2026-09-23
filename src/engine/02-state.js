@@ -16,7 +16,7 @@ let gravityFxHold=0;     // 下一次 applyGravity 要给下落棋子的起落�
 function holdNextGravity(frames=FX_FALL_HOLD){ if(headless||jumping) return; gravityFxHold=Math.max(gravityFxHold, frames|0); }
 
 function newPlayer(){
-  return {hp:20,maxHp:20, armor:0, shieldXp:0, toughness:0, shopCd:{}, skillCd:0, dmgBy:{}, deathMode:'damage', bossDue:false, gold:0, xp:0, level:1,
+  return {hp:20,maxHp:20, armor:0, shieldXp:0, toughness:0, shopCd:{}, skillCd:0, dmgBy:{}, deathMode:'damage', bossDue:false, bossDeck:null, gold:0, xp:0, level:1,
     weaponPower:1, swordFlat:0, armorPerShield:1, healPerHeart:1, goldPerCoin:1,
     lifesteal:0, regen:0, coinXp:0, turns:0,
     race:null, tier1:null, tier2:null, t1Pending:false, t2Pending:false,   // 种族/转职

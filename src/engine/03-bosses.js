@@ -122,7 +122,20 @@ const BOSSES=[
       log(tr(`👑 终焉第 ${player.finaleWave}/10 波：召唤 ${made} 个 Boss！`,`👑 Wave ${player.finaleWave}/10: ${made} bosses summoned!`), 'bad');
     } },
 ];
-function randomBossDef(){ const pool=BOSSES.filter(b=>!b.noRandom); return pool[Math.floor(rnd()*pool.length)]; }
+function refillBossDeck(){
+  const ids=BOSSES.filter(b=>!b.noRandom).flatMap(b=>[b.id,b.id]);
+  for(let i=ids.length-1;i>0;i--){ const j=Math.floor(rnd()*(i+1)); [ids[i],ids[j]]=[ids[j],ids[i]]; }
+  player.bossDeck=ids;
+}
+function randomBossDef(exclude){
+  if(!player.bossDeck || !player.bossDeck.length) refillBossDeck();
+  const blocked=new Set([exclude].filter(Boolean));
+  let i=0; while(i<player.bossDeck.length && blocked.has(player.bossDeck[i])) i++;
+  if(i>=player.bossDeck.length){ refillBossDeck(); i=0; while(i<player.bossDeck.length && blocked.has(player.bossDeck[i])) i++; }
+  const id=player.bossDeck.splice(i,1)[0];
+  const def=BOSSES.find(b=>b.id===id);
+  return def||BOSSES[0];
+}
 // 把一个非怪/非Boss棋子变成随机 Boss（终焉浪潮用）；返回是否成功
 function spawnRandomBossTile(){
   const cells=[];
@@ -298,9 +311,9 @@ function spawnBoss(force, exclude){
   for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const t=grid[r][c]; if(t && t.type!=='boss') cells.push([r,c]); }   // 不覆盖已有 Boss
   if(!cells.length) return null;
   const [r,c]=cells[Math.floor(rnd()*cells.length)];
-  let def=randomBossDef();   // 排除终焉之主（noRandom）
+  let def=randomBossDef();   // 从每个 Boss 两张组成的确定性牌堆抽取
   const _ms=[50,100,200,350].includes(player.turns);   // 里程碑回合：排除小偷（跑了学不了技能）
-  if(exclude || _ms){ let tries=0; while(((exclude && def.id===exclude)||(_ms&&def.id==='thief'))&& tries<8){ def=randomBossDef(); tries++; } }
+  if(exclude || _ms){ const forbidden=exclude||(_ms?'thief':null); if(def.id===forbidden){ player.bossDeck.push(def.id); def=randomBossDef(forbidden); } }
   const tier=bossTier();
   const s = def.id==='matryoshka' ? enemyStats() : (def.monster ? enemyStats() : bossStats());   // 套娃按普通怪属性生成
   const cdv = Math.max(1,(s.cd!=null ? s.cd : s.baseCd) + extraFoeCd());
