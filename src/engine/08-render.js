@@ -64,7 +64,7 @@ function draw(){
     const frostedBase = t.type==='boss' ? '#4d94d8' : '#5aa9f8';
     const frostedGlow = t.type==='boss' ? '#d9f3ff' : '#c8ecff';
     // 能被剑攻击的（怪 / 可剑连的Boss，以及剑本身）统一红底，一眼看出可攻击；蔓藤缠绕中的怪改绿底；燃烧中的怪改橙红底；火焰链激活时的 Boss 改火红底
-    const baseCol = flashedWhite ? '#eef7ff' : frosted ? frostedBase : immuneBossBurning ? d.color : burning ? '#ff6b2f' : fireLinked ? '#ff5336' : coiled ? '#27ae60' : (isSwordTarget(t) || t.type==='sword') ? DEF.sword.color : d.color;   // 黑毒心/绿毒心底色与普通心一致，只换 emoji（💚/🖤）
+    const baseCol = flashedWhite ? '#eef7ff' : frosted ? frostedBase : immuneBossBurning ? d.color : burning ? '#ff6b2f' : fireLinked ? '#ff5336' : coiled ? '#27ae60' : t.type==='sword' ? '#aebcff' : t.type==='enemy' ? '#c4a7df' : isSwordTarget(t) ? '#c4a7df' : d.color;   // 安卓端降低武器/普通怪底色饱和度，和心棋子拉开区分
     // 被剑链穿过的怪/可攻击Boss → 红色高亮（表示正被攻击）；燃烧目标走橙色光晕；火焰链激活的 Boss 走更亮的火色
     const gl = flashedWhite ? '#ffffff' : frosted ? frostedGlow : (picked && chainType==='sword' && (isSwordTarget(t) || isFireChainTarget(t))) ? '#ff8a3c' : burning ? '#ff9a52' : fireLinked ? '#ff7043' : coiled ? '#2ecc71' : d.glow;
     // 背景

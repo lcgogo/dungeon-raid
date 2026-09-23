@@ -249,9 +249,9 @@ const CONTENT = {
 if('serviceWorker' in navigator) window.addEventListener('load',()=>navigator.serviceWorker.register('/sw.js').catch(()=>{}));
 //==================== 配置 ====================
 // 版本号 v主.次.修：不影响 verify/replay 兼容边界的小改动改"修"；凡是影响 verify/replay/版本分桶/release 验证语义的改动都改"次"；大版本变更需先确认。页面底部显示。
-const VERSION='v1.78.1';
+const VERSION='v1.78.2';
 // CHANGELOG_LINES below is only a fallback for raw source inspection; build/build.js replaces it from CHANGELOG.md.
-const CHANGELOG_LINES=[{"ver": "v1.78.1", "zh": "修复回放最后一回合仍可能响应棋盘拖拽的问题；回放期间所有拖拽阶段均会被锁定。", "en": "Fixed a replay-end input race where the board could still respond to a drag on the final turn; all drag phases are now locked during replay."}, {"ver": "v1.78.0", "zh": "修正文案与实现不一致：玄龟主动技能、玄龟二阶被动、小偷偷金比例和 Boss 牌堆说明；同时修正火枪手狙击 Boss 的奖励重复计算，使总奖励恢复为 3 倍。", "en": "Fixed mismatched race/class/Boss wording and corrected Musketeer’s Boss kill reward so the total is 3× instead of being counted twice."}, {"ver": "v1.77.2", "zh": "澄清岩浆魔机制文案：融化盾牌不会回血，但火焰伤害会为它回血。", "en": "Clarified Magmafiend wording: melting shields does not heal it, while fire damage does."}, {"ver": "v1.77.1", "zh": "放大 Boss 等级圆圈内的数字，使其与攻击力数字大小一致。", "en": "Enlarged the boss-level badge number to match the attack-value badge size."}, {"ver": "v1.77.0", "zh": "Boss 改用确定性 30 张牌堆：每个普通 Boss 各两张，抽空后重新洗牌；双 Boss 会抽取两张不同 Boss。", "en": "Bosses now use a deterministic 30-card deck: two cards per regular boss, reshuffled when empty; double-Boss turns draw two different bosses."}];   /* auto-injected by dr.sh embed-changelog（勿手改） */
+const CHANGELOG_LINES=[{"ver": "v1.78.2", "zh": "调淡安卓端武器和普通怪棋子的底色，避免与心棋子的粉色底色混淆。", "en": "Lightened weapon and normal-monster tile backgrounds on Android to distinguish them from pink heart tiles."}, {"ver": "v1.78.1", "zh": "修复回放最后一回合仍可能响应棋盘拖拽的问题；回放期间所有拖拽阶段均会被锁定。", "en": "Fixed a replay-end input race where the board could still respond to a drag on the final turn; all drag phases are now locked during replay."}, {"ver": "v1.78.0", "zh": "修正文案与实现不一致：玄龟主动技能、玄龟二阶被动、小偷偷金比例和 Boss 牌堆说明；同时修正火枪手狙击 Boss 的奖励重复计算，使总奖励恢复为 3 倍。", "en": "Fixed mismatched race/class/Boss wording and corrected Musketeer’s Boss kill reward so the total is 3× instead of being counted twice."}, {"ver": "v1.77.2", "zh": "澄清岩浆魔机制文案：融化盾牌不会回血，但火焰伤害会为它回血。", "en": "Clarified Magmafiend wording: melting shields does not heal it, while fire damage does."}, {"ver": "v1.77.1", "zh": "放大 Boss 等级圆圈内的数字，使其与攻击力数字大小一致。", "en": "Enlarged the boss-level badge number to match the attack-value badge size."}];   /* auto-injected by dr.sh embed-changelog（勿手改） */
 const DEV=true;   // release build (DEV=false); dev build is dungeon-raid-dev.html (DEV=true)
 const REC_API='https://api.dungeonraid.win';   // 录像分享 API（Cloudflare Worker + KV）
 // 带种子随机数（mulberry32）：游戏全程用 rnd() 取代原生随机，配合录制种子可确定性重放
@@ -1537,7 +1537,7 @@ function draw(){
     const frostedBase = t.type==='boss' ? '#4d94d8' : '#5aa9f8';
     const frostedGlow = t.type==='boss' ? '#d9f3ff' : '#c8ecff';
     // 能被剑攻击的（怪 / 可剑连的Boss，以及剑本身）统一红底，一眼看出可攻击；蔓藤缠绕中的怪改绿底；燃烧中的怪改橙红底；火焰链激活时的 Boss 改火红底
-    const baseCol = flashedWhite ? '#eef7ff' : frosted ? frostedBase : immuneBossBurning ? d.color : burning ? '#ff6b2f' : fireLinked ? '#ff5336' : coiled ? '#27ae60' : (isSwordTarget(t) || t.type==='sword') ? DEF.sword.color : d.color;   // 黑毒心/绿毒心底色与普通心一致，只换 emoji（💚/🖤）
+    const baseCol = flashedWhite ? '#eef7ff' : frosted ? frostedBase : immuneBossBurning ? d.color : burning ? '#ff6b2f' : fireLinked ? '#ff5336' : coiled ? '#27ae60' : t.type==='sword' ? '#aebcff' : t.type==='enemy' ? '#c4a7df' : isSwordTarget(t) ? '#c4a7df' : d.color;   // 安卓端降低武器/普通怪底色饱和度，和心棋子拉开区分
     // 被剑链穿过的怪/可攻击Boss → 红色高亮（表示正被攻击）；燃烧目标走橙色光晕；火焰链激活的 Boss 走更亮的火色
     const gl = flashedWhite ? '#ffffff' : frosted ? frostedGlow : (picked && chainType==='sword' && (isSwordTarget(t) || isFireChainTarget(t))) ? '#ff8a3c' : burning ? '#ff9a52' : fireLinked ? '#ff7043' : coiled ? '#2ecc71' : d.glow;
     // 背景

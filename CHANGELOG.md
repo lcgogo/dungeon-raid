@@ -1,4 +1,9 @@
 
+## [v1.78.2] - 2026-09-24
+
+- 调淡安卓端武器和普通怪棋子的底色，避免与心棋子的粉色底色混淆。
+- Lightened weapon and normal-monster tile backgrounds on Android to distinguish them from pink heart tiles.
+
 ## [v1.78.1] - 2026-09-23
 
 - 修复回放最后一回合仍可能响应棋盘拖拽的问题；回放期间所有拖拽阶段均会被锁定。
