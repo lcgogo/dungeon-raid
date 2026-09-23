@@ -5,6 +5,11 @@
 - Boss 改用确定性 30 张牌堆：每个普通 Boss 各两张，抽空后重新洗牌；双 Boss 会抽取两张不同 Boss。
 - Bosses now use a deterministic 30-card deck: two cards per regular boss, reshuffled when empty; double-Boss turns draw two different bosses.
 
+## [v1.77.2] - 2026-09-23
+
+- 澄清岩浆魔机制文案：融化盾牌不会回血，但火焰伤害会为它回血。
+- Clarified Magmafiend wording: melting shields does not heal it, while fire damage does.
+
 ## [v1.77.1] - 2026-09-23
 
 - 放大 Boss 等级圆圈内的数字，使其与攻击力数字大小一致。

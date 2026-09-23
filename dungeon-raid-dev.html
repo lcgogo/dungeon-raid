@@ -249,9 +249,9 @@ const CONTENT = {
 if('serviceWorker' in navigator) window.addEventListener('load',()=>navigator.serviceWorker.register('/sw.js').catch(()=>{}));
 //==================== 配置 ====================
 // 版本号 v主.次.修：不影响 verify/replay 兼容边界的小改动改"修"；凡是影响 verify/replay/版本分桶/release 验证语义的改动都改"次"；大版本变更需先确认。页面底部显示。
-const VERSION='v1.77.1';
+const VERSION='v1.77.2';
 // CHANGELOG_LINES below is only a fallback for raw source inspection; build/build.js replaces it from CHANGELOG.md.
-const CHANGELOG_LINES=[{"ver": "v1.77.0", "zh": "Boss 改用确定性 30 张牌堆：每个普通 Boss 各两张，抽空后重新洗牌；双 Boss 会抽取两张不同 Boss。", "en": "Bosses now use a deterministic 30-card deck: two cards per regular boss, reshuffled when empty; double-Boss turns draw two different bosses."}, {"ver": "v1.77.1", "zh": "放大 Boss 等级圆圈内的数字，使其与攻击力数字大小一致。", "en": "Enlarged the boss-level badge number to match the attack-value badge size."}, {"ver": "v1.76.4", "zh": "修复 Boss 棋子生命数字偏左的问题，恢复居中显示。", "en": "Fixed boss HP values appearing left-shifted; they are centered again."}, {"ver": "v1.76.3", "zh": "统一普通怪与 Boss 的燃烧层数位置：所有怪物的燃烧层数都显示在左下角，Boss 右下角专门显示等级。", "en": "Unified burn-stack placement for normal monsters and bosses: all foes now show burn stacks in the lower-left corner, while boss levels stay in the lower-right."}, {"ver": "v1.76.2", "zh": "Boss 棋子右下角等级改为圆形数字标记，不再显示 `Lv`；普通怪右下角仍用于燃烧层数。", "en": "Changed the boss level badge to a circular number-only marker; normal monsters still use the lower-right corner for burn stacks."}];   /* auto-injected by dr.sh embed-changelog（勿手改） */
+const CHANGELOG_LINES=[{"ver": "v1.77.0", "zh": "Boss 改用确定性 30 张牌堆：每个普通 Boss 各两张，抽空后重新洗牌；双 Boss 会抽取两张不同 Boss。", "en": "Bosses now use a deterministic 30-card deck: two cards per regular boss, reshuffled when empty; double-Boss turns draw two different bosses."}, {"ver": "v1.77.2", "zh": "澄清岩浆魔机制文案：融化盾牌不会回血，但火焰伤害会为它回血。", "en": "Clarified Magmafiend wording: melting shields does not heal it, while fire damage does."}, {"ver": "v1.77.1", "zh": "放大 Boss 等级圆圈内的数字，使其与攻击力数字大小一致。", "en": "Enlarged the boss-level badge number to match the attack-value badge size."}, {"ver": "v1.76.4", "zh": "修复 Boss 棋子生命数字偏左的问题，恢复居中显示。", "en": "Fixed boss HP values appearing left-shifted; they are centered again."}, {"ver": "v1.76.3", "zh": "统一普通怪与 Boss 的燃烧层数位置：所有怪物的燃烧层数都显示在左下角，Boss 右下角专门显示等级。", "en": "Unified burn-stack placement for normal monsters and bosses: all foes now show burn stacks in the lower-left corner, while boss levels stay in the lower-right."}];   /* auto-injected by dr.sh embed-changelog（勿手改） */
 const DEV=true;   // release build (DEV=false); dev build is dungeon-raid-dev.html (DEV=true)
 const REC_API='https://api.dungeonraid.win';   // 录像分享 API（Cloudflare Worker + KV）
 // 带种子随机数（mulberry32）：游戏全程用 rnd() 取代原生随机，配合录制种子可确定性重放
@@ -376,7 +376,7 @@ const BOSSES=[
     onSpawn(t){ let n=0; const cells=[]; let sr=-1, sc=-1; for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const x=grid[r][c]; if(x===t){ sr=r; sc=c; } else if(x&&x.type==='enemy'){ x.cd=Math.max(1,x.cd-1); cells.push({r,c}); n++; } } if(n){ lashmasterFx({r:sr,c:sc},cells); log(tr(`🪢 鞭笞者现身，${n} 只怪物立刻被驱赶向前！`,`🪢 Lashmaster arrives — ${n} enemies are driven forward at once!`), 'debuff'); } },
     act(t){ let n=0; const cells=[]; let sr=-1, sc=-1; for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const x=grid[r][c]; if(x===t){ sr=r; sc=c; } else if(x&&x.type==='enemy'){ x.cd=Math.max(1,x.cd-1); cells.push({r,c}); n++; } } if(n){ lashmasterFx({r:sr,c:sc},cells); log(tr(`🪢 鞭笞者鞭策全场，${n} 只怪物变得更暴躁！`,`🪢 Lashmaster drives the horde forward — ${n} enemies speed up!`), 'debuff'); } } },
   { id:'magmafiend', emoji:'♨️', name:['岩浆魔','Magmafiend'], quip:['别想用你那纸糊的盾牌保护你。','Do not hide behind those paper shields.'], perTurn:true, swordable:true,
-    special:['每回合融化场上所有盾牌；吸收火焰回血','Melts all shields each turn; feeds on fire'],
+    special:['每回合融化盾牌但不回血；吸收火焰伤害回血','Melts shields without healing; fire damage heals it'],
     desc:['可以用{W}攻击它。但它【每回合】都会融化棋盘上所有的盾牌，但不会因此回血。它不会直接拆掉你已经有的护甲值，却会让你很难继续靠盾链续上防线；此外它【吸收火焰】——不会被点燃，火墙与点燃本应造成的火焰伤害反而会为它回血。','You CAN hit it with a {WC}. But【every turn】it melts all shields on the board without healing from them. It does not directly strip your current armor, but it makes it much harder to sustain a shield-based defense; in addition, it【feeds on fire】— it cannot be ignited, and any damage it would have taken from burn or Firewall instead heals it.'],
     act(t){ const cells=[]; for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const x=grid[r][c]; if(x&&x.type==='shield') cells.push({r,c}); }
       if(!cells.length) return; let rr=-1, cc=-1; for(let r=0;r<ROWS&&rr<0;r++)for(let c=0;c<COLS;c++){ if(grid[r][c]===t){ rr=r; cc=c; break; } }
@@ -384,7 +384,7 @@ const BOSSES=[
       for(const cell of cells) grid[cell.r][cell.c]=null;
       holdNextGravity(); holdVisibleBoard();
       applyGravity(); syncPositions(false);
-      log(tr(`♨️ 岩浆魔融化了 ${cells.length} 面盾（不再回血）`,`♨️ Magmafiend melts ${cells.length} shields (no HP restored)`), 'debuff'); } },
+      log(tr(`♨️ 岩浆魔融化了 ${cells.length} 面盾（盾牌不回血；火焰伤害会回血）`,`♨️ Magmafiend melts ${cells.length} shields (shields do not heal it; fire damage does)`), 'debuff'); } },
   { id:'vampire', emoji:'🧛', name:['吸血鬼','Vampire'], quip:['你的心留着也浪费，我喝了。','Those hearts are wasted on you. Mine now.'], perTurn:true, swordable:true,
     special:['每回合吸取场上的 ❤️ 回血','Drains ❤️ each turn to heal'],
     desc:['可以用{W}攻击它。但它【每回合】会吸取棋盘上所有的心来回血——别把心留在场上！','You CAN hit it with a {WC}. But every turn it drains all hearts on the board to heal — do not leave hearts on the board!'],

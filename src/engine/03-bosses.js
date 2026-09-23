@@ -14,7 +14,7 @@ const BOSSES=[
     onSpawn(t){ let n=0; const cells=[]; let sr=-1, sc=-1; for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const x=grid[r][c]; if(x===t){ sr=r; sc=c; } else if(x&&x.type==='enemy'){ x.cd=Math.max(1,x.cd-1); cells.push({r,c}); n++; } } if(n){ lashmasterFx({r:sr,c:sc},cells); log(tr(`🪢 鞭笞者现身，${n} 只怪物立刻被驱赶向前！`,`🪢 Lashmaster arrives — ${n} enemies are driven forward at once!`), 'debuff'); } },
     act(t){ let n=0; const cells=[]; let sr=-1, sc=-1; for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const x=grid[r][c]; if(x===t){ sr=r; sc=c; } else if(x&&x.type==='enemy'){ x.cd=Math.max(1,x.cd-1); cells.push({r,c}); n++; } } if(n){ lashmasterFx({r:sr,c:sc},cells); log(tr(`🪢 鞭笞者鞭策全场，${n} 只怪物变得更暴躁！`,`🪢 Lashmaster drives the horde forward — ${n} enemies speed up!`), 'debuff'); } } },
   { id:'magmafiend', emoji:'♨️', name:['岩浆魔','Magmafiend'], quip:['别想用你那纸糊的盾牌保护你。','Do not hide behind those paper shields.'], perTurn:true, swordable:true,
-    special:['每回合融化场上所有盾牌；吸收火焰回血','Melts all shields each turn; feeds on fire'],
+    special:['每回合融化盾牌但不回血；吸收火焰伤害回血','Melts shields without healing; fire damage heals it'],
     desc:['可以用{W}攻击它。但它【每回合】都会融化棋盘上所有的盾牌，但不会因此回血。它不会直接拆掉你已经有的护甲值，却会让你很难继续靠盾链续上防线；此外它【吸收火焰】——不会被点燃，火墙与点燃本应造成的火焰伤害反而会为它回血。','You CAN hit it with a {WC}. But【every turn】it melts all shields on the board without healing from them. It does not directly strip your current armor, but it makes it much harder to sustain a shield-based defense; in addition, it【feeds on fire】— it cannot be ignited, and any damage it would have taken from burn or Firewall instead heals it.'],
     act(t){ const cells=[]; for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const x=grid[r][c]; if(x&&x.type==='shield') cells.push({r,c}); }
       if(!cells.length) return; let rr=-1, cc=-1; for(let r=0;r<ROWS&&rr<0;r++)for(let c=0;c<COLS;c++){ if(grid[r][c]===t){ rr=r; cc=c; break; } }
@@ -22,7 +22,7 @@ const BOSSES=[
       for(const cell of cells) grid[cell.r][cell.c]=null;
       holdNextGravity(); holdVisibleBoard();
       applyGravity(); syncPositions(false);
-      log(tr(`♨️ 岩浆魔融化了 ${cells.length} 面盾（不再回血）`,`♨️ Magmafiend melts ${cells.length} shields (no HP restored)`), 'debuff'); } },
+      log(tr(`♨️ 岩浆魔融化了 ${cells.length} 面盾（盾牌不回血；火焰伤害会回血）`,`♨️ Magmafiend melts ${cells.length} shields (shields do not heal it; fire damage does)`), 'debuff'); } },
   { id:'vampire', emoji:'🧛', name:['吸血鬼','Vampire'], quip:['你的心留着也浪费，我喝了。','Those hearts are wasted on you. Mine now.'], perTurn:true, swordable:true,
     special:['每回合吸取场上的 ❤️ 回血','Drains ❤️ each turn to heal'],
     desc:['可以用{W}攻击它。但它【每回合】会吸取棋盘上所有的心来回血——别把心留在场上！','You CAN hit it with a {WC}. But every turn it drains all hearts on the board to heal — do not leave hearts on the board!'],
