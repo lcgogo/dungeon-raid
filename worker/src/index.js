@@ -428,10 +428,28 @@ export default {
     const url = new URL(req.url), p = url.pathname;
 
     // 写入类端点按来源 IP 限流（每 IP 20 次/60s），挡刷榜/批量伪造。绑定缺失时（本地/未配）跳过。
-    if (req.method === 'POST' && (p === '/rec' || p === '/score' || p === '/clear') && env.WRITE_LIMITER) {
+    if (req.method === 'POST' && (p === '/rec' || p === '/score' || p === '/clear' || p === '/feedback') && env.WRITE_LIMITER) {
       const ip = req.headers.get('cf-connecting-ip') || 'unknown';
       const { success } = await env.WRITE_LIMITER.limit({ key: ip });
       if (!success) return json({ error: 'too many requests, slow down' }, 429);
+    }
+
+    // 公开反馈板：只展示 status=open 的留言；联系方式等私密字段不接收。
+    if (req.method === 'GET' && p === '/feedback') {
+      const limit = Math.max(1, Math.min(50, Number(url.searchParams.get('limit') || 30) | 0));
+      const rows = await env.DB.prepare("SELECT id,nickname,category,body,version,created FROM feedback WHERE status='open' ORDER BY created DESC LIMIT ?").bind(limit).all();
+      return json({ feedback: rows.results || [] });
+    }
+    if (req.method === 'POST' && p === '/feedback') {
+      let d; try { d = await req.json(); } catch { return json({ error: 'invalid json' }, 400); }
+      const category = ['suggestion', 'bug', 'balance', 'copy'].includes(d && d.category) ? d.category : 'suggestion';
+      const body = String(d && d.body || '').trim();
+      if (!body || body.length > 1000) return json({ error: 'feedback body must be 1-1000 characters' }, 400);
+      const nickname = cleanName(d && d.nickname || '').slice(0, 24);
+      const version = String(d && d.version || '').slice(0, 20);
+      const id = 'fb_' + shortId(12), created = Math.floor(Date.now() / 1000);
+      await env.DB.prepare("INSERT INTO feedback (id,nickname,category,body,version,status,created) VALUES (?,?,?,?,?, 'open', ?)").bind(id, nickname, category, body, version, created).run();
+      return json({ ok: true, id }, 201);
     }
 
     // POST /seed —— 发放一次性服务端种子 + token（上榜成绩须用它，防离线刷种子）。门槛快照延后到真正需要预判/上传时再取，避免把 D1 查找压在开局路径上。已被上方按 IP 限流。

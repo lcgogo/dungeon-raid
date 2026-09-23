@@ -1,4 +1,9 @@
 
+## [v1.78.3] - 2026-09-24
+
+- 开发版新增公开反馈板：玩家可匿名发布建议、Bug、平衡和文案反馈，并查看其他留言。
+- Added a public feedback board to the dev build for anonymous ideas, bugs, balance notes, and copy feedback.
+
 ## [v1.78.2] - 2026-09-24
 
 - 调淡安卓端武器和普通怪棋子的底色，避免与心棋子的粉色底色混淆。

@@ -249,9 +249,9 @@ const CONTENT = {
 if('serviceWorker' in navigator) window.addEventListener('load',()=>navigator.serviceWorker.register('/sw.js').catch(()=>{}));
 //==================== 配置 ====================
 // 版本号 v主.次.修：不影响 verify/replay 兼容边界的小改动改"修"；凡是影响 verify/replay/版本分桶/release 验证语义的改动都改"次"；大版本变更需先确认。页面底部显示。
-const VERSION='v1.78.2';
+const VERSION='v1.78.3';
 // CHANGELOG_LINES below is only a fallback for raw source inspection; build/build.js replaces it from CHANGELOG.md.
-const CHANGELOG_LINES=[{"ver": "v1.78.2", "zh": "调淡安卓端武器和普通怪棋子的底色，避免与心棋子的粉色底色混淆。", "en": "Lightened weapon and normal-monster tile backgrounds on Android to distinguish them from pink heart tiles."}, {"ver": "v1.78.1", "zh": "修复回放最后一回合仍可能响应棋盘拖拽的问题；回放期间所有拖拽阶段均会被锁定。", "en": "Fixed a replay-end input race where the board could still respond to a drag on the final turn; all drag phases are now locked during replay."}, {"ver": "v1.78.0", "zh": "修正文案与实现不一致：玄龟主动技能、玄龟二阶被动、小偷偷金比例和 Boss 牌堆说明；同时修正火枪手狙击 Boss 的奖励重复计算，使总奖励恢复为 3 倍。", "en": "Fixed mismatched race/class/Boss wording and corrected Musketeer’s Boss kill reward so the total is 3× instead of being counted twice."}, {"ver": "v1.77.2", "zh": "澄清岩浆魔机制文案：融化盾牌不会回血，但火焰伤害会为它回血。", "en": "Clarified Magmafiend wording: melting shields does not heal it, while fire damage does."}, {"ver": "v1.77.1", "zh": "放大 Boss 等级圆圈内的数字，使其与攻击力数字大小一致。", "en": "Enlarged the boss-level badge number to match the attack-value badge size."}];   /* auto-injected by dr.sh embed-changelog（勿手改） */
+const CHANGELOG_LINES=[{"ver": "v1.78.3", "zh": "开发版新增公开反馈板：玩家可匿名发布建议、Bug、平衡和文案反馈，并查看其他留言。", "en": "Added a public feedback board to the dev build for anonymous ideas, bugs, balance notes, and copy feedback."}, {"ver": "v1.78.2", "zh": "调淡安卓端武器和普通怪棋子的底色，避免与心棋子的粉色底色混淆。", "en": "Lightened weapon and normal-monster tile backgrounds on Android to distinguish them from pink heart tiles."}, {"ver": "v1.78.1", "zh": "修复回放最后一回合仍可能响应棋盘拖拽的问题；回放期间所有拖拽阶段均会被锁定。", "en": "Fixed a replay-end input race where the board could still respond to a drag on the final turn; all drag phases are now locked during replay."}, {"ver": "v1.78.0", "zh": "修正文案与实现不一致：玄龟主动技能、玄龟二阶被动、小偷偷金比例和 Boss 牌堆说明；同时修正火枪手狙击 Boss 的奖励重复计算，使总奖励恢复为 3 倍。", "en": "Fixed mismatched race/class/Boss wording and corrected Musketeer’s Boss kill reward so the total is 3× instead of being counted twice."}, {"ver": "v1.77.2", "zh": "澄清岩浆魔机制文案：融化盾牌不会回血，但火焰伤害会为它回血。", "en": "Clarified Magmafiend wording: melting shields does not heal it, while fire damage does."}];   /* auto-injected by dr.sh embed-changelog（勿手改） */
 const DEV=true;   // release build (DEV=false); dev build is dungeon-raid-dev.html (DEV=true)
 const REC_API='https://api.dungeonraid.win';   // 录像分享 API（Cloudflare Worker + KV）
 // 带种子随机数（mulberry32）：游戏全程用 rnd() 取代原生随机，配合录制种子可确定性重放
@@ -943,6 +943,7 @@ function showClassSelect(){
   if(lastRec) mk('#6a4fa3', `<b>🎬 ${tr('回放上一局','Replay last run')}</b>`, ()=>startReplay(lastRec));
   mk('#6a4fa3', `<b>📥 ${tr('导入回放','Import replay')}</b>`, ()=>importReplay());
   mk('#a8852c', `<b>🏆 ${tr('排行榜','Leaderboard')}</b>`, ()=>showLeaderboard());
+  mk('#4b8fa8', `<b>💬 ${tr('反馈板','Feedback')}</b>`, ()=>showFeedback());
   // 🙏 致敬原作（放最下面）
   const trib=document.createElement('div');
   trib.style.cssText='text-align:left;font-size:10.5px;line-height:1.55;color:var(--dim);margin-top:8px';
@@ -2868,6 +2869,39 @@ function approxPctLine(th, turns, level, gold, cleared){
   turns = turns || (player&&player.turns) || 0;
   const pct = turns>=th.p5?5 : turns>=th.p10?10 : turns>=th.p30?30 : turns>=th.p50?50 : turns>=th.p70?70 : turns>=th.p90?90 : 100;
   return tr(`📊 本局未达上传门槛（需至少 ${th.upload_min_turns} 回合，或进入当前口径种族前10）；按开局快照估算，约超过 ${pct}% 对局`,`📊 Below upload threshold (need at least ${th.upload_min_turns} turns, or a current-scope race top 10); launch-time snapshot estimates you beat about ${pct}% of runs`);
+}
+
+// ==================== 公开反馈板 ====================
+let feedbackCategory='suggestion';
+function feedbackText(v){ return String(v||'').replace(/[<>]/g, ch=>ch==='<'?'&lt;':'&gt;'); }
+function showFeedback(){ busy=true; renderFeedback(); }
+async function renderFeedback(){
+  const card=document.getElementById('card');
+  card.innerHTML=`<h2 style="color:var(--gold)">💬 ${tr('反馈板','Feedback')}</h2>
+    <div id="feedbackList" style="text-align:left;min-height:80px;max-height:42vh;overflow:auto;background:var(--panel2);border-radius:10px;padding:6px 7px;margin-bottom:9px">${tr('加载中…','Loading…')}</div>
+    <div style="display:flex;gap:6px;margin-bottom:6px">
+      <input id="feedbackName" maxlength="24" placeholder="${tr('昵称（可选）','Nickname (optional)')}" style="flex:1;min-width:0;background:var(--panel2);border:1px solid #4a3a63;color:var(--txt);border-radius:8px;padding:8px;font-size:12px">
+      <select id="feedbackCategory" style="width:92px;background:var(--panel2);border:1px solid #4a3a63;color:var(--txt);border-radius:8px;padding:8px;font-size:12px"><option value="suggestion">${tr('建议','Idea')}</option><option value="bug">${tr('Bug','Bug')}</option><option value="balance">${tr('平衡','Balance')}</option><option value="copy">${tr('文案','Copy')}</option></select>
+    </div>
+    <textarea id="feedbackBody" maxlength="1000" placeholder="${tr('写下你的想法…','Write your feedback…')}" style="box-sizing:border-box;width:100%;height:72px;resize:vertical;background:var(--panel2);border:1px solid #4a3a63;color:var(--txt);border-radius:8px;padding:8px;font-size:12px;margin-bottom:6px"></textarea>
+    <div style="display:flex;gap:6px"><button class="btn" id="feedbackSend" style="flex:1">${tr('发布留言','Post')}</button><button class="btn" id="feedbackBack" style="flex:1">${tr('返回','Back')}</button></div>`;
+  document.getElementById('feedbackBack').onclick=showClassSelect;
+  document.getElementById('feedbackSend').onclick=submitFeedback;
+  loadFeedback(); showOverlay();
+}
+async function loadFeedback(){
+  const list=document.getElementById('feedbackList'); if(!list) return;
+  try{ const r=await fetch(REC_API+'/feedback?limit=30'); const j=await r.json(); const rows=j.feedback||[];
+    list.innerHTML=rows.length?rows.map(x=>`<article style="padding:7px 4px;border-bottom:1px solid #3a2d4d"><div style="display:flex;justify-content:space-between;color:var(--gold);font-size:11px"><b>${feedbackText(x.nickname||tr('匿名','Anonymous'))}</b><span>${feedbackText(x.category)} · ${new Date(x.created*1000).toLocaleDateString()}</span></div><div style="white-space:pre-wrap;word-break:break-word;margin-top:4px;font-size:12px;line-height:1.45">${feedbackText(x.body)}</div><small style="color:var(--dim)">${feedbackText(x.version)}</small></article>`).join(''):`<div style="text-align:center;color:var(--dim);padding:20px">${tr('还没有留言','No feedback yet')}</div>`;
+  }catch(e){ list.innerHTML=`<div style="text-align:center;color:var(--dim);padding:20px">${tr('反馈板暂时不可用','Feedback board unavailable')}</div>`; }
+}
+async function submitFeedback(){
+  const body=document.getElementById('feedbackBody').value.trim(), btn=document.getElementById('feedbackSend');
+  if(!body){ toast(tr('请先写点内容','Please write something first')); return; }
+  btn.disabled=true;
+  try{ const r=await fetch(REC_API+'/feedback',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({nickname:document.getElementById('feedbackName').value,category:document.getElementById('feedbackCategory').value,body,version:VERSION})}); if(!r.ok) throw new Error(); document.getElementById('feedbackBody').value=''; toast(tr('留言已发布','Feedback posted')); await loadFeedback(); }
+  catch(e){ toast(tr('发布失败，请稍后再试','Post failed, please try again')); }
+  finally{ btn.disabled=false; }
 }
 
 // ==================== 排行榜浏览（人类 / AI 切换） ====================

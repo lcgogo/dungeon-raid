@@ -209,6 +209,7 @@ function showClassSelect(){
   if(lastRec) mk('#6a4fa3', `<b>🎬 ${tr('回放上一局','Replay last run')}</b>`, ()=>startReplay(lastRec));
   mk('#6a4fa3', `<b>📥 ${tr('导入回放','Import replay')}</b>`, ()=>importReplay());
   mk('#a8852c', `<b>🏆 ${tr('排行榜','Leaderboard')}</b>`, ()=>showLeaderboard());
+  mk('#4b8fa8', `<b>💬 ${tr('反馈板','Feedback')}</b>`, ()=>showFeedback());
   // 🙏 致敬原作（放最下面）
   const trib=document.createElement('div');
   trib.style.cssText='text-align:left;font-size:10.5px;line-height:1.55;color:var(--dim);margin-top:8px';
