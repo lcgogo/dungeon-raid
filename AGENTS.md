@@ -22,6 +22,7 @@
 - **`engines.json` 的 sha256 只由 release 脚本写**，谁都别手敲；它只用来「校验这份文件是不是该版本」，不用来反推版本。
 - **正式版 `dungeon-raid.html` 不准手改**：两个 HTML 只许差 `const DEV` 一行；dev→prod 同步只能由 release 脚本做。
 - **密钥永不进仓库**：`VERIFY_SECRET` / `VERIFY_PUSH_URL` / `RENDER_PING_URL` / `GH_DISPATCH_TOKEN`、验证器 onrender 原址——只存在于 Cloudflare Worker / GitHub Actions / render 的环境变量里，**别 print、别写进代码或文档**。
+- **VERIFY_SECRET / ADMIN_SECRET 运维记忆**：从仓库根执行 `npx wrangler secret list --config deploy/worker/wrangler.toml` 可确认 Cloudflare Worker 已配置 `VERIFY_SECRET`、`ADMIN_SECRET`；Wrangler 只显示名称、不能读回值。手动运行验证器需由用户在本地注入 `VERIFY_SECRET` 后执行 `node verify.js`；执行 `bash deploy/dr.sh classify|delete|feedback-status|feedback-delete|prune|wipe` 等管理命令需本地注入 `ADMIN_SECRET`。不要把密钥值写入仓库、文档或日志。
 - **正式版存档跨版本不兼容**（从头开始）；dev 存档不受版本限制。
 - **后端 schema 变更走 D1 迁移框架**：迁移 SQL 放 `worker/migrations/`，从仓库根执行 `npx wrangler d1 migrations apply dungeon-raid-scores --remote --config deploy/worker/wrangler.toml`，勿手敲 SQL。
 
