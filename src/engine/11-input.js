@@ -58,6 +58,7 @@ function startDrag(e){
   e.preventDefault();
 }
 function moveDrag(e){
+  if(replaying){ dragging=false; selection=[]; lastPointer=null; return; }
   if(!dragging) return; e.preventDefault();
   const cell=cellFromEvent(e); if(!cell) return;
   const t=grid[cell.r][cell.c]; if(!t) return;
@@ -76,6 +77,7 @@ function moveDrag(e){
     selection.push({r:cell.r,c:cell.c,type:t.type}); dragExtended=true; }
 }
 function endDrag(e){
+  if(replaying){ dragging=false; selection=[]; lastPointer=null; return; }
   if(!dragging) return; dragging=false;
   if(selection.length>=2){
     // 剑链必须含至少一把剑（剑是武器）：从怪起手却没把任何剑连进来 → 不算攻击，取消且不消耗回合

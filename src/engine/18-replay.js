@@ -80,7 +80,7 @@ function updateReplayBar(){
     prev.classList.toggle('dim', turn<=1); next.classList.toggle('dim', turn>=tt); }
   document.querySelectorAll('#replayBar .rbSpd').forEach(b=>b.classList.toggle('on', +b.dataset.spd===replaySpeed));
 }
-function replayDone(){ clearTimeout(replayTimer); replayTimer=null; replayPaused=true; replayPending=null; selection=[]; updateReplayBar(); log(tr('🎬 回放结束（点 ⏹ 退出）','🎬 Replay finished (⏹ to exit)')); }
+function replayDone(){ clearTimeout(replayTimer); replayTimer=null; replayPaused=true; replayPending=null; dragging=false; selection=[]; lastPointer=null; busy=false; updateReplayBar(); log(tr('🎬 回放结束（点 ⏹ 退出）','🎬 Replay finished (⏹ to exit)')); }
 function stopReplay(){
   clearTimeout(replayTimer); replayTimer=null;
   replaying=false; replayRec=null; replayPending=null;

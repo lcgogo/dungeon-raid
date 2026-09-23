@@ -1,4 +1,9 @@
 
+## [v1.78.1] - 2026-09-23
+
+- 修复回放最后一回合仍可能响应棋盘拖拽的问题；回放期间所有拖拽阶段均会被锁定。
+- Fixed a replay-end input race where the board could still respond to a drag on the final turn; all drag phases are now locked during replay.
+
 ## [v1.78.0] - 2026-09-23
 
 > Version-Impact: verify

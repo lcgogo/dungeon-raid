@@ -37,7 +37,7 @@ The current Dev build is `v1.75.1`; builds now automatically inject the latest c
 
 The current Dev build is `v1.75.2`; race and turn-50 class `ⓘ` details now use separate buttons so they cannot accidentally select the card.
 
-The current Dev build is `v1.78.0`; bosses use a deterministic 30-card deck with two cards per boss and reshuffle when empty. The Matryoshka boss 🪆 still splits; boss levels use a circular number badge in the lower-right corner, and all foes show burn stacks in the lower-left.
+The current Dev build is `v1.78.1`; fixed a replay-end race that could leave the board operable on the final turn. Bosses use a deterministic 30-card deck with two cards per boss and reshuffle when empty.
 
 ## 🧩 Core Gameplay
 
