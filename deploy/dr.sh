@@ -70,6 +70,22 @@ cmd_delete(){
     -H 'Content-Type: application/json' -d "{\"op\":\"del\",\"id\":\"$id\"}"; echo
 }
 
+# ---------- 反馈板状态/删除（需 ADMIN_SECRET）----------
+cmd_feedback_status(){
+  local id="$1" status="$2"
+  [ -n "$id" ] && { [ "$status" = open ] || [ "$status" = resolved ] || [ "$status" = invalid ]; } || { echo "用法: ADMIN_SECRET=… bash dr.sh feedback-status <id> <open|resolved|invalid>"; return 1; }
+  [ -n "$ADMIN_SECRET" ] || { echo "缺少环境变量 ADMIN_SECRET"; return 1; }
+  curl -s -X POST "https://api.dungeonraid.win/admin?k=$ADMIN_SECRET" \
+    -H 'Content-Type: application/json' -d "{\"op\":\"feedback-status\",\"id\":\"$id\",\"status\":\"$status\"}"; echo
+}
+cmd_feedback_delete(){
+  local id="$1"
+  [ -n "$id" ] || { echo "用法: ADMIN_SECRET=… bash dr.sh feedback-delete <id>"; return 1; }
+  [ -n "$ADMIN_SECRET" ] || { echo "缺少环境变量 ADMIN_SECRET"; return 1; }
+  curl -s -X POST "https://api.dungeonraid.win/admin?k=$ADMIN_SECRET" \
+    -H 'Content-Type: application/json' -d "{\"op\":\"feedback-delete\",\"id\":\"$id\"}"; echo
+}
+
 # ---------- 手动清理旧版本+陈旧录像（需 ADMIN_SECRET）。用法: prune [天数=30] [保留版本数=5] ----------
 cmd_prune(){
   [ -n "$ADMIN_SECRET" ] || { echo "缺少环境变量 ADMIN_SECRET"; return 1; }
@@ -261,6 +277,8 @@ case "${1:-help}" in
   embed-changelog)   shift; cmd_embed_changelog "$@" ;;
   classify)          cmd_classify "$2" "$3" ;;
   delete)            cmd_delete "$2" ;;
+  feedback-status)   cmd_feedback_status "$2" "$3" ;;
+  feedback-delete)   cmd_feedback_delete "$2" ;;
   prune)             cmd_prune "$2" "$3" ;;
   wipe)              cmd_wipe ;;
   seed-debug)        cmd_seed_debug ;;

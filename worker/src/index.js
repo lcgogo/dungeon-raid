@@ -697,6 +697,14 @@ export default {
         try { if (env.REC) await env.REC.delete(d.id); } catch (e) {}
         return json({ ok: true, deleted: d.id });
       }
+      if (d && d.op === 'feedback-status' && d.id && ['open', 'resolved', 'invalid'].includes(d.status)) {
+        const r = await env.DB.prepare("UPDATE feedback SET status=? WHERE id=?").bind(d.status, d.id).run();
+        return json({ ok: true, id: d.id, status: d.status, changed: (r.meta && r.meta.changes) || 0 });
+      }
+      if (d && d.op === 'feedback-delete' && d.id) {
+        const r = await env.DB.prepare("DELETE FROM feedback WHERE id=?").bind(d.id).run();
+        return json({ ok: true, deleted: d.id, changed: (r.meta && r.meta.changes) || 0 });
+      }
       if (d && d.op === 'wipe' && d.confirm === 'YES') {
         const r = await env.DB.prepare("DELETE FROM scores").run();
         return json({ ok: true, wiped: (r.meta && r.meta.changes) || 0 });
@@ -705,7 +713,7 @@ export default {
         const r = await pruneOld(env, { days: d.days | 0 || 30, keepVers: d.keep | 0 || 5, max: d.max | 0 || 400 });
         return json({ ok: true, ...r });
       }
-      return json({ error: "usage: {op:'del',id} | {op:'wipe',confirm:'YES'} | {op:'prune',days?,keep?,max?}" }, 400);
+      return json({ error: "usage: {op:'del',id} | {op:'feedback-status',id,status} | {op:'feedback-delete',id} | {op:'wipe',confirm:'YES'} | {op:'prune',days?,keep?,max?}" }, 400);
     }
 
     // POST /verify?k= —— 回写验证结果

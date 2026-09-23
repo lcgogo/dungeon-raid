@@ -1,4 +1,16 @@
 
+## [v1.79.0] - 2026-09-24
+
+> Version-Impact: verify
+
+- 修复验证器只按当前引擎版本拉取待验证成绩的问题；旧版本录像现在会按 `rec.ver` 加载对应引擎快照并继续验证。
+- Fixed the verifier so pending scores are no longer limited to the current engine version; legacy recordings are replayed with the engine snapshot matching `rec.ver`.
+
+## [v1.78.4] - 2026-09-24
+
+- 反馈板新增管理员状态管理：可标记为已解决/无效并隐藏，或永久删除明显垃圾内容。
+- Added feedback moderation commands to hide resolved/invalid posts or permanently delete obvious spam.
+
 ## [v1.78.3] - 2026-09-24
 
 - 开发版新增公开反馈板：玩家可匿名发布建议、Bug、平衡和文案反馈，并查看其他留言。

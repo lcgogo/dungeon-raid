@@ -91,7 +91,9 @@ function loadEnginesForPending(pend) {
 // 拉取并验证待验证项，按录像自己的 release 版本选择引擎。返回 {pass,fail,skip,total}。可被常驻服务反复调用。
 async function verifyPending(G, ENGINE_VER) {
   if (!SECRET) throw new Error('缺少 VERIFY_SECRET 环境变量');
-  const purl = `${API}/pending?k=${encodeURIComponent(SECRET)}` + (ENGINE_VER ? `&version=${encodeURIComponent(ENGINE_VER)}` : '');
+  // 队列必须覆盖所有仍待验证的版本；每条录像随后按 e.version 选择对应快照。
+  // 继续传当前引擎版本会让旧版本记录永久留在 verified=0。
+  const purl = `${API}/pending?k=${encodeURIComponent(SECRET)}`;
   const pend = (await (await fetch(purl)).json()).pending || [];
   if (!pend.length) return { pass: 0, fail: 0, skip: 0, total: 0 };
   const engines = loadEnginesForPending(pend);
