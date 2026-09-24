@@ -1,4 +1,13 @@
 
+## [v1.81.0] - 2026-09-24
+
+> Version-Impact: verify
+
+- 按“没有攻击力的 Boss 默认武器免疫”规则修正岩浆魔、吸血鬼、召唤师；血量公式和档位倍率保持不变，并将规则写入设计文档。
+- Made non-attacking Magmafiend, Vampire, and Summoner weapon-immune without changing HP formulas or tier scaling; documented the rule.
+- 统一所有武器免疫 Boss 的血量：使用同级普通怪血量，不再因 Boss 档位额外增厚；攻击力和倒计时公式保持不变。
+- Unified weapon-immune Boss HP to same-tier normal-monster HP without changing their attack or countdown formulas.
+
 ## [v1.80.1] - 2026-09-24
 
 - 精简「钱能买命」说明，只保留“受伤先扣手头金币”的独立规则，不再要求了解囤金。

@@ -37,7 +37,7 @@ The current Dev build is `v1.75.1`; builds now automatically inject the latest c
 
 The current Dev build is `v1.75.2`; race and turn-50 class `ⓘ` details now use separate buttons so they cannot accidentally select the card.
 
-The current Dev build is `v1.80.1`; Money Buys Life spends wallet gold before HP, and any remainder spills into HP.
+The current Dev build is `v1.81.0`; non-attacking bosses are weapon-immune, all weapon-immune bosses use same-tier normal-monster HP, and Money Buys Life spends wallet gold before HP.
 
 ## 🧩 Core Gameplay
 
@@ -164,14 +164,14 @@ Every **10 turns**, one boss is drawn from a **deterministic 30-card deck** cont
 | Boss | How to hit | Gimmick |
 |---|---|---|
 | 🪆 Matryoshka | Sword / Bomb | Stats match a same-tier normal enemy; splits into two one-tier-lower copies on available non-monster tiles, until Lv1 is finally defeated |
-| 👻 Ghost | Bomb only | Immune to weapon chains; **its HP matches same-tier normal enemies (without the extra boss-tier HP multiplier)**; strikes you hard when its timer hits 0 |
+| 👻 Ghost | Bomb only | Immune to weapon chains; **all weapon-immune bosses use same-tier normal-monster HP**; strikes you hard when its timer hits 0 |
 | 🤡 Clown | Bomb only | Re-rolls several non-monster tiles into other resources each turn, disrupting your chains; does NOT spawn monsters (that's the Summoner) |
 | 🪢 Lashmaster | Bomb only | On spawn, all normal enemies get **-1 attack countdown**, and each turn after that they get **-1 attack countdown** again. It may not be the deadliest foe by itself, but it drags the whole board into a frenzy the longer it lives. |
-| ♨️ Magmafiend | Sword / Bomb | **Every turn**, it melts all shields on the board but no longer restores HP from them; it also **feeds on fire** — instead of being ignited or hurt by Firewall, those fire effects heal it. It does not directly strip your current armor, but it makes it much harder to sustain a shield-based defense. |
-| 🧛 Vampire | Sword / Bomb | Drains every heart on the board each turn to heal — do not leave hearts out; but **drinking poison hearts (Corruptor green / Witch Doctor black) poisons it instead — it loses HP and can even die** (counter it with Hex) |
+| ♨️ Magmafiend | Bomb only | **No attack; weapon-immune**. Every turn it melts all shields without healing from them; fire damage heals it. |
+| 🧛 Vampire | Bomb only | **No attack; weapon-immune**. Drains every heart on the board each turn to heal; poison hearts damage it instead. |
 | 🥷 Assassin | Sword / Bomb | Stats like a normal enemy, but its hits are **true damage** — ignore armor, straight to HP |
 | 🦖 Devourer | Sword / Bomb | When its countdown hits 0, it first strikes for **50% of its current HP**; only after that hit resolves does it drain half the HP from every regular enemy to grow |
-| 🧙 Summoner | Sword / Bomb | Turns a non-enemy tile into an enemy each turn — the longer it lives, the more enemies |
+| 🧙 Summoner | Bomb only | **No attack; weapon-immune**. Turns a non-enemy tile into an enemy each turn — the longer it lives, the more enemies |
 | 🦹 Thief | Sword / Bomb | Steals a share of gold on arrival (10% at Lv1, 20% at Lv2…, capped at all you have at high tiers — never goes negative); kill it before its timer to recover, let it flee and the gold is gone forever |
 | 🧟 Zombie | Sword / Bomb | Infects you on arrival (HP bar turns green); **after a 1-turn incubation** you lose a % of HP each turn (scaling per tier, capped at 30%/turn, ignoring armor); kill it during incubation to cure |
 | 🦅 Birdman | Sword / Bomb | **Every turn** it dives to peck you (half attack) and, at turn end, **swaps places with a random tile (teleport)** — elusive and nagging, so line up your chain where it lands and finish it fast |

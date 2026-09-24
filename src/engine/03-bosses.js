@@ -13,7 +13,7 @@ const BOSSES=[
     desc:['{WC}对它无效，只能用 💥炸弹 炸。它一出场就会让场上所有普通怪物的攻击倒计时 -1，之后【每回合】再让所有普通怪物的攻击倒计时 -1。它自己未必最疼，但会把整盘怪一起抽进暴走节奏——拖得越久，怪就越快出手。','Immune to {WC} — only the 💥 Bomb works. On spawn it reduces the attack countdown of all normal enemies on the board by 1, then does so again every turn after that. It may not hit the hardest by itself, but it drives the whole board into a frenzy — the longer it lives, the faster everything else attacks.'],
     onSpawn(t){ let n=0; const cells=[]; let sr=-1, sc=-1; for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const x=grid[r][c]; if(x===t){ sr=r; sc=c; } else if(x&&x.type==='enemy'){ x.cd=Math.max(1,x.cd-1); cells.push({r,c}); n++; } } if(n){ lashmasterFx({r:sr,c:sc},cells); log(tr(`🪢 鞭笞者现身，${n} 只怪物立刻被驱赶向前！`,`🪢 Lashmaster arrives — ${n} enemies are driven forward at once!`), 'debuff'); } },
     act(t){ let n=0; const cells=[]; let sr=-1, sc=-1; for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const x=grid[r][c]; if(x===t){ sr=r; sc=c; } else if(x&&x.type==='enemy'){ x.cd=Math.max(1,x.cd-1); cells.push({r,c}); n++; } } if(n){ lashmasterFx({r:sr,c:sc},cells); log(tr(`🪢 鞭笞者鞭策全场，${n} 只怪物变得更暴躁！`,`🪢 Lashmaster drives the horde forward — ${n} enemies speed up!`), 'debuff'); } } },
-  { id:'magmafiend', emoji:'♨️', name:['岩浆魔','Magmafiend'], quip:['别想用你那纸糊的盾牌保护你。','Do not hide behind those paper shields.'], perTurn:true, swordable:true,
+  { id:'magmafiend', emoji:'♨️', name:['岩浆魔','Magmafiend'], quip:['别想用你那纸糊的盾牌保护你。','Do not hide behind those paper shields.'], perTurn:true,
     special:['每回合融化盾牌但不回血；吸收火焰伤害回血','Melts shields without healing; fire damage heals it'],
     desc:['可以用{W}攻击它。但它【每回合】都会融化棋盘上所有的盾牌，但不会因此回血。它不会直接拆掉你已经有的护甲值，却会让你很难继续靠盾链续上防线；此外它【吸收火焰】——不会被点燃，火墙与点燃本应造成的火焰伤害反而会为它回血。','You CAN hit it with a {WC}. But【every turn】it melts all shields on the board without healing from them. It does not directly strip your current armor, but it makes it much harder to sustain a shield-based defense; in addition, it【feeds on fire】— it cannot be ignited, and any damage it would have taken from burn or Firewall instead heals it.'],
     act(t){ const cells=[]; for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const x=grid[r][c]; if(x&&x.type==='shield') cells.push({r,c}); }
@@ -23,7 +23,7 @@ const BOSSES=[
       holdNextGravity(); holdVisibleBoard();
       applyGravity(); syncPositions(false);
       log(tr(`♨️ 岩浆魔融化了 ${cells.length} 面盾（盾牌不回血；火焰伤害会回血）`,`♨️ Magmafiend melts ${cells.length} shields (shields do not heal it; fire damage does)`), 'debuff'); } },
-  { id:'vampire', emoji:'🧛', name:['吸血鬼','Vampire'], quip:['你的心留着也浪费，我喝了。','Those hearts are wasted on you. Mine now.'], perTurn:true, swordable:true,
+  { id:'vampire', emoji:'🧛', name:['吸血鬼','Vampire'], quip:['你的心留着也浪费，我喝了。','Those hearts are wasted on you. Mine now.'], perTurn:true,
     special:['每回合吸取场上的 ❤️ 回血','Drains ❤️ each turn to heal'],
     desc:['可以用{W}攻击它。但它【每回合】会吸取棋盘上所有的心来回血——别把心留在场上！','You CAN hit it with a {WC}. But every turn it drains all hearts on the board to heal — do not leave hearts on the board!'],
     act(t){ let n=0, pois=0; const normalCells=[], poisonCells=[]; const polluted=pollutionActive(); let rr=-1, cc=-1; for(let r=0;r<ROWS&&rr<0;r++)for(let c=0;c<COLS;c++){ if(grid[r][c]===t){ rr=r; cc=c; break; } }   // 正常心回血；毒心(污染光环 或 巫医黑毒心)反害它
@@ -50,7 +50,7 @@ const BOSSES=[
       const dmg=hurtPlayer(raw, 'devourer', false, t);
       t.hp=Math.max(1, t.hp-raw);   // 放大招消耗自身一半生命，下一步再靠吞怪补回来
       log(tr(`🦖 饕餮先释放积蓄之力，造成 ${dmg} 伤害（自损至 ${t.hp}）！`,`🦖 Devourer strikes first for ${dmg} damage (drops to ${t.hp})!`), 'bad'); } },
-  { id:'summoner', emoji:'🧙', name:['召唤师','Summoner'], quip:['一个不够热闹，再加几个。','One is lonely — let me add a few.'], monster:true, swordable:true, perTurn:true,
+  { id:'summoner', emoji:'🧙', name:['召唤师','Summoner'], quip:['一个不够热闹，再加几个。','One is lonely — let me add a few.'], monster:true, perTurn:true,
     special:['每回合召唤一只怪','Summons an enemy each turn'],
     desc:['属性和普通怪一样，可被{W}攻击。它【每回合】把场上一个非怪/非Boss的棋子变成一只怪——拖得越久怪越多，速战速决！被它点名变怪的格子现在也会拉出召唤线，方便看清到底是哪里被改写了。','Stats like a normal enemy and {W}-attackable. Every turn it turns one non-enemy tile into an enemy — the longer it lives, the more enemies. End it fast! Converted tiles now also get a summoning tether so you can immediately see what was rewritten.'],
     act(t){ const n=t.tier||1; let made=0; const spawned=[]; let rr=-1, cc=-1;
@@ -318,7 +318,9 @@ function spawnBoss(force, exclude){
   const s = def.id==='matryoshka' ? enemyStats() : (def.monster ? enemyStats() : bossStats());   // 套娃按普通怪属性生成
   const cdv = Math.max(1,(s.cd!=null ? s.cd : s.baseCd) + extraFoeCd());
   const mult = def.noTierScale ? 1 : tier;              // 刺客等：血量/攻击始终同级怪物，不吃档位倍率
-  const hp=s.hp*mult*(def.hpMult||1), atk=s.atk*mult;
+  // Weapon-immune Bosses use same-tier normal-monster HP; keep attack/cooldown formulas unchanged.
+  const hpBase=(!def.swordable&&!def.finale&&!def.monster) ? enemyStats().hp : s.hp;
+  const hp=hpBase*(def.noTierScale?1:mult)*(def.hpMult||1), atk=s.atk*mult;
   grid[r][c]={type:'boss', bossId:def.id, tier, hp, maxHp:hp, atk, cd:cdv, baseCd:cdv};
   addBossFx(r,c,false);
   const tlabel = ` Lv${tier}`;   // 始终标注档位（含一阶 Lv1）

@@ -7,7 +7,7 @@ function showPlayerInfo(){
        <span style="color:var(--dim)">${k}</span><b style="text-align:right">${v}</b></div>`;
   const rows=[
     [tr('❤️ 生命','❤️ HP'), `${Math.round(p.hp)} / ${p.maxHp}`],
-    [tr('🔰 护甲','🔰 Armor'), p.noArmor?tr('无甲','none'):`${p.armor}${p.armorMult>1?` ×${p.armorMult}`:''}　${p.shieldXp}/${an}`],
+    [tr('🔰 护甲','🔰 Armor'), p.noArmor?tr('无甲','none'):`${tr('减伤','DR')} ${p.armor}×${p.armorMult||1}${p.toughness?` +${p.toughness}`:''}　${p.shieldXp}/${an}`],
     [tr('📈 经验','📈 XP'), `Lv.${p.level} · ${p.xp}/${xpNeeded(p.level)}`],
     [tr('💰 金币 · 回合','💰 Gold · Turn'), `${p.gold} · ${p.turns}`],
     [tr(`${wE()} ${wN()}威力`,`${wE()} ${wN()} power`), `×${p.weaponPower}${p.swordFlat?` +${p.swordFlat}`:''}${p.swordMult!=1?` ·总伤×${p.swordMult}`:''}`],

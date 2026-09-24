@@ -12,7 +12,7 @@ function updateHUD(){
   document.getElementById('arBar').style.width=Math.min(100,player.shieldXp/an*100)+'%';
   const tortoiseGuard=player.tortoiseGuardTurns>0 ? `　🐢½×${player.tortoiseGuardTurns}` : '';
   document.getElementById('arTxt').textContent=
-    `${tr('减伤','DR')} ${player.armor}${player.toughness?`+${player.toughness}`:''}${tortoiseGuard}　${player.shieldXp}/${an}`;
+    `${tr('减伤','DR')} ${player.armor}×${player.armorMult||1}${player.toughness?`+${player.toughness}`:''}${tortoiseGuard}　${player.shieldXp}/${an}`;
   const need=xpNeeded(player.level);
   document.getElementById('xpBar').style.width=(player.xp/need*100)+'%';
   document.getElementById('xpTxt').textContent=`${player.xp} / ${need}`;
