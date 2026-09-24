@@ -142,7 +142,7 @@ At **level 100 (Tier-2 Skill)** you automatically get the passive **locked to yo
 | 🧝 Elf | Seer → Echo of Fate | Every 5 valid turns, the next refill is guaranteed to match the non-enemy tile cleared on the trigger turn |
 | 🎅 Dwarf | Blacksmith → Shield Bash | Adds your armor (damage-reduction) value to flat {W} damage — more armor, harder hits |
 | 🎅 Dwarf | Musketeer → Demolitionist | Each bomb use: +1 damage and +5 gold cost (stronger but pricier each time) |
-| 🎅 Dwarf | Miser → Money Buys Life | While Hoard is active, incoming damage spends **current gold only**; if wallet gold runs out, the remainder spills into HP and **invested Hoard gold is not spent** |
+| 🎅 Dwarf | Miser → Money Buys Life | Incoming damage always spends **current gold first**; if wallet gold runs out, the remainder spills into HP and **invested Hoard gold is not spent** |
 | 🎅 Dwarf | Guild Master → Cheapskate | Gold-spending actives (shop 💊Heal / 💥Bomb, Guild Master’s Buyout) cost half |
 | 🧌 Orc | Tauren → Titan | Higher max HP means higher flat sword damage (+1 per 12 max HP) |
 | 🧌 Orc | Fighter → Blood Frenzy | When Lifesteal/Bloodthirst healing exceeds max HP, **30%** of the overflow becomes permanent max HP; but at the **end of every turn you lose 5% of max HP** |
