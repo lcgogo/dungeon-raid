@@ -93,7 +93,7 @@ const TIER2={
   shadow:{n:['乾坤一掷','All-In'], d:['买炸弹后，再额外扣当前金币的 20%，并把这笔数额加到这次炸弹伤害上','After buying a bomb, also spend 20% of your current gold and add exactly that amount to this bomb’s damage'], f:p=>{ p.shadowBombGold=true; }},
   demolitionist:{n:['爆破手','Demolitionist'], d:['每用一次炸弹：伤害 +1、花费 +5 金（越炸越强、越炸越贵）','Each bomb use: +1 damage and +5 gold cost (stronger but pricier each time)'], f:p=>{ p.bombBoost=true; }},
   shieldbash:{n:['盾击','Shield Bash'], d:['把「护甲减伤量」加到固定{WC}伤害上（护甲越厚、剑伤越高）','Adds your armor (damage-reduction) value to flat {W} damage — more armor, harder hits'], f:p=>{ p.shieldBash=true; }},
-  tycoon:{n:['钱能买命','Money Buys Life'], d:['受到伤害时先扣手头金币；手头金币不够时，剩余伤害才继续掉血，不动囤金本金','Incoming damage spends wallet gold first; any remainder spills into HP, while invested Hoard gold remains untouched'], f:p=>{ p.tycoonGoldShield=true; }},
+  tycoon:{n:['钱能买命','Money Buys Life'], d:['受到伤害时先扣手头金币；手头金币不够时，剩余伤害才继续掉血','Incoming damage spends wallet gold first; any remainder spills into HP'], f:p=>{ p.tycoonGoldShield=true; }},
   warlord:{n:['巨力','Titan'], d:['最大生命越高，{WC}固定伤害越高（每 12 点最大生命 +1）','Higher max HP = higher flat {W} damage (+1 per 12 max HP)'], f:p=>{ p.titan=true; }},
   thorns:{n:['荆棘','Thorns'], d:['受到攻击时，把「当前护甲减伤量」反弹给攻击者（护甲越高反弹越多）','When hit, reflect your current armor (damage-reduction) back to the attacker — more armor, more reflect'], f:p=>{ p.thorns=true; }},
   bloodfrenzy:{n:['血狂','Blood Frenzy'], d:['吸血/嗜血回血超出生命上限时，溢出的 30% 增为永久生命上限；但每回合结束损失 5% 最大生命','Lifesteal/Bloodthirst healing past max HP: 30% of overflow becomes permanent max HP; but at end of every turn, lose 5% of max HP'], f:p=>{ p.bloodFrenzy=true; }},

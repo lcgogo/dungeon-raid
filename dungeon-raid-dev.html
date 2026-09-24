@@ -249,9 +249,9 @@ const CONTENT = {
 if('serviceWorker' in navigator) window.addEventListener('load',()=>navigator.serviceWorker.register('/sw.js').catch(()=>{}));
 //==================== 配置 ====================
 // 版本号 v主.次.修：不影响 verify/replay 兼容边界的小改动改"修"；凡是影响 verify/replay/版本分桶/release 验证语义的改动都改"次"；大版本变更需先确认。页面底部显示。
-const VERSION='v1.80.0';
+const VERSION='v1.80.1';
 // CHANGELOG_LINES below is only a fallback for raw source inspection; build/build.js replaces it from CHANGELOG.md.
-const CHANGELOG_LINES=[{"ver": "v1.80.0", "zh": "钱能买命不再受囤金回合限制：受到伤害时总是先扣手头金币，金币不足的部分才扣生命，囤金本金不受影响。", "en": "Money Buys Life no longer depends on Hoard being active: incoming damage always spends wallet gold first, then spills into HP, while invested Hoard gold remains untouched."}, {"ver": "v1.79.2", "zh": "首页资源棋子示意改为用 `/` 分隔金币、心和盾。", "en": "Separated the coin, heart, and shield examples with `/` on the home screen."}, {"ver": "v1.79.1", "zh": "首页操作示意改为两行：鼠标箭头 → 武器 → 怪物，以及鼠标箭头 ×2 → 金币/心/盾。", "en": "Reworked the home-screen gameplay diagram into two lines: mouse → weapon → monster, and mouse ×2 → coin/heart/shield."}, {"ver": "v1.79.0", "zh": "修复验证器只按当前引擎版本拉取待验证成绩的问题；旧版本录像现在会按 `rec.ver` 加载对应引擎快照并继续验证。", "en": "Fixed the verifier so pending scores are no longer limited to the current engine version; legacy recordings are replayed with the engine snapshot matching `rec.ver`."}, {"ver": "v1.78.4", "zh": "反馈板新增管理员状态管理：可标记为已解决/无效并隐藏，或永久删除明显垃圾内容。", "en": "Added feedback moderation commands to hide resolved/invalid posts or permanently delete obvious spam."}];   /* auto-injected by dr.sh embed-changelog（勿手改） */
+const CHANGELOG_LINES=[{"ver": "v1.80.1", "zh": "精简「钱能买命」说明，只保留“受伤先扣手头金币”的独立规则，不再要求了解囤金。", "en": "Simplified Money Buys Life wording to its standalone rule: damage spends wallet gold first, without requiring knowledge of Hoard."}, {"ver": "v1.80.0", "zh": "钱能买命不再受囤金回合限制：受到伤害时总是先扣手头金币，金币不足的部分才扣生命，囤金本金不受影响。", "en": "Money Buys Life no longer depends on Hoard being active: incoming damage always spends wallet gold first, then spills into HP, while invested Hoard gold remains untouched."}, {"ver": "v1.79.2", "zh": "首页资源棋子示意改为用 `/` 分隔金币、心和盾。", "en": "Separated the coin, heart, and shield examples with `/` on the home screen."}, {"ver": "v1.79.1", "zh": "首页操作示意改为两行：鼠标箭头 → 武器 → 怪物，以及鼠标箭头 ×2 → 金币/心/盾。", "en": "Reworked the home-screen gameplay diagram into two lines: mouse → weapon → monster, and mouse ×2 → coin/heart/shield."}, {"ver": "v1.79.0", "zh": "修复验证器只按当前引擎版本拉取待验证成绩的问题；旧版本录像现在会按 `rec.ver` 加载对应引擎快照并继续验证。", "en": "Fixed the verifier so pending scores are no longer limited to the current engine version; legacy recordings are replayed with the engine snapshot matching `rec.ver`."}];   /* auto-injected by dr.sh embed-changelog（勿手改） */
 const DEV=true;   // release build (DEV=false); dev build is dungeon-raid-dev.html (DEV=true)
 const REC_API='https://api.dungeonraid.win';   // 录像分享 API（Cloudflare Worker + KV）
 // 带种子随机数（mulberry32）：游戏全程用 rnd() 取代原生随机，配合录制种子可确定性重放
@@ -827,7 +827,7 @@ const TIER2={
   shadow:{n:['乾坤一掷','All-In'], d:['买炸弹后，再额外扣当前金币的 20%，并把这笔数额加到这次炸弹伤害上','After buying a bomb, also spend 20% of your current gold and add exactly that amount to this bomb’s damage'], f:p=>{ p.shadowBombGold=true; }},
   demolitionist:{n:['爆破手','Demolitionist'], d:['每用一次炸弹：伤害 +1、花费 +5 金（越炸越强、越炸越贵）','Each bomb use: +1 damage and +5 gold cost (stronger but pricier each time)'], f:p=>{ p.bombBoost=true; }},
   shieldbash:{n:['盾击','Shield Bash'], d:['把「护甲减伤量」加到固定{WC}伤害上（护甲越厚、剑伤越高）','Adds your armor (damage-reduction) value to flat {W} damage — more armor, harder hits'], f:p=>{ p.shieldBash=true; }},
-  tycoon:{n:['钱能买命','Money Buys Life'], d:['受到伤害时先扣手头金币；手头金币不够时，剩余伤害才继续掉血，不动囤金本金','Incoming damage spends wallet gold first; any remainder spills into HP, while invested Hoard gold remains untouched'], f:p=>{ p.tycoonGoldShield=true; }},
+  tycoon:{n:['钱能买命','Money Buys Life'], d:['受到伤害时先扣手头金币；手头金币不够时，剩余伤害才继续掉血','Incoming damage spends wallet gold first; any remainder spills into HP'], f:p=>{ p.tycoonGoldShield=true; }},
   warlord:{n:['巨力','Titan'], d:['最大生命越高，{WC}固定伤害越高（每 12 点最大生命 +1）','Higher max HP = higher flat {W} damage (+1 per 12 max HP)'], f:p=>{ p.titan=true; }},
   thorns:{n:['荆棘','Thorns'], d:['受到攻击时，把「当前护甲减伤量」反弹给攻击者（护甲越高反弹越多）','When hit, reflect your current armor (damage-reduction) back to the attacker — more armor, more reflect'], f:p=>{ p.thorns=true; }},
   bloodfrenzy:{n:['血狂','Blood Frenzy'], d:['吸血/嗜血回血超出生命上限时，溢出的 30% 增为永久生命上限；但每回合结束损失 5% 最大生命','Lifesteal/Bloodthirst healing past max HP: 30% of overflow becomes permanent max HP; but at end of every turn, lose 5% of max HP'], f:p=>{ p.bloodFrenzy=true; }},
@@ -3238,7 +3238,7 @@ function tileInfo(t){
     rows:[ [tr('每枚金币','Gold per coin'), `+${p.goldPerCoin}`],
       [tr('当前金币','Current gold'), `${p.gold}`],
       [tr('囤金投入','Hoard invested'), p.goldLock>0?tr(`${p.goldFrozen} 金币，剩 ${p.goldLock} 回合`,`${p.goldFrozen} gold, ${p.goldLock} turns left`):'—'],
-      [tr('钱能买命(财阀)','Money Buys Life (Tycoon)'), p.tycoonGoldShield?tr('只扣手头金币，不动囤金','Current gold only; Hoard untouched'):'—'] ]};
+      [tr('钱能买命(财阀)','Money Buys Life (Tycoon)'), p.tycoonGoldShield?tr('受伤先扣手头金币','Damage spends current gold first'):'—'] ]};
   if((t.type==='enemy'||t.type==='boss') && t.burnTurns) return {icon:'🔥', title:tr('点燃状态','Ignited'),
     desc:L(CONTENT.tile.ignited),
     rows:[ [tr('火焰层数','Burn stacks'), `${t.burnStacks||0}`],

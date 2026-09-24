@@ -33,7 +33,7 @@ function tileInfo(t){
     rows:[ [tr('每枚金币','Gold per coin'), `+${p.goldPerCoin}`],
       [tr('当前金币','Current gold'), `${p.gold}`],
       [tr('囤金投入','Hoard invested'), p.goldLock>0?tr(`${p.goldFrozen} 金币，剩 ${p.goldLock} 回合`,`${p.goldFrozen} gold, ${p.goldLock} turns left`):'—'],
-      [tr('钱能买命(财阀)','Money Buys Life (Tycoon)'), p.tycoonGoldShield?tr('只扣手头金币，不动囤金','Current gold only; Hoard untouched'):'—'] ]};
+      [tr('钱能买命(财阀)','Money Buys Life (Tycoon)'), p.tycoonGoldShield?tr('受伤先扣手头金币','Damage spends current gold first'):'—'] ]};
   if((t.type==='enemy'||t.type==='boss') && t.burnTurns) return {icon:'🔥', title:tr('点燃状态','Ignited'),
     desc:L(CONTENT.tile.ignited),
     rows:[ [tr('火焰层数','Burn stacks'), `${t.burnStacks||0}`],

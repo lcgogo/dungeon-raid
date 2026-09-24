@@ -1,4 +1,9 @@
 
+## [v1.80.1] - 2026-09-24
+
+- 精简「钱能买命」说明，只保留“受伤先扣手头金币”的独立规则，不再要求了解囤金。
+- Simplified Money Buys Life wording to its standalone rule: damage spends wallet gold first, without requiring knowledge of Hoard.
+
 ## [v1.80.0] - 2026-09-24
 
 > Version-Impact: verify

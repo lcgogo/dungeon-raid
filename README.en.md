@@ -37,7 +37,7 @@ The current Dev build is `v1.75.1`; builds now automatically inject the latest c
 
 The current Dev build is `v1.75.2`; race and turn-50 class `ⓘ` details now use separate buttons so they cannot accidentally select the card.
 
-The current Dev build is `v1.80.0`; Money Buys Life now spends wallet gold before HP whether or not Hoard is active, while invested Hoard gold remains untouched.
+The current Dev build is `v1.80.1`; Money Buys Life spends wallet gold before HP, and any remainder spills into HP.
 
 ## 🧩 Core Gameplay
 
@@ -142,7 +142,7 @@ At **level 100 (Tier-2 Skill)** you automatically get the passive **locked to yo
 | 🧝 Elf | Seer → Echo of Fate | Every 5 valid turns, the next refill is guaranteed to match the non-enemy tile cleared on the trigger turn |
 | 🎅 Dwarf | Blacksmith → Shield Bash | Adds your armor (damage-reduction) value to flat {W} damage — more armor, harder hits |
 | 🎅 Dwarf | Musketeer → Demolitionist | Each bomb use: +1 damage and +5 gold cost (stronger but pricier each time) |
-| 🎅 Dwarf | Miser → Money Buys Life | Incoming damage always spends **current gold first**; if wallet gold runs out, the remainder spills into HP and **invested Hoard gold is not spent** |
+| 🎅 Dwarf | Miser → Money Buys Life | Incoming damage spends **current gold first**; if wallet gold runs out, the remainder spills into HP |
 | 🎅 Dwarf | Guild Master → Cheapskate | Gold-spending actives (shop 💊Heal / 💥Bomb, Guild Master’s Buyout) cost half |
 | 🧌 Orc | Tauren → Titan | Higher max HP means higher flat sword damage (+1 per 12 max HP) |
 | 🧌 Orc | Fighter → Blood Frenzy | When Lifesteal/Bloodthirst healing exceeds max HP, **30%** of the overflow becomes permanent max HP; but at the **end of every turn you lose 5% of max HP** |
