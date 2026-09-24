@@ -37,7 +37,7 @@ The current Dev build is `v1.75.1`; builds now automatically inject the latest c
 
 The current Dev build is `v1.75.2`; race and turn-50 class `ⓘ` details now use separate buttons so they cannot accidentally select the card.
 
-The current Dev build is `v1.79.2`; the home-screen resource diagram now separates coin, heart, and shield with `/`. The verifier replays each recording with its matching engine snapshot.
+The current Dev build is `v1.80.0`; Money Buys Life now spends wallet gold before HP whether or not Hoard is active, while invested Hoard gold remains untouched.
 
 ## 🧩 Core Gameplay
 

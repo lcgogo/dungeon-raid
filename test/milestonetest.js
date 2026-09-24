@@ -106,6 +106,10 @@ ok(tyDmg===3 && ty.goldFrozen===5 && ty.gold===0 && ty.hp===tyHp-3,'钱能买命
 const tyDmg2=G.hurtPlayer(6,'enemy',true,{type:'enemy'});
 ok(tyDmg2===6 && ty.goldFrozen===5 && ty.gold===0 && ty.hp===tyHp-9,'钱能买命手头金币不够时不动囤金本金，剩余伤害掉血');
 
+ty.hp=ty.maxHp=50; ty.goldLock=0; ty.goldFrozen=5; ty.gold=4;
+const tyDmg3=G.hurtPlayer(6,'enemy',true,{type:'enemy'});
+ok(tyDmg3===2 && ty.gold===0 && ty.goldFrozen===5 && ty.hp===48,'钱能买命不在囤金期间也先扣手头金币，余额不足再掉血');
+
 ty.hp=ty.maxHp=50; ty.armor=0; ty.toughness=0; ty.goldLock=1; ty.goldFrozen=6; ty.gold=0; ty.shopCd={}; ty.frozen={}; G.busy=false; G.pendingLevels=0;
 for(let r=0;r<6;r++)for(let c=0;c<6;c++) G.grid[r][c]=null;
 G.grid[0][0]={type:'heart'}; G.grid[0][1]={type:'heart'};

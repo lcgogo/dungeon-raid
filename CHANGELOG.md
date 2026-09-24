@@ -1,4 +1,11 @@
 
+## [v1.80.0] - 2026-09-24
+
+> Version-Impact: verify
+
+- 钱能买命不再受囤金回合限制：受到伤害时总是先扣手头金币，金币不足的部分才扣生命，囤金本金不受影响。
+- Money Buys Life no longer depends on Hoard being active: incoming damage always spends wallet gold first, then spills into HP, while invested Hoard gold remains untouched.
+
 ## [v1.79.2] - 2026-09-24
 
 - 首页资源棋子示意改为用 `/` 分隔金币、心和盾。

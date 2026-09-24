@@ -245,7 +245,7 @@ function hurtPlayer(atk, sourceKey, ignoreArmor, attacker){
   const armorReducer = player.armor*(player.armorMult||1) + (player.toughness||0);
   let dmg = ignoreArmor ? atk : Math.max(1, atk - armorReducer);
   if(player.tortoiseGuardTurns>0 && dmg>0) dmg=Math.max(1,Math.ceil(dmg*0.5));
-  if(player.tycoonGoldShield && player.goldLock>0 && dmg>0){
+  if(player.tycoonGoldShield && dmg>0){
     const paid = loseGoldForShield(dmg), spill = dmg-paid;
     if(paid>0) log(tr(`💸 钱能买命：花掉 ${paid} 金币挡住 ${paid} 伤害`,`💸 Money Buys Life: spend ${paid} gold to block ${paid} damage`), 'buff');
     dmg = spill;
