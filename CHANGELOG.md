@@ -1,4 +1,9 @@
 
+## [v1.79.2] - 2026-09-24
+
+- 首页资源棋子示意改为用 `/` 分隔金币、心和盾。
+- Separated the coin, heart, and shield examples with `/` on the home screen.
+
 ## [v1.79.1] - 2026-09-24
 
 - 首页操作示意改为两行：鼠标箭头 → 武器 → 怪物，以及鼠标箭头 ×2 → 金币/心/盾。

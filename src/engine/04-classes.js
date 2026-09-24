@@ -182,7 +182,7 @@ function showClassSelect(){
       <span style="color:var(--dim)"> ${tr('地心封印着「终焉之主」，历代冒险者潜入地牢、无人生还——轮到你了。拖动连接相邻同类符文：🔪斩怪、🔰凝甲、💗回血、💰补给。能走多深，看你自己。','The Overlord lies sealed at the world’s core; none who went in returned — your turn now. Link adjacent runes: 🔪 slay, 🔰 armor, 💗 heal, 💰 supplies. How deep you go is up to you.')}</span>
       <div style="color:var(--dim);text-align:center;font-size:12px;line-height:1.9;margin:7px 0 2px">
         <div>👆 ➜ 🗡️ ➜ 👹</div>
-        <div>👆 ×2 ➜ 💰　💗　🔰</div>
+        <div>👆 ×2 ➜ 💰 / 💗 / 🔰</div>
       </div>
       <div style="color:var(--dim);text-align:center;font-size:10.5px">${tr('🗡️ 武器链可穿过 👹，横竖斜 8 向均可；资源棋子连续点按 2 次可自动连线。<br>💡 <b>轻点方块</b>看说明；<b>长按商店/技能块</b>看数值。','A 🗡️ weapon chain can pass through 👹 in all 8 directions; double-tap a resource tile to auto-link it.<br>💡 <b>Tap a tile</b> for info; <b>long-press a shop/skill block</b> for details.')}</div>
     </div>`;
