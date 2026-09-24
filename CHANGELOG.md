@@ -1,4 +1,14 @@
 
+## [v1.82.2] - 2026-09-24
+
+- Pages 现在发布 `engines/` 历史引擎快照；旧版本分享录像和排行榜回放会自动跳转到对应引擎。
+- Pages now publishes historical `engines/` snapshots; old shared and leaderboard replays automatically open their matching engine.
+
+## [v1.82.1] - 2026-09-24
+
+- 回放旧版本录像时增加版本保护：不再用当前引擎强行回放并报错退出，而是提示打开对应版本。
+- Added a replay version guard: old recordings now show a clear matching-version message instead of failing mid-replay under the current engine.
+
 ## [v1.82.0] - 2026-09-24
 
 > Version-Impact: verify

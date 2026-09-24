@@ -171,6 +171,7 @@ cmd_deploy(){
   cmd_embed_changelog dungeon-raid-dev.html   # dev 站更新前先注入最新更新日志（只动 dev）
   rm -rf public
   mkdir -p public/functions
+  mkdir -p public/engines
   local prodVer devVer
   prodVer=$(ver_of dungeon-raid.html)
   devVer=$(ver_of dungeon-raid-dev.html)
@@ -186,6 +187,7 @@ pathlib.Path('public').mkdir(exist_ok=True)
 pathlib.Path('public/index.html').write_text(text, encoding='utf-8')
 PY
   cp dungeon-raid.html dungeon-raid-dev.html apple-touch-icon.png icon-192.png icon-512.png manifest.webmanifest sw.js public/
+  cp engines/*.html public/engines/
   cp deploy/pages/functions/_middleware.js public/functions/
   echo "public/ 内容（应只有网页文件，无私钥）："; ls -R public
   npx --yes wrangler pages project create "$PROJ" --production-branch=main 2>/dev/null || true

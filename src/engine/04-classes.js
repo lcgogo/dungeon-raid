@@ -298,6 +298,7 @@ async function loadSharedReplay(id){
     if(!res.ok) throw new Error('HTTP '+res.status);
     const r=await res.json();
     if(!r||!Array.isArray(r.acts)||typeof r.seed!=='number') throw new Error('invalid');
+    r._shareId=id;
     startReplay(r);
   }catch(e){ log(tr('分享录像加载失败：','Failed to load shared replay: ')+e.message); __bootHandled=true; showClassSelect(); }
 }

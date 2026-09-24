@@ -4,6 +4,12 @@ let jumping=false;   // 跳回合快进期间：抑制 gameOver/onClear，避免
 const REPLAY_BASE=620;   // 每步基础间隔 ms（按倍速缩短）
 function startReplay(recObj){
   if(!recObj||!Array.isArray(recObj.acts)){ alert(tr('录像无效','Invalid recording')); return; }
+  if(recObj.ver && recObj.ver!==VERSION){
+    const url=`/engines/${encodeURIComponent(recObj.ver)}.html`;
+    if(recObj._shareId){ location.href=`${url}?rec=${encodeURIComponent(recObj._shareId)}`; return; }
+    alert(tr(`录像版本 ${recObj.ver} 与当前引擎 ${VERSION} 不同，请打开对应版本页面：${url}`,`Recording version ${recObj.ver} differs from the current engine ${VERSION}. Open: ${url}`));
+    return;
+  }
   recObj.acts.forEach(a=>{ if(a&&a[0]==='t'&&typeof a[2]==='string') a[2]=normalizeClassId(a[2]); if(a&&a[0]==='b'&&a[2]==='seer'&&typeof a[1]==='string') a[1]=normalizeClassId(a[1]); });
   replayResumeState = player&&grid ? {
     player: JSON.parse(JSON.stringify(player)),

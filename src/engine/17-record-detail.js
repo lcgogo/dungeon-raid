@@ -15,6 +15,7 @@ async function showRecDetail(id){
     try{ const res=await fetch(REC_API+'/rec/'+id); if(!res.ok) throw 0; rec=await res.json(); _recDetailCache[id]=rec; }
     catch(e){ body.innerHTML=`<span style="color:#c66">${tr('加载失败','Failed')}</span>`; return; }
   }
+  rec._shareId=id;
   renderRecDetail(rec, body, _lbEntries[id]);
 }
 function closeRecModal(){ const m=document.getElementById('recModal'); if(m) m.remove(); }
@@ -48,7 +49,7 @@ function renderRecDetail(rec, box, entry){
       ${rec.token?`<button class="choice" id="recSubmitBtn" style="flex:1;width:auto;margin:0;padding:7px;font-size:12px;text-align:center">${tr('🏆 补交排行榜','🏆 Resubmit')}</button>`:''}
     </div>
   </div>`;
-  const rb=box.querySelector('#recReplayBtn'); if(rb) rb.onclick=()=>{ closeRecModal(); startReplay(rec); };   // 闭包绑定本条 rec（修旧版 onclick 引用全局 rec 的隐患）
+  const rb=box.querySelector('#recReplayBtn'); if(rb) rb.onclick=()=>{ closeRecModal(); startReplay(rec); };   // 版本不匹配时跳到对应历史引擎
   const sb=box.querySelector('#recShareBtn'); if(sb) sb.onclick=()=>{ shareRec(rec, sb); };
   const submitBox=box.querySelector('#recSubmitBox');
   const tb=box.querySelector('#recSubmitBtn');
