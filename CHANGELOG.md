@@ -1,4 +1,11 @@
 
+## [v1.82.0] - 2026-09-24
+
+> Version-Impact: verify
+
+- 「钱能买命」改为每花 10 金币抵消 1 点伤害，金币不足时剩余伤害才扣生命。
+- Money Buys Life now spends 10 wallet gold to block 1 damage; any remainder spills into HP.
+
 ## [v1.81.0] - 2026-09-24
 
 > Version-Impact: verify

@@ -249,9 +249,9 @@ const CONTENT = {
 if('serviceWorker' in navigator) window.addEventListener('load',()=>navigator.serviceWorker.register('/sw.js').catch(()=>{}));
 //==================== 配置 ====================
 // 版本号 v主.次.修：不影响 verify/replay 兼容边界的小改动改"修"；凡是影响 verify/replay/版本分桶/release 验证语义的改动都改"次"；大版本变更需先确认。页面底部显示。
-const VERSION='v1.81.0';
+const VERSION='v1.82.0';
 // CHANGELOG_LINES below is only a fallback for raw source inspection; build/build.js replaces it from CHANGELOG.md.
-const CHANGELOG_LINES=[{"ver": "v1.81.0", "zh": "按“没有攻击力的 Boss 默认武器免疫”规则修正岩浆魔、吸血鬼、召唤师；血量公式和档位倍率保持不变，并将规则写入设计文档。", "en": "Made non-attacking Magmafiend, Vampire, and Summoner weapon-immune without changing HP formulas or tier scaling; documented the rule."}, {"ver": "v1.80.1", "zh": "精简「钱能买命」说明，只保留“受伤先扣手头金币”的独立规则，不再要求了解囤金。", "en": "Simplified Money Buys Life wording to its standalone rule: damage spends wallet gold first, without requiring knowledge of Hoard."}, {"ver": "v1.80.0", "zh": "钱能买命不再受囤金回合限制：受到伤害时总是先扣手头金币，金币不足的部分才扣生命，囤金本金不受影响。", "en": "Money Buys Life no longer depends on Hoard being active: incoming damage always spends wallet gold first, then spills into HP, while invested Hoard gold remains untouched."}, {"ver": "v1.79.2", "zh": "首页资源棋子示意改为用 `/` 分隔金币、心和盾。", "en": "Separated the coin, heart, and shield examples with `/` on the home screen."}, {"ver": "v1.79.1", "zh": "首页操作示意改为两行：鼠标箭头 → 武器 → 怪物，以及鼠标箭头 ×2 → 金币/心/盾。", "en": "Reworked the home-screen gameplay diagram into two lines: mouse → weapon → monster, and mouse ×2 → coin/heart/shield."}];   /* auto-injected by dr.sh embed-changelog（勿手改） */
+const CHANGELOG_LINES=[{"ver": "v1.82.0", "zh": "「钱能买命」改为每花 10 金币抵消 1 点伤害，金币不足时剩余伤害才扣生命。", "en": "Money Buys Life now spends 10 wallet gold to block 1 damage; any remainder spills into HP."}, {"ver": "v1.81.0", "zh": "按“没有攻击力的 Boss 默认武器免疫”规则修正岩浆魔、吸血鬼、召唤师；血量公式和档位倍率保持不变，并将规则写入设计文档。", "en": "Made non-attacking Magmafiend, Vampire, and Summoner weapon-immune without changing HP formulas or tier scaling; documented the rule."}, {"ver": "v1.80.1", "zh": "精简「钱能买命」说明，只保留“受伤先扣手头金币”的独立规则，不再要求了解囤金。", "en": "Simplified Money Buys Life wording to its standalone rule: damage spends wallet gold first, without requiring knowledge of Hoard."}, {"ver": "v1.80.0", "zh": "钱能买命不再受囤金回合限制：受到伤害时总是先扣手头金币，金币不足的部分才扣生命，囤金本金不受影响。", "en": "Money Buys Life no longer depends on Hoard being active: incoming damage always spends wallet gold first, then spills into HP, while invested Hoard gold remains untouched."}, {"ver": "v1.79.2", "zh": "首页资源棋子示意改为用 `/` 分隔金币、心和盾。", "en": "Separated the coin, heart, and shield examples with `/` on the home screen."}];   /* auto-injected by dr.sh embed-changelog（勿手改） */
 const DEV=true;   // release build (DEV=false); dev build is dungeon-raid-dev.html (DEV=true)
 const REC_API='https://api.dungeonraid.win';   // 录像分享 API（Cloudflare Worker + KV）
 // 带种子随机数（mulberry32）：游戏全程用 rnd() 取代原生随机，配合录制种子可确定性重放
@@ -584,9 +584,9 @@ function firewallTick(){
 }
 function loseGoldForShield(g){
   g=g|0; if(g<=0) return 0;
-  const fromHand=Math.min(g, player.gold||0);
-  player.gold-=fromHand;
-  return fromHand;
+  const blocked=Math.min(g, Math.floor((player.gold||0)/10));
+  player.gold-=blocked*10;
+  return blocked;
 }
 // 击败小偷：夺回它偷走的金币
 function thiefRecover(t){ if(t&&t.bossId==='thief'&&t.stolen>0){ gainGold(t.stolen, g=>tr(`🦹 抓住小偷！夺回 ${g} 金币。`,`🦹 Caught the Thief! Recovered ${g} gold.`)); t.stolen=0; } }
@@ -2547,8 +2547,8 @@ function hurtPlayer(atk, sourceKey, ignoreArmor, attacker){
   let dmg = ignoreArmor ? atk : Math.max(1, atk - armorReducer);
   if(player.tortoiseGuardTurns>0 && dmg>0) dmg=Math.max(1,Math.ceil(dmg*0.5));
   if(player.tycoonGoldShield && dmg>0){
-    const paid = loseGoldForShield(dmg), spill = dmg-paid;
-    if(paid>0) log(tr(`💸 钱能买命：花掉 ${paid} 金币挡住 ${paid} 伤害`,`💸 Money Buys Life: spend ${paid} gold to block ${paid} damage`), 'buff');
+    const blocked = loseGoldForShield(dmg), spent=blocked*10, spill = dmg-blocked;
+    if(blocked>0) log(tr(`💸 钱能买命：花掉 ${spent} 金币挡住 ${blocked} 伤害`,`💸 Money Buys Life: spend ${spent} gold to block ${blocked} damage`), 'buff');
     dmg = spill;
   }
   player.hp -= dmg;

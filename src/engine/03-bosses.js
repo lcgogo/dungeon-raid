@@ -222,9 +222,9 @@ function firewallTick(){
 }
 function loseGoldForShield(g){
   g=g|0; if(g<=0) return 0;
-  const fromHand=Math.min(g, player.gold||0);
-  player.gold-=fromHand;
-  return fromHand;
+  const blocked=Math.min(g, Math.floor((player.gold||0)/10));
+  player.gold-=blocked*10;
+  return blocked;
 }
 // 击败小偷：夺回它偷走的金币
 function thiefRecover(t){ if(t&&t.bossId==='thief'&&t.stolen>0){ gainGold(t.stolen, g=>tr(`🦹 抓住小偷！夺回 ${g} 金币。`,`🦹 Caught the Thief! Recovered ${g} gold.`)); t.stolen=0; } }
