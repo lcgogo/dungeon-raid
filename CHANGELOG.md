@@ -1,4 +1,9 @@
 
+## [v1.82.3] - 2026-09-24
+
+- 回放条显示录像版本；历史引擎首页新增返回当前版本入口，避免“再来一局”继续停留在旧版本。
+- Replay bars now show recording versions; historical engine home screens link back to the current build.
+
 ## [v1.82.2] - 2026-09-24
 
 - Pages 现在发布 `engines/` 历史引擎快照；旧版本分享录像和排行榜回放会自动跳转到对应引擎。

@@ -174,7 +174,9 @@ function showClassSelect(){
     ? `<span style="background:#7d3cad;color:#fff;font-size:12px;font-weight:700;padding:3px 12px;border-radius:12px;letter-spacing:1px">🚧 DEV ${VERSION} · ${tr('开发版','build')}</span>`
     : `<span style="background:#2e7d46;color:#fff;font-size:12px;font-weight:700;padding:3px 12px;border-radius:12px;letter-spacing:1px">✅ ${VERSION} · ${tr('正式版','Release')}</span>`;
   // 版本徽标旁放一个「🏠 首页」按钮，回到版本选择页（index.html）
-  const buildBadge = `<div style="display:flex;justify-content:center;align-items:center;gap:8px;margin-bottom:8px">${verBadge}<a href="index.html" style="font-size:12px;color:var(--dim);text-decoration:none;border:1px solid #4a3a63;border-radius:12px;padding:3px 11px">🏠 ${tr('首页','Home')}</a></div>`;
+  const isHistorical=typeof location!=='undefined' && /\/engines\//.test(location.pathname||'');
+  const currentHref=DEV?'../dungeon-raid-dev.html':'../dungeon-raid.html';
+  const buildBadge = `<div style="display:flex;justify-content:center;align-items:center;gap:8px;margin-bottom:8px">${verBadge}<a href="index.html" style="font-size:12px;color:var(--dim);text-decoration:none;border:1px solid #4a3a63;border-radius:12px;padding:3px 11px">🏠 ${tr('首页','Home')}</a>${isHistorical?`<a href="${currentHref}" style="font-size:12px;color:var(--gold);text-decoration:none;border:1px solid #a8852c;border-radius:12px;padding:3px 11px">↗ ${tr('当前版本','Current')}</a>`:''}</div>`;
   card.innerHTML=`${buildBadge}
     <h2 style="margin:2px 0 6px">⚔️ ${tr('地牢突袭','Dungeon Raid')}</h2>
     <div style="text-align:left;font-size:11.5px;line-height:1.6;background:var(--panel2);border-radius:10px;padding:9px 11px;margin-bottom:10px">

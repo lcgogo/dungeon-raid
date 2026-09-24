@@ -78,7 +78,8 @@ function dispatchReplayAct(a){
 function updateReplayBar(){
   const tt=replayTotalTurns||0;
   const turn=(player?player.turns:0)+(replayPending?1:0);   // 正在预显示连线（未结算）时，显示的是「即将完成的那一回合」
-  document.getElementById('rbTxt').textContent=`🎬 ${tr('回放','Replay')}${replayPaused?' ⏸':''} · ${tr('回合','turn')} ${turn}/${tt}`;
+  const replayVer=replayRec&&replayRec.ver?` · ${replayRec.ver}`:'';
+  document.getElementById('rbTxt').textContent=`🎬 ${tr('回放','Replay')}${replayPaused?' ⏸':''}${replayVer} · ${tr('回合','turn')} ${turn}/${tt}`;
   document.getElementById('rbFill').style.width=(tt?Math.min(100,turn/tt*100):0)+'%';
   // 步进键：仅暂停时可见（用 .hide 隐藏但保留占位，避免挤动其它按钮/进度条）；到首/末回合相应变灰
   const prev=document.getElementById('rbPrev'), next=document.getElementById('rbNext');
