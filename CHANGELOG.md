@@ -1901,3 +1901,9 @@
 
 - 新增套娃 Boss 🪆：属性与普通怪一致；被击败后在可用非怪物格分裂成两个低 1 级套娃，直到 Lv1 才会真正击败并获得 Boss 奖励。
 - Added the Matryoshka boss 🪆: it has normal-monster stats and splits into two one-tier-lower copies on available non-monster tiles when defeated, until Lv1 is truly defeated and rewards are granted.
+## [v1.83.0] - 2026-09-26
+
+> Version-Impact: verify
+
+- 修正污染怪不会直接攻击玩家；它只把心变成毒心，保留武器免疫和非武器伤害处理。
+- Fixed Corruptor so it never directly attacks the player; it only poisons hearts while retaining weapon immunity and non-weapon damage handling.

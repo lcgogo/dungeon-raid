@@ -37,7 +37,7 @@ The current Dev build is `v1.75.1`; builds now automatically inject the latest c
 
 The current Dev build is `v1.75.2`; race and turn-50 class `ⓘ` details now use separate buttons so they cannot accidentally select the card.
 
-The current Dev build is `v1.82.3`; replay bars show the recording version, and historical engine home screens link back to the current build. Money Buys Life spends 10 wallet gold to block 1 damage.
+The current Dev build is `v1.83.0`; fixed Corruptor so it does not directly attack the player. Replay bars show the recording version, and historical engine home screens link back to the current build.
 
 ## 🧩 Core Gameplay
 
