@@ -249,9 +249,9 @@ const CONTENT = {
 if('serviceWorker' in navigator) window.addEventListener('load',()=>navigator.serviceWorker.register('/sw.js').catch(()=>{}));
 //==================== 配置 ====================
 // 版本号 v主.次.修：不影响 verify/replay 兼容边界的小改动改"修"；凡是影响 verify/replay/版本分桶/release 验证语义的改动都改"次"；大版本变更需先确认。页面底部显示。
-const VERSION='v1.83.0';
+const VERSION='v1.84.0';
 // CHANGELOG_LINES below is only a fallback for raw source inspection; build/build.js replaces it from CHANGELOG.md.
-const CHANGELOG_LINES=[{"ver": "v1.82.3", "zh": "回放条显示录像版本；历史引擎首页新增返回当前版本入口，避免“再来一局”继续停留在旧版本。", "en": "Replay bars now show recording versions; historical engine home screens link back to the current build."}, {"ver": "v1.82.2", "zh": "Pages 现在发布 `engines/` 历史引擎快照；旧版本分享录像和排行榜回放会自动跳转到对应引擎。", "en": "Pages now publishes historical `engines/` snapshots; old shared and leaderboard replays automatically open their matching engine."}, {"ver": "v1.82.1", "zh": "回放旧版本录像时增加版本保护：不再用当前引擎强行回放并报错退出，而是提示打开对应版本。", "en": "Added a replay version guard: old recordings now show a clear matching-version message instead of failing mid-replay under the current engine."}, {"ver": "v1.82.0", "zh": "「钱能买命」改为每花 10 金币抵消 1 点伤害，金币不足时剩余伤害才扣生命。", "en": "Money Buys Life now spends 10 wallet gold to block 1 damage; any remainder spills into HP."}, {"ver": "v1.81.0", "zh": "按“没有攻击力的 Boss 默认武器免疫”规则修正岩浆魔、吸血鬼、召唤师；血量公式和档位倍率保持不变，并将规则写入设计文档。", "en": "Made non-attacking Magmafiend, Vampire, and Summoner weapon-immune without changing HP formulas or tier scaling; documented the rule."}];   /* auto-injected by dr.sh embed-changelog（勿手改） */
+const CHANGELOG_LINES=[{"ver": "v1.84.0", "zh": "修复污染怪作为每回合 Boss 时缺少动作函数，导致回合结算异常中断、棋盘不再补充棋子的问题。", "en": "Fixed Corruptor turns aborting before refill because its per-turn Boss definition had no action function."}, {"ver": "v1.82.3", "zh": "回放条显示录像版本；历史引擎首页新增返回当前版本入口，避免“再来一局”继续停留在旧版本。", "en": "Replay bars now show recording versions; historical engine home screens link back to the current build."}, {"ver": "v1.82.2", "zh": "Pages 现在发布 `engines/` 历史引擎快照；旧版本分享录像和排行榜回放会自动跳转到对应引擎。", "en": "Pages now publishes historical `engines/` snapshots; old shared and leaderboard replays automatically open their matching engine."}, {"ver": "v1.82.1", "zh": "回放旧版本录像时增加版本保护：不再用当前引擎强行回放并报错退出，而是提示打开对应版本。", "en": "Added a replay version guard: old recordings now show a clear matching-version message instead of failing mid-replay under the current engine."}, {"ver": "v1.82.0", "zh": "「钱能买命」改为每花 10 金币抵消 1 点伤害，金币不足时剩余伤害才扣生命。", "en": "Money Buys Life now spends 10 wallet gold to block 1 damage; any remainder spills into HP."}];   /* auto-injected by dr.sh embed-changelog（勿手改） */
 const DEV=true;   // release build (DEV=false); dev build is dungeon-raid-dev.html (DEV=true)
 const REC_API='https://api.dungeonraid.win';   // 录像分享 API（Cloudflare Worker + KV）
 // 带种子随机数（mulberry32）：游戏全程用 rnd() 取代原生随机，配合录制种子可确定性重放
@@ -2497,7 +2497,7 @@ function advanceEnemies(){
       r=pos.r; c=pos.c;
     }
     const def = t.type==='boss' ? bossDef(t) : null;
-    if(def && def.perTurn){ def.act(t); continue; }    // 纯每回合型（小丑/吸血鬼）：无倒计时
+    if(def && def.perTurn){ if(def.act) def.act(t); continue; }    // 纯每回合型（小丑/吸血鬼）：无倒计时；无动作的光环 Boss 也要正常跳过倒计时
     let acted=false;
     t.cd--;
     if(t.cd<=0){

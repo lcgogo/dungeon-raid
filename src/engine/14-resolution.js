@@ -193,7 +193,7 @@ function advanceEnemies(){
       r=pos.r; c=pos.c;
     }
     const def = t.type==='boss' ? bossDef(t) : null;
-    if(def && def.perTurn){ def.act(t); continue; }    // 纯每回合型（小丑/吸血鬼）：无倒计时
+    if(def && def.perTurn){ if(def.act) def.act(t); continue; }    // 纯每回合型（小丑/吸血鬼）：无倒计时；无动作的光环 Boss 也要正常跳过倒计时
     let acted=false;
     t.cd--;
     if(t.cd<=0){

@@ -1,4 +1,11 @@
 
+## [v1.84.0] - 2026-10-08
+
+> Version-Impact: verify
+
+- 修复污染怪作为每回合 Boss 时缺少动作函数，导致回合结算异常中断、棋盘不再补充棋子的问题。
+- Fixed Corruptor turns aborting before refill because its per-turn Boss definition had no action function.
+
 ## [v1.82.3] - 2026-09-24
 
 - 回放条显示录像版本；历史引擎首页新增返回当前版本入口，避免“再来一局”继续停留在旧版本。
