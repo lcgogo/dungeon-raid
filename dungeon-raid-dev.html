@@ -249,9 +249,9 @@ const CONTENT = {
 if('serviceWorker' in navigator) window.addEventListener('load',()=>navigator.serviceWorker.register('/sw.js').catch(()=>{}));
 //==================== 配置 ====================
 // 版本号 v主.次.修：不影响 verify/replay 兼容边界的小改动改"修"；凡是影响 verify/replay/版本分桶/release 验证语义的改动都改"次"；大版本变更需先确认。页面底部显示。
-const VERSION='v1.84.0';
+const VERSION='v1.85.0';
 // CHANGELOG_LINES below is only a fallback for raw source inspection; build/build.js replaces it from CHANGELOG.md.
-const CHANGELOG_LINES=[{"ver": "v1.84.0", "zh": "修复污染怪作为每回合 Boss 时缺少动作函数，导致回合结算异常中断、棋盘不再补充棋子的问题。", "en": "Fixed Corruptor turns aborting before refill because its per-turn Boss definition had no action function."}, {"ver": "v1.82.3", "zh": "回放条显示录像版本；历史引擎首页新增返回当前版本入口，避免“再来一局”继续停留在旧版本。", "en": "Replay bars now show recording versions; historical engine home screens link back to the current build."}, {"ver": "v1.82.2", "zh": "Pages 现在发布 `engines/` 历史引擎快照；旧版本分享录像和排行榜回放会自动跳转到对应引擎。", "en": "Pages now publishes historical `engines/` snapshots; old shared and leaderboard replays automatically open their matching engine."}, {"ver": "v1.82.1", "zh": "回放旧版本录像时增加版本保护：不再用当前引擎强行回放并报错退出，而是提示打开对应版本。", "en": "Added a replay version guard: old recordings now show a clear matching-version message instead of failing mid-replay under the current engine."}, {"ver": "v1.82.0", "zh": "「钱能买命」改为每花 10 金币抵消 1 点伤害，金币不足时剩余伤害才扣生命。", "en": "Money Buys Life now spends 10 wallet gold to block 1 damage; any remainder spills into HP."}];   /* auto-injected by dr.sh embed-changelog（勿手改） */
+const CHANGELOG_LINES=[{"ver": "v1.85.0", "zh": "明确污染怪是无攻击力的纯光环 Boss：棋盘角标和详情页不再显示攻击力或每回合出手倒计时。", "en": "Clarified that Corruptor is a non-attacking aura Boss: its attack value and per-turn attack timer are no longer shown."}, {"ver": "v1.84.0", "zh": "修复污染怪作为每回合 Boss 时缺少动作函数，导致回合结算异常中断、棋盘不再补充棋子的问题。", "en": "Fixed Corruptor turns aborting before refill because its per-turn Boss definition had no action function."}, {"ver": "v1.82.3", "zh": "回放条显示录像版本；历史引擎首页新增返回当前版本入口，避免“再来一局”继续停留在旧版本。", "en": "Replay bars now show recording versions; historical engine home screens link back to the current build."}, {"ver": "v1.82.2", "zh": "Pages 现在发布 `engines/` 历史引擎快照；旧版本分享录像和排行榜回放会自动跳转到对应引擎。", "en": "Pages now publishes historical `engines/` snapshots; old shared and leaderboard replays automatically open their matching engine."}, {"ver": "v1.82.1", "zh": "回放旧版本录像时增加版本保护：不再用当前引擎强行回放并报错退出，而是提示打开对应版本。", "en": "Added a replay version guard: old recordings now show a clear matching-version message instead of failing mid-replay under the current engine."}];   /* auto-injected by dr.sh embed-changelog（勿手改） */
 const DEV=true;   // release build (DEV=false); dev build is dungeon-raid-dev.html (DEV=true)
 const REC_API='https://api.dungeonraid.win';   // 录像分享 API（Cloudflare Worker + KV）
 // 带种子随机数（mulberry32）：游戏全程用 rnd() 取代原生随机，配合录制种子可确定性重放
@@ -443,7 +443,7 @@ const BOSSES=[
   { id:'statue', emoji:'🗿', name:['石像','Statue'], quip:['打我？你打的是你自己。','Hit me? You are hitting yourself.'], monster:true, swordable:true, noTierScale:true, hpMult:2,
     special:['受到的伤害真实反弹给你','Reflects damage taken as TRUE damage'],
     desc:['可以用{W}攻击它，但它【受到多少伤害，就把等量伤害当作真实伤害（无视护甲）反弹给你】！想杀它得先确保自己血够厚——别一刀连自己也送走。倒计时归零也会重击你。','You CAN hit it with a {WC}, but【whatever damage it takes is reflected back at you as TRUE damage (ignoring armor)】! Make sure you have the HP to survive the kill — do not one-shot yourself. It also strikes you when its timer hits 0.'] },
-  { id:'pollution', emoji:'🦠', name:['污染怪','Corruptor'], quip:['你的心，我给染绿了。','I dyed your hearts rotten green.'], monster:true, noTierScale:true, perTurn:true,
+  { id:'pollution', emoji:'🦠', name:['污染怪','Corruptor'], quip:['你的心，我给染绿了。','I dyed your hearts rotten green.'], monster:true, noTierScale:true, perTurn:true, noAttack:true,
     special:['在场时全场心变毒心（连之扣血）','While alive, all hearts are poison (linking drains HP)'],
     desc:['{WC}对它无效，只能用 💥炸弹 炸。只要它在场，棋盘上所有的心都变成毒心（绿心 💚）——连毒心不再回血，反而按等量【扣血】（无视护甲）！它本身不攻击玩家，炸掉它后心就恢复正常。','Immune to {WC} — only the 💥 Bomb works. While it is on the board, ALL hearts become poison (green 💚) — linking them DRAINS that much HP instead of healing (ignoring armor)! It does not attack the player; bomb it and hearts return to normal.'] },
   { id:'snowman', emoji:'⛄', name:['雪人','Snowman'], quip:['冻住，不许走——技能也别想用。','Freeze! No moves, and no skills either.'], monster:true, noTierScale:true,
@@ -1577,7 +1577,7 @@ function draw(){
         ctx.fillText(t.burnStacks, bx, by+1);
       }
       // 攻击力角标（左上）——没有攻击行为的小偷不显示；特效/大招型 Boss（攻击力无意义）也不显示
-      if(t.bossId!=='thief' && (!isBoss || (!bdef.act && !bdef.cdAttack) || bdef.shownAtk || bdef.dynAtk)){
+      if(t.bossId!=='thief' && !(isBoss && bdef.noAttack) && (!isBoss || (!bdef.act && !bdef.cdAttack) || bdef.shownAtk || bdef.dynAtk)){
         const av=(isBoss && (bdef.shownAtk||bdef.dynAtk)) ? (bdef.shownAtk?bdef.shownAtk(t):bdef.dynAtk(t)) : (isBoss?t.atk:normalEnemyAttack(t));
         const ax=x+10, ay=y+10, ar=TILE*0.16;
         ctx.beginPath(); ctx.arc(ax,ay,ar,0,7);
@@ -1586,7 +1586,7 @@ function draw(){
         ctx.fillText(av, ax, ay+1);
       }
       // 倒计时角标（右上）：普通 Boss=倒计时；每回合行动型=恒「1」（每回合都出手）；终焉之主不显示
-      if(!isBoss || !bdef.finale){
+      if(!isBoss || (!bdef.finale && !bdef.noAttack)){
         const perT = isBoss && bdef.perTurn, cv = perT ? 1 : t.cd;
         const bx=x+g-4, by=y+10, br=TILE*0.16;
         ctx.beginPath(); ctx.arc(bx,by,br,0,7);
@@ -3260,11 +3260,11 @@ function tileInfo(t){
   if(t.type==='boss'){ const def=bossDef(t);
     const rows=[ [tr('血量','HP'), `${t.hp} / ${t.maxHp}`] ];
     if(def.special) rows.push([tr('特殊','Special'), L(def.special)]);
-    if(def.shownAtk) rows.push([L(def.atkLabel||['攻击力','Attack']), `${def.shownAtk(t)}`]);
-    else if(!def.special) rows.push([def.trueDmg?tr('攻击力（真实·无视护甲）','Attack (TRUE, ignores armor)'):tr('攻击力','Attack'), `${t.atk}`]);
+    if(!def.noAttack && def.shownAtk) rows.push([L(def.atkLabel||['攻击力','Attack']), `${def.shownAtk(t)}`]);
+    else if(!def.noAttack && !def.special) rows.push([def.trueDmg?tr('攻击力（真实·无视护甲）','Attack (TRUE, ignores armor)'):tr('攻击力','Attack'), `${t.atk}`]);
     if(def.dynAtk) rows.push([tr('当前攻击','Attack now'), `${def.dynAtk(t)} ${tr('（=血量50%）','(=50% HP)')}`]);   // 饕餮：动态攻击
     if(!def.perTurn) rows.push([tr(def.flee?'逃走倒计时':'倒计时',def.flee?'Escape timer':'Timer'), `${t.cd} / ${t.baseCd}`]);
-    else if(!def.finale) rows.push([tr('倒计时','Timer'), tr('每回合出手','Every turn')]);
+    else if(!def.finale && !def.noAttack) rows.push([tr('倒计时','Timer'), tr('每回合出手','Every turn')]);
     if(def.id==='thief'&&t.stolen) rows.push([tr('已偷金币','Stolen gold'), tr(`${t.stolen}（击败夺回）`,`${t.stolen} (recover on kill)`)]);
     rows.push([tr('攻击方式','How to hit'), def.swordable?tr(`${wN()} / 炸弹`,`${wN()} / Bomb`):tr('只能炸弹','Bomb only')]);
     rows.push([tr('击败奖励','Kill reward'), '💰+20 · XP+15']);

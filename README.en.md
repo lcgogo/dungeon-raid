@@ -37,7 +37,7 @@ The current Dev build is `v1.75.1`; builds now automatically inject the latest c
 
 The current Dev build is `v1.75.2`; race and turn-50 class `ⓘ` details now use separate buttons so they cannot accidentally select the card.
 
-The current Dev build is `v1.84.0`; fixed a Corruptor turn-resolution crash that stopped the board from refilling, and fixed Corruptor so it does not directly attack the player. Replay bars show the recording version, and historical engine home screens link back to the current build.
+The current Dev build is `v1.85.0`; clarified that Corruptor has no attack and only applies its poison-heart aura, and fixed a Corruptor turn-resolution crash that stopped the board from refilling. Replay bars show the recording version, and historical engine home screens link back to the current build.
 
 ## 🧩 Core Gameplay
 

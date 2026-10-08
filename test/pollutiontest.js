@@ -22,4 +22,5 @@ G.selection=[{r:0,c:1,type:G.grid[0][1].type},{r:0,c:2,type:G.grid[0][2].type}];
 G.resolve();
 const after=G.grid.flat().filter(Boolean).length;
 if(p.turns!==1 || after!==36) throw new Error(`pollution turn did not settle: turns=${p.turns}, tiles=${after}, before=${before}`);
+if(G.grid[0][0].type!=='boss' || G.grid[0][0].bossId!=='pollution') throw new Error('pollution boss was unexpectedly removed');
 console.log('✅ pollution perTurn regression passed');

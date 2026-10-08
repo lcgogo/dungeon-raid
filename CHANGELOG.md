@@ -1,4 +1,11 @@
 
+## [v1.85.0] - 2026-10-08
+
+> Version-Impact: verify
+
+- 明确污染怪是无攻击力的纯光环 Boss：棋盘角标和详情页不再显示攻击力或每回合出手倒计时。
+- Clarified that Corruptor is a non-attacking aura Boss: its attack value and per-turn attack timer are no longer shown.
+
 ## [v1.84.0] - 2026-10-08
 
 > Version-Impact: verify

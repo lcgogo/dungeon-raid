@@ -99,7 +99,7 @@ function draw(){
         ctx.fillText(t.burnStacks, bx, by+1);
       }
       // 攻击力角标（左上）——没有攻击行为的小偷不显示；特效/大招型 Boss（攻击力无意义）也不显示
-      if(t.bossId!=='thief' && (!isBoss || (!bdef.act && !bdef.cdAttack) || bdef.shownAtk || bdef.dynAtk)){
+      if(t.bossId!=='thief' && !(isBoss && bdef.noAttack) && (!isBoss || (!bdef.act && !bdef.cdAttack) || bdef.shownAtk || bdef.dynAtk)){
         const av=(isBoss && (bdef.shownAtk||bdef.dynAtk)) ? (bdef.shownAtk?bdef.shownAtk(t):bdef.dynAtk(t)) : (isBoss?t.atk:normalEnemyAttack(t));
         const ax=x+10, ay=y+10, ar=TILE*0.16;
         ctx.beginPath(); ctx.arc(ax,ay,ar,0,7);
@@ -108,7 +108,7 @@ function draw(){
         ctx.fillText(av, ax, ay+1);
       }
       // 倒计时角标（右上）：普通 Boss=倒计时；每回合行动型=恒「1」（每回合都出手）；终焉之主不显示
-      if(!isBoss || !bdef.finale){
+      if(!isBoss || (!bdef.finale && !bdef.noAttack)){
         const perT = isBoss && bdef.perTurn, cv = perT ? 1 : t.cd;
         const bx=x+g-4, by=y+10, br=TILE*0.16;
         ctx.beginPath(); ctx.arc(bx,by,br,0,7);
