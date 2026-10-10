@@ -249,9 +249,9 @@ const CONTENT = {
 if('serviceWorker' in navigator) window.addEventListener('load',()=>navigator.serviceWorker.register('/sw.js').catch(()=>{}));
 //==================== 配置 ====================
 // 版本号 v主.次.修：不影响 verify/replay 兼容边界的小改动改"修"；凡是影响 verify/replay/版本分桶/release 验证语义的改动都改"次"；大版本变更需先确认。页面底部显示。
-const VERSION='v1.85.0';
+const VERSION='v1.85.1';
 // CHANGELOG_LINES below is only a fallback for raw source inspection; build/build.js replaces it from CHANGELOG.md.
-const CHANGELOG_LINES=[{"ver": "v1.85.0", "zh": "明确污染怪是无攻击力的纯光环 Boss：棋盘角标和详情页不再显示攻击力或每回合出手倒计时。", "en": "Clarified that Corruptor is a non-attacking aura Boss: its attack value and per-turn attack timer are no longer shown."}, {"ver": "v1.84.0", "zh": "修复污染怪作为每回合 Boss 时缺少动作函数，导致回合结算异常中断、棋盘不再补充棋子的问题。", "en": "Fixed Corruptor turns aborting before refill because its per-turn Boss definition had no action function."}, {"ver": "v1.82.3", "zh": "回放条显示录像版本；历史引擎首页新增返回当前版本入口，避免“再来一局”继续停留在旧版本。", "en": "Replay bars now show recording versions; historical engine home screens link back to the current build."}, {"ver": "v1.82.2", "zh": "Pages 现在发布 `engines/` 历史引擎快照；旧版本分享录像和排行榜回放会自动跳转到对应引擎。", "en": "Pages now publishes historical `engines/` snapshots; old shared and leaderboard replays automatically open their matching engine."}, {"ver": "v1.82.1", "zh": "回放旧版本录像时增加版本保护：不再用当前引擎强行回放并报错退出，而是提示打开对应版本。", "en": "Added a replay version guard: old recordings now show a clear matching-version message instead of failing mid-replay under the current engine."}];   /* auto-injected by dr.sh embed-changelog（勿手改） */
+const CHANGELOG_LINES=[{"ver": "v1.85.1", "zh": "API 不可达时缩短正式版服务端种子请求超时，快速回退到本地随机开局，避免初始化长时间等待；API 正常时仍优先使用服务端种子。", "en": "Reduced the release build's server-seed timeout when the API is unreachable, quickly falling back to a local random start instead of blocking initialization; reachable APIs still provide the preferred server seed."}, {"ver": "v1.85.0", "zh": "明确污染怪是无攻击力的纯光环 Boss：棋盘角标和详情页不再显示攻击力或每回合出手倒计时。", "en": "Clarified that Corruptor is a non-attacking aura Boss: its attack value and per-turn attack timer are no longer shown."}, {"ver": "v1.84.0", "zh": "修复污染怪作为每回合 Boss 时缺少动作函数，导致回合结算异常中断、棋盘不再补充棋子的问题。", "en": "Fixed Corruptor turns aborting before refill because its per-turn Boss definition had no action function."}, {"ver": "v1.82.3", "zh": "回放条显示录像版本；历史引擎首页新增返回当前版本入口，避免“再来一局”继续停留在旧版本。", "en": "Replay bars now show recording versions; historical engine home screens link back to the current build."}, {"ver": "v1.82.2", "zh": "Pages 现在发布 `engines/` 历史引擎快照；旧版本分享录像和排行榜回放会自动跳转到对应引擎。", "en": "Pages now publishes historical `engines/` snapshots; old shared and leaderboard replays automatically open their matching engine."}];   /* auto-injected by dr.sh embed-changelog（勿手改） */
 const DEV=true;   // release build (DEV=false); dev build is dungeon-raid-dev.html (DEV=true)
 const REC_API='https://api.dungeonraid.win';   // 录像分享 API（Cloudflare Worker + KV）
 // 带种子随机数（mulberry32）：游戏全程用 rnd() 取代原生随机，配合录制种子可确定性重放
@@ -1302,11 +1302,14 @@ function consumePrefetchedServerSeed(rc){
 async function fetchServerSeed(rc){
   if(DEV) return null;
   if(typeof navigator!=='undefined' && navigator.onLine===false) return null;
+  const ctrl=typeof AbortController!=='undefined' ? new AbortController() : null;
+  const timer=ctrl ? setTimeout(()=>ctrl.abort(),800) : null;
   try{
     const qs = new URLSearchParams({ race: rc.id, version: VERSION });
-    const r=await fetch(REC_API+'/seed?'+qs.toString(),{method:'POST'});
+    const r=await fetch(REC_API+'/seed?'+qs.toString(),{method:'POST',signal:ctrl&&ctrl.signal});
     if(r&&r.ok){ const x=await r.json(); if(typeof x.seed==='number'&&x.token) return {seed:x.seed>>>0, token:x.token}; }
   }catch(e){}
+  finally{ if(timer) clearTimeout(timer); }
   return null;
 }
 
@@ -1339,7 +1342,7 @@ async function freshStart(rc){
   let srv=consumePrefetchedServerSeed(rc);
   if(!srv){
     const pending=pendingSeedPromise(rc);
-    try{ srv=await Promise.race([ pending || fetchServerSeed(rc), new Promise(res=>setTimeout(()=>res(null), 2500)) ]); }catch(e){}
+    try{ srv=await Promise.race([ pending || fetchServerSeed(rc), new Promise(res=>setTimeout(()=>res(null), 900)) ]); }catch(e){}
   }
   startGame(rc, srv);
   if(!srv) offlineSeedNotice();

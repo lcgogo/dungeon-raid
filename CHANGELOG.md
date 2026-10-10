@@ -1,4 +1,9 @@
 
+## [v1.85.1] - 2026-10-10
+
+- API 不可达时缩短正式版服务端种子请求超时，快速回退到本地随机开局，避免初始化长时间等待；API 正常时仍优先使用服务端种子。
+- Reduced the release build's server-seed timeout when the API is unreachable, quickly falling back to a local random start instead of blocking initialization; reachable APIs still provide the preferred server seed.
+
 ## [v1.85.0] - 2026-10-08
 
 > Version-Impact: verify
