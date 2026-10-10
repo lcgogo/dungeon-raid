@@ -87,11 +87,14 @@ function consumePrefetchedServerSeed(rc){
 async function fetchServerSeed(rc){
   if(DEV) return null;
   if(typeof navigator!=='undefined' && navigator.onLine===false) return null;
+  const ctrl=typeof AbortController!=='undefined' ? new AbortController() : null;
+  const timer=ctrl ? setTimeout(()=>ctrl.abort(),800) : null;
   try{
     const qs = new URLSearchParams({ race: rc.id, version: VERSION });
-    const r=await fetch(REC_API+'/seed?'+qs.toString(),{method:'POST'});
+    const r=await fetch(REC_API+'/seed?'+qs.toString(),{method:'POST',signal:ctrl&&ctrl.signal});
     if(r&&r.ok){ const x=await r.json(); if(typeof x.seed==='number'&&x.token) return {seed:x.seed>>>0, token:x.token}; }
   }catch(e){}
+  finally{ if(timer) clearTimeout(timer); }
   return null;
 }
 
@@ -124,7 +127,7 @@ async function freshStart(rc){
   let srv=consumePrefetchedServerSeed(rc);
   if(!srv){
     const pending=pendingSeedPromise(rc);
-    try{ srv=await Promise.race([ pending || fetchServerSeed(rc), new Promise(res=>setTimeout(()=>res(null), 2500)) ]); }catch(e){}
+    try{ srv=await Promise.race([ pending || fetchServerSeed(rc), new Promise(res=>setTimeout(()=>res(null), 900)) ]); }catch(e){}
   }
   startGame(rc, srv);
   if(!srv) offlineSeedNotice();
