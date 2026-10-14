@@ -437,11 +437,12 @@ function botTransform(){
 }
 
 // ---------- 4) 单局 ----------
+const PLAY_CAP=511;   // 正式终局的有效回合上限；超过它属于机器人未终结，不是更高的生存成绩
 function playGame(rc, srv){   // srv={seed,token}：用服务端种子开局（--submit-ai 上榜需要），缺省则本地随机
   G.headless=true;   // 抑制升级弹窗在 resolve 里抽池，避免与机器人 resolveLevels 重复消耗 RNG（保证录像可重放）
   G.startGame(rc, srv);
   let turn=0;
-  for(; turn<4000; turn++){
+  for(; turn<PLAY_CAP; turn++){
     const p=P();
     if(p.hp<=0 || p.cleared) break;
     botTransform();   // 处理上一步触发的转职
@@ -486,7 +487,8 @@ function playGame(rc, srv){   // srv={seed,token}：用服务端种子开局（-
   }
   const p=P();
   const db=p.dmgBy||{}; let deathSrc=null,mx=0; for(const k in db){ if(db[k]>mx){mx=db[k];deathSrc=k;} }  // 致命回合主要死因
-  return { level:p.level, turns:p.turns, gold:p.gold, maxHp:p.maxHp, died:p.hp<=0, loopTurns:turn, t1:p.tier1, t2:p.tier2, t2b:p.tier2b, skill2:(p.skill2&&p.skill2.id)||null, deathSrc };
+  const deadlock=p.deathMode==='deadlock';
+  return { level:p.level, turns:Math.min(p.turns,PLAY_CAP), gold:p.gold, maxHp:p.maxHp, died:p.hp<=0, deadlock, cleared:!!p.cleared, capped:p.hp>0 && !deadlock && !p.cleared && turn>=PLAY_CAP, loopTurns:turn, t1:p.tier1, t2:p.tier2, t2b:p.tier2b, skill2:(p.skill2&&p.skill2.id)||null, deathSrc };
 }
 
 // ---------- 5) 批量跑 ----------
@@ -712,13 +714,13 @@ else if(FOCUS){
     const topD=Object.entries(deaths).sort((a,b)=>b[1]-a[1]).slice(0,2).map(([k,v])=>`${srcName(k)} ${Math.round(v/ok.length*100)}%`).join(' · ')||'—';
     const t1id=ARG.t1||G.RACE_PATHS[rc.id].t1[0];
     const path=`${t1id}/${G.CLASS_T2[t1id]}`;   // 二阶被动锁定职业
-    const err=res.length-ok.length;
+    const err=res.length-ok.length, capped=ok.filter(r=>r.capped).length, deadlocks=ok.filter(r=>r.deadlock).length;
     console.log(
       rc.n[0].padEnd(5)+'  '+path.padEnd(18)+' | '+
       String(med(turns)).padStart(6)+String(Math.round(avg(turns))).padStart(5)+String(Math.max(0,...turns)).padStart(5)+' | '+
       String(med(lv)).padStart(7)+'  | '+
       (Math.round(r1/ok.length*100)+'%').padStart(6)+(Math.round(r2/ok.length*100)+'%').padStart(8)+' | '+
-      topD + (err?`  ⚠️${err}错误`:''));
+      topD + (err?`  ⚠️${err}错误`:'') + (deadlocks?`  ⚠️${deadlocks}死局`:'') + (capped?`  ⚠️${capped}未终结`:'') );
   }
   console.log('\n回合=存活回合，达一阶=击败50回合Boss转一阶的比例，达二阶=转二阶的比例，主要死因=致命回合伤害来源占比。');
 } else {
