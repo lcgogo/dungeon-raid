@@ -1,4 +1,11 @@
 
+## [v1.86.0] - 2026-10-14
+
+> Version-Impact: verify
+
+- 新增可被武器攻击的 👁️ 独眼巨人：倒计时归零时，从当前生命最高的普通怪中确定性随机选一只投掷；伤害为该怪当前生命 ×（1 + 20% × Boss 等级），被投掷的普通怪随之消失且不给击杀奖励。
+- Added the weapon-attackable 👁️ Cyclops: when its countdown reaches 0, it deterministically picks a random normal enemy among those with the highest current HP and hurls it; damage is that enemy's current HP × (1 + 20% × Boss level), and the thrown enemy leaves without granting a kill reward.
+
 ## [v1.85.1] - 2026-10-10
 
 - API 不可达时缩短正式版服务端种子请求超时，快速回退到本地随机开局，避免初始化长时间等待；API 正常时仍优先使用服务端种子。

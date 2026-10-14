@@ -1,4 +1,4 @@
-// ===== Boss 池：每 10 回合从中随机挑一个现身。剑链免疫，只能用炸弹炸，奖励丰厚 =====
+// ===== Boss 池：每 10 回合从中随机挑一个现身。多数 Boss 可被武器攻击，奖励丰厚 =====
 const BOSSES=[
   { id:'matryoshka', emoji:'🪆', name:['套娃','Matryoshka'], quip:['里面还有一个。','There is another one inside.'], monster:true, swordable:true, noTierScale:true,
     desc:['属性与同级普通怪一致。被击败后会在可用非怪物格分裂成 2 个低 1 级的套娃；Lv1 才会真正击败并获得 Boss 奖励。','Stats match a normal enemy. When defeated, it splits into two one-tier-lower copies on available non-monster tiles; only Lv1 is truly defeated and grants boss rewards.'] },
@@ -50,6 +50,17 @@ const BOSSES=[
       const dmg=hurtPlayer(raw, 'devourer', false, t);
       t.hp=Math.max(1, t.hp-raw);   // 放大招消耗自身一半生命，下一步再靠吞怪补回来
       log(tr(`🦖 饕餮先释放积蓄之力，造成 ${dmg} 伤害（自损至 ${t.hp}）！`,`🦖 Devourer strikes first for ${dmg} damage (drops to ${t.hp})!`), 'bad'); } },
+  { id:'cyclops', emoji:'👁️', name:['独眼巨人','Cyclops'], quip:['看准了，再砸。','One eye is enough to aim.'], monster:true, swordable:true,
+    dynAtk:t=>cyclopsAttackPower(t),
+    special:['随机投掷当前生命最高的普通怪','Throws a random highest-HP normal enemy'],
+    desc:['可以用{W}攻击它。倒计时归零时，它会从棋盘上当前生命最高的普通怪中随机选一个，把那只怪砸向你；伤害等于该怪当前生命 ×（1 + 20% × Boss 等级），被投掷的怪物从棋盘消失且不给击杀奖励。','You CAN attack it with a {WC}. When its countdown reaches 0, it randomly chooses one of the normal enemies tied for highest current HP and hurls it at you; damage equals that enemy’s current HP × (1 + 20% × Boss level), and the thrown enemy leaves the board without granting a kill reward.'],
+    cdAttack(t){
+      const target=pickCyclopsTarget();
+      if(!target){ log(tr('👁️ 独眼巨人找不到可投掷的普通怪。','👁️ The Cyclops finds no normal enemy to hurl.'), 'debuff'); return; }
+      const hp=target.hp, dmg=hurtPlayer(cyclopsAttackPower(t,target), 'cyclops', false, t);
+      const pos=findTilePos(target); if(pos) grid[pos.r][pos.c]=null;
+      log(tr(`👁️ 独眼巨人把一只 ${hp} 生命的怪物砸来，造成 ${dmg} 伤害！`,`👁️ The Cyclops hurls a ${hp}-HP enemy for ${dmg} damage!`), 'bad');
+    } },
   { id:'summoner', emoji:'🧙', name:['召唤师','Summoner'], quip:['一个不够热闹，再加几个。','One is lonely — let me add a few.'], monster:true, perTurn:true,
     special:['每回合召唤一只怪','Summons an enemy each turn'],
     desc:['属性和普通怪一样，可被{W}攻击。它【每回合】把场上一个非怪/非Boss的棋子变成一只怪——拖得越久怪越多，速战速决！被它点名变怪的格子现在也会拉出召唤线，方便看清到底是哪里被改写了。','Stats like a normal enemy and {W}-attackable. Every turn it turns one non-enemy tile into an enemy — the longer it lives, the more enemies. End it fast! Converted tiles now also get a summoning tether so you can immediately see what was rewritten.'],
@@ -239,6 +250,19 @@ function dmgSourceLabel(key){
 function bossStats(){
   const lv=player.level;
   return { hp: 8 + Math.floor(lv*1.0), atk: 5 + Math.floor(lv*1.8), cd: 6 + Math.floor(rnd()*3) }; // cd 6~8（atk 提斜率：lv5=14/lv10=23/lv20=41，压过后期护甲）
+}
+function pickCyclopsTarget(){
+  let max=-Infinity, candidates=[];
+  for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){
+    const t=grid[r][c]; if(!t||t.type!=='enemy') continue;
+    if(t.hp>max){ max=t.hp; candidates=[t]; }
+    else if(t.hp===max) candidates.push(t);
+  }
+  return candidates.length ? candidates[Math.floor(rnd()*candidates.length)] : null;
+}
+function cyclopsAttackPower(boss, target){
+  if(!target){ let max=0; for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const t=grid[r][c]; if(t&&t.type==='enemy') max=Math.max(max,t.hp); } target={hp:max}; }
+  return Math.max(0, Math.floor(target.hp*(1+0.2*(boss&&boss.tier||1))));
 }
 function bossTier(){ return 1 + Math.floor(player.turns/50); }  // 每 50 回合 Boss 强度档位 +1
 function hasBoss(){ for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++) if(grid[r][c]&&grid[r][c].type==='boss') return true; return false; }

@@ -159,7 +159,7 @@ At **level 100 (Tier-2 Skill)** you automatically get the passive **locked to yo
 
 ## 👹 Bestiary
 
-Every **10 turns**, one boss is drawn from a **deterministic 30-card deck** containing two cards for each regular boss; the deck reshuffles when empty. **Beating one by any means rewards 💰+20 and +15 XP** (announced in the log). **If you don't clear it in time the next one still comes and stacks** — no camping a weak boss to suppress the rest. Boss strength steps up one tier every **50 turns** (Lv2, Lv3…). **Ghost / Clown / Corruptor / Snowman can only be hit with the 💥 Bomb** (or bomb-like non-weapon damage such as poison/drain); all others can be attacked with weapon chains too. **After you beat the turn-350 boss, a warning pops and from then on 2 different bosses descend together every 10 turns** — a ramp toward the turn-500 endgame.
+Every **10 turns**, one boss is drawn from a **deterministic 32-card deck** containing two cards for each regular boss; the deck reshuffles when empty. **Beating one by any means rewards 💰+20 and +15 XP** (announced in the log). **If you don't clear it in time the next one still comes and stacks** — no camping a weak boss to suppress the rest. Boss strength steps up one tier every **50 turns** (Lv2, Lv3…). **Ghost / Clown / Corruptor / Snowman can only be hit with the 💥 Bomb** (or bomb-like non-weapon damage such as poison/drain); all others can be attacked with weapon chains too. **After you beat the turn-350 boss, a warning pops and from then on 2 different bosses descend together every 10 turns** — a ramp toward the turn-500 endgame.
 
 | Boss | How to hit | Gimmick |
 |---|---|---|
@@ -171,6 +171,7 @@ Every **10 turns**, one boss is drawn from a **deterministic 30-card deck** cont
 | 🧛 Vampire | Bomb only | **No attack; weapon-immune**. Drains every heart on the board each turn to heal; poison hearts damage it instead. |
 | 🥷 Assassin | Sword / Bomb | Stats like a normal enemy, but its hits are **true damage** — ignore armor, straight to HP |
 | 🦖 Devourer | Sword / Bomb | When its countdown hits 0, it first strikes for **50% of its current HP**; only after that hit resolves does it drain half the HP from every regular enemy to grow |
+| 👁️ Cyclops | Sword / Bomb | When its countdown hits 0, it randomly chooses one of the highest-current-HP normal enemies and hurls it at you; damage is that enemy's current HP × (1 + 20% × Boss level), and the thrown enemy leaves without granting a kill reward |
 | 🧙 Summoner | Bomb only | **No attack; weapon-immune**. Turns a non-enemy tile into an enemy each turn — the longer it lives, the more enemies |
 | 🦹 Thief | Sword / Bomb | Steals a share of gold on arrival (10% at Lv1, 20% at Lv2…, capped at all you have at high tiers — never goes negative); kill it before its timer to recover, let it flee and the gold is gone forever |
 | 🧟 Zombie | Sword / Bomb | Infects you on arrival (HP bar turns green); **after a 1-turn incubation** you lose a % of HP each turn (scaling per tier, capped at 30%/turn, ignoring armor); kill it during incubation to cure |
