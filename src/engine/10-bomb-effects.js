@@ -128,6 +128,38 @@ function zombiePlagueFx(src){
   if(!src) return;
   absorbLinesFx([{r:src.r,c:src.c}], { targetId:'hpBar', stroke:'#27ae60', glow:'#7dff9d' });
 }
+// 独眼巨人投掷：先锁定被投掷的怪，再把伤害引向玩家血条（纯视觉，不进录像）。
+function cyclopsThrowFx(src, target){
+  if(headless || jumping || !src || !target) return;
+  try{
+    if(!document.createElementNS) return;
+    const cv0=document.getElementById('board'), hp=document.getElementById('hpBar');
+    if(!cv0||!hp||!cv0.getBoundingClientRect||!hp.getBoundingClientRect) return;
+    const r=cv0.getBoundingClientRect(), hr=hp.getBoundingClientRect();
+    if(!r.width) return;
+    const sx=r.width/cv0.width, sy=r.height/cv0.height;
+    const point=p=>({x:r.left+(cellX(p.c)+TILE/2)*sx,y:r.top+(cellY(p.r)+TILE/2)*sy});
+    const a=point(src), b=point(target), h={x:hr.left+hr.width/2,y:hr.top+hr.height/2};
+    if(![a.x,a.y,b.x,b.y,h.x,h.y].every(Number.isFinite)) return;
+    const NS='http://www.w3.org/2000/svg', svg=document.createElementNS(NS,'svg');
+    svg.style.cssText='position:fixed;inset:0;width:100vw;height:100vh;pointer-events:none;z-index:45';
+    const line=(p1,p2,stroke,glow,duration,delay)=>{
+      const ln=document.createElementNS(NS,'line'), len=Math.hypot(p2.x-p1.x,p2.y-p1.y);
+      ln.setAttribute('x1',p1.x); ln.setAttribute('y1',p1.y); ln.setAttribute('x2',p2.x); ln.setAttribute('y2',p2.y);
+      ln.setAttribute('stroke',stroke); ln.setAttribute('stroke-width','3.5'); ln.setAttribute('stroke-linecap','round');
+      ln.style.filter=`drop-shadow(0 0 6px ${glow})`;
+      ln.setAttribute('stroke-dasharray',len); ln.setAttribute('stroke-dashoffset',len); svg.appendChild(ln);
+      if(ln.animate) ln.animate(
+        [{strokeDashoffset:len,opacity:0},{strokeDashoffset:0,opacity:1,offset:.18},{strokeDashoffset:0,opacity:1,offset:.72},{strokeDashoffset:0,opacity:0}],
+        {duration,delay,easing:'ease-out',fill:'forwards'}
+      ); else { ln.setAttribute('stroke-dashoffset','0'); ln.style.opacity='0.9'; }
+    };
+    line(a,b,'#9aa1a8','#60666d',360,0);
+    line(b,h,'#ff2d2d','#ff3b3b',520,220);
+    markTransientFxDom(svg); document.body.appendChild(svg);
+    setTimeout(()=>{ try{ svg.remove(); }catch(e){} }, 820);
+  }catch(e){}
+}
 function buyoutFx(cells){
   if(headless || jumping || !cells || !cells.length) return;
   try{

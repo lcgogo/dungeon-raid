@@ -44,7 +44,15 @@ function tileInfo(t){
     if(def.special) rows.push([tr('特殊','Special'), L(def.special)]);
     if(!def.noAttack && def.shownAtk) rows.push([L(def.atkLabel||['攻击力','Attack']), `${def.shownAtk(t)}`]);
     else if(!def.noAttack && !def.special) rows.push([def.trueDmg?tr('攻击力（真实·无视护甲）','Attack (TRUE, ignores armor)'):tr('攻击力','Attack'), `${t.atk}`]);
-    if(def.dynAtk) rows.push([tr('当前攻击','Attack now'), `${def.dynAtk(t)} ${tr('（=血量50%）','(=50% HP)')}`]);   // 饕餮：动态攻击
+    if(def.dynAtk){
+      const attackLabel=def.id==='cyclops'?tr('预计攻击','Estimated attack'):tr('当前攻击','Attack now');
+      const attackNote=def.id==='devourer'
+        ? tr('（=自身血量50%）','(=50% of own HP)')
+        : def.id==='cyclops'
+          ? tr('（最高生命普通怪 × (1 + 20% × Boss等级)）','(highest-HP enemy × (1 + 20% × boss level))')
+          : '';
+      rows.push([attackLabel, `${def.dynAtk(t)} ${attackNote}`.trim()]);
+    }
     if(!def.perTurn) rows.push([tr(def.flee?'逃走倒计时':'倒计时',def.flee?'Escape timer':'Timer'), `${t.cd} / ${t.baseCd}`]);
     else if(!def.finale && !def.noAttack) rows.push([tr('倒计时','Timer'), tr('每回合出手','Every turn')]);
     if(def.id==='thief'&&t.stolen) rows.push([tr('已偷金币','Stolen gold'), tr(`${t.stolen}（击败夺回）`,`${t.stolen} (recover on kill)`)]);

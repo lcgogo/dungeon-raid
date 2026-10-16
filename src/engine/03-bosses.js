@@ -50,15 +50,16 @@ const BOSSES=[
       const dmg=hurtPlayer(raw, 'devourer', false, t);
       t.hp=Math.max(1, t.hp-raw);   // 放大招消耗自身一半生命，下一步再靠吞怪补回来
       log(tr(`🦖 饕餮先释放积蓄之力，造成 ${dmg} 伤害（自损至 ${t.hp}）！`,`🦖 Devourer strikes first for ${dmg} damage (drops to ${t.hp})!`), 'bad'); } },
-  { id:'cyclops', emoji:'👁️', name:['独眼巨人','Cyclops'], quip:['看准了，再砸。','One eye is enough to aim.'], monster:true, swordable:true,
+  { id:'cyclops', emoji:'👁️', name:['独眼巨人','Cyclops'], quip:['瞄准，开炮','Aim. Fire.'], monster:true, swordable:true,
     dynAtk:t=>cyclopsAttackPower(t),
     special:['随机投掷当前生命最高的普通怪','Throws a random highest-HP normal enemy'],
     desc:['可以用{W}攻击它。倒计时归零时，它会从棋盘上当前生命最高的普通怪中随机选一个，把那只怪砸向你；伤害等于该怪当前生命 ×（1 + 20% × Boss 等级），被投掷的怪物从棋盘消失且不给击杀奖励。','You CAN attack it with a {WC}. When its countdown reaches 0, it randomly chooses one of the normal enemies tied for highest current HP and hurls it at you; damage equals that enemy’s current HP × (1 + 20% × Boss level), and the thrown enemy leaves the board without granting a kill reward.'],
     cdAttack(t){
       const target=pickCyclopsTarget();
       if(!target){ log(tr('👁️ 独眼巨人找不到可投掷的普通怪。','👁️ The Cyclops finds no normal enemy to hurl.'), 'debuff'); return; }
-      const hp=target.hp, dmg=hurtPlayer(cyclopsAttackPower(t,target), 'cyclops', false, t);
       const pos=findTilePos(target); if(pos) grid[pos.r][pos.c]=null;
+      const src=findTilePos(t); if(src&&pos) cyclopsThrowFx(src,pos);
+      const hp=target.hp, dmg=hurtPlayer(cyclopsAttackPower(t,target), 'cyclops', false, t);
       log(tr(`👁️ 独眼巨人把一只 ${hp} 生命的怪物砸来，造成 ${dmg} 伤害！`,`👁️ The Cyclops hurls a ${hp}-HP enemy for ${dmg} damage!`), 'bad');
     } },
   { id:'summoner', emoji:'🧙', name:['召唤师','Summoner'], quip:['一个不够热闹，再加几个。','One is lonely — let me add a few.'], monster:true, perTurn:true,

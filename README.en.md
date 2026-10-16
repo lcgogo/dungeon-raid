@@ -37,7 +37,7 @@ The current Dev build is `v1.75.1`; builds now automatically inject the latest c
 
 The current Dev build is `v1.75.2`; race and turn-50 class `ⓘ` details now use separate buttons so they cannot accidentally select the card.
 
-The current Dev build is `v1.85.0`; clarified that Corruptor has no attack and only applies its poison-heart aura, and fixed a Corruptor turn-resolution crash that stopped the board from refilling. Replay bars show the recording version, and historical engine home screens link back to the current build.
+The current Dev build is `v1.87.0`; the newest normal Boss added to the pool automatically uses 4 deck cards for a higher appearance rate, while the release build keeps the standard weight.
 
 ## 🧩 Core Gameplay
 

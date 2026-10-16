@@ -1,4 +1,17 @@
 
+## [v1.87.0] - 2026-10-16
+
+> Version-Impact: verify
+
+- dev 版以后新增的 Boss 会自动获得更高出现权重：Boss 池中最新加入的普通 Boss 使用 4 张牌，其余 Boss 使用 2 张；正式版仍全部使用 2 张，且牌堆继续确定性洗牌。
+- Future Bosses added to the dev build automatically receive a higher appearance weight: the newest normal Boss in the pool uses 4 cards while other Bosses use 2; the release build keeps 2 cards for every Boss, with deterministic shuffling preserved.
+- 修复独眼巨人 👁️ 在棋盘格中因彩色 emoji 可见边界与字体 advance box 不一致而视觉偏移的问题。
+- Fixed the Cyclops 👁️ appearing visually off-center in board cells because its color-emoji bounds differed from its font advance box.
+- 修正独眼巨人详情页误显示“自身血量 50%”的问题，改为显示投掷目标生命值计算公式。
+- Fixed the Cyclops details incorrectly saying “50% of its own HP”; they now show the thrown-target HP formula.
+- 独眼巨人投掷时新增视觉连线：灰线锁定被投掷的怪物，红线随后指向玩家血条。
+- Added Cyclops throw visuals: a gray line locks onto the thrown monster, followed by a red line to the player HP bar.
+
 ## [v1.86.0] - 2026-10-14
 
 > Version-Impact: verify
