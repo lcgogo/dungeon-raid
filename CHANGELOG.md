@@ -54,6 +54,13 @@
 - 修复污染怪作为每回合 Boss 时缺少动作函数，导致回合结算异常中断、棋盘不再补充棋子的问题。
 - Fixed Corruptor turns aborting before refill because its per-turn Boss definition had no action function.
 
+## [v1.83.0] - 2026-09-26
+
+> Version-Impact: verify
+
+- 修正污染怪不会直接攻击玩家；它只把心变成毒心，保留武器免疫和非武器伤害处理。
+- Fixed Corruptor so it never directly attacks the player; it only poisons hearts while retaining weapon immunity and non-weapon damage handling.
+
 ## [v1.82.3] - 2026-09-24
 
 - 回放条显示录像版本；历史引擎首页新增返回当前版本入口，避免“再来一局”继续停留在旧版本。
@@ -177,6 +184,13 @@
 
 - 在 Boss 棋子右下角显示等级；燃烧层数移至左下角，避免与等级标记重叠。
 - Boss tiles now show their level in the lower-right corner; burn stacks move to the lower-left to avoid overlap.
+
+## [v1.76.0] - 2026-09-22
+
+> Version-Impact: verify
+
+- 新增套娃 Boss 🪆：属性与普通怪一致；被击败后在可用非怪物格分裂成两个低 1 级套娃，直到 Lv1 才会真正击败并获得 Boss 奖励。
+- Added the Matryoshka boss 🪆: it has normal-monster stats and splits into two one-tier-lower copies on available non-monster tiles when defeated, until Lv1 is truly defeated and rewards are granted.
 
 ## [v1.75.3] - 2026-09-21
 
@@ -1950,15 +1964,3 @@
 [v1.2]: 刺客平衡
 [v1.1]: Boss 档位升级
 [v1.0]: 首个版本
-## [v1.76.0] - 2026-09-22
-
-> Version-Impact: verify
-
-- 新增套娃 Boss 🪆：属性与普通怪一致；被击败后在可用非怪物格分裂成两个低 1 级套娃，直到 Lv1 才会真正击败并获得 Boss 奖励。
-- Added the Matryoshka boss 🪆: it has normal-monster stats and splits into two one-tier-lower copies on available non-monster tiles when defeated, until Lv1 is truly defeated and rewards are granted.
-## [v1.83.0] - 2026-09-26
-
-> Version-Impact: verify
-
-- 修正污染怪不会直接攻击玩家；它只把心变成毒心，保留武器免疫和非武器伤害处理。
-- Fixed Corruptor so it never directly attacks the player; it only poisons hearts while retaining weapon immunity and non-weapon damage handling.
