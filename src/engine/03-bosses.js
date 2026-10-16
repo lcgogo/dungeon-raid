@@ -123,14 +123,14 @@ const BOSSES=[
       const [nr,nc]=cells[Math.floor(rnd()*cells.length)]; const {r,c}=pos; const tmp=grid[nr][nc];
       grid[nr][nc]=t; grid[r][c]=tmp; t.curY=cellY(nr); if(tmp) tmp.curY=cellY(r); syncPositions(false);
       log(tr('🦅 鸟人振翅，和一个棋子换了位置！','🦅 The Birdman flaps to a new spot!'), 'debuff'); } },
-  // 终焉之主：第 500 回合出现。无血量、无攻击、不可被打。每回合把若干非怪/非Boss棋子变成随机Boss（第1波1个…第10波10个），撑满10波不死即破关。不进随机池。
+  // 终焉之主：第 500 回合出现。无血量、无攻击、不可被打。每回合把若干非怪/非Boss棋子变成对应波次等级的随机Boss（第1波1个Lv1…第10波10个Lv10），撑满10波不死即破关。不进随机池。
   { id:'finale', emoji:'👑', name:['终焉之主','Overlord'], quip:['走到这一步？那就别想走了。','Made it this far? You leave no more.'], noRandom:true, perTurn:true, finale:true,
     special:['每回合召唤渐增的Boss浪潮，撑过10波即破关','Summons growing boss waves; survive 10 to clear'],
     desc:['终局考验：它本身无血、无攻击、打不掉。但【每回合】把若干非怪/非Boss棋子变成随机 Boss——第 1 波 1 个、第 2 波 2 个…第 10 波 10 个。撑满 10 波还活着即【破关】！','The final trial: it has no HP, no attack, and cannot be killed. Each turn it turns several non-enemy tiles into random bosses — 1 on wave 1, 2 on wave 2… 10 on wave 10. Survive all 10 waves to CLEAR the game!'],
     act(t){
       if(player.finaleWave>=10){ onClear(); return; }   // 已撑满10波且仍存活 → 破关
       player.finaleWave++;
-      let made=0; for(let i=0;i<player.finaleWave;i++){ if(spawnRandomBossTile()) made++; }
+      let made=0; for(let i=0;i<player.finaleWave;i++){ if(spawnRandomBossTile(player.finaleWave)) made++; }
       syncPositions(false);
       log(tr(`👑 终焉第 ${player.finaleWave}/10 波：召唤 ${made} 个 Boss！`,`👑 Wave ${player.finaleWave}/10: ${made} bosses summoned!`), 'bad');
     } },
@@ -150,16 +150,17 @@ function randomBossDef(exclude){
   return def||BOSSES[0];
 }
 // 把一个非怪/非Boss棋子变成随机 Boss（终焉浪潮用）；返回是否成功
-function spawnRandomBossTile(){
+function spawnRandomBossTile(tier=1){
   const cells=[];
   for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const t=grid[r][c]; if(t && t.type!=='enemy' && t.type!=='boss') cells.push([r,c]); }
   if(!cells.length) return false;
   const [r,c]=cells[Math.floor(rnd()*cells.length)];
-  const def=randomBossDef(), tier=1;   // 终焉浪潮用基础档：可被清掉，挑战在数量而非单体肉度
+  const def=randomBossDef();
   const s=def.monster?enemyStats():bossStats();
   const cdv=Math.max(1,(s.cd!=null?s.cd:s.baseCd)+extraFoeCd());
-  const hp=s.hp*(def.hpMult||1);
-  grid[r][c]={type:'boss', bossId:def.id, tier, hp, maxHp:hp, atk:s.atk, cd:cdv, baseCd:cdv};
+  const mult=def.noTierScale?1:tier;
+  const hp=s.hp*mult*(def.hpMult||1), atk=s.atk*mult;
+  grid[r][c]={type:'boss', bossId:def.id, tier, hp, maxHp:hp, atk, cd:cdv, baseCd:cdv};
   if(def.onSpawn) def.onSpawn(grid[r][c]);
   addBossFx(r,c,false);
   return true;

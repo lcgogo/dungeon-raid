@@ -37,7 +37,7 @@ The current Dev build is `v1.75.1`; builds now automatically inject the latest c
 
 The current Dev build is `v1.75.2`; race and turn-50 class `ⓘ` details now use separate buttons so they cannot accidentally select the card.
 
-The current Dev build is `v1.88.0`; Vampires now drain at most their level in hearts each turn (1 at Lv1, 2 at Lv2) instead of consuming every heart, and death reports retain damage from the player's action phase.
+The current Dev build is `v1.89.0`; Overlord wave N now summons N Bosses at LvN, Vampires drain at most their level in hearts each turn, and death reports retain damage from the player's action phase.
 
 ## 🧩 Core Gameplay
 

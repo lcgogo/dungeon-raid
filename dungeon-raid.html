@@ -249,9 +249,9 @@ const CONTENT = {
 if('serviceWorker' in navigator) window.addEventListener('load',()=>navigator.serviceWorker.register('/sw.js').catch(()=>{}));
 //==================== 配置 ====================
 // 版本号 v主.次.修：不影响 verify/replay 兼容边界的小改动改"修"；凡是影响 verify/replay/版本分桶/release 验证语义的改动都改"次"；大版本变更需先确认。页面底部显示。
-const VERSION='v1.88.0';
+const VERSION='v1.89.0';
 // CHANGELOG_LINES below is only a fallback for raw source inspection; build/build.js replaces it from CHANGELOG.md.
-const CHANGELOG_LINES=[{"ver": "v1.88.0", "zh": "调整吸血鬼：每回合最多按自身等级吸取对应数量的心，Lv1 吸 1 个、Lv2 吸 2 个，以此类推；不再一次吸走棋盘上的全部心。", "en": "Rebalanced Vampire: each turn it drains at most its level in hearts — 1 at Lv1, 2 at Lv2, and so on — instead of consuming every heart on the board."}, {"ver": "v1.87.1", "zh": "修复死亡报告丢失玩家行动阶段伤害的问题：攻击石像造成的反伤现在会和敌方行动伤害一起保留并正确显示。", "en": "Fixed death reports losing damage from the player's action phase: Statue reflection damage is now preserved and shown together with enemy-phase damage."}, {"ver": "v1.87.0", "zh": "dev 版以后新增的 Boss 会自动获得更高出现权重：Boss 池中最新加入的普通 Boss 使用 4 张牌，其余 Boss 使用 2 张；正式版仍全部使用 2 张，且牌堆继续确定性洗牌。", "en": "Future Bosses added to the dev build automatically receive a higher appearance weight: the newest normal Boss in the pool uses 4 cards while other Bosses use 2; the release build keeps 2 cards for every Boss, with deterministic shuffling preserved."}, {"ver": "v1.86.0", "zh": "新增可被武器攻击的 👁️ 独眼巨人：倒计时归零时，从当前生命最高的普通怪中确定性随机选一只投掷；伤害为该怪当前生命 ×（1 + 20% × Boss 等级），被投掷的普通怪随之消失且不给击杀奖励。", "en": "Added the weapon-attackable 👁️ Cyclops: when its countdown reaches 0, it deterministically picks a random normal enemy among those with the highest current HP and hurls it; damage is that enemy's current HP × (1 + 20% × Boss level), and the thrown enemy leaves without granting a kill reward."}, {"ver": "v1.85.1", "zh": "API 不可达时缩短正式版服务端种子请求超时，快速回退到本地随机开局，避免初始化长时间等待；API 正常时仍优先使用服务端种子。", "en": "Reduced the release build's server-seed timeout when the API is unreachable, quickly falling back to a local random start instead of blocking initialization; reachable APIs still provide the preferred server seed."}];   /* auto-injected by dr.sh embed-changelog（勿手改） */
+const CHANGELOG_LINES=[{"ver": "v1.89.0", "zh": "调整终焉之主的 Boss 浪潮：第 1 波召唤 1 个 Lv1 Boss，第 2 波召唤 2 个 Lv2 Boss，依此类推至第 10 波的 10 个 Lv10 Boss。", "en": "Rebalanced the Overlord waves: wave 1 summons one Lv1 Boss, wave 2 summons two Lv2 Bosses, and so on through ten Lv10 Bosses in wave 10."}, {"ver": "v1.88.0", "zh": "调整吸血鬼：每回合最多按自身等级吸取对应数量的心，Lv1 吸 1 个、Lv2 吸 2 个，以此类推；不再一次吸走棋盘上的全部心。", "en": "Rebalanced Vampire: each turn it drains at most its level in hearts — 1 at Lv1, 2 at Lv2, and so on — instead of consuming every heart on the board."}, {"ver": "v1.87.1", "zh": "修复死亡报告丢失玩家行动阶段伤害的问题：攻击石像造成的反伤现在会和敌方行动伤害一起保留并正确显示。", "en": "Fixed death reports losing damage from the player's action phase: Statue reflection damage is now preserved and shown together with enemy-phase damage."}, {"ver": "v1.87.0", "zh": "dev 版以后新增的 Boss 会自动获得更高出现权重：Boss 池中最新加入的普通 Boss 使用 4 张牌，其余 Boss 使用 2 张；正式版仍全部使用 2 张，且牌堆继续确定性洗牌。", "en": "Future Bosses added to the dev build automatically receive a higher appearance weight: the newest normal Boss in the pool uses 4 cards while other Bosses use 2; the release build keeps 2 cards for every Boss, with deterministic shuffling preserved."}, {"ver": "v1.86.0", "zh": "新增可被武器攻击的 👁️ 独眼巨人：倒计时归零时，从当前生命最高的普通怪中确定性随机选一只投掷；伤害为该怪当前生命 ×（1 + 20% × Boss 等级），被投掷的普通怪随之消失且不给击杀奖励。", "en": "Added the weapon-attackable 👁️ Cyclops: when its countdown reaches 0, it deterministically picks a random normal enemy among those with the highest current HP and hurls it; damage is that enemy's current HP × (1 + 20% × Boss level), and the thrown enemy leaves without granting a kill reward."}];   /* auto-injected by dr.sh embed-changelog（勿手改） */
 const DEV=false;   // release build (DEV=false); dev build is dungeon-raid-dev.html (DEV=true)
 const REC_API='https://api.dungeonraid.win';   // 录像分享 API（Cloudflare Worker + KV）
 // 带种子随机数（mulberry32）：游戏全程用 rnd() 取代原生随机，配合录制种子可确定性重放
@@ -485,14 +485,14 @@ const BOSSES=[
       const [nr,nc]=cells[Math.floor(rnd()*cells.length)]; const {r,c}=pos; const tmp=grid[nr][nc];
       grid[nr][nc]=t; grid[r][c]=tmp; t.curY=cellY(nr); if(tmp) tmp.curY=cellY(r); syncPositions(false);
       log(tr('🦅 鸟人振翅，和一个棋子换了位置！','🦅 The Birdman flaps to a new spot!'), 'debuff'); } },
-  // 终焉之主：第 500 回合出现。无血量、无攻击、不可被打。每回合把若干非怪/非Boss棋子变成随机Boss（第1波1个…第10波10个），撑满10波不死即破关。不进随机池。
+  // 终焉之主：第 500 回合出现。无血量、无攻击、不可被打。每回合把若干非怪/非Boss棋子变成对应波次等级的随机Boss（第1波1个Lv1…第10波10个Lv10），撑满10波不死即破关。不进随机池。
   { id:'finale', emoji:'👑', name:['终焉之主','Overlord'], quip:['走到这一步？那就别想走了。','Made it this far? You leave no more.'], noRandom:true, perTurn:true, finale:true,
     special:['每回合召唤渐增的Boss浪潮，撑过10波即破关','Summons growing boss waves; survive 10 to clear'],
     desc:['终局考验：它本身无血、无攻击、打不掉。但【每回合】把若干非怪/非Boss棋子变成随机 Boss——第 1 波 1 个、第 2 波 2 个…第 10 波 10 个。撑满 10 波还活着即【破关】！','The final trial: it has no HP, no attack, and cannot be killed. Each turn it turns several non-enemy tiles into random bosses — 1 on wave 1, 2 on wave 2… 10 on wave 10. Survive all 10 waves to CLEAR the game!'],
     act(t){
       if(player.finaleWave>=10){ onClear(); return; }   // 已撑满10波且仍存活 → 破关
       player.finaleWave++;
-      let made=0; for(let i=0;i<player.finaleWave;i++){ if(spawnRandomBossTile()) made++; }
+      let made=0; for(let i=0;i<player.finaleWave;i++){ if(spawnRandomBossTile(player.finaleWave)) made++; }
       syncPositions(false);
       log(tr(`👑 终焉第 ${player.finaleWave}/10 波：召唤 ${made} 个 Boss！`,`👑 Wave ${player.finaleWave}/10: ${made} bosses summoned!`), 'bad');
     } },
@@ -512,16 +512,17 @@ function randomBossDef(exclude){
   return def||BOSSES[0];
 }
 // 把一个非怪/非Boss棋子变成随机 Boss（终焉浪潮用）；返回是否成功
-function spawnRandomBossTile(){
+function spawnRandomBossTile(tier=1){
   const cells=[];
   for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const t=grid[r][c]; if(t && t.type!=='enemy' && t.type!=='boss') cells.push([r,c]); }
   if(!cells.length) return false;
   const [r,c]=cells[Math.floor(rnd()*cells.length)];
-  const def=randomBossDef(), tier=1;   // 终焉浪潮用基础档：可被清掉，挑战在数量而非单体肉度
+  const def=randomBossDef();
   const s=def.monster?enemyStats():bossStats();
   const cdv=Math.max(1,(s.cd!=null?s.cd:s.baseCd)+extraFoeCd());
-  const hp=s.hp*(def.hpMult||1);
-  grid[r][c]={type:'boss', bossId:def.id, tier, hp, maxHp:hp, atk:s.atk, cd:cdv, baseCd:cdv};
+  const mult=def.noTierScale?1:tier;
+  const hp=s.hp*mult*(def.hpMult||1), atk=s.atk*mult;
+  grid[r][c]={type:'boss', bossId:def.id, tier, hp, maxHp:hp, atk, cd:cdv, baseCd:cdv};
   if(def.onSpawn) def.onSpawn(grid[r][c]);
   addBossFx(r,c,false);
   return true;

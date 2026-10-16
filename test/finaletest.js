@@ -22,7 +22,7 @@ G.replayRec={seed:42,race:'human',acts:[]}; G.replaying=true; G.startGame(G.race
 const p=G.player;
 p.hp=p.maxHp=999999; p.turns=498;   // 无限血，快进到接近 500
 function findMove(){const g=G.grid;for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){const t=g[r][c];if(!t||!CONN.includes(t.type))continue;for(const[dr,dc]of N8){const nr=r+dr,nc=c+dc;if(nr<0||nr>=ROWS||nc<0||nc>=COLS)continue;const u=g[nr][nc];if(u&&u.type===t.type)return[{r,c,type:t.type},{r:nr,c:nc,type:u.type}];}}return null;}
-let finaleSeen=false, maxWave=0;
+let finaleSeen=false, maxWave=0, waveTierOk=true;
 for(let i=0;i<60;i++){
   if(p.cleared){ break; }
   while(G.pendingLevels>0) G.pendingLevels=0;   // 测试里跳过升级弹窗
@@ -34,8 +34,10 @@ for(let i=0;i<60;i++){
   G.selection=mv; G.resolve();
   if(p.finaleStarted) finaleSeen=true;
   if(typeof p.finaleWave==='number') maxWave=Math.max(maxWave,p.finaleWave);
+  for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const t=G.grid[r][c]; if(t&&t.type==='boss'&&!t.finale&&t.tier!==p.finaleWave) waveTierOk=false; }
 }
 console.log('终焉降临:', finaleSeen?'是':'否');
 console.log('最高波次:', maxWave, '(应达到 10)');
+console.log('波次 Boss 等级:', waveTierOk?'正确':'错误');
 console.log('破关 player.cleared:', !!p.cleared, '| 最终回合', p.turns, '| 等级', p.level);
-console.log(finaleSeen && p.cleared ? '✅ 终局+破关 流程通过' : '❌ 未达成破关，检查逻辑');
+console.log(finaleSeen && p.cleared && waveTierOk ? '✅ 终局+破关 流程通过' : '❌ 未达成破关或 Boss 等级错误，检查逻辑');

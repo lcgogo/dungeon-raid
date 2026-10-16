@@ -1,4 +1,10 @@
 
+## [v1.89.0] - 2026-10-17
+> Version-Impact: verify
+
+- 调整终焉之主的 Boss 浪潮：第 1 波召唤 1 个 Lv1 Boss，第 2 波召唤 2 个 Lv2 Boss，依此类推至第 10 波的 10 个 Lv10 Boss。
+- Rebalanced the Overlord waves: wave 1 summons one Lv1 Boss, wave 2 summons two Lv2 Bosses, and so on through ten Lv10 Bosses in wave 10.
+
 ## [v1.88.0] - 2026-10-17
 > Version-Impact: verify
 
