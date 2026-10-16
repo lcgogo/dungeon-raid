@@ -1,5 +1,6 @@
 //==================== 核心结算 ====================
 function resolve(){
+  player.dmgBy={}; player.deathMode='damage';
   const type=selection[0].type;
   recAct(['m', selection.map(s=>[s.r,s.c]), type]);   // 录制连线（改动棋盘前）
   let msg='', mk=''; // 经验只来自击杀（在 dealDamage 里 +3）；mk=日志颜色类型（''白=攻击/heal绿/buff蓝/bad红/debuff黄）
@@ -178,7 +179,6 @@ function splashHit(over){
 }
 
 function advanceEnemies(){
-  player.dmgBy={}; player.deathMode='damage';   // 死亡报告只统计死亡那一回合的伤害；若本回合改为死局判负，checkDeadlock 会把 deathMode 改成 deadlock
   // 先快照本回合的行动者：终焉浪潮在 act 中途生成的新 Boss 不应在同一回合再行动一次
   const actors=[];
   const enemyHits=[]; let enemyTotal=0;

@@ -249,9 +249,9 @@ const CONTENT = {
 if('serviceWorker' in navigator) window.addEventListener('load',()=>navigator.serviceWorker.register('/sw.js').catch(()=>{}));
 //==================== 配置 ====================
 // 版本号 v主.次.修：不影响 verify/replay 兼容边界的小改动改"修"；凡是影响 verify/replay/版本分桶/release 验证语义的改动都改"次"；大版本变更需先确认。页面底部显示。
-const VERSION='v1.87.0';
+const VERSION='v1.87.1';
 // CHANGELOG_LINES below is only a fallback for raw source inspection; build/build.js replaces it from CHANGELOG.md.
-const CHANGELOG_LINES=[{"ver": "v1.87.0", "zh": "dev 版以后新增的 Boss 会自动获得更高出现权重：Boss 池中最新加入的普通 Boss 使用 4 张牌，其余 Boss 使用 2 张；正式版仍全部使用 2 张，且牌堆继续确定性洗牌。", "en": "Future Bosses added to the dev build automatically receive a higher appearance weight: the newest normal Boss in the pool uses 4 cards while other Bosses use 2; the release build keeps 2 cards for every Boss, with deterministic shuffling preserved."}, {"ver": "v1.86.0", "zh": "新增可被武器攻击的 👁️ 独眼巨人：倒计时归零时，从当前生命最高的普通怪中确定性随机选一只投掷；伤害为该怪当前生命 ×（1 + 20% × Boss 等级），被投掷的普通怪随之消失且不给击杀奖励。", "en": "Added the weapon-attackable 👁️ Cyclops: when its countdown reaches 0, it deterministically picks a random normal enemy among those with the highest current HP and hurls it; damage is that enemy's current HP × (1 + 20% × Boss level), and the thrown enemy leaves without granting a kill reward."}, {"ver": "v1.85.1", "zh": "API 不可达时缩短正式版服务端种子请求超时，快速回退到本地随机开局，避免初始化长时间等待；API 正常时仍优先使用服务端种子。", "en": "Reduced the release build's server-seed timeout when the API is unreachable, quickly falling back to a local random start instead of blocking initialization; reachable APIs still provide the preferred server seed."}, {"ver": "v1.85.0", "zh": "明确污染怪是无攻击力的纯光环 Boss：棋盘角标和详情页不再显示攻击力或每回合出手倒计时。", "en": "Clarified that Corruptor is a non-attacking aura Boss: its attack value and per-turn attack timer are no longer shown."}, {"ver": "v1.84.0", "zh": "修复污染怪作为每回合 Boss 时缺少动作函数，导致回合结算异常中断、棋盘不再补充棋子的问题。", "en": "Fixed Corruptor turns aborting before refill because its per-turn Boss definition had no action function."}];   /* auto-injected by dr.sh embed-changelog（勿手改） */
+const CHANGELOG_LINES=[{"ver": "v1.87.1", "zh": "修复死亡报告丢失玩家行动阶段伤害的问题：攻击石像造成的反伤现在会和敌方行动伤害一起保留并正确显示。", "en": "Fixed death reports losing damage from the player's action phase: Statue reflection damage is now preserved and shown together with enemy-phase damage."}, {"ver": "v1.87.0", "zh": "dev 版以后新增的 Boss 会自动获得更高出现权重：Boss 池中最新加入的普通 Boss 使用 4 张牌，其余 Boss 使用 2 张；正式版仍全部使用 2 张，且牌堆继续确定性洗牌。", "en": "Future Bosses added to the dev build automatically receive a higher appearance weight: the newest normal Boss in the pool uses 4 cards while other Bosses use 2; the release build keeps 2 cards for every Boss, with deterministic shuffling preserved."}, {"ver": "v1.86.0", "zh": "新增可被武器攻击的 👁️ 独眼巨人：倒计时归零时，从当前生命最高的普通怪中确定性随机选一只投掷；伤害为该怪当前生命 ×（1 + 20% × Boss 等级），被投掷的普通怪随之消失且不给击杀奖励。", "en": "Added the weapon-attackable 👁️ Cyclops: when its countdown reaches 0, it deterministically picks a random normal enemy among those with the highest current HP and hurls it; damage is that enemy's current HP × (1 + 20% × Boss level), and the thrown enemy leaves without granting a kill reward."}, {"ver": "v1.85.1", "zh": "API 不可达时缩短正式版服务端种子请求超时，快速回退到本地随机开局，避免初始化长时间等待；API 正常时仍优先使用服务端种子。", "en": "Reduced the release build's server-seed timeout when the API is unreachable, quickly falling back to a local random start instead of blocking initialization; reachable APIs still provide the preferred server seed."}, {"ver": "v1.85.0", "zh": "明确污染怪是无攻击力的纯光环 Boss：棋盘角标和详情页不再显示攻击力或每回合出手倒计时。", "en": "Clarified that Corruptor is a non-attacking aura Boss: its attack value and per-turn attack timer are no longer shown."}];   /* auto-injected by dr.sh embed-changelog（勿手改） */
 const DEV=false;   // release build (DEV=false); dev build is dungeon-raid-dev.html (DEV=true)
 const REC_API='https://api.dungeonraid.win';   // 录像分享 API（Cloudflare Worker + KV）
 // 带种子随机数（mulberry32）：游戏全程用 rnd() 取代原生随机，配合录制种子可确定性重放
@@ -2364,6 +2364,7 @@ attachLongPress(document.getElementById('skillBtn'), 'skill');
 
 //==================== 核心结算 ====================
 function resolve(){
+  player.dmgBy={}; player.deathMode='damage';
   const type=selection[0].type;
   recAct(['m', selection.map(s=>[s.r,s.c]), type]);   // 录制连线（改动棋盘前）
   let msg='', mk=''; // 经验只来自击杀（在 dealDamage 里 +3）；mk=日志颜色类型（''白=攻击/heal绿/buff蓝/bad红/debuff黄）
@@ -2542,7 +2543,6 @@ function splashHit(over){
 }
 
 function advanceEnemies(){
-  player.dmgBy={}; player.deathMode='damage';   // 死亡报告只统计死亡那一回合的伤害；若本回合改为死局判负，checkDeadlock 会把 deathMode 改成 deadlock
   // 先快照本回合的行动者：终焉浪潮在 act 中途生成的新 Boss 不应在同一回合再行动一次
   const actors=[];
   const enemyHits=[]; let enemyTotal=0;

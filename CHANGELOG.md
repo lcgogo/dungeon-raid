@@ -1,4 +1,8 @@
 
+## [v1.87.1] - 2026-10-17
+- 修复死亡报告丢失玩家行动阶段伤害的问题：攻击石像造成的反伤现在会和敌方行动伤害一起保留并正确显示。
+- Fixed death reports losing damage from the player's action phase: Statue reflection damage is now preserved and shown together with enemy-phase damage.
+
 ## [v1.87.0] - 2026-10-16
 
 > Version-Impact: verify
