@@ -24,10 +24,11 @@ const BOSSES=[
       applyGravity(); syncPositions(false);
       log(tr(`♨️ 岩浆魔融化了 ${cells.length} 面盾（盾牌不回血；火焰伤害会回血）`,`♨️ Magmafiend melts ${cells.length} shields (shields do not heal it; fire damage does)`), 'debuff'); } },
   { id:'vampire', emoji:'🧛', name:['吸血鬼','Vampire'], quip:['你的心留着也浪费，我喝了。','Those hearts are wasted on you. Mine now.'], perTurn:true,
-    special:['每回合吸取场上的 ❤️ 回血','Drains ❤️ each turn to heal'],
-    desc:['可以用{W}攻击它。但它【每回合】会吸取棋盘上所有的心来回血——别把心留在场上！','You CAN hit it with a {WC}. But every turn it drains all hearts on the board to heal — do not leave hearts on the board!'],
+    special:['每回合按等级最多吸取对应数量的 ❤️ 回血','Drains up to its level in ❤️ each turn'],
+    desc:['可以用{W}攻击它。它【每回合】最多按自身等级吸取对应数量的心来回血：Lv1 吸 1 个，Lv2 吸 2 个，以此类推。','You CAN attack it with a {WC}. Each turn it drains up to its level in hearts: 1 at Lv1, 2 at Lv2, and so on.'],
     act(t){ let n=0, pois=0; const normalCells=[], poisonCells=[]; const polluted=pollutionActive(); let rr=-1, cc=-1; for(let r=0;r<ROWS&&rr<0;r++)for(let c=0;c<COLS;c++){ if(grid[r][c]===t){ rr=r; cc=c; break; } }   // 正常心回血；毒心(污染光环 或 巫医黑毒心)反害它
-      for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const x=grid[r][c]; if(x&&x.type==='heart'){ if(polluted||x.poison){ pois++; poisonCells.push([r,c]); } else { n++; normalCells.push([r,c]); } grid[r][c]=null; } }
+      const maxHearts=Math.max(1,t.tier||1); let drained=0;
+      for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const x=grid[r][c]; if(x&&x.type==='heart'&&drained<maxHearts){ if(polluted||x.poison){ pois++; poisonCells.push([r,c]); } else { n++; normalCells.push([r,c]); } grid[r][c]=null; drained++; } }
       const tot=n+pois; if(!tot) return;
       holdNextGravity(); holdVisibleBoard();
       vampireDrainFx(rr>=0?{r:rr,c:cc}:null, normalCells, poisonCells);

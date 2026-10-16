@@ -1,4 +1,10 @@
 
+## [v1.88.0] - 2026-10-17
+> Version-Impact: verify
+
+- 调整吸血鬼：每回合最多按自身等级吸取对应数量的心，Lv1 吸 1 个、Lv2 吸 2 个，以此类推；不再一次吸走棋盘上的全部心。
+- Rebalanced Vampire: each turn it drains at most its level in hearts — 1 at Lv1, 2 at Lv2, and so on — instead of consuming every heart on the board.
+
 ## [v1.87.1] - 2026-10-17
 - 修复死亡报告丢失玩家行动阶段伤害的问题：攻击石像造成的反伤现在会和敌方行动伤害一起保留并正确显示。
 - Fixed death reports losing damage from the player's action phase: Statue reflection damage is now preserved and shown together with enemy-phase damage.
