@@ -249,9 +249,9 @@ const CONTENT = {
 if('serviceWorker' in navigator) window.addEventListener('load',()=>navigator.serviceWorker.register('/sw.js').catch(()=>{}));
 //==================== 配置 ====================
 // 版本号 v主.次.修：不影响 verify/replay 兼容边界的小改动改"修"；凡是影响 verify/replay/版本分桶/release 验证语义的改动都改"次"；大版本变更需先确认。页面底部显示。
-const VERSION='v1.90.1';
+const VERSION='v1.91.0';
 // CHANGELOG_LINES below is only a fallback for raw source inspection; build/build.js replaces it from CHANGELOG.md.
-const CHANGELOG_LINES=[{"ver": "v1.90.1", "zh": "修复独眼巨人彩色 emoji 的可见边界与字体 advance box 不一致导致的棋盘视觉偏右：现在按实际可见边界居中，旧浏览器使用兼容回退。", "en": "Fixed the Cyclops color emoji appearing visually right-shifted on the board: it now centers against its visible bounds, with a fallback for older browsers."}, {"ver": "v1.90.0", "zh": "新增升级「精研火药」：炸弹伤害 +1，但每级让炸弹多消耗 5 金。矮人二阶被动「爆破手」改为每使用一次炸弹获得 1 级精研火药；两者可以叠加。", "en": "Added the Refined Powder upgrade: +1 Bomb damage, while each level makes bombs cost 5 more gold. Dwarf's Demolitionist Tier-2 passive now grants 1 Refined Powder level per bomb use; both effects stack."}, {"ver": "v1.89.1", "zh": "收敛死灵「吸魂大法」的中英文说明，明确每个目标按玩家最大生命与目标当前生命取较小值，并说明治疗减半与溅射协同。", "en": "Clarified Necromancer's Soul Drain text: each target uses the lesser of player max HP and target current HP, with the healing-halving and Splash interactions stated explicitly."}, {"ver": "v1.89.0", "zh": "调整终焉之主的 Boss 浪潮：第 1 波召唤 1 个 Lv1 Boss，第 2 波召唤 2 个 Lv2 Boss，依此类推至第 10 波的 10 个 Lv10 Boss。", "en": "Rebalanced the Overlord waves: wave 1 summons one Lv1 Boss, wave 2 summons two Lv2 Bosses, and so on through ten Lv10 Bosses in wave 10."}, {"ver": "v1.88.0", "zh": "调整吸血鬼：每回合最多按自身等级吸取对应数量的心，Lv1 吸 1 个、Lv2 吸 2 个，以此类推；不再一次吸走棋盘上的全部心。", "en": "Rebalanced Vampire: each turn it drains at most its level in hearts — 1 at Lv1, 2 at Lv2, and so on — instead of consuming every heart on the board."}];   /* auto-injected by dr.sh embed-changelog（勿手改） */
+const CHANGELOG_LINES=[{"ver": "v1.91.0", "zh": "dev 版人族新增隐藏职业「🧑‍💻 程序员」：主动「捉虫」可从 Boss 列表选择一个 Boss，以当前回合档位投放；100 回合被动「压力测试」每回合把一个非 Boss 棋子变成当前档位的随机 Boss。该职业仅在 `DEV=true` 时显示，prod 不可见。", "en": "Added the dev-only Human hidden class 🧑‍💻 Programmer: its Debug active chooses a Boss from a list and spawns it at the current turn tier; its turn-100 Stress Test passive converts one non-Boss tile into a random current-tier Boss every turn. It is visible only when `DEV=true` and hidden in prod."}, {"ver": "v1.90.1", "zh": "修复独眼巨人彩色 emoji 的可见边界与字体 advance box 不一致导致的棋盘视觉偏右：现在按实际可见边界居中，旧浏览器使用兼容回退。", "en": "Fixed the Cyclops color emoji appearing visually right-shifted on the board: it now centers against its visible bounds, with a fallback for older browsers."}, {"ver": "v1.90.0", "zh": "新增升级「精研火药」：炸弹伤害 +1，但每级让炸弹多消耗 5 金。矮人二阶被动「爆破手」改为每使用一次炸弹获得 1 级精研火药；两者可以叠加。", "en": "Added the Refined Powder upgrade: +1 Bomb damage, while each level makes bombs cost 5 more gold. Dwarf's Demolitionist Tier-2 passive now grants 1 Refined Powder level per bomb use; both effects stack."}, {"ver": "v1.89.1", "zh": "收敛死灵「吸魂大法」的中英文说明，明确每个目标按玩家最大生命与目标当前生命取较小值，并说明治疗减半与溅射协同。", "en": "Clarified Necromancer's Soul Drain text: each target uses the lesser of player max HP and target current HP, with the healing-halving and Splash interactions stated explicitly."}, {"ver": "v1.89.0", "zh": "调整终焉之主的 Boss 浪潮：第 1 波召唤 1 个 Lv1 Boss，第 2 波召唤 2 个 Lv2 Boss，依此类推至第 10 波的 10 个 Lv10 Boss。", "en": "Rebalanced the Overlord waves: wave 1 summons one Lv1 Boss, wave 2 summons two Lv2 Bosses, and so on through ten Lv10 Bosses in wave 10."}];   /* auto-injected by dr.sh embed-changelog（勿手改） */
 const DEV=true;   // release build (DEV=false); dev build is dungeon-raid-dev.html (DEV=true)
 const REC_API='https://api.dungeonraid.win';   // 录像分享 API（Cloudflare Worker + KV）
 // 带种子随机数（mulberry32）：游戏全程用 rnd() 取代原生随机，配合录制种子可确定性重放
@@ -340,7 +340,7 @@ function newPlayer(){
     chosenPerks:[],                                                      // 本局已选技能名（按选择顺序，供录像/展示用）
     prophecyPending:null, echoPendingType:null,                           // 先知 / 命运回响：下一次补子强制落下的类型
     heartPoison:false, rogueStealTurn:false, fireChainTurn:false, firewall:false, echoOfFate:false, tauntWindow:false, frostPulse:0, flashWhite:0,   // 巫医蛊毒：本回合连心改为毒怪；盗贼：本回合命中偷金；火法师：火焰链 / 火墙；先知：命运回响；斧王：下一轮受伤转上限；巫妖：冰封脉冲/冰甲白闪
-    foeCdBonus:0, skillCdMod:0, splash:false, rebirthTurn:false, nirvanaTurn:false, rebirthSaves:0, healMult:1, witherAura:false, unbroken:false, iceArmor:false, beastDamageMult:1, beastPhoenix:false, fireFeather:false, dragonMight:false, dragonMightActive:false, tortoiseRegen:false, tortoiseGuardTurns:0,  // 神兽：神识经验/龙威/玄龟回生/玄龟临时半伤/朱雀火羽/朱雀涅槃
+    foeCdBonus:0, skillCdMod:0, splash:false, rebirthTurn:false, nirvanaTurn:false, rebirthSaves:0, healMult:1, witherAura:false, unbroken:false, iceArmor:false, beastDamageMult:1, beastPhoenix:false, fireFeather:false, dragonMight:false, dragonMightActive:false, tortoiseRegen:false, tortoiseGuardTurns:0, stressTest:false,  // 神兽：神识经验/龙威/玄龟回生/玄龟临时半伤/朱雀火羽/朱雀涅槃；程序员：压力测试
     upgradeChoices:3, bombCd:3, goldLock:0, goldFrozen:0, healUses:0, bombUses:0, gunpowder:0, demolitionist:false, shadowBombGold:false, tycoonGoldShield:false, frozen:{},  // healUses：治疗递增；gunpowder：精研火药等级；bombUses：旧存档兼容计数；demolitionist：爆破手；shadowBombGold：乾坤一掷；tycoonGoldShield：钱能买命；frozen：雪人冰封的主动剩余回合（skill/heal/bomb）
     finaleStarted:false, finaleWave:0, cleared:false};                      // 终局：终焉之主浪潮 / 破关
 }
@@ -512,9 +512,9 @@ function randomBossDef(exclude){
   return def||BOSSES[0];
 }
 // 把一个非怪/非Boss棋子变成随机 Boss（终焉浪潮用）；返回是否成功
-function spawnRandomBossTile(tier=1){
+function spawnRandomBossTile(tier=1, includeEnemies=false){
   const cells=[];
-  for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const t=grid[r][c]; if(t && t.type!=='enemy' && t.type!=='boss') cells.push([r,c]); }
+  for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const t=grid[r][c]; if(t && t.type!=='boss' && (includeEnemies || t.type!=='enemy')) cells.push([r,c]); }
   if(!cells.length) return false;
   const [r,c]=cells[Math.floor(rnd()*cells.length)];
   const def=randomBossDef();
@@ -525,6 +525,25 @@ function spawnRandomBossTile(tier=1){
   grid[r][c]={type:'boss', bossId:def.id, tier, hp, maxHp:hp, atk, cd:cdv, baseCd:cdv};
   if(def.onSpawn) def.onSpawn(grid[r][c]);
   addBossFx(r,c,false);
+  return true;
+}
+// Dev-only Programmer skill: replace one non-Boss tile with the selected current-tier Boss.
+function spawnChosenBoss(id, tier=bossTier()){
+  const def=BOSSES.find(b=>b.id===id && !b.noRandom && !b.finale);
+  if(!def) return false;
+  const cells=[];
+  for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const t=grid[r][c]; if(t && t.type!=='boss') cells.push([r,c]); }
+  if(!cells.length) return false;
+  const [r,c]=cells[Math.floor(rnd()*cells.length)];
+  const s=def.id==='matryoshka' ? enemyStats() : (def.monster ? enemyStats() : bossStats());
+  const cdv=Math.max(1,(s.cd!=null?s.cd:s.baseCd)+extraFoeCd());
+  const mult=def.noTierScale?1:tier;
+  const hpBase=(!def.swordable&&!def.finale&&!def.monster) ? enemyStats().hp : s.hp;
+  const hp=hpBase*(def.noTierScale?1:mult)*(def.hpMult||1), atk=s.atk*mult;
+  grid[r][c]={type:'boss', bossId:def.id, tier, hp, maxHp:hp, atk, cd:cdv, baseCd:cdv};
+  addBossFx(r,c,false);
+  if(def.onSpawn) def.onSpawn(grid[r][c]);
+  log(tr(`🪲 捉虫：投放 ${def.emoji} ${L(def.name)} Lv${tier}！`,`🪲 Debug: spawned ${def.emoji} ${L(def.name)} Lv${tier}!`), 'debuff');
   return true;
 }
 function spawnFinale(){
@@ -770,6 +789,7 @@ function normalizeClassId(id){ return LEGACY_CLASS_IDS[id]||id; }
 function normalizeReplayAct(a){ if(!a) return a; if(a[0]==='t'&&typeof a[2]==='string') a[2]=normalizeClassId(a[2]); return a; }
 function normalizePlayerClassIds(p){ if(!p) return p; p.tier1=normalizeClassId(p.tier1); if(p.skill2&&p.skill2.id) p.skill2.id=normalizeClassId(p.skill2.id); return p; }
 const TIER1={
+  programmer:{n:['🧑‍💻 程序员','🧑‍💻 Programmer'], quip:['先复现，再修复。','Reproduce first, fix second.'], devOnly:true, skill:{name:['捉虫','Debug'], short:['选择一个 Boss 投放当前回合档位','Choose a Boss to spawn at the current tier'], desc:['打开 Boss 列表，选择一个普通 Boss，立即把它以当前回合档位投放到棋盘上的非 Boss 格。选择会进入录像，保证重放一致。','Open the Boss list and immediately spawn one selected regular Boss at the current turn tier on a non-Boss tile. The choice is recorded for deterministic replay.'], cd:5, f:p=>{ showDebugBossSelect(); return '__defer__'; }}},
   knight:{n:['骑士','Knight'], quip:['盾举起来，伤害？不存在的。','Shield up. Damage? Never heard of it.'], skill:{name:['圣盾','Aegis'], short:['本回合免伤','No damage this turn'], desc:['本回合受到的所有伤害全部归 0——含 Boss 重击、无视护甲的真实伤害、石像反弹、毒心反噬等。只护本回合，下回合恢复正常。','All damage you take this turn becomes 0 — boss strikes, armor-piercing true damage, statue reflection, poison-heart backlash, everything. This turn only.'], cd:5, f:p=>{ p.shieldTurn=true; log(tr('🛡️ 圣盾：本回合免疫伤害','🛡️ Aegis: immune to damage this turn'), 'buff'); return true; }}},
   priest:{n:['牧师','Priest'], quip:['心给我，经验你拿，公平交易。','Hearts to me, XP to you. Fair deal.'], skill:{name:['祝福','Blessing'], short:['全场❤️转经验+回血','Hearts→XP & heal'], desc:['立即清空棋盘上所有的「心」：每颗转成 3 点经验，同时按每颗心的回复量给你回血。场上没有心时无效、不进冷却。','Instantly clears every heart on the board: each becomes 3 XP and also heals you (by your heal-per-heart). No effect — and no cooldown — if there are no hearts.'], cd:5, f:p=>{ const cells=[]; let n=0; for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){const t=grid[r][c]; if(t&&t.type==='heart'){cells.push({r,c,type:'heart'}); grid[r][c]=null;n++;}} if(!n)return false; absorbLinesFx(cells,{targetId:'skillBtn'}); addXp(player,n*3); const h=gainHeal(n*player.healPerHeart); applyGravity(); syncPositions(false); checkLevel(); log(tr(`💗 祝福：${n} 颗心 → ${n*3} 经验，回血 ${h}`,`💗 Blessing: ${n} hearts → ${n*3} XP, +${h} HP`), 'buff'); return n; }}},
   firemage:{n:['火法师','Fire Mage'], quip:['让火先走一步，怪自己会追上结局。','Let the fire go first; the monsters will catch up to the ending themselves.'], skill:{name:['火焰链','Flame Chain'], short:['本回合划过怪物全部点燃','Ignite all foes touched this turn'], desc:['本回合你的剑链划过的每个怪物/Boss（含幽灵等剑免疫目标，终焉之主除外）都会被点燃。被点燃者以后每回合损失「点燃当回合固定伤害的 20%」（最少 1 点），直到死亡。若本回合没有用剑链划过任何怪物，就等于白开。','This turn, every monster/boss your sword chain touches (including sword-immune targets like Ghosts, but not the Overlord) is ignited. An ignited target loses 20% of the flat damage you had on the ignition turn (minimum 1) every turn until it dies. If your chain touches no foe this turn, the cast is wasted.'], cd:5, f:p=>{ p.fireChainTurn=true; log(tr('🔥 火焰链：本回合划过的怪物都会被点燃，持续烧到死亡','🔥 Flame Chain: every foe touched this turn is ignited until it dies'), 'buff'); return true; }}},
@@ -850,6 +870,7 @@ Object.assign(TIER1.skeletonking.skill, {
 TIER1.skeletonking.skill.f=p=>true;
 // 二阶职业：被动
 const TIER2={
+  stresstest:{n:['压力测试','Stress Test'], d:['每回合把一个非 Boss 棋子变成当前档位的随机 Boss','Each turn, turn one non-Boss tile into a random Boss at the current tier'], devOnly:true, f:p=>{ p.stressTest=true; }},
   holystrike:{n:['神圣打击','Holy Strike'], d:['治疗溢出优先轰 Boss；多 Boss 取血最少','Healing overflow prioritizes bosses; lowest-HP boss first'], f:p=>{ p.holyStrike=true; }},
   general:{n:['将军','General'], d:['升级时四选一','Level-up offers 4 choices'], f:p=>{ p.upgradeChoices=4; }},
   firewall:{n:['火墙','Firewall'], d:['底部 3 行形成火墙；其中怪物每回合掉当前固定伤害 20%（最少 1）','Bottom 3 rows become a firewall; foes there lose 20% of current flat damage each turn (minimum 1)'], f:p=>{ p.firewall=true; }},
@@ -880,12 +901,12 @@ const CLASS_T2={
   knight:'general', priest:'holystrike', firemage:'firewall', swordsaint:'bladeall',
   ranger:'sharpshooter', rogue:'shadow', treant:'thorns', seer:'echooffate',
   blacksmith:'shieldbash', miser:'tycoon', guildmaster:'cheapskate', musketeer:'demolitionist',
-  necromancer:'witheraura', skeletonking:'splash', butcher:'rotflesh', lich:'icearmor',
+  necromancer:'witheraura', skeletonking:'splash', butcher:'rotflesh', lich:'icearmor', programmer:'stresstest',
   berserker:'warlord', fighter:'bloodfrenzy', witchdoctor:'allpoison', axelord:'unbroken',
   azuredragon:'dragonmight', whitetiger:'tigerfury', blackturtle:'tortoiseheart', vermilion:'phoenixash',
 };
 const RACE_PATHS={
-  human:{t1:['knight','priest','firemage','swordsaint'], t2:['general','holystrike','firewall','bladeall']},
+  human:{t1:['knight','priest','firemage','swordsaint',...(DEV?['programmer']:[])], t2:['general','holystrike','firewall','bladeall',...(DEV?['stresstest']:[])]},
   elf:  {t1:['ranger','rogue','treant','seer'], t2:['sharpshooter','shadow','thorns','echooffate']},
   dwarf:{t1:['blacksmith','miser','guildmaster','musketeer'], t2:['shieldbash','tycoon','cheapskate','demolitionist']},
   undead:{t1:['necromancer','skeletonking','butcher','lich'], t2:['witheraura','splash','rotflesh','icearmor']},
@@ -1191,6 +1212,7 @@ function showSkillSwap(){
   const excludeIds=new Set(((RACE_PATHS[myRace]&&RACE_PATHS[myRace].t1)||[]).map(normalizeClassId));
   Object.keys(TIER1).forEach(id=>{
     if(excludeIds.has(id)) return;   // 排除本种族职业技能
+    if(TIER1[id].devOnly && !DEV) return;   // dev-only 职业不进入正式版跨界技能列表
     // 排除对当前玩家永久无效的技能（如兽人无甲→锻甲无效）；其它主动只按当前角色属性结算，不做职业限定。
     const def=TIER1[id], sk=def.skill;
     const row=document.createElement('div'); row.style.cssText='display:flex;gap:6px;align-items:stretch;margin:0 0 6px';
@@ -2355,6 +2377,38 @@ function showProphecySelect(slotKey){
   });
   showOverlay();
 }
+function activateDebugSkill(id, fromReplay){
+  if(!DEV || !player || player.tier1!=='programmer') return false;
+  const tier=bossTier();
+  if(!spawnChosenBoss(id,tier)) return false;
+  triggerDragonMight();
+  player.skillCd=effSkillCd(player.tier1);
+  if(!fromReplay) recAct(['k','debug',id]);
+  checkLevel(); busy=false; hideOverlay(); updateHUD();
+  if(player.t3Pending){ player.t3Pending=false; showTierSelect(3); return true; }
+  if(player.t4Pending){ player.t4Pending=false; showSkillSwap(); return true; }
+  if(pendingLevels){ if(deferLevelUpAfterActive()) return true; return true; }
+  checkDeadlock();
+  return true;
+}
+function showDebugBossSelect(){
+  if(!DEV || !player || player.tier1!=='programmer') return;
+  busy=true;
+  const card=document.getElementById('card');
+  const tier=bossTier();
+  card.innerHTML=`<h2>🪲 ${tr('捉虫','Debug')}</h2><p style="font-size:12px;color:var(--dim);margin-bottom:8px">${tr(`选择一个 Boss，投放当前档位 Lv${tier}` ,`Choose a Boss to spawn at the current tier Lv${tier}`)}</p><div id="debugBossList" style="max-height:50vh;overflow-y:auto;overscroll-behavior:contain;padding:1px 3px 2px;touch-action:pan-y"></div>`;
+  const list=document.getElementById('debugBossList');
+  BOSSES.filter(b=>!b.noRandom&&!b.finale).forEach(b=>{
+    const row=document.createElement('button'); row.className='choice'; row.style.cssText='width:100%;margin:0 0 6px;text-align:left';
+    row.innerHTML=`<b>${b.emoji} ${L(b.name)}</b><small>${L(b.special&&b.special[0]||b.desc&&b.desc[0]||'')}</small>`;
+    row.onclick=()=>activateDebugSkill(b.id,false);
+    list.appendChild(row);
+  });
+  const cancel=document.createElement('button'); cancel.className='btn'; cancel.style.cssText='width:100%;margin-top:4px'; cancel.textContent=tr('取消','Cancel');
+  cancel.onclick=()=>{ busy=false; hideOverlay(); updateHUD(); };
+  card.appendChild(cancel);
+  showOverlay();
+}
 function activateSkill(){
   if(busy||pendingLevels) return;
   prophecySlotKey=null;
@@ -2466,6 +2520,7 @@ function resolve(){
 
   applyGravity();
   syncPositions(false);
+  if(player.stressTest && !player.finaleStarted && spawnRandomBossTile(bossTier(), true)){ syncPositions(false); log(tr('🧪 压力测试：把一个非 Boss 棋子变成了当前档位 Boss！','🧪 Stress Test: one non-Boss tile became a current-tier Boss!'), 'debuff'); }
   // 在本回合补子完成后才记录，避免把周期效果误消费在触发回合。
   if(player.echoOfFate && player.turns%5===0 && type!=='enemy'){
     player.echoPendingType=type;
@@ -3196,6 +3251,7 @@ function dispatchReplayAct(a){
   }
   else if(k==='k'){
     if(a[1]==='seer') activateSeerSkill(a[2], true);
+    else if(a[1]==='debug') activateDebugSkill(a[2], true);
     else activateSkill();
   }
   else if(k==='a') setAutoUse(a[1],!!a[2],true);

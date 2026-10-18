@@ -4,7 +4,7 @@ const fs = require('fs');
 const path = require('path');
 const file = fs.existsSync('dungeon-raid-dev.html') ? 'dungeon-raid-dev.html' : path.join('..', 'dungeon-raid-dev.html');
 let s = fs.readFileSync(file, 'utf8').match(/<script>([\s\S]*?)<\/script>/)[1];
-const EXPORT = `globalThis.__G={startGame,raceById,onBossKilled,dispatchReplayAct,buyItem,shopCost,resolve,applyUpgrade,applyGravity,advanceEnemies,activateSkill,autoReleaseItems,makeTile,isSwordTarget,normalEnemyAttack,bombDamage,gunpowderLevels,
+const EXPORT = `globalThis.__G={startGame,raceById,onBossKilled,dispatchReplayAct,buyItem,shopCost,resolve,applyUpgrade,applyGravity,advanceEnemies,activateSkill,activateDebugSkill,autoReleaseItems,makeTile,isSwordTarget,normalEnemyAttack,bombDamage,gunpowderLevels,bossTier,
   TIER1,TIER2,RACE_PATHS, CLASS_T2, UPGRADES, WEAPON, gainGold, gainHeal, addXp, currentSwordFlat, witherAuraTick, hurtPlayer, frostOrbDamage,
   get player(){return player}, get grid(){return grid}, get logHistory(){return logHistory}, set selection(v){selection=v},
   set busy(v){busy=v}, set pendingLevels(v){pendingLevels=v}, set replaying(v){replaying=v}, set replayRec(v){replayRec=v}};`;
@@ -281,6 +281,19 @@ bz.hp=40; bz.maxHp=40; bz.fireFeather=false; const featherFoe={type:'enemy',hp:1
 // onBossKilled 链：未到回合不应误触发
 const q=Object.assign({},{t1:se.t1Pending||e.t1Pending||p.t1Pending,t2:se.t2Pending||e.t2Pending||p.t2Pending,t3:se.t3Pending||e.t3Pending||p.t3Pending,t4:se.t4Pending||e.t4Pending||p.t4Pending});
 ok(!q.t1&&!q.t2&&!q.t3&&!q.t4,'里程碑用尽后无残留 pending');
+
+// DEV 专属程序员：捉虫按当前回合档位投放所选 Boss，压力测试每回合转化一个非 Boss 格
+ok(G.RACE_PATHS.human.t1.includes('programmer') && G.CLASS_T2.programmer==='stresstest','DEV 人族职业池包含程序员及压力测试');
+G.replayRec={seed:67,race:'human',acts:[]}; G.replaying=true; G.startGame(G.raceById('human')); G.replaying=false;
+const coder=G.player; coder.tier1='programmer'; coder.turns=100; coder.skillCd=0; coder.hp=coder.maxHp=100; coder.busy=false; G.pendingLevels=0;
+for(let r=0;r<6;r++)for(let c=0;c<6;c++) G.grid[r][c]={type:'coin'};
+G.activateDebugSkill('ghost',true);
+const debugBosses=[]; for(let r=0;r<6;r++)for(let c=0;c<6;c++){ const t=G.grid[r][c]; if(t&&t.type==='boss') debugBosses.push(t); }
+ok(debugBosses.length===1 && debugBosses[0].bossId==='ghost' && debugBosses[0].tier===3,'捉虫投放所选 Boss 且档位跟随当前回合');
+G.TIER2.stresstest.f(coder); coder.skillCd=0; coder.turns=100; coder.shopCd={};
+for(let r=0;r<6;r++)for(let c=0;c<6;c++) G.grid[r][c]={type:'coin'};
+G.selection=[{r:0,c:0,type:'coin'},{r:0,c:1,type:'coin'}]; G.resolve();
+ok(coder.stressTest===true && [...G.grid.flat()].some(t=>t&&t.type==='boss'&&t.tier===3),'压力测试每回合把一个非 Boss 格变成当前档位 Boss');
 
 // 精研火药：升级和爆破手的炸弹强化应共享等级，并同时影响伤害与价格
 G.replayRec={seed:61,race:'dwarf',acts:[]}; G.replaying=true; G.startGame(G.raceById('dwarf')); G.replaying=false;

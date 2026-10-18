@@ -41,6 +41,38 @@ function showProphecySelect(slotKey){
   });
   showOverlay();
 }
+function activateDebugSkill(id, fromReplay){
+  if(!DEV || !player || player.tier1!=='programmer') return false;
+  const tier=bossTier();
+  if(!spawnChosenBoss(id,tier)) return false;
+  triggerDragonMight();
+  player.skillCd=effSkillCd(player.tier1);
+  if(!fromReplay) recAct(['k','debug',id]);
+  checkLevel(); busy=false; hideOverlay(); updateHUD();
+  if(player.t3Pending){ player.t3Pending=false; showTierSelect(3); return true; }
+  if(player.t4Pending){ player.t4Pending=false; showSkillSwap(); return true; }
+  if(pendingLevels){ if(deferLevelUpAfterActive()) return true; return true; }
+  checkDeadlock();
+  return true;
+}
+function showDebugBossSelect(){
+  if(!DEV || !player || player.tier1!=='programmer') return;
+  busy=true;
+  const card=document.getElementById('card');
+  const tier=bossTier();
+  card.innerHTML=`<h2>🪲 ${tr('捉虫','Debug')}</h2><p style="font-size:12px;color:var(--dim);margin-bottom:8px">${tr(`选择一个 Boss，投放当前档位 Lv${tier}` ,`Choose a Boss to spawn at the current tier Lv${tier}`)}</p><div id="debugBossList" style="max-height:50vh;overflow-y:auto;overscroll-behavior:contain;padding:1px 3px 2px;touch-action:pan-y"></div>`;
+  const list=document.getElementById('debugBossList');
+  BOSSES.filter(b=>!b.noRandom&&!b.finale).forEach(b=>{
+    const row=document.createElement('button'); row.className='choice'; row.style.cssText='width:100%;margin:0 0 6px;text-align:left';
+    row.innerHTML=`<b>${b.emoji} ${L(b.name)}</b><small>${L(b.special&&b.special[0]||b.desc&&b.desc[0]||'')}</small>`;
+    row.onclick=()=>activateDebugSkill(b.id,false);
+    list.appendChild(row);
+  });
+  const cancel=document.createElement('button'); cancel.className='btn'; cancel.style.cssText='width:100%;margin-top:4px'; cancel.textContent=tr('取消','Cancel');
+  cancel.onclick=()=>{ busy=false; hideOverlay(); updateHUD(); };
+  card.appendChild(cancel);
+  showOverlay();
+}
 function activateSkill(){
   if(busy||pendingLevels) return;
   prophecySlotKey=null;

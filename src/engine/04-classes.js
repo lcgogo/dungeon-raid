@@ -6,6 +6,7 @@ function normalizeClassId(id){ return LEGACY_CLASS_IDS[id]||id; }
 function normalizeReplayAct(a){ if(!a) return a; if(a[0]==='t'&&typeof a[2]==='string') a[2]=normalizeClassId(a[2]); return a; }
 function normalizePlayerClassIds(p){ if(!p) return p; p.tier1=normalizeClassId(p.tier1); if(p.skill2&&p.skill2.id) p.skill2.id=normalizeClassId(p.skill2.id); return p; }
 const TIER1={
+  programmer:{n:['🧑‍💻 程序员','🧑‍💻 Programmer'], quip:['先复现，再修复。','Reproduce first, fix second.'], devOnly:true, skill:{name:['捉虫','Debug'], short:['选择一个 Boss 投放当前回合档位','Choose a Boss to spawn at the current tier'], desc:['打开 Boss 列表，选择一个普通 Boss，立即把它以当前回合档位投放到棋盘上的非 Boss 格。选择会进入录像，保证重放一致。','Open the Boss list and immediately spawn one selected regular Boss at the current turn tier on a non-Boss tile. The choice is recorded for deterministic replay.'], cd:5, f:p=>{ showDebugBossSelect(); return '__defer__'; }}},
   knight:{n:['骑士','Knight'], quip:['盾举起来，伤害？不存在的。','Shield up. Damage? Never heard of it.'], skill:{name:['圣盾','Aegis'], short:['本回合免伤','No damage this turn'], desc:['本回合受到的所有伤害全部归 0——含 Boss 重击、无视护甲的真实伤害、石像反弹、毒心反噬等。只护本回合，下回合恢复正常。','All damage you take this turn becomes 0 — boss strikes, armor-piercing true damage, statue reflection, poison-heart backlash, everything. This turn only.'], cd:5, f:p=>{ p.shieldTurn=true; log(tr('🛡️ 圣盾：本回合免疫伤害','🛡️ Aegis: immune to damage this turn'), 'buff'); return true; }}},
   priest:{n:['牧师','Priest'], quip:['心给我，经验你拿，公平交易。','Hearts to me, XP to you. Fair deal.'], skill:{name:['祝福','Blessing'], short:['全场❤️转经验+回血','Hearts→XP & heal'], desc:['立即清空棋盘上所有的「心」：每颗转成 3 点经验，同时按每颗心的回复量给你回血。场上没有心时无效、不进冷却。','Instantly clears every heart on the board: each becomes 3 XP and also heals you (by your heal-per-heart). No effect — and no cooldown — if there are no hearts.'], cd:5, f:p=>{ const cells=[]; let n=0; for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){const t=grid[r][c]; if(t&&t.type==='heart'){cells.push({r,c,type:'heart'}); grid[r][c]=null;n++;}} if(!n)return false; absorbLinesFx(cells,{targetId:'skillBtn'}); addXp(player,n*3); const h=gainHeal(n*player.healPerHeart); applyGravity(); syncPositions(false); checkLevel(); log(tr(`💗 祝福：${n} 颗心 → ${n*3} 经验，回血 ${h}`,`💗 Blessing: ${n} hearts → ${n*3} XP, +${h} HP`), 'buff'); return n; }}},
   firemage:{n:['火法师','Fire Mage'], quip:['让火先走一步，怪自己会追上结局。','Let the fire go first; the monsters will catch up to the ending themselves.'], skill:{name:['火焰链','Flame Chain'], short:['本回合划过怪物全部点燃','Ignite all foes touched this turn'], desc:['本回合你的剑链划过的每个怪物/Boss（含幽灵等剑免疫目标，终焉之主除外）都会被点燃。被点燃者以后每回合损失「点燃当回合固定伤害的 20%」（最少 1 点），直到死亡。若本回合没有用剑链划过任何怪物，就等于白开。','This turn, every monster/boss your sword chain touches (including sword-immune targets like Ghosts, but not the Overlord) is ignited. An ignited target loses 20% of the flat damage you had on the ignition turn (minimum 1) every turn until it dies. If your chain touches no foe this turn, the cast is wasted.'], cd:5, f:p=>{ p.fireChainTurn=true; log(tr('🔥 火焰链：本回合划过的怪物都会被点燃，持续烧到死亡','🔥 Flame Chain: every foe touched this turn is ignited until it dies'), 'buff'); return true; }}},
@@ -86,6 +87,7 @@ Object.assign(TIER1.skeletonking.skill, {
 TIER1.skeletonking.skill.f=p=>true;
 // 二阶职业：被动
 const TIER2={
+  stresstest:{n:['压力测试','Stress Test'], d:['每回合把一个非 Boss 棋子变成当前档位的随机 Boss','Each turn, turn one non-Boss tile into a random Boss at the current tier'], devOnly:true, f:p=>{ p.stressTest=true; }},
   holystrike:{n:['神圣打击','Holy Strike'], d:['治疗溢出优先轰 Boss；多 Boss 取血最少','Healing overflow prioritizes bosses; lowest-HP boss first'], f:p=>{ p.holyStrike=true; }},
   general:{n:['将军','General'], d:['升级时四选一','Level-up offers 4 choices'], f:p=>{ p.upgradeChoices=4; }},
   firewall:{n:['火墙','Firewall'], d:['底部 3 行形成火墙；其中怪物每回合掉当前固定伤害 20%（最少 1）','Bottom 3 rows become a firewall; foes there lose 20% of current flat damage each turn (minimum 1)'], f:p=>{ p.firewall=true; }},
@@ -116,12 +118,12 @@ const CLASS_T2={
   knight:'general', priest:'holystrike', firemage:'firewall', swordsaint:'bladeall',
   ranger:'sharpshooter', rogue:'shadow', treant:'thorns', seer:'echooffate',
   blacksmith:'shieldbash', miser:'tycoon', guildmaster:'cheapskate', musketeer:'demolitionist',
-  necromancer:'witheraura', skeletonking:'splash', butcher:'rotflesh', lich:'icearmor',
+  necromancer:'witheraura', skeletonking:'splash', butcher:'rotflesh', lich:'icearmor', programmer:'stresstest',
   berserker:'warlord', fighter:'bloodfrenzy', witchdoctor:'allpoison', axelord:'unbroken',
   azuredragon:'dragonmight', whitetiger:'tigerfury', blackturtle:'tortoiseheart', vermilion:'phoenixash',
 };
 const RACE_PATHS={
-  human:{t1:['knight','priest','firemage','swordsaint'], t2:['general','holystrike','firewall','bladeall']},
+  human:{t1:['knight','priest','firemage','swordsaint',...(DEV?['programmer']:[])], t2:['general','holystrike','firewall','bladeall',...(DEV?['stresstest']:[])]},
   elf:  {t1:['ranger','rogue','treant','seer'], t2:['sharpshooter','shadow','thorns','echooffate']},
   dwarf:{t1:['blacksmith','miser','guildmaster','musketeer'], t2:['shieldbash','tycoon','cheapskate','demolitionist']},
   undead:{t1:['necromancer','skeletonking','butcher','lich'], t2:['witheraura','splash','rotflesh','icearmor']},
@@ -427,6 +429,7 @@ function showSkillSwap(){
   const excludeIds=new Set(((RACE_PATHS[myRace]&&RACE_PATHS[myRace].t1)||[]).map(normalizeClassId));
   Object.keys(TIER1).forEach(id=>{
     if(excludeIds.has(id)) return;   // 排除本种族职业技能
+    if(TIER1[id].devOnly && !DEV) return;   // dev-only 职业不进入正式版跨界技能列表
     // 排除对当前玩家永久无效的技能（如兽人无甲→锻甲无效）；其它主动只按当前角色属性结算，不做职业限定。
     const def=TIER1[id], sk=def.skill;
     const row=document.createElement('div'); row.style.cssText='display:flex;gap:6px;align-items:stretch;margin:0 0 6px';

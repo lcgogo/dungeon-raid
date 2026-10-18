@@ -1,4 +1,10 @@
 
+## [v1.91.0] - 2026-10-18
+> Version-Impact: verify
+
+- dev 版人族新增隐藏职业「🧑‍💻 程序员」：主动「捉虫」可从 Boss 列表选择一个 Boss，以当前回合档位投放；100 回合被动「压力测试」每回合把一个非 Boss 棋子变成当前档位的随机 Boss。该职业仅在 `DEV=true` 时显示，prod 不可见。
+- Added the dev-only Human hidden class 🧑‍💻 Programmer: its Debug active chooses a Boss from a list and spawns it at the current turn tier; its turn-100 Stress Test passive converts one non-Boss tile into a random current-tier Boss every turn. It is visible only when `DEV=true` and hidden in prod.
+
 ## [v1.90.1] - 2026-10-18
 
 - 修复独眼巨人彩色 emoji 的可见边界与字体 advance box 不一致导致的棋盘视觉偏右：现在按实际可见边界居中，旧浏览器使用兼容回退。

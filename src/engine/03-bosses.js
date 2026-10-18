@@ -150,9 +150,9 @@ function randomBossDef(exclude){
   return def||BOSSES[0];
 }
 // 把一个非怪/非Boss棋子变成随机 Boss（终焉浪潮用）；返回是否成功
-function spawnRandomBossTile(tier=1){
+function spawnRandomBossTile(tier=1, includeEnemies=false){
   const cells=[];
-  for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const t=grid[r][c]; if(t && t.type!=='enemy' && t.type!=='boss') cells.push([r,c]); }
+  for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const t=grid[r][c]; if(t && t.type!=='boss' && (includeEnemies || t.type!=='enemy')) cells.push([r,c]); }
   if(!cells.length) return false;
   const [r,c]=cells[Math.floor(rnd()*cells.length)];
   const def=randomBossDef();
@@ -163,6 +163,25 @@ function spawnRandomBossTile(tier=1){
   grid[r][c]={type:'boss', bossId:def.id, tier, hp, maxHp:hp, atk, cd:cdv, baseCd:cdv};
   if(def.onSpawn) def.onSpawn(grid[r][c]);
   addBossFx(r,c,false);
+  return true;
+}
+// Dev-only Programmer skill: replace one non-Boss tile with the selected current-tier Boss.
+function spawnChosenBoss(id, tier=bossTier()){
+  const def=BOSSES.find(b=>b.id===id && !b.noRandom && !b.finale);
+  if(!def) return false;
+  const cells=[];
+  for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const t=grid[r][c]; if(t && t.type!=='boss') cells.push([r,c]); }
+  if(!cells.length) return false;
+  const [r,c]=cells[Math.floor(rnd()*cells.length)];
+  const s=def.id==='matryoshka' ? enemyStats() : (def.monster ? enemyStats() : bossStats());
+  const cdv=Math.max(1,(s.cd!=null?s.cd:s.baseCd)+extraFoeCd());
+  const mult=def.noTierScale?1:tier;
+  const hpBase=(!def.swordable&&!def.finale&&!def.monster) ? enemyStats().hp : s.hp;
+  const hp=hpBase*(def.noTierScale?1:mult)*(def.hpMult||1), atk=s.atk*mult;
+  grid[r][c]={type:'boss', bossId:def.id, tier, hp, maxHp:hp, atk, cd:cdv, baseCd:cdv};
+  addBossFx(r,c,false);
+  if(def.onSpawn) def.onSpawn(grid[r][c]);
+  log(tr(`🪲 捉虫：投放 ${def.emoji} ${L(def.name)} Lv${tier}！`,`🪲 Debug: spawned ${def.emoji} ${L(def.name)} Lv${tier}!`), 'debuff');
   return true;
 }
 function spawnFinale(){

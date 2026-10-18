@@ -89,6 +89,7 @@ function resolve(){
 
   applyGravity();
   syncPositions(false);
+  if(player.stressTest && !player.finaleStarted && spawnRandomBossTile(bossTier(), true)){ syncPositions(false); log(tr('🧪 压力测试：把一个非 Boss 棋子变成了当前档位 Boss！','🧪 Stress Test: one non-Boss tile became a current-tier Boss!'), 'debuff'); }
   // 在本回合补子完成后才记录，避免把周期效果误消费在触发回合。
   if(player.echoOfFate && player.turns%5===0 && type!=='enemy'){
     player.echoPendingType=type;
