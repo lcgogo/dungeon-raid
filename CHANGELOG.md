@@ -1,4 +1,9 @@
 
+## [v1.89.1] - 2026-10-18
+
+- 收敛死灵「吸魂大法」的中英文说明，明确每个目标按玩家最大生命与目标当前生命取较小值，并说明治疗减半与溅射协同。
+- Clarified Necromancer's Soul Drain text: each target uses the lesser of player max HP and target current HP, with the healing-halving and Splash interactions stated explicitly.
+
 ## [v1.89.0] - 2026-10-17
 > Version-Impact: verify
 

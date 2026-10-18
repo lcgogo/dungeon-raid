@@ -37,7 +37,7 @@ The current Dev build is `v1.75.1`; builds now automatically inject the latest c
 
 The current Dev build is `v1.75.2`; race and turn-50 class `ⓘ` details now use separate buttons so they cannot accidentally select the card.
 
-The current Dev build is `v1.89.0`; Overlord wave N now summons N Bosses at LvN, Vampires drain at most their level in hearts each turn, and death reports retain damage from the player's action phase.
+The current Dev build is `v1.89.1`; the Necromancer's Soul Drain description now clearly states the lesser-of-max-HP-and-target-HP rule, Undead healing halving, and Splash interaction.
 
 ## 🧩 Core Gameplay
 
