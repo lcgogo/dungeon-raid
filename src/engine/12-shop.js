@@ -16,10 +16,10 @@ const SHOP={
     const lifeHeal=lifestealHeal(kills+boss);   // 汲取生命：炸弹击杀也回血
     log(tr(`💥 投掷炸弹，全场怪血量 −${D}`+(extra?`（乾坤一掷 +${extra}）`:''),`💥 Bomb: all foes lose ${D} HP`+(extra?` (All-In +${extra})`:'')) + (kills?tr(`，击杀 ${kills} 只👹`,`, ${kills} killed`):'') + (multiGold?tr(`，多杀奖励 +${multiGold} 金`,`，multi-kill bonus +${multiGold} gold`):'') + (lifeHeal?tr(`，吸血 +${lifeHeal}`,`, +${lifeHeal} lifesteal`):'') + (boss?tr(`，击败 ${boss} 个 Boss`,`, ${boss} boss(es) down`):''));   // Boss 奖励日志由 onBossKilled 统一报
     if(xp) log(tr(`📈 击杀获得经验 +${xp}`,`📈 Kill XP +${xp}`), 'buff');
-    if(player.bombBoost) player.bombUses=(player.bombUses||0)+1;   // 爆破手：每用一次 → 下次 伤害+1、花费+5
+    if(player.demolitionist || player.bombBoost){ player.gunpowder=gunpowderLevels(player)+1; player.bombUses=(player.bombUses||0)+1; }   // 爆破手：每用一次获得 1 级精研火药
     applyGravity(); syncPositions(false); }},
 };
-function shopCost(key){ let c=SHOP[key].cost; if(key==='heal') c+=(player.healUses||0); if(key==='bomb'&&player.bombBoost) c+=5*(player.bombUses||0); if(player.cheapskate) c=Math.ceil(c/2); return c; } // 治疗：每用一次，下次花费 +1 金；爆破手：每用一次炸弹，下次花费 +5 金；小气鬼：花费减半
+function shopCost(key){ let c=SHOP[key].cost; if(key==='heal') c+=(player.healUses||0); if(key==='bomb') c+=5*gunpowderLevels(player); if(player.cheapskate) c=Math.ceil(c/2); return c; } // 治疗/精研火药：每次使用后下次分别多花 1/5 金；小气鬼：花费减半
 function buyItem(key){
   if(busy||pendingLevels) return;
   if(player.frozen && player.frozen[key]>0) return;   // 雪人冰封该槽（治疗/炸弹），数回合内不可用
@@ -145,8 +145,8 @@ function shopInfoData(key){
     return { icon:'💥', title:tr('炸弹','Bomb'),
       desc:L(['投掷炸弹，对全场怪与 Boss 造成固定伤害（无视档位倍率）。能炸{W}免疫的 Boss（幽灵/小丑/污染怪/雪人）；终焉之主无效；石像会把伤害反弹给你。若有「乾坤一掷」，买完炸弹后还会再额外扣当前金币的 20%，并把这笔数额加到这次炸弹伤害上。',
               'Throw a bomb for fixed damage to all monsters & bosses (ignores tier scaling). Hits {W}-immune bosses (Ghost/Clown/Corruptor/Snowman); no effect on the Overlord; the Statue reflects it back. With All-In, buying the bomb also spends 20% of your current gold and adds exactly that amount to this bomb’s damage.']),
-      rows:[ [tr('当前伤害','Damage'), `−${D}`+(p.bombBoost?tr(`（爆破手 +${p.bombUses||0}）`,`(Demo +${p.bombUses||0})`):'')+(extra?tr(`（乾坤一掷 +${extra}）`,` (All-In +${extra})`):'')],
-             [tr('花费','Cost'), `${shopCost('bomb')} 💰`+(p.cheapskate?tr('（小气鬼半价）',' (½)'):'')+(p.bombBoost?tr(`（爆破手 +${5*(p.bombUses||0)}）`,` (Demo +${5*(p.bombUses||0)})`):'')],
+      rows:[ [tr('当前伤害','Damage'), `−${D}`+(gunpowderLevels(p)?tr(`（精研火药 +${gunpowderLevels(p)}）`,`(Powder +${gunpowderLevels(p)})`):'')+(extra?tr(`（乾坤一掷 +${extra}）`,` (All-In +${extra})`):'')],
+             [tr('花费','Cost'), `${shopCost('bomb')} 💰`+(p.cheapskate?tr('（小气鬼半价）',' (½)'):'')+(gunpowderLevels(p)?tr(`（精研火药 +${5*gunpowderLevels(p)}）`,` (Powder +${5*gunpowderLevels(p)})`):'')],
              [tr('额外扣金','Extra gold spent'), extra?`${extra} 💰`:tr('无','None')],
              [tr('冷却','Cooldown'), `${cd} ${tr('回合','t')}`+(p.shadowBombGold?tr('（乾坤一掷）',' (All-In)'):'')] ] };
   }

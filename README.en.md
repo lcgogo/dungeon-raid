@@ -37,7 +37,7 @@ The current Dev build is `v1.75.1`; builds now automatically inject the latest c
 
 The current Dev build is `v1.75.2`; race and turn-50 class `ⓘ` details now use separate buttons so they cannot accidentally select the card.
 
-The current Dev build is `v1.89.1`; the Necromancer's Soul Drain description now clearly states the lesser-of-max-HP-and-target-HP rule, Undead healing halving, and Splash interaction.
+The current Dev build is `v1.90.0`; the new Refined Powder upgrade adds 1 Bomb damage per level while costing 5 more gold, and the Dwarf Demolitionist passive now grants one level per bomb use.
 
 ## 🧩 Core Gameplay
 

@@ -9,6 +9,7 @@ const UPGRADES=[
   {n:['搜刮财富','Gather Gold'],   d:['每枚金币收益 +1','+1 gold per coin'], f:p=>{p.goldPerCoin+=1;}},
   {n:['汲取生命','Drain Life'],    d:['每击杀一只怪物回复 1 生命','Heal 1 HP per enemy killed'], f:p=>{p.lifesteal+=1;}},
   {n:['凝聚生机','Channel Vitality'], d:['每次选择时，「每回合自动回复」+1（第1次回1，第2次回2，第3次回3…）','Each pick increases per-turn regen by +1 more than last time (1, then 2, then 3, ...)'], f:p=>{ const next=(p.regenLevel||0)+1; p.regenLevel=next; p.regen+=next; }},
+  {n:['精研火药','Refined Powder'], d:['炸弹伤害 +1，炸弹多消耗 5 金','Bomb damage +1; bombs cost 5 more gold'], f:p=>{ p.gunpowder=(p.gunpowder||0)+1; }},
 ];
 // 升级三选一的洗牌（消耗 RNG）——供 UI 与回放共用，确保 RNG 消耗一致
 function rollUpgradePool(){

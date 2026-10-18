@@ -4,8 +4,8 @@ const fs = require('fs');
 const path = require('path');
 const file = fs.existsSync('dungeon-raid-dev.html') ? 'dungeon-raid-dev.html' : path.join('..', 'dungeon-raid-dev.html');
 let s = fs.readFileSync(file, 'utf8').match(/<script>([\s\S]*?)<\/script>/)[1];
-const EXPORT = `globalThis.__G={startGame,raceById,onBossKilled,dispatchReplayAct,buyItem,resolve,applyGravity,advanceEnemies,activateSkill,autoReleaseItems,makeTile,isSwordTarget,normalEnemyAttack,
-  TIER1,TIER2,RACE_PATHS, CLASS_T2, WEAPON, gainGold, gainHeal, addXp, currentSwordFlat, witherAuraTick, hurtPlayer, frostOrbDamage,
+const EXPORT = `globalThis.__G={startGame,raceById,onBossKilled,dispatchReplayAct,buyItem,shopCost,resolve,applyUpgrade,applyGravity,advanceEnemies,activateSkill,autoReleaseItems,makeTile,isSwordTarget,normalEnemyAttack,bombDamage,gunpowderLevels,
+  TIER1,TIER2,RACE_PATHS, CLASS_T2, UPGRADES, WEAPON, gainGold, gainHeal, addXp, currentSwordFlat, witherAuraTick, hurtPlayer, frostOrbDamage,
   get player(){return player}, get grid(){return grid}, get logHistory(){return logHistory}, set selection(v){selection=v},
   set busy(v){busy=v}, set pendingLevels(v){pendingLevels=v}, set replaying(v){replaying=v}, set replayRec(v){replayRec=v}};`;
 s = s.replace('resize(); showClassSelect(); loop();', EXPORT);
@@ -281,6 +281,15 @@ bz.hp=40; bz.maxHp=40; bz.fireFeather=false; const featherFoe={type:'enemy',hp:1
 // onBossKilled 链：未到回合不应误触发
 const q=Object.assign({},{t1:se.t1Pending||e.t1Pending||p.t1Pending,t2:se.t2Pending||e.t2Pending||p.t2Pending,t3:se.t3Pending||e.t3Pending||p.t3Pending,t4:se.t4Pending||e.t4Pending||p.t4Pending});
 ok(!q.t1&&!q.t2&&!q.t3&&!q.t4,'里程碑用尽后无残留 pending');
+
+// 精研火药：升级和爆破手的炸弹强化应共享等级，并同时影响伤害与价格
+G.replayRec={seed:61,race:'dwarf',acts:[]}; G.replaying=true; G.startGame(G.raceById('dwarf')); G.replaying=false;
+const powder=G.player; powder.hp=powder.maxHp=100; powder.gold=100; powder.shopCd={bomb:0,heal:0}; G.busy=false; G.pendingLevels=1;
+const powderUpgrade=G.UPGRADES.find(u=>u.n[0]==='精研火药');
+G.applyUpgrade(powderUpgrade);
+ok(powder.gunpowder===1 && G.bombDamage(powder)===6 && G.shopCost('bomb')===30,'精研火药一级：炸弹伤害+1且价格+5');
+G.TIER2.demolitionist.f(powder); powder.shopCd={bomb:0,heal:0}; G.buyItem('bomb');
+ok(powder.gunpowder===2 && G.bombDamage(powder)===7 && G.shopCost('bomb')===35,'爆破手使用炸弹后获得一级精研火药，并与升级叠加');
 
 console.log(fails?`\n❌ ${fails} 项未通过`:'\n✅ 里程碑链 + 换装主动 全部通过');
 process.exit(fails?1:0);

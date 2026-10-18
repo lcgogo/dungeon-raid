@@ -51,7 +51,7 @@ function updateHUD(){
     }
     const c=shopCost(key), cd=scd[key]||0, fz=player.frozen&&player.frozen[key]>0;   // 雪人冰封该槽
     if(key==='heal'){ const hv=Math.round((10+2*(player.healUses||0))*(player.healMult||1)); btn.querySelector('small').textContent=tr(`回复 ${hv} 生命`,`Restore ${hv} HP`); }   // 治疗恢复量随次数递增（活死人按 healMult 折算）
-    if(key==='bomb'){ const extra=bombGoldSacrificeBonus(player), D=bombDamage(player)+extra; btn.querySelector('small').textContent=tr(`全场怪 -${D} 血`+(extra?`（乾坤一掷 +${extra}）`:''),`All foes -${D} HP`+(extra?` (All-In +${extra})`:'')); }   // 炸弹伤害随爆破手/乾坤一掷动态显示
+    if(key==='bomb'){ const extra=bombGoldSacrificeBonus(player), D=bombDamage(player)+extra; btn.querySelector('small').textContent=tr(`全场怪 -${D} 血`+(extra?`（乾坤一掷 +${extra}）`:''),`All foes -${D} HP`+(extra?` (All-In +${extra})`:'')); }   // 炸弹伤害随精研火药/乾坤一掷动态显示
     const full = key==='heal' && player.hp>=player.maxHp;   // 满血时治疗禁用
     btn.querySelector('em').textContent = fz ? `❄️${player.frozen[key]}${tr('回合','t')}` : cd>0 ? `⏳${cd}${tr('回合','t')}` : full ? tr('已满血','Full HP') : c+'💰';
     btn.classList.toggle('off', busy || pendingLevels || cd>0 || player.gold < c || fz || full); });

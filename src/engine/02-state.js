@@ -27,7 +27,7 @@ function newPlayer(){
     prophecyPending:null, echoPendingType:null,                           // 先知 / 命运回响：下一次补子强制落下的类型
     heartPoison:false, rogueStealTurn:false, fireChainTurn:false, firewall:false, echoOfFate:false, tauntWindow:false, frostPulse:0, flashWhite:0,   // 巫医蛊毒：本回合连心改为毒怪；盗贼：本回合命中偷金；火法师：火焰链 / 火墙；先知：命运回响；斧王：下一轮受伤转上限；巫妖：冰封脉冲/冰甲白闪
     foeCdBonus:0, skillCdMod:0, splash:false, rebirthTurn:false, nirvanaTurn:false, rebirthSaves:0, healMult:1, witherAura:false, unbroken:false, iceArmor:false, beastDamageMult:1, beastPhoenix:false, fireFeather:false, dragonMight:false, dragonMightActive:false, tortoiseRegen:false, tortoiseGuardTurns:0,  // 神兽：神识经验/龙威/玄龟回生/玄龟临时半伤/朱雀火羽/朱雀涅槃
-    upgradeChoices:3, bombCd:3, goldLock:0, goldFrozen:0, healUses:0, bombUses:0, shadowBombGold:false, tycoonGoldShield:false, frozen:{},  // 转职被动相关；healUses：治疗递增；bombUses：爆破手炸弹递增；shadowBombGold：乾坤一掷；tycoonGoldShield：钱能买命；frozen：雪人冰封的主动剩余回合（skill/heal/bomb）
+    upgradeChoices:3, bombCd:3, goldLock:0, goldFrozen:0, healUses:0, bombUses:0, gunpowder:0, demolitionist:false, shadowBombGold:false, tycoonGoldShield:false, frozen:{},  // healUses：治疗递增；gunpowder：精研火药等级；bombUses：旧存档兼容计数；demolitionist：爆破手；shadowBombGold：乾坤一掷；tycoonGoldShield：钱能买命；frozen：雪人冰封的主动剩余回合（skill/heal/bomb）
     finaleStarted:false, finaleWave:0, cleared:false};                      // 终局：终焉之主浪潮 / 破关
 }
 function addXp(p,n){ const gained=n * (p.race==='beast' ? 2 : 1); p.xp += gained; return gained; }

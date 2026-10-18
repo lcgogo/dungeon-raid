@@ -249,9 +249,9 @@ const CONTENT = {
 if('serviceWorker' in navigator) window.addEventListener('load',()=>navigator.serviceWorker.register('/sw.js').catch(()=>{}));
 //==================== 配置 ====================
 // 版本号 v主.次.修：不影响 verify/replay 兼容边界的小改动改"修"；凡是影响 verify/replay/版本分桶/release 验证语义的改动都改"次"；大版本变更需先确认。页面底部显示。
-const VERSION='v1.89.1';
+const VERSION='v1.90.0';
 // CHANGELOG_LINES below is only a fallback for raw source inspection; build/build.js replaces it from CHANGELOG.md.
-const CHANGELOG_LINES=[{"ver": "v1.89.1", "zh": "收敛死灵「吸魂大法」的中英文说明，明确每个目标按玩家最大生命与目标当前生命取较小值，并说明治疗减半与溅射协同。", "en": "Clarified Necromancer's Soul Drain text: each target uses the lesser of player max HP and target current HP, with the healing-halving and Splash interactions stated explicitly."}, {"ver": "v1.89.0", "zh": "调整终焉之主的 Boss 浪潮：第 1 波召唤 1 个 Lv1 Boss，第 2 波召唤 2 个 Lv2 Boss，依此类推至第 10 波的 10 个 Lv10 Boss。", "en": "Rebalanced the Overlord waves: wave 1 summons one Lv1 Boss, wave 2 summons two Lv2 Bosses, and so on through ten Lv10 Bosses in wave 10."}, {"ver": "v1.88.0", "zh": "调整吸血鬼：每回合最多按自身等级吸取对应数量的心，Lv1 吸 1 个、Lv2 吸 2 个，以此类推；不再一次吸走棋盘上的全部心。", "en": "Rebalanced Vampire: each turn it drains at most its level in hearts — 1 at Lv1, 2 at Lv2, and so on — instead of consuming every heart on the board."}, {"ver": "v1.87.1", "zh": "修复死亡报告丢失玩家行动阶段伤害的问题：攻击石像造成的反伤现在会和敌方行动伤害一起保留并正确显示。", "en": "Fixed death reports losing damage from the player's action phase: Statue reflection damage is now preserved and shown together with enemy-phase damage."}, {"ver": "v1.87.0", "zh": "dev 版以后新增的 Boss 会自动获得更高出现权重：Boss 池中最新加入的普通 Boss 使用 4 张牌，其余 Boss 使用 2 张；正式版仍全部使用 2 张，且牌堆继续确定性洗牌。", "en": "Future Bosses added to the dev build automatically receive a higher appearance weight: the newest normal Boss in the pool uses 4 cards while other Bosses use 2; the release build keeps 2 cards for every Boss, with deterministic shuffling preserved."}];   /* auto-injected by dr.sh embed-changelog（勿手改） */
+const CHANGELOG_LINES=[{"ver": "v1.90.0", "zh": "新增升级「精研火药」：炸弹伤害 +1，但每级让炸弹多消耗 5 金。矮人二阶被动「爆破手」改为每使用一次炸弹获得 1 级精研火药；两者可以叠加。", "en": "Added the Refined Powder upgrade: +1 Bomb damage, while each level makes bombs cost 5 more gold. Dwarf's Demolitionist Tier-2 passive now grants 1 Refined Powder level per bomb use; both effects stack."}, {"ver": "v1.89.1", "zh": "收敛死灵「吸魂大法」的中英文说明，明确每个目标按玩家最大生命与目标当前生命取较小值，并说明治疗减半与溅射协同。", "en": "Clarified Necromancer's Soul Drain text: each target uses the lesser of player max HP and target current HP, with the healing-halving and Splash interactions stated explicitly."}, {"ver": "v1.89.0", "zh": "调整终焉之主的 Boss 浪潮：第 1 波召唤 1 个 Lv1 Boss，第 2 波召唤 2 个 Lv2 Boss，依此类推至第 10 波的 10 个 Lv10 Boss。", "en": "Rebalanced the Overlord waves: wave 1 summons one Lv1 Boss, wave 2 summons two Lv2 Bosses, and so on through ten Lv10 Bosses in wave 10."}, {"ver": "v1.88.0", "zh": "调整吸血鬼：每回合最多按自身等级吸取对应数量的心，Lv1 吸 1 个、Lv2 吸 2 个，以此类推；不再一次吸走棋盘上的全部心。", "en": "Rebalanced Vampire: each turn it drains at most its level in hearts — 1 at Lv1, 2 at Lv2, and so on — instead of consuming every heart on the board."}, {"ver": "v1.87.1", "zh": "修复死亡报告丢失玩家行动阶段伤害的问题：攻击石像造成的反伤现在会和敌方行动伤害一起保留并正确显示。", "en": "Fixed death reports losing damage from the player's action phase: Statue reflection damage is now preserved and shown together with enemy-phase damage."}];   /* auto-injected by dr.sh embed-changelog（勿手改） */
 const DEV=true;   // release build (DEV=false); dev build is dungeon-raid-dev.html (DEV=true)
 const REC_API='https://api.dungeonraid.win';   // 录像分享 API（Cloudflare Worker + KV）
 // 带种子随机数（mulberry32）：游戏全程用 rnd() 取代原生随机，配合录制种子可确定性重放
@@ -341,7 +341,7 @@ function newPlayer(){
     prophecyPending:null, echoPendingType:null,                           // 先知 / 命运回响：下一次补子强制落下的类型
     heartPoison:false, rogueStealTurn:false, fireChainTurn:false, firewall:false, echoOfFate:false, tauntWindow:false, frostPulse:0, flashWhite:0,   // 巫医蛊毒：本回合连心改为毒怪；盗贼：本回合命中偷金；火法师：火焰链 / 火墙；先知：命运回响；斧王：下一轮受伤转上限；巫妖：冰封脉冲/冰甲白闪
     foeCdBonus:0, skillCdMod:0, splash:false, rebirthTurn:false, nirvanaTurn:false, rebirthSaves:0, healMult:1, witherAura:false, unbroken:false, iceArmor:false, beastDamageMult:1, beastPhoenix:false, fireFeather:false, dragonMight:false, dragonMightActive:false, tortoiseRegen:false, tortoiseGuardTurns:0,  // 神兽：神识经验/龙威/玄龟回生/玄龟临时半伤/朱雀火羽/朱雀涅槃
-    upgradeChoices:3, bombCd:3, goldLock:0, goldFrozen:0, healUses:0, bombUses:0, shadowBombGold:false, tycoonGoldShield:false, frozen:{},  // 转职被动相关；healUses：治疗递增；bombUses：爆破手炸弹递增；shadowBombGold：乾坤一掷；tycoonGoldShield：钱能买命；frozen：雪人冰封的主动剩余回合（skill/heal/bomb）
+    upgradeChoices:3, bombCd:3, goldLock:0, goldFrozen:0, healUses:0, bombUses:0, gunpowder:0, demolitionist:false, shadowBombGold:false, tycoonGoldShield:false, frozen:{},  // healUses：治疗递增；gunpowder：精研火药等级；bombUses：旧存档兼容计数；demolitionist：爆破手；shadowBombGold：乾坤一掷；tycoonGoldShield：钱能买命；frozen：雪人冰封的主动剩余回合（skill/heal/bomb）
     finaleStarted:false, finaleWave:0, cleared:false};                      // 终局：终焉之主浪潮 / 破关
 }
 function addXp(p,n){ const gained=n * (p.race==='beast' ? 2 : 1); p.xp += gained; return gained; }
@@ -632,7 +632,8 @@ function cyclopsAttackPower(boss, target){
 function bossTier(){ return 1 + Math.floor(player.turns/50); }  // 每 50 回合 Boss 强度档位 +1
 function hasBoss(){ for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++) if(grid[r][c]&&grid[r][c].type==='boss') return true; return false; }
 function enemyHpSum(){ let h=0; for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const t=grid[r][c]; if(t&&t.type==='enemy') h+=t.hp; } return h; }   // 会长「收买」花费 = 全场普通怪当前血量之和
-function bombDamage(p){ p=p||player; return 5 + (p.bombBoost ? (p.bombUses||0) : 0); }   // 炸弹伤害=基础5+爆破手累计；火枪手「狙击」=本值×2，故炸弹变强狙击同步变强
+function gunpowderLevels(p){ p=p||player; return p.gunpowder!=null ? p.gunpowder : (p.bombBoost ? (p.bombUses||0) : 0); }
+function bombDamage(p){ return 5 + gunpowderLevels(p); }   // 炸弹伤害=基础5+精研火药等级；火枪手「狙击」=本值×2
 function bombGoldSacrificeBonus(p){ p=p||player; return p.shadowBombGold ? Math.floor((p.gold||0)*0.2) : 0; }   // 乾坤一掷：买完炸弹后，再额外扣当前金币的 20% 并把同值加到这次炸弹伤害
 function bombGoldSacrificePreviewBonus(p){ p=p||player; return p.shadowBombGold ? Math.floor(Math.max(0,(p.gold||0)-shopCost('bomb'))*0.2) : 0; }   // 面板预览：先扣正常炸弹价，再估算乾坤一掷会额外扣多少金币
 function shieldBashFlat(p){ p=p||player; return p.shieldBash ? (p.armor*(p.armorMult||1)+(p.toughness||0)) : 0; }   // 盾击：把护甲减伤量加到固定剑伤上
@@ -854,7 +855,7 @@ const TIER2={
   firewall:{n:['火墙','Firewall'], d:['底部 3 行形成火墙；其中怪物每回合掉当前固定伤害 20%（最少 1）','Bottom 3 rows become a firewall; foes there lose 20% of current flat damage each turn (minimum 1)'], f:p=>{ p.firewall=true; }},
   sharpshooter:{n:['神射手','Sharpshooter'], d:['{WC}击杀怪 +2 经验','+2 XP per {W} kill'], f:p=>{ p.killXp=(p.killXp||0)+2; }},
   shadow:{n:['乾坤一掷','All-In'], d:['买炸弹后，再额外扣当前金币的 20%，并把这笔数额加到这次炸弹伤害上','After buying a bomb, also spend 20% of your current gold and add exactly that amount to this bomb’s damage'], f:p=>{ p.shadowBombGold=true; }},
-  demolitionist:{n:['爆破手','Demolitionist'], d:['每用一次炸弹：伤害 +1、花费 +5 金（越炸越强、越炸越贵）','Each bomb use: +1 damage and +5 gold cost (stronger but pricier each time)'], f:p=>{ p.bombBoost=true; }},
+  demolitionist:{n:['爆破手','Demolitionist'], d:['每使用一次炸弹，获得 1 级「精研火药」','Each bomb use grants 1 level of Refined Powder'], f:p=>{ p.bombBoost=true; p.demolitionist=true; }},
   shieldbash:{n:['盾击','Shield Bash'], d:['把「护甲减伤量」加到固定{WC}伤害上（护甲越厚、剑伤越高）','Adds your armor (damage-reduction) value to flat {W} damage — more armor, harder hits'], f:p=>{ p.shieldBash=true; }},
   tycoon:{n:['钱能买命','Money Buys Life'], d:['受到伤害时先扣手头金币；手头金币不够时，剩余伤害才继续掉血','Incoming damage spends wallet gold first; any remainder spills into HP'], f:p=>{ p.tycoonGoldShield=true; }},
   warlord:{n:['巨力','Titan'], d:['最大生命越高，{WC}固定伤害越高（每 12 点最大生命 +1）','Higher max HP = higher flat {W} damage (+1 per 12 max HP)'], f:p=>{ p.titan=true; }},
@@ -2136,10 +2137,10 @@ const SHOP={
     const lifeHeal=lifestealHeal(kills+boss);   // 汲取生命：炸弹击杀也回血
     log(tr(`💥 投掷炸弹，全场怪血量 −${D}`+(extra?`（乾坤一掷 +${extra}）`:''),`💥 Bomb: all foes lose ${D} HP`+(extra?` (All-In +${extra})`:'')) + (kills?tr(`，击杀 ${kills} 只👹`,`, ${kills} killed`):'') + (multiGold?tr(`，多杀奖励 +${multiGold} 金`,`，multi-kill bonus +${multiGold} gold`):'') + (lifeHeal?tr(`，吸血 +${lifeHeal}`,`, +${lifeHeal} lifesteal`):'') + (boss?tr(`，击败 ${boss} 个 Boss`,`, ${boss} boss(es) down`):''));   // Boss 奖励日志由 onBossKilled 统一报
     if(xp) log(tr(`📈 击杀获得经验 +${xp}`,`📈 Kill XP +${xp}`), 'buff');
-    if(player.bombBoost) player.bombUses=(player.bombUses||0)+1;   // 爆破手：每用一次 → 下次 伤害+1、花费+5
+    if(player.demolitionist || player.bombBoost){ player.gunpowder=gunpowderLevels(player)+1; player.bombUses=(player.bombUses||0)+1; }   // 爆破手：每用一次获得 1 级精研火药
     applyGravity(); syncPositions(false); }},
 };
-function shopCost(key){ let c=SHOP[key].cost; if(key==='heal') c+=(player.healUses||0); if(key==='bomb'&&player.bombBoost) c+=5*(player.bombUses||0); if(player.cheapskate) c=Math.ceil(c/2); return c; } // 治疗：每用一次，下次花费 +1 金；爆破手：每用一次炸弹，下次花费 +5 金；小气鬼：花费减半
+function shopCost(key){ let c=SHOP[key].cost; if(key==='heal') c+=(player.healUses||0); if(key==='bomb') c+=5*gunpowderLevels(player); if(player.cheapskate) c=Math.ceil(c/2); return c; } // 治疗/精研火药：每次使用后下次分别多花 1/5 金；小气鬼：花费减半
 function buyItem(key){
   if(busy||pendingLevels) return;
   if(player.frozen && player.frozen[key]>0) return;   // 雪人冰封该槽（治疗/炸弹），数回合内不可用
@@ -2265,8 +2266,8 @@ function shopInfoData(key){
     return { icon:'💥', title:tr('炸弹','Bomb'),
       desc:L(['投掷炸弹，对全场怪与 Boss 造成固定伤害（无视档位倍率）。能炸{W}免疫的 Boss（幽灵/小丑/污染怪/雪人）；终焉之主无效；石像会把伤害反弹给你。若有「乾坤一掷」，买完炸弹后还会再额外扣当前金币的 20%，并把这笔数额加到这次炸弹伤害上。',
               'Throw a bomb for fixed damage to all monsters & bosses (ignores tier scaling). Hits {W}-immune bosses (Ghost/Clown/Corruptor/Snowman); no effect on the Overlord; the Statue reflects it back. With All-In, buying the bomb also spends 20% of your current gold and adds exactly that amount to this bomb’s damage.']),
-      rows:[ [tr('当前伤害','Damage'), `−${D}`+(p.bombBoost?tr(`（爆破手 +${p.bombUses||0}）`,`(Demo +${p.bombUses||0})`):'')+(extra?tr(`（乾坤一掷 +${extra}）`,` (All-In +${extra})`):'')],
-             [tr('花费','Cost'), `${shopCost('bomb')} 💰`+(p.cheapskate?tr('（小气鬼半价）',' (½)'):'')+(p.bombBoost?tr(`（爆破手 +${5*(p.bombUses||0)}）`,` (Demo +${5*(p.bombUses||0)})`):'')],
+      rows:[ [tr('当前伤害','Damage'), `−${D}`+(gunpowderLevels(p)?tr(`（精研火药 +${gunpowderLevels(p)}）`,`(Powder +${gunpowderLevels(p)})`):'')+(extra?tr(`（乾坤一掷 +${extra}）`,` (All-In +${extra})`):'')],
+             [tr('花费','Cost'), `${shopCost('bomb')} 💰`+(p.cheapskate?tr('（小气鬼半价）',' (½)'):'')+(gunpowderLevels(p)?tr(`（精研火药 +${5*gunpowderLevels(p)}）`,` (Powder +${5*gunpowderLevels(p)})`):'')],
              [tr('额外扣金','Extra gold spent'), extra?`${extra} 💰`:tr('无','None')],
              [tr('冷却','Cooldown'), `${cd} ${tr('回合','t')}`+(p.shadowBombGold?tr('（乾坤一掷）',' (All-In)'):'')] ] };
   }
@@ -2725,6 +2726,7 @@ const UPGRADES=[
   {n:['搜刮财富','Gather Gold'],   d:['每枚金币收益 +1','+1 gold per coin'], f:p=>{p.goldPerCoin+=1;}},
   {n:['汲取生命','Drain Life'],    d:['每击杀一只怪物回复 1 生命','Heal 1 HP per enemy killed'], f:p=>{p.lifesteal+=1;}},
   {n:['凝聚生机','Channel Vitality'], d:['每次选择时，「每回合自动回复」+1（第1次回1，第2次回2，第3次回3…）','Each pick increases per-turn regen by +1 more than last time (1, then 2, then 3, ...)'], f:p=>{ const next=(p.regenLevel||0)+1; p.regenLevel=next; p.regen+=next; }},
+  {n:['精研火药','Refined Powder'], d:['炸弹伤害 +1，炸弹多消耗 5 金','Bomb damage +1; bombs cost 5 more gold'], f:p=>{ p.gunpowder=(p.gunpowder||0)+1; }},
 ];
 // 升级三选一的洗牌（消耗 RNG）——供 UI 与回放共用，确保 RNG 消耗一致
 function rollUpgradePool(){
@@ -3470,7 +3472,7 @@ function updateHUD(){
     }
     const c=shopCost(key), cd=scd[key]||0, fz=player.frozen&&player.frozen[key]>0;   // 雪人冰封该槽
     if(key==='heal'){ const hv=Math.round((10+2*(player.healUses||0))*(player.healMult||1)); btn.querySelector('small').textContent=tr(`回复 ${hv} 生命`,`Restore ${hv} HP`); }   // 治疗恢复量随次数递增（活死人按 healMult 折算）
-    if(key==='bomb'){ const extra=bombGoldSacrificeBonus(player), D=bombDamage(player)+extra; btn.querySelector('small').textContent=tr(`全场怪 -${D} 血`+(extra?`（乾坤一掷 +${extra}）`:''),`All foes -${D} HP`+(extra?` (All-In +${extra})`:'')); }   // 炸弹伤害随爆破手/乾坤一掷动态显示
+    if(key==='bomb'){ const extra=bombGoldSacrificeBonus(player), D=bombDamage(player)+extra; btn.querySelector('small').textContent=tr(`全场怪 -${D} 血`+(extra?`（乾坤一掷 +${extra}）`:''),`All foes -${D} HP`+(extra?` (All-In +${extra})`:'')); }   // 炸弹伤害随精研火药/乾坤一掷动态显示
     const full = key==='heal' && player.hp>=player.maxHp;   // 满血时治疗禁用
     btn.querySelector('em').textContent = fz ? `❄️${player.frozen[key]}${tr('回合','t')}` : cd>0 ? `⏳${cd}${tr('回合','t')}` : full ? tr('已满血','Full HP') : c+'💰';
     btn.classList.toggle('off', busy || pendingLevels || cd>0 || player.gold < c || fz || full); });

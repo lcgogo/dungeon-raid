@@ -270,7 +270,8 @@ function cyclopsAttackPower(boss, target){
 function bossTier(){ return 1 + Math.floor(player.turns/50); }  // 每 50 回合 Boss 强度档位 +1
 function hasBoss(){ for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++) if(grid[r][c]&&grid[r][c].type==='boss') return true; return false; }
 function enemyHpSum(){ let h=0; for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const t=grid[r][c]; if(t&&t.type==='enemy') h+=t.hp; } return h; }   // 会长「收买」花费 = 全场普通怪当前血量之和
-function bombDamage(p){ p=p||player; return 5 + (p.bombBoost ? (p.bombUses||0) : 0); }   // 炸弹伤害=基础5+爆破手累计；火枪手「狙击」=本值×2，故炸弹变强狙击同步变强
+function gunpowderLevels(p){ p=p||player; return p.gunpowder!=null ? p.gunpowder : (p.bombBoost ? (p.bombUses||0) : 0); }
+function bombDamage(p){ return 5 + gunpowderLevels(p); }   // 炸弹伤害=基础5+精研火药等级；火枪手「狙击」=本值×2
 function bombGoldSacrificeBonus(p){ p=p||player; return p.shadowBombGold ? Math.floor((p.gold||0)*0.2) : 0; }   // 乾坤一掷：买完炸弹后，再额外扣当前金币的 20% 并把同值加到这次炸弹伤害
 function bombGoldSacrificePreviewBonus(p){ p=p||player; return p.shadowBombGold ? Math.floor(Math.max(0,(p.gold||0)-shopCost('bomb'))*0.2) : 0; }   // 面板预览：先扣正常炸弹价，再估算乾坤一掷会额外扣多少金币
 function shieldBashFlat(p){ p=p||player; return p.shieldBash ? (p.armor*(p.armorMult||1)+(p.toughness||0)) : 0; }   // 盾击：把护甲减伤量加到固定剑伤上

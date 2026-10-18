@@ -1,4 +1,10 @@
 
+## [v1.90.0] - 2026-10-18
+> Version-Impact: verify
+
+- 新增升级「精研火药」：炸弹伤害 +1，但每级让炸弹多消耗 5 金。矮人二阶被动「爆破手」改为每使用一次炸弹获得 1 级精研火药；两者可以叠加。
+- Added the Refined Powder upgrade: +1 Bomb damage, while each level makes bombs cost 5 more gold. Dwarf's Demolitionist Tier-2 passive now grants 1 Refined Powder level per bomb use; both effects stack.
+
 ## [v1.89.1] - 2026-10-18
 
 - 收敛死灵「吸魂大法」的中英文说明，明确每个目标按玩家最大生命与目标当前生命取较小值，并说明治疗减半与溅射协同。
