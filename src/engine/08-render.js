@@ -15,6 +15,14 @@ function roundRect(x,y,w,h,r){ ctx.beginPath(); ctx.moveTo(x+r,y);
   ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r);
   ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath(); }
 
+// Color emoji can have asymmetric visible bounds even when Canvas centers its advance box.
+function fillEmojiVisuallyCentered(text, cx, y){
+  const m=ctx.measureText(text);
+  const hasBounds=Number.isFinite(m.actualBoundingBoxLeft)&&Number.isFinite(m.actualBoundingBoxRight);
+  const dx=hasBounds ? (m.actualBoundingBoxLeft-m.actualBoundingBoxRight)/2 : -TILE*0.035;
+  ctx.fillText(text, cx+dx, y);
+}
+
 // 预览：当前剑链会杀死哪些怪（与 dealDamage 逻辑保持一致）
 function previewKills(){
   // 剑链且已构成可消除的连线（长度≥2，怪起手时怪自身也占一格）
@@ -86,7 +94,9 @@ function draw(){
       const doomed = killSet && killSet.has(t.r+','+t.c) && (!isBoss || bdef.swordable || player.pierceTurn); // 会被这条线杀死 → 骷髅
       ctx.font=Math.floor(TILE*0.30)+'px '+EMOJI_FONT;
       ctx.textAlign='center'; ctx.textBaseline='middle';
-      ctx.fillText(doomed?'💀':(isBoss?bdef.emoji:'👹'), cx, y+TILE*0.30);
+      const glyph=doomed?'💀':(isBoss?bdef.emoji:'👹');
+      if(!doomed && isBoss && t.bossId==='cyclops') fillEmojiVisuallyCentered(glyph, cx, y+TILE*0.30);
+      else ctx.fillText(glyph, cx, y+TILE*0.30);
       // 血量（终焉之主无血、打不掉 → 显示 ∞ 而非 0）
       ctx.fillStyle='#fff'; ctx.font='700 '+Math.floor(TILE*0.34)+'px system-ui';
       if(!t.finale) ctx.fillText(t.hp, cx, cy+TILE*0.10);

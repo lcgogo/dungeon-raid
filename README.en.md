@@ -37,7 +37,7 @@ The current Dev build is `v1.75.1`; builds now automatically inject the latest c
 
 The current Dev build is `v1.75.2`; race and turn-50 class `ⓘ` details now use separate buttons so they cannot accidentally select the card.
 
-The current Dev build is `v1.90.0`; the new Refined Powder upgrade adds 1 Bomb damage per level while costing 5 more gold, and the Dwarf Demolitionist passive now grants one level per bomb use.
+The current Dev build is `v1.90.1`; the Cyclops color emoji is now centered against its visible bounds instead of appearing shifted right.
 
 ## 🧩 Core Gameplay
 

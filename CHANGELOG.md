@@ -1,4 +1,9 @@
 
+## [v1.90.1] - 2026-10-18
+
+- 修复独眼巨人彩色 emoji 的可见边界与字体 advance box 不一致导致的棋盘视觉偏右：现在按实际可见边界居中，旧浏览器使用兼容回退。
+- Fixed the Cyclops color emoji appearing visually right-shifted on the board: it now centers against its visible bounds, with a fallback for older browsers.
+
 ## [v1.90.0] - 2026-10-18
 > Version-Impact: verify
 
