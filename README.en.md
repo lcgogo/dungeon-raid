@@ -37,7 +37,7 @@ The current Dev build is `v1.75.1`; builds now automatically inject the latest c
 
 The current Dev build is `v1.75.2`; race and turn-50 class `ⓘ` details now use separate buttons so they cannot accidentally select the card.
 
-The current Dev build is `v1.91.0`; Dev now includes the hidden Human-only 🧑‍💻 Programmer class with Debug and Stress Test, while Release keeps it hidden.
+The current Dev build is `v1.91.1`; the Bomb tile now shows All-In's extra gold cost and damage bonus.
 
 ## 🧩 Core Gameplay
 

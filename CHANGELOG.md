@@ -1,4 +1,9 @@
 
+## [v1.91.1] - 2026-10-20
+
+- 修复炸弹方块未显示「乾坤一掷」额外金币消耗的问题；现在会同时显示本次额外扣金和对应伤害。
+- Fixed the Bomb tile not showing All-In's extra gold cost; it now displays both the extra gold spent and the corresponding bonus damage.
+
 ## [v1.91.0] - 2026-10-18
 > Version-Impact: verify
 
