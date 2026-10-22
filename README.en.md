@@ -23,21 +23,7 @@ Play online: **<https://dungeonraid.win>** (Dev build: <https://dungeonraid.win/
 
 The two builds keep **separate, non-overwriting saves** (Dev uses its own localStorage keys). The start screen and footer both label which build you are in. The home page’s Release / Dev version numbers are **statically injected at deploy time**, so they appear instantly even on weak connections without an extra fetch.
 
-The current Dev build is `v1.74.2`; fixed mobile browser gestures canceling turn-50 class-card long-press previews, while short taps still select the class. Race cards support long-press details for their traits and weaknesses, and the Statue boss has 2× the same-level base HP. Replay settlement screens show the replay's actual final level, gold, and turns instead of the state from before replay started. Turn-50 advancement details use a stable label/content layout so long effects wrap consistently. Turn-50, turn-100, and turn-200 advancement prompts tell players to long-press a choice for details, while turn-350 Crossover Skill choices have an `ⓘ` details button. Long combat logs wrap automatically. Frozen Heal/Bomb actives do not auto-cast during a Snowman freeze. Multi-kills of normal enemies grant bonus gold equal to the number killed. The DEV start card shows the version directly. The installed PWA opens the home page first, where you can choose Release or Dev. Source lives under `src/` and the self-contained HTML is regenerated with `node build/build.js`.
-
-The current Dev build is `v1.74.5`; the race list now uses a dedicated scroll box with the Back button outside it. Race selection supports long-press or `ⓘ` details for every turn-50 class, active skill, and full effect. Turn-50 class choices also have an `ⓘ` entry for full details, including the Tier-1 active and the Tier-2 passive locked at turn 100.
-
-The race-detail class list uses an inner scroll area so the Back button remains visible.
-
-The current Dev build is `v1.75.0`; Skeleton King's Rebirth is now a passive that automatically revives once at full HP on lethal damage and resets all foe cooldowns.
-
-The current Dev build is `v1.75.0`; Skeleton King's Rebirth is an automatic passive with a 5-turn cooldown, and expanded death/clear settlement logs now show only the full log.
-
-The current Dev build is `v1.75.1`; builds now automatically inject the latest changelog from `CHANGELOG.md`.
-
-The current Dev build is `v1.75.2`; race and turn-50 class `ⓘ` details now use separate buttons so they cannot accidentally select the card.
-
-The current Dev build is `v1.92.1`; the Cyclops board icon is further corrected for iOS Canvas alignment.
+The current Dev build is `v1.92.1`; the README now tracks the current code, including the Dev-only Human hidden Programmer class, Refined Powder, stable replay boundaries, and the iOS Cyclops board-icon fix. Release builds keep Programmer hidden. Source lives under `src/` and the self-contained HTML is regenerated with `node build/build.js`.
 
 ## 🧩 Core Gameplay
 
@@ -68,7 +54,7 @@ Each enemy tile shows three numbers:
 - **XP comes only from kills** (+3 per enemy). On level-up, **pick 1 of 3** upgrades. The regen upgrade **Channel Vitality** now scales by repeated picks: the 1st pick gives +1 per turn, the 2nd adds +2 more (total 3), the 3rd adds +3 more (total 6), and so on.
 - **Combo bonus**: longer chains pay more — total reward `× (1 + (N − 2) × 15%)` (5-chain ≈ ×1.45, 7-chain ≈ ×1.75).
 - **Armor accumulates**: shields do not grant damage reduction directly; they fill the HUD "Armor" bar, and filling it gives +1 damage reduction (costs more each time). Damage reduction soaks each hit, then the rest comes off your HP.
-- **Gold shop**: 💊 Heal (restore 10 HP, **+2 healing and +1 gold cost per use**; **unavailable at full HP** to avoid waste) / 💥 Bomb (all foes' HP −5). Each item has its own cooldown.
+- **Gold shop**: 💊 Heal (restore 10 HP, **+2 healing and +1 gold cost per use**; **unavailable at full HP**) / 💥 Bomb (base −5 HP to all foes; Refined Powder adds +1 damage and +5 cost per level). **All-In** spends 20% of current gold after buying the bomb and adds that amount to its damage. Each item has its own cooldown.
 
 ## 🧬 Races (chosen at start)
 
@@ -105,6 +91,7 @@ Each race has **several** classes; every skill has a **5-turn cooldown** (except
 | 🧑 Human | 💗 Priest | Blessing | Clear all hearts on the board; each becomes 3 XP **and also heals you (by your heal-per-heart)** |
 | 🧑 Human | 🔥 Fire Mage | Flame Chain | Highlights and enables bosses this turn, including weapon-immune bosses as the first target; every enemy hit by your weapon chain is ignited and then loses **20% of the ignition-turn flat damage** each turn (minimum 1, stacks, until death) |
 | 🧑 Human | ⚔️ Sword Saint | Bladeshift | Turn every heart and coin into swords (its signature passive "Anything a Blade" unlocks at level 100, see below) |
+| 🧑 Human (Dev only) | 🧑‍💻 Programmer | Debug | Opens the Boss list and spawns one selected regular Boss at the current turn tier on a non-Boss tile; the choice is recorded for deterministic replay |
 | 🧝 Elf | 🏹 Ranger | Arrow Rain | Deal "sword power ×2" damage to all enemies |
 | 🧝 Elf | 💰 Rogue | Empty Pockets | For this turn, each enemy hit by your weapon chain drops extra gold equal to 20% of its pre-hit HP (rounded down, minimum 1); the chain turns gold |
 | 🧝 Elf | 🌿 Treant | Vine Coil | For the next 3 turns, all enemies/bosses (incl. weapon-immune; Overlord excluded) lose 30% of your max HP each turn; cursed foes glow green |
@@ -117,7 +104,7 @@ Each race has **several** classes; every skill has a **5-turn cooldown** (except
 | 🧌 Orc | 🩸 Fighter | Bloodthirst | **Drain 3 HP per monster / boss hit** by your weapon chain this turn, **and your weapon can hit weapon-immune bosses (Ghost/Clown)** |
 | 🧌 Orc | 🧪 Witch Doctor | Hex | **Burns every red heart on the board into a black poison heart 🖤**; linking them heals nothing and poisons **all foes (incl. weapon-immune; Overlord excluded)** instead (its signature passive "All is Poison" unlocks at level 100, see below) |
 | 🧌 Orc | 🪓 Axe Lord | Taunt | Set all enemies/bosses on the board (excluding the Overlord) to attack on the **next turn** by forcing their countdown to **1**; the skill card short text also notes that during that volley, **10% of the actual damage you take** becomes **permanent max HP** (**minimum +1**) |
-| 🪦 Undead | 🪄 Necromancer | Soul Drain | Drain HP from 2 random targets (monsters or bosses — **including weapon-immune ones, like the bomb**; Overlord excluded) to heal yourself; per-target drain = your max HP, so any target with HP ≤ your max HP dies |
+| 🪦 Undead | 🪄 Necromancer | Soul Drain | Drain 2 random targets (monsters or bosses, including weapon-immune bosses; Overlord excluded); each drain is `min(player max HP, target current HP)`, the total heals you, and Undead healing halving applies |
 | 🪦 Undead | 💀 Skeleton King | Rebirth | **Passive**: lethal damage automatically revives you at full HP and resets every monster and boss countdown on the board to its base value; then enters a 5-turn cooldown |
 | 🪦 Undead | 🪝 Butcher | Hook | Drags every monster/boss (incl. weapon-immune; Overlord excluded) down to the bottom of its column while other tiles float up; then deals damage by **distance from the bottom**: bottom row takes 1× flat damage, second-from-bottom takes 2×, and so on (CD 5) |
 | 🪦 Undead | 🧊 Lich | Frost Orb | Deal your **current flat damage** once to all monsters/bosses on the board (excluding the Overlord), then add **+1 to their current attack countdown** so their next attack is delayed by one extra turn |
@@ -136,12 +123,13 @@ At **level 100 (Tier-2 Skill)** you automatically get the passive **locked to yo
 | 🧑 Human | Priest → Holy Strike | Healing overflow **prioritizes bosses**; with multiple bosses it hits the **lowest-HP** one first, and only falls back to normal enemies when no boss is present (Overlord excluded) |
 | 🧑 Human | Fire Mage → Firewall | The bottom 3 rows become a visible firewall; monsters/bosses there (including weapon-immune ones, excluding the Overlord) lose **20% of your current flat damage** each turn (minimum 1) |
 | 🧑 Human | Sword Saint → Anything a Blade | Each turn after the board settles, turn 3 non-enemy non-sword tiles into swords |
+| 🧑 Human (Dev only) | Programmer → Stress Test | Each turn, turn one non-Boss tile into a random Boss at the current tier |
 | 🧝 Elf | Ranger → Sharpshooter | +2 extra XP per enemy killed by a weapon chain |
 | 🧝 Elf | Rogue → All-In | After buying a bomb, also spend 20% of your current gold and add exactly that amount to this bomb’s damage |
 | 🧝 Elf | Treant → Thorns | When hit, reflect your current armor (damage-reduction) back to the attacker (more armor → more reflect; DoT/poison-backlash/Statue reflection do NOT trigger it) |
 | 🧝 Elf | Seer → Echo of Fate | Every 5 valid turns, the next refill is guaranteed to match the non-enemy tile cleared on the trigger turn |
 | 🎅 Dwarf | Blacksmith → Shield Bash | Adds your armor (damage-reduction) value to flat {W} damage — more armor, harder hits |
-| 🎅 Dwarf | Musketeer → Demolitionist | Each bomb use: +1 damage and +5 gold cost (stronger but pricier each time) |
+| 🎅 Dwarf | Musketeer → Demolitionist | Each bomb use grants 1 Refined Powder level; each level adds +1 Bomb damage and +5 gold cost |
 | 🎅 Dwarf | Miser → Money Buys Life | Incoming damage spends **10 wallet gold per 1 blocked damage**; if gold runs out, the remainder spills into HP |
 | 🎅 Dwarf | Guild Master → Cheapskate | Gold-spending actives (shop 💊Heal / 💥Bomb, Guild Master’s Buyout) cost half |
 | 🧌 Orc | Tauren → Titan | Higher max HP means higher flat sword damage (+1 per 12 max HP) |
@@ -168,7 +156,7 @@ Every **10 turns**, one boss is drawn from a **deterministic 32-card deck** cont
 | 🤡 Clown | Bomb only | Re-rolls several non-monster tiles into other resources each turn, disrupting your chains; does NOT spawn monsters (that's the Summoner) |
 | 🪢 Lashmaster | Bomb only | On spawn, all normal enemies get **-1 attack countdown**, and each turn after that they get **-1 attack countdown** again. It may not be the deadliest foe by itself, but it drags the whole board into a frenzy the longer it lives. |
 | ♨️ Magmafiend | Bomb only | **No attack; weapon-immune**. Every turn it melts all shields without healing from them; fire damage heals it. |
-| 🧛 Vampire | Bomb only | **No attack; weapon-immune**. Drains every heart on the board each turn to heal; poison hearts damage it instead. |
+| 🧛 Vampire | Bomb only | **No attack; weapon-immune**. Drains up to its tier in hearts each turn to heal; poison hearts damage it instead. |
 | 🥷 Assassin | Sword / Bomb | Stats like a normal enemy, but its hits are **true damage** — ignore armor, straight to HP |
 | 🦖 Devourer | Sword / Bomb | When its countdown hits 0, it first strikes for **50% of its current HP**; only after that hit resolves does it drain half the HP from every regular enemy to grow |
 | 👁️ Cyclops | Sword / Bomb | When its countdown hits 0, it randomly chooses one of the highest-current-HP normal enemies and hurls it at you; damage is that enemy's current HP × (1 + 20% × Boss level), and the thrown enemy leaves without granting a kill reward |
