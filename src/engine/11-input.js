@@ -36,7 +36,7 @@ function autoGreedyChain(r0,c0,type){
   if(chain.length<2){ const t=grid[r0][c0]; if(t) showTileInfo(t); return; }   // 没有可连同类邻居 → 退化为看信息
   selection=chain.map(([r,c])=>({r,c,type}));
   lastPointer=null; busy=true;   // 先把连线亮出来一拍再结算（busy 只锁输入、不挡渲染；draw 见 selection 即画线）
-  setTimeout(()=>{ busy=false; if(selection.length){ resolve(); selection=[]; } updateHUD(); }, 260);
+  setTimeout(()=>{ if(ended){ selection=[]; busy=true; updateHUD(); return; } busy=false; if(selection.length){ resolve(); selection=[]; } updateHUD(); }, 260);
 }
 function startDrag(e){
   if(replaying){ e.preventDefault(); togglePauseReplay(); return; }   // 回放中：棋盘不可操作；点棋盘=暂停/继续

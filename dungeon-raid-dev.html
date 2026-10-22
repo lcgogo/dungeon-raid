@@ -249,9 +249,9 @@ const CONTENT = {
 if('serviceWorker' in navigator) window.addEventListener('load',()=>navigator.serviceWorker.register('/sw.js').catch(()=>{}));
 //==================== 配置 ====================
 // 版本号 v主.次.修：不影响 verify/replay 兼容边界的小改动改"修"；凡是影响 verify/replay/版本分桶/release 验证语义的改动都改"次"；大版本变更需先确认。页面底部显示。
-const VERSION='v1.91.1';
+const VERSION='v1.92.0';
 // CHANGELOG_LINES below is only a fallback for raw source inspection; build/build.js replaces it from CHANGELOG.md.
-const CHANGELOG_LINES=[{"ver": "v1.91.1", "zh": "修复炸弹方块未显示「乾坤一掷」额外金币消耗的问题；现在会同时显示本次额外扣金和对应伤害。", "en": "Fixed the Bomb tile not showing All-In's extra gold cost; it now displays both the extra gold spent and the corresponding bonus damage."}, {"ver": "v1.91.0", "zh": "dev 版人族新增隐藏职业「🧑‍💻 程序员」：主动「捉虫」可从 Boss 列表选择一个 Boss，以当前回合档位投放；100 回合被动「压力测试」每回合把一个非 Boss 棋子变成当前档位的随机 Boss。该职业仅在 `DEV=true` 时显示，prod 不可见。", "en": "Added the dev-only Human hidden class 🧑‍💻 Programmer: its Debug active chooses a Boss from a list and spawns it at the current turn tier; its turn-100 Stress Test passive converts one non-Boss tile into a random current-tier Boss every turn. It is visible only when `DEV=true` and hidden in prod."}, {"ver": "v1.90.1", "zh": "修复独眼巨人彩色 emoji 的可见边界与字体 advance box 不一致导致的棋盘视觉偏右：现在按实际可见边界居中，旧浏览器使用兼容回退。", "en": "Fixed the Cyclops color emoji appearing visually right-shifted on the board: it now centers against its visible bounds, with a fallback for older browsers."}, {"ver": "v1.90.0", "zh": "新增升级「精研火药」：炸弹伤害 +1，但每级让炸弹多消耗 5 金。矮人二阶被动「爆破手」改为每使用一次炸弹获得 1 级精研火药；两者可以叠加。", "en": "Added the Refined Powder upgrade: +1 Bomb damage, while each level makes bombs cost 5 more gold. Dwarf's Demolitionist Tier-2 passive now grants 1 Refined Powder level per bomb use; both effects stack."}, {"ver": "v1.89.1", "zh": "收敛死灵「吸魂大法」的中英文说明，明确每个目标按玩家最大生命与目标当前生命取较小值，并说明治疗减半与溅射协同。", "en": "Clarified Necromancer's Soul Drain text: each target uses the lesser of player max HP and target current HP, with the healing-halving and Splash interactions stated explicitly."}];   /* auto-injected by dr.sh embed-changelog（勿手改） */
+const CHANGELOG_LINES=[{"ver": "v1.92.0", "zh": "修复死亡/破关后的延迟输入仍可能写入录像的问题：终局后不再录制新动作，延迟连线结算也会被丢弃，避免录像声称回合数与确定性重放差 1。", "en": "Fixed delayed post-death/clear inputs being appended to recordings: terminal runs no longer record new actions, and delayed link resolution is discarded, preventing one-turn mismatches between claimed and deterministic replay results."}, {"ver": "v1.91.1", "zh": "修复炸弹方块未显示「乾坤一掷」额外金币消耗的问题；现在会同时显示本次额外扣金和对应伤害。", "en": "Fixed the Bomb tile not showing All-In's extra gold cost; it now displays both the extra gold spent and the corresponding bonus damage."}, {"ver": "v1.91.0", "zh": "dev 版人族新增隐藏职业「🧑‍💻 程序员」：主动「捉虫」可从 Boss 列表选择一个 Boss，以当前回合档位投放；100 回合被动「压力测试」每回合把一个非 Boss 棋子变成当前档位的随机 Boss。该职业仅在 `DEV=true` 时显示，prod 不可见。", "en": "Added the dev-only Human hidden class 🧑‍💻 Programmer: its Debug active chooses a Boss from a list and spawns it at the current turn tier; its turn-100 Stress Test passive converts one non-Boss tile into a random current-tier Boss every turn. It is visible only when `DEV=true` and hidden in prod."}, {"ver": "v1.90.1", "zh": "修复独眼巨人彩色 emoji 的可见边界与字体 advance box 不一致导致的棋盘视觉偏右：现在按实际可见边界居中，旧浏览器使用兼容回退。", "en": "Fixed the Cyclops color emoji appearing visually right-shifted on the board: it now centers against its visible bounds, with a fallback for older browsers."}, {"ver": "v1.90.0", "zh": "新增升级「精研火药」：炸弹伤害 +1，但每级让炸弹多消耗 5 金。矮人二阶被动「爆破手」改为每使用一次炸弹获得 1 级精研火药；两者可以叠加。", "en": "Added the Refined Powder upgrade: +1 Bomb damage, while each level makes bombs cost 5 more gold. Dwarf's Demolitionist Tier-2 passive now grants 1 Refined Powder level per bomb use; both effects stack."}];   /* auto-injected by dr.sh embed-changelog（勿手改） */
 const DEV=true;   // release build (DEV=false); dev build is dungeon-raid-dev.html (DEV=true)
 const REC_API='https://api.dungeonraid.win';   // 录像分享 API（Cloudflare Worker + KV）
 // 带种子随机数（mulberry32）：游戏全程用 rnd() 取代原生随机，配合录制种子可确定性重放
@@ -1451,7 +1451,7 @@ const REC_KEY=DEV?'dr_rec_dev':'dr_rec', REC_LAST_KEY=DEV?'dr_rec_last_dev':'dr_
 const SEED_POOL_KEY=DEV?'dr_seed_pool_dev':'dr_seed_pool';   // 预热的服务端种子：本地最多缓存 1 枚，优先给下次正式版开局复用
 // 录制一个玩家动作（回放中不录）。动作：['m',cells,baseType] 连线 / ['b',key] 购买 / ['b',key,'seer',type] 换装先知选择 / ['k'] 技能 / ['k','seer',type] 先知选择 / ['a',key,on] 自动释放开关 / ['u',idx] 升级选择 / ['t',tier,id] 转职选择
 // 每个动作末尾追加一个时间戳（epoch ms，相对开局可算操作间隔）——仅供离线分析（后续黑盒判定是否 AI 录像），回放/校验按固定下标取值，忽略该尾元素，旧录像无此字段也能正常回放。
-function recAct(a){ if(rec && !replaying){ a.push(Date.now()-(rec.t0||0)); rec.acts.push(a); saveRec(); } }
+function recAct(a){ if(rec && !replaying && !ended){ a.push(Date.now()-(rec.t0||0)); rec.acts.push(a); saveRec(); } }
 // 本局游玩时长（毫秒）：实时对局取 now−t0；回放取录像最后一步的时间戳（相对开局 ms）
 function playMs(){
   if(!replaying && rec && rec.t0) return Math.max(0, Date.now()-rec.t0);
@@ -2083,7 +2083,7 @@ function autoGreedyChain(r0,c0,type){
   if(chain.length<2){ const t=grid[r0][c0]; if(t) showTileInfo(t); return; }   // 没有可连同类邻居 → 退化为看信息
   selection=chain.map(([r,c])=>({r,c,type}));
   lastPointer=null; busy=true;   // 先把连线亮出来一拍再结算（busy 只锁输入、不挡渲染；draw 见 selection 即画线）
-  setTimeout(()=>{ busy=false; if(selection.length){ resolve(); selection=[]; } updateHUD(); }, 260);
+  setTimeout(()=>{ if(ended){ selection=[]; busy=true; updateHUD(); return; } busy=false; if(selection.length){ resolve(); selection=[]; } updateHUD(); }, 260);
 }
 function startDrag(e){
   if(replaying){ e.preventDefault(); togglePauseReplay(); return; }   // 回放中：棋盘不可操作；点棋盘=暂停/继续

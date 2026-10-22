@@ -16,7 +16,7 @@ const REC_KEY=DEV?'dr_rec_dev':'dr_rec', REC_LAST_KEY=DEV?'dr_rec_last_dev':'dr_
 const SEED_POOL_KEY=DEV?'dr_seed_pool_dev':'dr_seed_pool';   // 预热的服务端种子：本地最多缓存 1 枚，优先给下次正式版开局复用
 // 录制一个玩家动作（回放中不录）。动作：['m',cells,baseType] 连线 / ['b',key] 购买 / ['b',key,'seer',type] 换装先知选择 / ['k'] 技能 / ['k','seer',type] 先知选择 / ['a',key,on] 自动释放开关 / ['u',idx] 升级选择 / ['t',tier,id] 转职选择
 // 每个动作末尾追加一个时间戳（epoch ms，相对开局可算操作间隔）——仅供离线分析（后续黑盒判定是否 AI 录像），回放/校验按固定下标取值，忽略该尾元素，旧录像无此字段也能正常回放。
-function recAct(a){ if(rec && !replaying){ a.push(Date.now()-(rec.t0||0)); rec.acts.push(a); saveRec(); } }
+function recAct(a){ if(rec && !replaying && !ended){ a.push(Date.now()-(rec.t0||0)); rec.acts.push(a); saveRec(); } }
 // 本局游玩时长（毫秒）：实时对局取 now−t0；回放取录像最后一步的时间戳（相对开局 ms）
 function playMs(){
   if(!replaying && rec && rec.t0) return Math.max(0, Date.now()-rec.t0);

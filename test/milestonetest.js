@@ -6,7 +6,8 @@ const file = fs.existsSync('dungeon-raid-dev.html') ? 'dungeon-raid-dev.html' : 
 let s = fs.readFileSync(file, 'utf8').match(/<script>([\s\S]*?)<\/script>/)[1];
 const EXPORT = `globalThis.__G={startGame,raceById,onBossKilled,dispatchReplayAct,buyItem,shopCost,resolve,applyUpgrade,applyGravity,advanceEnemies,activateSkill,activateDebugSkill,autoReleaseItems,makeTile,isSwordTarget,normalEnemyAttack,bombDamage,gunpowderLevels,bossTier,
   TIER1,TIER2,RACE_PATHS, CLASS_T2, UPGRADES, WEAPON, gainGold, gainHeal, addXp, currentSwordFlat, witherAuraTick, hurtPlayer, frostOrbDamage,
-  get player(){return player}, get grid(){return grid}, get logHistory(){return logHistory}, set selection(v){selection=v},
+  get player(){return player}, get grid(){return grid}, get logHistory(){return logHistory}, get rec(){return rec}, set rec(v){rec=v}, get ended(){return ended}, set ended(v){ended=v}, recAct,
+  set selection(v){selection=v},
   set busy(v){busy=v}, set pendingLevels(v){pendingLevels=v}, set replaying(v){replaying=v}, set replayRec(v){replayRec=v}};`;
 s = s.replace('resize(); showClassSelect(); loop();', EXPORT);
 const elH={get(t,p){if(p==='style')return t._s||(t._s={});if(p==='dataset')return t._d||(t._d={});if(p==='classList')return{add(){},remove(){},toggle(){}};if(p==='getContext')return()=>new Proxy({},{get:()=>()=>{},set:()=>true});if(['addEventListener','appendChild','setAttribute','focus','click'].includes(p))return()=>{};if(p==='querySelector')return()=>new Proxy({},elH);if(p==='querySelectorAll')return()=>[];if(p==='getBoundingClientRect')return()=>({left:0,top:0,width:420,height:420});if(['width','height','clientWidth','clientHeight'].includes(p))return 420;return t[p];},set(t,p,v){t[p]=v;return true;}};
@@ -281,6 +282,11 @@ bz.hp=40; bz.maxHp=40; bz.fireFeather=false; const featherFoe={type:'enemy',hp:1
 // onBossKilled 链：未到回合不应误触发
 const q=Object.assign({},{t1:se.t1Pending||e.t1Pending||p.t1Pending,t2:se.t2Pending||e.t2Pending||p.t2Pending,t3:se.t3Pending||e.t3Pending||p.t3Pending,t4:se.t4Pending||e.t4Pending||p.t4Pending});
 ok(!q.t1&&!q.t2&&!q.t3&&!q.t4,'里程碑用尽后无残留 pending');
+
+// 终局边界：死亡/破关后任何迟到动作都不能继续写入录像
+G.rec={t0:0,acts:[]}; G.ended=true; G.replaying=false; G.recAct(['m',[], 'coin']);
+ok(G.rec.acts.length===0,'终局后迟到动作不会写入录像');
+G.ended=false;
 
 // DEV 专属程序员：捉虫按当前回合档位投放所选 Boss，压力测试每回合转化一个非 Boss 格
 ok(G.RACE_PATHS.human.t1.includes('programmer') && G.CLASS_T2.programmer==='stresstest','DEV 人族职业池包含程序员及压力测试');

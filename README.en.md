@@ -37,7 +37,7 @@ The current Dev build is `v1.75.1`; builds now automatically inject the latest c
 
 The current Dev build is `v1.75.2`; race and turn-50 class `ⓘ` details now use separate buttons so they cannot accidentally select the card.
 
-The current Dev build is `v1.91.1`; the Bomb tile now shows All-In's extra gold cost and damage bonus.
+The current Dev build is `v1.92.0`; delayed inputs after death or clear are no longer recorded, preventing claimed-turn and deterministic-replay mismatches.
 
 ## 🧩 Core Gameplay
 

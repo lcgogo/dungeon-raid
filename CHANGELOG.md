@@ -1,4 +1,10 @@
 
+## [v1.92.0] - 2026-10-21
+> Version-Impact: verify
+
+- 修复死亡/破关后的延迟输入仍可能写入录像的问题：终局后不再录制新动作，延迟连线结算也会被丢弃，避免录像声称回合数与确定性重放差 1。
+- Fixed delayed post-death/clear inputs being appended to recordings: terminal runs no longer record new actions, and delayed link resolution is discarded, preventing one-turn mismatches between claimed and deterministic replay results.
+
 ## [v1.91.1] - 2026-10-20
 
 - 修复炸弹方块未显示「乾坤一掷」额外金币消耗的问题；现在会同时显示本次额外扣金和对应伤害。
