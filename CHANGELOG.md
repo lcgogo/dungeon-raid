@@ -1,4 +1,9 @@
 
+## [v1.92.1] - 2026-10-22
+
+- 进一步修复 iOS Canvas 中独眼巨人图标仍偏右的问题：棋盘绘制改用不带变体选择符的 `👁` 字形，详情和日志图标保持不变。
+- Further fixed the Cyclops icon remaining right-shifted in iOS Canvas: board rendering now uses the plain `👁` glyph without a variation selector, while detail and log icons remain unchanged.
+
 ## [v1.92.0] - 2026-10-21
 > Version-Impact: verify
 

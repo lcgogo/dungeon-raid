@@ -37,7 +37,7 @@ The current Dev build is `v1.75.1`; builds now automatically inject the latest c
 
 The current Dev build is `v1.75.2`; race and turn-50 class `ⓘ` details now use separate buttons so they cannot accidentally select the card.
 
-The current Dev build is `v1.92.0`; delayed inputs after death or clear are no longer recorded, preventing claimed-turn and deterministic-replay mismatches.
+The current Dev build is `v1.92.1`; the Cyclops board icon is further corrected for iOS Canvas alignment.
 
 ## 🧩 Core Gameplay
 

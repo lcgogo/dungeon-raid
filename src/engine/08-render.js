@@ -94,7 +94,8 @@ function draw(){
       const doomed = killSet && killSet.has(t.r+','+t.c) && (!isBoss || bdef.swordable || player.pierceTurn); // 会被这条线杀死 → 骷髅
       ctx.font=Math.floor(TILE*0.30)+'px '+EMOJI_FONT;
       ctx.textAlign='center'; ctx.textBaseline='middle';
-      const glyph=doomed?'💀':(isBoss?bdef.emoji:'👹');
+      // iOS Apple Color Emoji gives 👁️'s variation-selector glyph an asymmetric advance box.
+      const glyph=doomed?'💀':(isBoss?(bdef.id==='cyclops'?'👁':bdef.emoji):'👹');
       if(!doomed && isBoss && t.bossId==='cyclops') fillEmojiVisuallyCentered(glyph, cx, y+TILE*0.30);
       else ctx.fillText(glyph, cx, y+TILE*0.30);
       // 血量（终焉之主无血、打不掉 → 显示 ∞ 而非 0）
