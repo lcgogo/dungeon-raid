@@ -23,7 +23,7 @@ Play online: **<https://dungeonraid.win>** (Dev build: <https://dungeonraid.win/
 
 The two builds keep **separate, non-overwriting saves** (Dev uses its own localStorage keys). The start screen and footer both label which build you are in. The home page’s Release / Dev version numbers are **statically injected at deploy time**, so they appear instantly even on weak connections without an extra fetch.
 
-The current Dev build is `v1.92.2`; feedback entries can now be opened to view their thread and post replies. The README tracks the current code, including the Dev-only Human hidden Programmer class, Refined Powder, stable replay boundaries, and the iOS Cyclops board-icon fix. Release builds keep Programmer hidden. Source lives under `src/` and the self-contained HTML is regenerated with `node build/build.js`.
+The current Dev build is `v1.93.0`; the new 🧽 SpongeBob boss absorbs the damage that normal enemies would take when the same sword chain crosses both. Feedback entries can be opened to view their thread and post replies. The README tracks the current code, including the Dev-only Human hidden Programmer class, Refined Powder, stable replay boundaries, and the iOS Cyclops board-icon fix. Release builds keep Programmer hidden. Source lives under `src/` and the self-contained HTML is regenerated with `node build/build.js`.
 
 ## 🧩 Core Gameplay
 

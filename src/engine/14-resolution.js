@@ -152,11 +152,15 @@ function dealDamage(pool, targets, allFoes){
     if(hits(t)) list.push({r,c,t}); } }   // 全场型（箭雨：allFoes 缺省→只可剑攻击 / 蛊毒·黑毒心：allFoes→含剑免疫）
   // 原版算法：剑链伤害对每只目标【独立、全额】生效，不共享、不分配
   const splashes=[];
+  const sponge=targets && !allFoes ? list.find(e=>e.t.type==='boss'&&e.t.bossId==='sponge') : null;
+  const spongeFodder=sponge ? list.filter(e=>e.t.type==='enemy').length : 0;
   for(const e of list){
     if(grid[e.r][e.c]!==e.t) continue;
+    if(sponge && e.t.type==='enemy') continue;   // 🧽宝宝替这些普通怪吸收本次剑链伤害
     const before=e.t.hp;
     if(player.rogueStealTurn && !allFoes && targets) bonusGold += Math.max(1, Math.floor(before*0.2));
-    const hit=Math.min(pool, before);
+    const intended=spongeFodder && e.t===sponge.t ? pool*(spongeFodder+1) : pool;
+    const hit=Math.min(intended, before);
     e.t.hp-=hit; dmg+=hit;
     statueReflect(e.t, hit);   // 石像：等量真实伤害反弹给玩家
     if(e.t.hp<=0){ if(e.t.type==='boss'){ if(defeatBoss(e.t,e.r,e.c)==='split') continue; } else { grid[e.r][e.c]=null; normalKills++; xp+=addXp(player,3+(player.killXp||0)); gainGold(1); if(player.rotflesh) player.maxHp++; } kills++;

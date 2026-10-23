@@ -1,5 +1,8 @@
 // ===== Boss 池：每 10 回合从中随机挑一个现身。多数 Boss 可被武器攻击，奖励丰厚 =====
 const BOSSES=[
+  { id:'sponge', emoji:'🧽', name:['海绵宝宝','SpongeBob'], quip:['别怕，伤害我来吸。','Do not worry, I will soak the damage.'], monster:true, swordable:true,
+    special:['剑链划过时替普通怪吸收本次伤害','Soaks sword-chain damage for crossed normal enemies'],
+    desc:['可以用{W}攻击它。若同一条{WC}同时划过它和普通怪，普通怪本次不受伤害，原本每只普通怪应承受的整段伤害都会由🧽宝宝吸收；它自己仍会吸收本来属于自己的那一份。','You CAN attack it with a {WC}. If the same chain crosses it and normal enemies, those enemies take no damage and 🧽 Sponge Baby absorbs the full damage each would have taken; it still absorbs its own normal share too.'] },
   { id:'matryoshka', emoji:'🪆', name:['套娃','Matryoshka'], quip:['里面还有一个。','There is another one inside.'], monster:true, swordable:true, noTierScale:true,
     desc:['属性与同级普通怪一致。被击败后会在可用非怪物格分裂成 2 个低 1 级的套娃；Lv1 才会真正击败并获得 Boss 奖励。','Stats match a normal enemy. When defeated, it splits into two one-tier-lower copies on available non-monster tiles; only Lv1 is truly defeated and grants boss rewards.'] },
   { id:'ghost', emoji:'👻', name:['幽灵','Ghost'], quip:['{W}？穿过去了，挠痒痒都算不上。','{W}s? They pass right through me.'], monster:true, noTierScale:true,

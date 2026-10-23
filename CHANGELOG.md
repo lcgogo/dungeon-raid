@@ -1,4 +1,10 @@
 
+## [v1.93.0] - 2026-10-23
+> Version-Impact: verify
+
+- 新增 Boss「🧽 海绵宝宝」：若同一条剑链划过它和普通怪，普通怪本次不受伤，原本每只普通怪应承受的整段剑伤由海绵宝宝吸收；炸弹、箭雨、毒心等非剑链伤害不触发该能力。
+- Added the 🧽 SpongeBob boss: when the same sword chain crosses it and normal enemies, those enemies take no damage and SpongeBob absorbs the full damage each would have taken; Bombs, Arrow Rain, poison hearts, and other non-chain damage do not trigger it.
+
 ## [v1.92.2] - 2026-10-23
 
 - 反馈板留言现在可以点开查看详情并继续回复；回复单独存储，保留原留言和回复时间线。

@@ -36,5 +36,5 @@ function applyStaticLang(){
   set('shBombName', tr('💥 炸弹','💥 Bomb'));
   set('shBombDesc', tr('全场怪-5血','All foes -5 HP'));
   set('tapHint', tr('💡：点开任意方块查看更多','💡: Tap any tile for more'));
-  set('ver', VERSION+(DEV?tr(' · 🚧 DEV 开发版',' · 🚧 DEV build'):tr(' · 正式版',' · Release'))+' 📝');
+  set('ver', VERSION+(DEV?tr(' · 🚧 DEV 开发版',' · 🚧 DEV build'):tr(' · 正式版',' · Release'))+' · '+tr('更新日志','Changelog')+' 📝');
 }
