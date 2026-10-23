@@ -1,4 +1,9 @@
 
+## [v1.92.2] - 2026-10-23
+
+- 反馈板留言现在可以点开查看详情并继续回复；回复单独存储，保留原留言和回复时间线。
+- Feedback board entries can now be opened to view a thread and post replies; replies are stored separately while preserving the original message timeline.
+
 ## [v1.92.1] - 2026-10-22
 
 - 进一步修复 iOS Canvas 中独眼巨人图标仍偏右的问题：棋盘绘制改用不带变体选择符的 `👁` 字形，详情和日志图标保持不变。

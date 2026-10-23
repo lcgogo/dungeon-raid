@@ -73,3 +73,25 @@ CREATE TABLE score_thresholds (
 );
 CREATE INDEX idx_score_thresholds_computed ON score_thresholds (computed DESC);
 CREATE INDEX idx_score_thresholds_agent_race_version_kind ON score_thresholds (agent, race, version_bucket, scope_kind, computed DESC);
+
+CREATE TABLE feedback (
+  id       TEXT PRIMARY KEY,
+  nickname TEXT NOT NULL DEFAULT '',
+  category TEXT NOT NULL DEFAULT 'suggestion',
+  body     TEXT NOT NULL,
+  version  TEXT NOT NULL DEFAULT '',
+  status   TEXT NOT NULL DEFAULT 'open',
+  created  INTEGER NOT NULL
+);
+CREATE INDEX idx_feedback_public ON feedback (status, created DESC);
+
+CREATE TABLE feedback_replies (
+  id          TEXT PRIMARY KEY,
+  feedback_id TEXT NOT NULL,
+  nickname    TEXT NOT NULL DEFAULT '',
+  body        TEXT NOT NULL,
+  version     TEXT NOT NULL DEFAULT '',
+  status      TEXT NOT NULL DEFAULT 'open',
+  created     INTEGER NOT NULL
+);
+CREATE INDEX idx_feedback_replies_public ON feedback_replies (feedback_id, status, created ASC);

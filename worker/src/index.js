@@ -428,7 +428,7 @@ export default {
     const url = new URL(req.url), p = url.pathname;
 
     // 写入类端点按来源 IP 限流（每 IP 20 次/60s），挡刷榜/批量伪造。绑定缺失时（本地/未配）跳过。
-    if (req.method === 'POST' && (p === '/rec' || p === '/score' || p === '/clear' || p === '/feedback') && env.WRITE_LIMITER) {
+    if (req.method === 'POST' && (p === '/rec' || p === '/score' || p === '/clear' || p === '/feedback' || /^\/feedback\/[^/]+\/reply$/.test(p)) && env.WRITE_LIMITER) {
       const ip = req.headers.get('cf-connecting-ip') || 'unknown';
       const { success } = await env.WRITE_LIMITER.limit({ key: ip });
       if (!success) return json({ error: 'too many requests, slow down' }, 429);
@@ -437,8 +437,16 @@ export default {
     // 公开反馈板：只展示 status=open 的留言；联系方式等私密字段不接收。
     if (req.method === 'GET' && p === '/feedback') {
       const limit = Math.max(1, Math.min(50, Number(url.searchParams.get('limit') || 30) | 0));
-      const rows = await env.DB.prepare("SELECT id,nickname,category,body,version,created FROM feedback WHERE status='open' ORDER BY created DESC LIMIT ?").bind(limit).all();
+      const rows = await env.DB.prepare("SELECT f.id,f.nickname,f.category,f.body,f.version,f.created,COUNT(r.id) AS reply_count FROM feedback f LEFT JOIN feedback_replies r ON r.feedback_id=f.id AND r.status='open' WHERE f.status='open' GROUP BY f.id ORDER BY f.created DESC LIMIT ?").bind(limit).all();
       return json({ feedback: rows.results || [] });
+    }
+    const feedbackDetail = p.match(/^\/feedback\/([^/]+)$/);
+    if (req.method === 'GET' && feedbackDetail) {
+      const id = decodeURIComponent(feedbackDetail[1]);
+      const row = await env.DB.prepare("SELECT id,nickname,category,body,version,created FROM feedback WHERE id=? AND status='open'").bind(id).first();
+      if (!row) return json({ error: 'feedback not found' }, 404);
+      const replies = await env.DB.prepare("SELECT id,nickname,body,version,created FROM feedback_replies WHERE feedback_id=? AND status='open' ORDER BY created ASC").bind(id).all();
+      return json({ feedback: row, replies: replies.results || [] });
     }
     if (req.method === 'POST' && p === '/feedback') {
       let d; try { d = await req.json(); } catch { return json({ error: 'invalid json' }, 400); }
@@ -449,6 +457,20 @@ export default {
       const version = String(d && d.version || '').slice(0, 20);
       const id = 'fb_' + shortId(12), created = Math.floor(Date.now() / 1000);
       await env.DB.prepare("INSERT INTO feedback (id,nickname,category,body,version,status,created) VALUES (?,?,?,?,?, 'open', ?)").bind(id, nickname, category, body, version, created).run();
+      return json({ ok: true, id }, 201);
+    }
+    const feedbackReply = p.match(/^\/feedback\/([^/]+)\/reply$/);
+    if (req.method === 'POST' && feedbackReply) {
+      const feedbackId = decodeURIComponent(feedbackReply[1]);
+      const parent = await env.DB.prepare("SELECT id FROM feedback WHERE id=? AND status='open'").bind(feedbackId).first();
+      if (!parent) return json({ error: 'feedback not found' }, 404);
+      let d; try { d = await req.json(); } catch { return json({ error: 'invalid json' }, 400); }
+      const body = String(d && d.body || '').trim();
+      if (!body || body.length > 1000) return json({ error: 'reply body must be 1-1000 characters' }, 400);
+      const nickname = cleanName(d && d.nickname || '').slice(0, 24);
+      const version = String(d && d.version || '').slice(0, 20);
+      const id = 'fbr_' + shortId(12), created = Math.floor(Date.now() / 1000);
+      await env.DB.prepare("INSERT INTO feedback_replies (id,feedback_id,nickname,body,version,status,created) VALUES (?,?,?,?,?,'open',?)").bind(id, feedbackId, nickname, body, version, created).run();
       return json({ ok: true, id }, 201);
     }
 
