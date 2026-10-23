@@ -36,9 +36,11 @@ function previewKills(){
   let pool=(nS*player.weaponPower+player.swordFlat+titanFlat)*combo*(player.swordMult||1);
   if(player.lowHpDmg) pool*=1+(1-player.hp/player.maxHp)*0.6;
   pool=Math.floor(pool);
-  // 与结算一致：每只怪独立吃满 pool，pool≥血量即死
+  // 海绵宝宝替同链普通怪吸收伤害，预览必须与 dealDamage 保持一致。
+  const sponge=targets.find(s=>{const t=grid[s.r][s.c]; return t&&t.type==='boss'&&t.bossId==='sponge';});
+  const spongeFodder=sponge?targets.filter(s=>{const t=grid[s.r][s.c]; return t&&t.type==='enemy';}).length:0;
   const dead=new Set();
-  targets.forEach(s=>{const t=grid[s.r][s.c]; if(isSwordTarget(t) && pool>=t.hp) dead.add(s.r+','+s.c);});
+  targets.forEach(s=>{const t=grid[s.r][s.c]; if(!isSwordTarget(t) || (spongeFodder&&t.type==='enemy')) return; const intended=spongeFodder&&t===grid[sponge.r][sponge.c]?pool*(spongeFodder+1):pool; if(intended>=t.hp) dead.add(s.r+','+s.c);});
   return dead;
 }
 

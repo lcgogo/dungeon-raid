@@ -1,4 +1,9 @@
 
+## [v1.93.1] - 2026-10-23
+
+- 修复海绵宝宝与普通怪同链时，普通怪预览错误显示骷髅的问题；并补充中英文 Boss 图鉴说明。
+- Fixed normal enemies incorrectly showing skulls in the preview when SpongeBob absorbs their chain damage; also completed the Chinese and English bestiary entries.
+
 ## [v1.93.0] - 2026-10-23
 > Version-Impact: verify
 

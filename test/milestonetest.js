@@ -4,10 +4,10 @@ const fs = require('fs');
 const path = require('path');
 const file = fs.existsSync('dungeon-raid-dev.html') ? 'dungeon-raid-dev.html' : path.join('..', 'dungeon-raid-dev.html');
 let s = fs.readFileSync(file, 'utf8').match(/<script>([\s\S]*?)<\/script>/)[1];
-const EXPORT = `globalThis.__G={startGame,raceById,onBossKilled,dispatchReplayAct,buyItem,shopCost,resolve,dealDamage,applyUpgrade,applyGravity,advanceEnemies,activateSkill,activateDebugSkill,autoReleaseItems,makeTile,isSwordTarget,normalEnemyAttack,bombDamage,gunpowderLevels,bossTier,
+const EXPORT = `globalThis.__G={startGame,raceById,onBossKilled,dispatchReplayAct,buyItem,shopCost,resolve,dealDamage,previewKills,applyUpgrade,applyGravity,advanceEnemies,activateSkill,activateDebugSkill,autoReleaseItems,makeTile,isSwordTarget,normalEnemyAttack,bombDamage,gunpowderLevels,bossTier,
   TIER1,TIER2,RACE_PATHS, CLASS_T2, UPGRADES, WEAPON, gainGold, gainHeal, addXp, currentSwordFlat, witherAuraTick, hurtPlayer, frostOrbDamage,
   get player(){return player}, get grid(){return grid}, get logHistory(){return logHistory}, get rec(){return rec}, set rec(v){rec=v}, get ended(){return ended}, set ended(v){ended=v}, recAct,
-  set selection(v){selection=v},
+  set selection(v){selection=v}, set dragging(v){dragging=v},
   set busy(v){busy=v}, set pendingLevels(v){pendingLevels=v}, set replaying(v){replaying=v}, set replayRec(v){replayRec=v}};`;
 s = s.replace('resize(); showClassSelect(); loop();', EXPORT);
 const elH={get(t,p){if(p==='style')return t._s||(t._s={});if(p==='dataset')return t._d||(t._d={});if(p==='classList')return{add(){},remove(){},toggle(){}};if(p==='getContext')return()=>new Proxy({},{get:()=>()=>{},set:()=>true});if(['addEventListener','appendChild','setAttribute','focus','click'].includes(p))return()=>{};if(p==='querySelector')return()=>new Proxy({},elH);if(p==='querySelectorAll')return()=>[];if(p==='getBoundingClientRect')return()=>({left:0,top:0,width:420,height:420});if(['width','height','clientWidth','clientHeight'].includes(p))return 420;return t[p];},set(t,p,v){t[p]=v;return true;}};
@@ -294,6 +294,9 @@ G.dealDamage(5,[{r:0,c:1},{r:0,c:2,type:'enemy'}]);
 ok(G.grid[0][1].hp===10 && G.grid[0][2].hp===20,'海绵宝宝替同链普通怪吸收整段剑伤');
 G.dealDamage(5,null,true);
 ok(G.grid[0][1].hp===5 && G.grid[0][2].hp===15,'非剑链全场伤害不触发额外吸收');
+G.grid[0][1]={type:'boss',bossId:'sponge',hp:20,maxHp:20,atk:1,cd:9,baseCd:9,tier:1}; G.grid[0][2]={type:'enemy',hp:1,maxHp:1,atk:1,cd:9,baseCd:9};
+G.selection=[{r:0,c:0,type:'sword'},{r:0,c:1,type:'boss'},{r:0,c:2,type:'enemy'}]; G.dragging=true;
+ok(G.previewKills() && G.previewKills().size===0,'海绵宝宝吸收时普通怪预览不显示骷髅'); G.dragging=false;
 
 // 终局边界：死亡/破关后任何迟到动作都不能继续写入录像
 G.rec={t0:0,acts:[]}; G.ended=true; G.replaying=false; G.recAct(['m',[], 'coin']);
