@@ -249,9 +249,9 @@ const CONTENT = {
 if('serviceWorker' in navigator) window.addEventListener('load',()=>navigator.serviceWorker.register('/sw.js').catch(()=>{}));
 //==================== 配置 ====================
 // 版本号 v主.次.修：不影响 verify/replay 兼容边界的小改动改"修"；凡是影响 verify/replay/版本分桶/release 验证语义的改动都改"次"；大版本变更需先确认。页面底部显示。
-const VERSION='v1.93.1';
+const VERSION='v1.93.2';
 // CHANGELOG_LINES below is only a fallback for raw source inspection; build/build.js replaces it from CHANGELOG.md.
-const CHANGELOG_LINES=[{"ver": "v1.93.1", "zh": "修复海绵宝宝与普通怪同链时，普通怪预览错误显示骷髅的问题；并补充中英文 Boss 图鉴说明。", "en": "Fixed normal enemies incorrectly showing skulls in the preview when SpongeBob absorbs their chain damage; also completed the Chinese and English bestiary entries."}, {"ver": "v1.93.0", "zh": "新增 Boss「🧽 海绵宝宝」：若同一条剑链划过它和普通怪，普通怪本次不受伤，原本每只普通怪应承受的整段剑伤由海绵宝宝吸收；炸弹、箭雨、毒心等非剑链伤害不触发该能力。", "en": "Added the 🧽 SpongeBob boss: when the same sword chain crosses it and normal enemies, those enemies take no damage and SpongeBob absorbs the full damage each would have taken; Bombs, Arrow Rain, poison hearts, and other non-chain damage do not trigger it."}, {"ver": "v1.92.2", "zh": "反馈板留言现在可以点开查看详情并继续回复；回复单独存储，保留原留言和回复时间线。", "en": "Feedback board entries can now be opened to view a thread and post replies; replies are stored separately while preserving the original message timeline."}, {"ver": "v1.92.1", "zh": "进一步修复 iOS Canvas 中独眼巨人图标仍偏右的问题：棋盘绘制改用不带变体选择符的 `👁` 字形，详情和日志图标保持不变。", "en": "Further fixed the Cyclops icon remaining right-shifted in iOS Canvas: board rendering now uses the plain `👁` glyph without a variation selector, while detail and log icons remain unchanged."}, {"ver": "v1.92.0", "zh": "修复死亡/破关后的延迟输入仍可能写入录像的问题：终局后不再录制新动作，延迟连线结算也会被丢弃，避免录像声称回合数与确定性重放差 1。", "en": "Fixed delayed post-death/clear inputs being appended to recordings: terminal runs no longer record new actions, and delayed link resolution is discarded, preventing one-turn mismatches between claimed and deterministic replay results."}];   /* auto-injected by dr.sh embed-changelog（勿手改） */
+const CHANGELOG_LINES=[{"ver": "v1.93.2", "zh": "海绵宝宝吸收剑链伤害时，现在会在本次剑链日志中明确显示吸收的伤害量。", "en": "SpongeBob now reports the absorbed damage amount in the sword-chain combat log."}, {"ver": "v1.93.1", "zh": "修复海绵宝宝与普通怪同链时，普通怪预览错误显示骷髅的问题；并补充中英文 Boss 图鉴说明。", "en": "Fixed normal enemies incorrectly showing skulls in the preview when SpongeBob absorbs their chain damage; also completed the Chinese and English bestiary entries."}, {"ver": "v1.93.0", "zh": "新增 Boss「🧽 海绵宝宝」：若同一条剑链划过它和普通怪，普通怪本次不受伤，原本每只普通怪应承受的整段剑伤由海绵宝宝吸收；炸弹、箭雨、毒心等非剑链伤害不触发该能力。", "en": "Added the 🧽 SpongeBob boss: when the same sword chain crosses it and normal enemies, those enemies take no damage and SpongeBob absorbs the full damage each would have taken; Bombs, Arrow Rain, poison hearts, and other non-chain damage do not trigger it."}, {"ver": "v1.92.2", "zh": "反馈板留言现在可以点开查看详情并继续回复；回复单独存储，保留原留言和回复时间线。", "en": "Feedback board entries can now be opened to view a thread and post replies; replies are stored separately while preserving the original message timeline."}, {"ver": "v1.92.1", "zh": "进一步修复 iOS Canvas 中独眼巨人图标仍偏右的问题：棋盘绘制改用不带变体选择符的 `👁` 字形，详情和日志图标保持不变。", "en": "Further fixed the Cyclops icon remaining right-shifted in iOS Canvas: board rendering now uses the plain `👁` glyph without a variation selector, while detail and log icons remain unchanged."}];   /* auto-injected by dr.sh embed-changelog（勿手改） */
 const DEV=true;   // release build (DEV=false); dev build is dungeon-raid-dev.html (DEV=true)
 const REC_API='https://api.dungeonraid.win';   // 录像分享 API（Cloudflare Worker + KV）
 // 带种子随机数（mulberry32）：游戏全程用 rnd() 取代原生随机，配合录制种子可确定性重放
@@ -2454,15 +2454,15 @@ function resolve(){
     if(player.beastDamageMult && player.beastDamageMult!==1) pool*=player.beastDamageMult; // 白虎破军：下一次爪链爆发
     pool=Math.floor(pool);
     if(targets.length && nS>0) pool=Math.max(1, pool);   // 矮人 ×0.85 等减伤仍按 floor；但合法武器攻击至少造成 1 点伤害，避免一锤打出 0 伤
-    let dmg=0, kills=0, bonusGold=0, multiGold=0, xp=0;
-    if(targets.length){ ({dmg,kills,bonusGold,multiGold,xp}=dealDamage(pool, targets)); }
+    let dmg=0, kills=0, bonusGold=0, multiGold=0, xp=0, spongeAbsorbed=0;
+    if(targets.length){ ({dmg,kills,bonusGold,multiGold,xp,spongeAbsorbed}=dealDamage(pool, targets)); }
     const ignited = fireChainIgnite(selection);
     const lifeHeal=lifestealHeal(kills);   // 汲取生命：每杀一只回血（含溅射击杀，kills 已含）
     let blood=0;
     if(player.bloodthirst && targets.length){ blood=vampGain(targets.length*3); player.bloodthirst=0; } // 斗士嗜血（血狂时溢出转上限）
     const comboTxt=combo>1?tr(` 连击×${combo.toFixed(2)}`,` combo×${combo.toFixed(2)}`):'';
     msg=`${wE()}×${nS}${comboTxt}` + (targets.length
-      ? tr(` 直击 ${targets.length} 只怪 → ${dmg} 伤害`,` hit ${targets.length} → ${dmg} dmg`) + (kills?tr(`，击杀 ${kills} 只👹`,`, ${kills} killed`):'') + (multiGold?tr(`，多杀奖励 +${multiGold} 金`,`，multi-kill bonus +${multiGold} gold`):'') + (bonusGold?tr(`，妙手空空 +${bonusGold} 金`,`，Empty Pockets +${bonusGold} gold`):'') + (ignited?tr(`，点燃 ${ignited} 个目标`,`，ignited ${ignited}`):'') + (lifeHeal?tr(`，吸血 +${lifeHeal}`,`, +${lifeHeal} lifesteal`):'') + (blood?tr(`，回血 ${blood}`,`, +${blood} HP`):'')
+      ? tr(` 直击 ${targets.length} 只怪 → ${dmg} 伤害`,` hit ${targets.length} → ${dmg} dmg`) + (spongeAbsorbed?tr(`，🧽海绵宝宝吸收 ${spongeAbsorbed} 伤害`,`，🧽 SpongeBob absorbed ${spongeAbsorbed} dmg`):'') + (kills?tr(`，击杀 ${kills} 只👹`,`, ${kills} killed`):'') + (multiGold?tr(`，多杀奖励 +${multiGold} 金`,`，multi-kill bonus +${multiGold} gold`):'') + (bonusGold?tr(`，妙手空空 +${bonusGold} 金`,`，Empty Pockets +${bonusGold} gold`):'') + (ignited?tr(`，点燃 ${ignited} 个目标`,`，ignited ${ignited}`):'') + (lifeHeal?tr(`，吸血 +${lifeHeal}`,`, +${lifeHeal} lifesteal`):'') + (blood?tr(`，回血 ${blood}`,`, +${blood} HP`):'')
       : tr('（未串到怪）','(no enemy hit)'));
     if(xp) msg += xpLog(xp);
   } else {
@@ -2578,7 +2578,7 @@ function holyStrikeDamage(amt){
 }
 
 function dealDamage(pool, targets, allFoes){
-  let dmg=0, kills=0, normalKills=0, bonusGold=0, xp=0;
+  let dmg=0, kills=0, normalKills=0, bonusGold=0, xp=0, spongeAbsorbed=0;
   const list=[];
   const seen=new Set();
   // allFoes=true：命中全场怪含【剑免疫 Boss】（蛊毒/黑毒心「灌给全场怪」，与炸弹/吸魂一致，仅排除终焉之主）；否则只命中可剑攻击目标
@@ -2598,6 +2598,7 @@ function dealDamage(pool, targets, allFoes){
     if(player.rogueStealTurn && !allFoes && targets) bonusGold += Math.max(1, Math.floor(before*0.2));
     const intended=spongeFodder && e.t===sponge.t ? pool*(spongeFodder+1) : pool;
     const hit=Math.min(intended, before);
+    if(sponge && e.t===sponge.t) spongeAbsorbed=Math.min(pool*spongeFodder, Math.max(0,before-pool));
     e.t.hp-=hit; dmg+=hit;
     statueReflect(e.t, hit);   // 石像：等量真实伤害反弹给玩家
     if(e.t.hp<=0){ if(e.t.type==='boss'){ if(defeatBoss(e.t,e.r,e.c)==='split') continue; } else { grid[e.r][e.c]=null; normalKills++; xp+=addXp(player,3+(player.killXp||0)); gainGold(1); if(player.rotflesh) player.maxHp++; } kills++;
@@ -2608,7 +2609,7 @@ function dealDamage(pool, targets, allFoes){
   // 溅射（骷髅王被动）：每份溢出随机砸到棋盘上剩余的一个敌人/Boss（含剑免疫，排除终焉之主）
   for(const over of splashes){ const r=splashHit(over); dmg+=r.dmg; kills+=r.kills; normalKills+=r.normalKills; xp+=r.xp; }
   const multiGold=multiKillGold(normalKills);
-  return {dmg,kills,bonusGold,multiGold,xp};
+  return {dmg,kills,bonusGold,multiGold,xp,spongeAbsorbed};
 }
 // 溅射落点：随机选一个剩余敌人/Boss（含剑免疫，排除终焉之主），造成 over 伤害
 function splashHit(over){

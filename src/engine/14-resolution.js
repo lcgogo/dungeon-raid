@@ -17,15 +17,15 @@ function resolve(){
     if(player.beastDamageMult && player.beastDamageMult!==1) pool*=player.beastDamageMult; // 白虎破军：下一次爪链爆发
     pool=Math.floor(pool);
     if(targets.length && nS>0) pool=Math.max(1, pool);   // 矮人 ×0.85 等减伤仍按 floor；但合法武器攻击至少造成 1 点伤害，避免一锤打出 0 伤
-    let dmg=0, kills=0, bonusGold=0, multiGold=0, xp=0;
-    if(targets.length){ ({dmg,kills,bonusGold,multiGold,xp}=dealDamage(pool, targets)); }
+    let dmg=0, kills=0, bonusGold=0, multiGold=0, xp=0, spongeAbsorbed=0;
+    if(targets.length){ ({dmg,kills,bonusGold,multiGold,xp,spongeAbsorbed}=dealDamage(pool, targets)); }
     const ignited = fireChainIgnite(selection);
     const lifeHeal=lifestealHeal(kills);   // 汲取生命：每杀一只回血（含溅射击杀，kills 已含）
     let blood=0;
     if(player.bloodthirst && targets.length){ blood=vampGain(targets.length*3); player.bloodthirst=0; } // 斗士嗜血（血狂时溢出转上限）
     const comboTxt=combo>1?tr(` 连击×${combo.toFixed(2)}`,` combo×${combo.toFixed(2)}`):'';
     msg=`${wE()}×${nS}${comboTxt}` + (targets.length
-      ? tr(` 直击 ${targets.length} 只怪 → ${dmg} 伤害`,` hit ${targets.length} → ${dmg} dmg`) + (kills?tr(`，击杀 ${kills} 只👹`,`, ${kills} killed`):'') + (multiGold?tr(`，多杀奖励 +${multiGold} 金`,`，multi-kill bonus +${multiGold} gold`):'') + (bonusGold?tr(`，妙手空空 +${bonusGold} 金`,`，Empty Pockets +${bonusGold} gold`):'') + (ignited?tr(`，点燃 ${ignited} 个目标`,`，ignited ${ignited}`):'') + (lifeHeal?tr(`，吸血 +${lifeHeal}`,`, +${lifeHeal} lifesteal`):'') + (blood?tr(`，回血 ${blood}`,`, +${blood} HP`):'')
+      ? tr(` 直击 ${targets.length} 只怪 → ${dmg} 伤害`,` hit ${targets.length} → ${dmg} dmg`) + (spongeAbsorbed?tr(`，🧽海绵宝宝吸收 ${spongeAbsorbed} 伤害`,`，🧽 SpongeBob absorbed ${spongeAbsorbed} dmg`):'') + (kills?tr(`，击杀 ${kills} 只👹`,`, ${kills} killed`):'') + (multiGold?tr(`，多杀奖励 +${multiGold} 金`,`，multi-kill bonus +${multiGold} gold`):'') + (bonusGold?tr(`，妙手空空 +${bonusGold} 金`,`，Empty Pockets +${bonusGold} gold`):'') + (ignited?tr(`，点燃 ${ignited} 个目标`,`，ignited ${ignited}`):'') + (lifeHeal?tr(`，吸血 +${lifeHeal}`,`, +${lifeHeal} lifesteal`):'') + (blood?tr(`，回血 ${blood}`,`, +${blood} HP`):'')
       : tr('（未串到怪）','(no enemy hit)'));
     if(xp) msg += xpLog(xp);
   } else {
@@ -141,7 +141,7 @@ function holyStrikeDamage(amt){
 }
 
 function dealDamage(pool, targets, allFoes){
-  let dmg=0, kills=0, normalKills=0, bonusGold=0, xp=0;
+  let dmg=0, kills=0, normalKills=0, bonusGold=0, xp=0, spongeAbsorbed=0;
   const list=[];
   const seen=new Set();
   // allFoes=true：命中全场怪含【剑免疫 Boss】（蛊毒/黑毒心「灌给全场怪」，与炸弹/吸魂一致，仅排除终焉之主）；否则只命中可剑攻击目标
@@ -161,6 +161,7 @@ function dealDamage(pool, targets, allFoes){
     if(player.rogueStealTurn && !allFoes && targets) bonusGold += Math.max(1, Math.floor(before*0.2));
     const intended=spongeFodder && e.t===sponge.t ? pool*(spongeFodder+1) : pool;
     const hit=Math.min(intended, before);
+    if(sponge && e.t===sponge.t) spongeAbsorbed=Math.min(pool*spongeFodder, Math.max(0,before-pool));
     e.t.hp-=hit; dmg+=hit;
     statueReflect(e.t, hit);   // 石像：等量真实伤害反弹给玩家
     if(e.t.hp<=0){ if(e.t.type==='boss'){ if(defeatBoss(e.t,e.r,e.c)==='split') continue; } else { grid[e.r][e.c]=null; normalKills++; xp+=addXp(player,3+(player.killXp||0)); gainGold(1); if(player.rotflesh) player.maxHp++; } kills++;
@@ -171,7 +172,7 @@ function dealDamage(pool, targets, allFoes){
   // 溅射（骷髅王被动）：每份溢出随机砸到棋盘上剩余的一个敌人/Boss（含剑免疫，排除终焉之主）
   for(const over of splashes){ const r=splashHit(over); dmg+=r.dmg; kills+=r.kills; normalKills+=r.normalKills; xp+=r.xp; }
   const multiGold=multiKillGold(normalKills);
-  return {dmg,kills,bonusGold,multiGold,xp};
+  return {dmg,kills,bonusGold,multiGold,xp,spongeAbsorbed};
 }
 // 溅射落点：随机选一个剩余敌人/Boss（含剑免疫，排除终焉之主），造成 over 伤害
 function splashHit(over){

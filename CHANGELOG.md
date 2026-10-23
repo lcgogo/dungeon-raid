@@ -1,4 +1,9 @@
 
+## [v1.93.2] - 2026-10-23
+
+- 海绵宝宝吸收剑链伤害时，现在会在本次剑链日志中明确显示吸收的伤害量。
+- SpongeBob now reports the absorbed damage amount in the sword-chain combat log.
+
 ## [v1.93.1] - 2026-10-23
 
 - 修复海绵宝宝与普通怪同链时，普通怪预览错误显示骷髅的问题；并补充中英文 Boss 图鉴说明。
