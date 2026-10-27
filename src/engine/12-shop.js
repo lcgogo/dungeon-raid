@@ -21,7 +21,7 @@ const SHOP={
 };
 function shopCost(key){ let c=SHOP[key].cost; if(key==='heal') c+=(player.healUses||0); if(key==='bomb') c+=5*gunpowderLevels(player); if(player.cheapskate) c=Math.ceil(c/2); return c; } // 治疗/精研火药：每次使用后下次分别多花 1/5 金；小气鬼：花费减半
 function buyItem(key){
-  if(busy||pendingLevels) return;
+  if(ended||busy||pendingLevels) return;
   if(player.frozen && player.frozen[key]>0) return;   // 雪人冰封该槽（治疗/炸弹），数回合内不可用
   if(player.skill2 && player.skill2.slot===key){ castSkill2(key); return; }   // 该槽被换装主动占用 → 施放，不再购买消耗品
   if(key==='heal' && player.hp>=player.maxHp) return;   // 满血时治疗无意义，不可用（HUD 亦置灰）

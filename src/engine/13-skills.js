@@ -74,7 +74,7 @@ function showDebugBossSelect(){
   showOverlay();
 }
 function activateSkill(){
-  if(busy||pendingLevels) return;
+  if(ended||busy||pendingLevels) return;
   prophecySlotKey=null;
   const sk=player&&player.tier1&&TIER1[player.tier1]&&TIER1[player.tier1].skill; if(!sk||sk.passive) return;  // 一阶职业的主动
   if(player.frozen && player.frozen.skill>0) return;   // 雪人冰封了一阶主动

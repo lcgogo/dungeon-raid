@@ -40,7 +40,7 @@ function autoGreedyChain(r0,c0,type){
 }
 function startDrag(e){
   if(replaying){ e.preventDefault(); togglePauseReplay(); return; }   // 回放中：棋盘不可操作；点棋盘=暂停/继续
-  if(busy||pendingLevels) return;
+  if(ended||busy||pendingLevels) return;
   const cell=cellFromEvent(e); if(!cell) return;
   const t=grid[cell.r][cell.c]; if(!t) return;
   // 双击 盾/心/金 → 贪心连线（双击窗口内、同一格的第二次 pointerdown）

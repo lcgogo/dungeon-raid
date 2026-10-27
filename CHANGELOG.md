@@ -1,4 +1,9 @@
 
+## [v1.93.3] - 2026-10-27
+
+- 修复结束后回放上一局时，退出回放误恢复已结束棋盘、没有回到首页的问题；已结束对局的棋盘、商店和技能输入现在会被拦截。
+- Fixed replay exit restoring a stale finished board instead of returning home; board, shop, and skill inputs are now blocked after a run ends.
+
 ## [v1.93.2] - 2026-10-23
 
 - 海绵宝宝吸收剑链伤害时，现在会在本次剑链日志中明确显示吸收的伤害量。

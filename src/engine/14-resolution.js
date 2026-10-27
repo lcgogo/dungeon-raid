@@ -1,5 +1,6 @@
 //==================== 核心结算 ====================
 function resolve(){
+  if(ended&&!replaying) return;
   player.dmgBy={}; player.deathMode='damage';
   const type=selection[0].type;
   recAct(['m', selection.map(s=>[s.r,s.c]), type]);   // 录制连线（改动棋盘前）
