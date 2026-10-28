@@ -249,9 +249,9 @@ const CONTENT = {
 if('serviceWorker' in navigator) window.addEventListener('load',()=>navigator.serviceWorker.register('/sw.js').catch(()=>{}));
 //==================== 配置 ====================
 // 版本号 v主.次.修：不影响 verify/replay 兼容边界的小改动改"修"；凡是影响 verify/replay/版本分桶/release 验证语义的改动都改"次"；大版本变更需先确认。页面底部显示。
-const VERSION='v1.93.3';
+const VERSION='v1.94.0';
 // CHANGELOG_LINES below is only a fallback for raw source inspection; build/build.js replaces it from CHANGELOG.md.
-const CHANGELOG_LINES=[{"ver": "v1.93.3", "zh": "修复结束后回放上一局时，退出回放误恢复已结束棋盘、没有回到首页的问题；已结束对局的棋盘、商店和技能输入现在会被拦截。", "en": "Fixed replay exit restoring a stale finished board instead of returning home; board, shop, and skill inputs are now blocked after a run ends."}, {"ver": "v1.93.2", "zh": "海绵宝宝吸收剑链伤害时，现在会在本次剑链日志中明确显示吸收的伤害量。", "en": "SpongeBob now reports the absorbed damage amount in the sword-chain combat log."}, {"ver": "v1.93.1", "zh": "修复海绵宝宝与普通怪同链时，普通怪预览错误显示骷髅的问题；并补充中英文 Boss 图鉴说明。", "en": "Fixed normal enemies incorrectly showing skulls in the preview when SpongeBob absorbs their chain damage; also completed the Chinese and English bestiary entries."}, {"ver": "v1.93.0", "zh": "新增 Boss「🧽 海绵宝宝」：若同一条剑链划过它和普通怪，普通怪本次不受伤，原本每只普通怪应承受的整段剑伤由海绵宝宝吸收；炸弹、箭雨、毒心等非剑链伤害不触发该能力。", "en": "Added the 🧽 SpongeBob boss: when the same sword chain crosses it and normal enemies, those enemies take no damage and SpongeBob absorbs the full damage each would have taken; Bombs, Arrow Rain, poison hearts, and other non-chain damage do not trigger it."}, {"ver": "v1.92.2", "zh": "反馈板留言现在可以点开查看详情并继续回复；回复单独存储，保留原留言和回复时间线。", "en": "Feedback board entries can now be opened to view a thread and post replies; replies are stored separately while preserving the original message timeline."}];   /* auto-injected by dr.sh embed-changelog（勿手改） */
+const CHANGELOG_LINES=[{"ver": "v1.94.0", "zh": "修复死局逃生检查把「主动技能已就绪」误当成「当前能改变棋盘」的问题：主动没有有效目标/棋子，或会长金币不足时，不再阻止判负。炸弹用完后若棋盘仍无合法行动且没有有效逃生技能，会正确结束对局。", "en": "Fixed deadlock escape checks treating any ready active as a viable board-changing action. Skills without a valid target or required tile, and Guild Master without enough gold, no longer prevent defeat; a board still blocked after using its Bomb now ends the run when no viable escape remains."}, {"ver": "v1.93.3", "zh": "修复结束后回放上一局时，退出回放误恢复已结束棋盘、没有回到首页的问题；已结束对局的棋盘、商店和技能输入现在会被拦截。", "en": "Fixed replay exit restoring a stale finished board instead of returning home; board, shop, and skill inputs are now blocked after a run ends."}, {"ver": "v1.93.2", "zh": "海绵宝宝吸收剑链伤害时，现在会在本次剑链日志中明确显示吸收的伤害量。", "en": "SpongeBob now reports the absorbed damage amount in the sword-chain combat log."}, {"ver": "v1.93.1", "zh": "修复海绵宝宝与普通怪同链时，普通怪预览错误显示骷髅的问题；并补充中英文 Boss 图鉴说明。", "en": "Fixed normal enemies incorrectly showing skulls in the preview when SpongeBob absorbs their chain damage; also completed the Chinese and English bestiary entries."}, {"ver": "v1.93.0", "zh": "新增 Boss「🧽 海绵宝宝」：若同一条剑链划过它和普通怪，普通怪本次不受伤，原本每只普通怪应承受的整段剑伤由海绵宝宝吸收；炸弹、箭雨、毒心等非剑链伤害不触发该能力。", "en": "Added the 🧽 SpongeBob boss: when the same sword chain crosses it and normal enemies, those enemies take no damage and SpongeBob absorbs the full damage each would have taken; Bombs, Arrow Rain, poison hearts, and other non-chain damage do not trigger it."}];   /* auto-injected by dr.sh embed-changelog（勿手改） */
 const DEV=true;   // release build (DEV=false); dev build is dungeon-raid-dev.html (DEV=true)
 const REC_API='https://api.dungeonraid.win';   // 录像分享 API（Cloudflare Worker + KV）
 // 带种子随机数（mulberry32）：游戏全程用 rnd() 取代原生随机，配合录制种子可确定性重放
@@ -671,11 +671,33 @@ function hasAnyMove(){
 }
 // 这些一阶/换装主动会「清/转」棋子，发动后可能打破死局（清掉小怪或造出可连的局）
 const ESCAPE_ACTIVES=['priest','ranger','blacksmith','guildmaster','swordsaint','necromancer','butcher'];
+function canEscapeWithSkill(id){
+  if(!ESCAPE_ACTIVES.includes(id)) return false;
+  let hearts=0, shields=0, heartOrCoin=0, targetable=0, drainTargets=0, hookTargets=0;
+  for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){
+    const t=grid[r][c]; if(!t) continue;
+    if(t.type==='heart'){ hearts++; heartOrCoin++; }
+    if(t.type==='coin') heartOrCoin++;
+    if(t.type==='shield') shields++;
+    if(isSwordTarget(t)||isFireChainTarget(t)) targetable++;
+    if(!t.finale && (t.type==='enemy'||t.type==='boss')){ drainTargets++; hookTargets++; }
+  }
+  if(id==='priest') return hearts>0;
+  if(id==='ranger') return targetable>0;
+  if(id==='blacksmith') return !player.noArmor && shields>0;
+  if(id==='guildmaster'){
+    const cost=player.cheapskate?Math.ceil(enemyHpSum()/2):enemyHpSum();
+    return cost>0 && player.gold>=cost;
+  }
+  if(id==='swordsaint') return heartOrCoin>0;
+  if(id==='necromancer') return drainTargets>0;
+  return id==='butcher' && hookTargets>0;
+}
 // 是否还有「就绪且能改盘」的动作可打破死局——判负前的逃生检查，避免错杀还能救的局
 function hasEscapeAction(){
   const fz=player.frozen||{};
-  if(player.tier1 && ESCAPE_ACTIVES.includes(player.tier1) && player.skillCd<=0 && !(fz.skill>0)) return true;  // 一阶主动就绪
-  if(player.skill2 && player.skill2Cd<=0 && !(fz[player.skill2.slot]>0) && ESCAPE_ACTIVES.includes(player.skill2.id)) return true;  // 换装主动就绪
+  if(player.tier1 && canEscapeWithSkill(player.tier1) && player.skillCd<=0 && !(fz.skill>0)) return true;  // 一阶主动就绪且当前有效
+  if(player.skill2 && player.skill2Cd<=0 && !(fz[player.skill2.slot]>0) && canEscapeWithSkill(player.skill2.id)) return true;  // 换装主动就绪且当前有效
   if(!(player.skill2 && player.skill2.slot==='bomb')){   // 炸弹槽未被换装占用时：就绪+未冰封+买得起 → 可清怪
     const cd=(player.shopCd&&player.shopCd.bomb)||0;
     if(cd<=0 && !(fz.bomb>0) && player.gold>=shopCost('bomb')) return true;

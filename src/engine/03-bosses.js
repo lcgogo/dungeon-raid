@@ -309,11 +309,33 @@ function hasAnyMove(){
 }
 // 这些一阶/换装主动会「清/转」棋子，发动后可能打破死局（清掉小怪或造出可连的局）
 const ESCAPE_ACTIVES=['priest','ranger','blacksmith','guildmaster','swordsaint','necromancer','butcher'];
+function canEscapeWithSkill(id){
+  if(!ESCAPE_ACTIVES.includes(id)) return false;
+  let hearts=0, shields=0, heartOrCoin=0, targetable=0, drainTargets=0, hookTargets=0;
+  for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){
+    const t=grid[r][c]; if(!t) continue;
+    if(t.type==='heart'){ hearts++; heartOrCoin++; }
+    if(t.type==='coin') heartOrCoin++;
+    if(t.type==='shield') shields++;
+    if(isSwordTarget(t)||isFireChainTarget(t)) targetable++;
+    if(!t.finale && (t.type==='enemy'||t.type==='boss')){ drainTargets++; hookTargets++; }
+  }
+  if(id==='priest') return hearts>0;
+  if(id==='ranger') return targetable>0;
+  if(id==='blacksmith') return !player.noArmor && shields>0;
+  if(id==='guildmaster'){
+    const cost=player.cheapskate?Math.ceil(enemyHpSum()/2):enemyHpSum();
+    return cost>0 && player.gold>=cost;
+  }
+  if(id==='swordsaint') return heartOrCoin>0;
+  if(id==='necromancer') return drainTargets>0;
+  return id==='butcher' && hookTargets>0;
+}
 // 是否还有「就绪且能改盘」的动作可打破死局——判负前的逃生检查，避免错杀还能救的局
 function hasEscapeAction(){
   const fz=player.frozen||{};
-  if(player.tier1 && ESCAPE_ACTIVES.includes(player.tier1) && player.skillCd<=0 && !(fz.skill>0)) return true;  // 一阶主动就绪
-  if(player.skill2 && player.skill2Cd<=0 && !(fz[player.skill2.slot]>0) && ESCAPE_ACTIVES.includes(player.skill2.id)) return true;  // 换装主动就绪
+  if(player.tier1 && canEscapeWithSkill(player.tier1) && player.skillCd<=0 && !(fz.skill>0)) return true;  // 一阶主动就绪且当前有效
+  if(player.skill2 && player.skill2Cd<=0 && !(fz[player.skill2.slot]>0) && canEscapeWithSkill(player.skill2.id)) return true;  // 换装主动就绪且当前有效
   if(!(player.skill2 && player.skill2.slot==='bomb')){   // 炸弹槽未被换装占用时：就绪+未冰封+买得起 → 可清怪
     const cd=(player.shopCd&&player.shopCd.bomb)||0;
     if(cd<=0 && !(fz.bomb>0) && player.gold>=shopCost('bomb')) return true;

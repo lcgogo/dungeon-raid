@@ -1,4 +1,10 @@
 
+## [v1.94.0] - 2026-10-28
+> Version-Impact: verify
+
+- 修复死局逃生检查把「主动技能已就绪」误当成「当前能改变棋盘」的问题：主动没有有效目标/棋子，或会长金币不足时，不再阻止判负。炸弹用完后若棋盘仍无合法行动且没有有效逃生技能，会正确结束对局。
+- Fixed deadlock escape checks treating any ready active as a viable board-changing action. Skills without a valid target or required tile, and Guild Master without enough gold, no longer prevent defeat; a board still blocked after using its Bomb now ends the run when no viable escape remains.
+
 ## [v1.93.3] - 2026-10-27
 
 - 修复结束后回放上一局时，退出回放误恢复已结束棋盘、没有回到首页的问题；已结束对局的棋盘、商店和技能输入现在会被拦截。
