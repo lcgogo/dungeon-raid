@@ -1,4 +1,9 @@
 
+## [v1.94.2] - 2026-10-29
+
+- 巫妖技能名称与《魔兽争霸》统一为「霜冻新星 / Frost Nova」；技能效果不变。
+- Renamed the Lich skill to match Warcraft: Frost Nova (霜冻新星). Its effects are unchanged.
+
 ## [v1.94.1] - 2026-10-29
 
 - 修复 350 回合跨界技能列表把被动技能「重生」列为可选主动的问题；现在只显示可发动的主动技能。

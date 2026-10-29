@@ -23,7 +23,7 @@ Play online: **<https://dungeonraid.win>** (Dev build: <https://dungeonraid.win/
 
 The two builds keep **separate, non-overwriting saves** (Dev uses its own localStorage keys). The start screen and footer both label which build you are in. The home page’s Release / Dev version numbers are **statically injected at deploy time**, so they appear instantly even on weak connections without an extra fetch.
 
-The current Dev build is `v1.94.1`; the turn-350 crossover list now shows only activatable skills and no longer offers passive Rebirth. Feedback entries can be opened to view their thread and post replies. The README tracks the current code, including the Dev-only Human hidden Programmer class, Refined Powder, stable replay boundaries, and the iOS Cyclops board-icon fix. Release builds keep Programmer hidden. Source lives under `src/` and the self-contained HTML is regenerated with `node build/build.js`.
+The current Dev build is `v1.94.2`; the Lich skill is now named Frost Nova to match Warcraft. The turn-350 crossover list shows only activatable skills and no longer offers passive Rebirth. Feedback entries can be opened to view their thread and post replies. The README tracks the current code, including the Dev-only Human hidden Programmer class, Refined Powder, stable replay boundaries, and the iOS Cyclops board-icon fix. Release builds keep Programmer hidden. Source lives under `src/` and the self-contained HTML is regenerated with `node build/build.js`.
 
 ## 🧩 Core Gameplay
 
@@ -107,7 +107,7 @@ Each race has **several** classes; every skill has a **5-turn cooldown** (except
 | 🪦 Undead | 🪄 Necromancer | Soul Drain | Drain 2 random targets (monsters or bosses, including weapon-immune bosses; Overlord excluded); each drain is `min(player max HP, target current HP)`, the total heals you, and Undead healing halving applies |
 | 🪦 Undead | 💀 Skeleton King | Rebirth | **Passive**: lethal damage automatically revives you at full HP and resets every monster and boss countdown on the board to its base value; then enters a 5-turn cooldown |
 | 🪦 Undead | 🪝 Butcher | Hook | Drags every monster/boss (incl. weapon-immune; Overlord excluded) down to the bottom of its column while other tiles float up; then deals damage by **distance from the bottom**: bottom row takes 1× flat damage, second-from-bottom takes 2×, and so on (CD 5) |
-| 🪦 Undead | 🧊 Lich | Frost Orb | Deal your **current flat damage** once to all monsters/bosses on the board (excluding the Overlord), then add **+1 to their current attack countdown** so their next attack is delayed by one extra turn |
+| 🪦 Undead | 🧊 Lich | Frost Nova | Deal your **current flat damage** once to all monsters/bosses on the board (excluding the Overlord), then add **+1 to their current attack countdown** so their next attack is delayed by one extra turn |
 | 🐉 Mythic Beasts | 🐉 Azure Dragon | Dragon Roar | Deal damage equal to your level to all foes, including normal-attack-immune bosses |
 | 🐉 Mythic Beasts | 🐯 White Tiger | Tiger Breaker | Your next weapon chain can hit weapon-immune bosses and deals ×3 damage |
 | 🐉 Mythic Beasts | 🐢 Black Tortoise | Tortoise Bastion | Halve all incoming damage for 3 turns (minimum 1) |
