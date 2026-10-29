@@ -432,6 +432,7 @@ function showSkillSwap(){
     if(TIER1[id].devOnly && !DEV) return;   // dev-only 职业不进入正式版跨界技能列表
     // 排除对当前玩家永久无效的技能（如兽人无甲→锻甲无效）；其它主动只按当前角色属性结算，不做职业限定。
     const def=TIER1[id], sk=def.skill;
+    if(sk.passive) return;   // 350回合只提供可发动的主动；骷髅王重生是被动
     const row=document.createElement('div'); row.style.cssText='display:flex;gap:6px;align-items:stretch;margin:0 0 6px';
     const b=document.createElement('button'); b.className='choice'; b.style.cssText='padding:8px 12px;margin:0;flex:1;min-width:0';
     b.innerHTML=`<b style="display:inline">✨ ${L(sk.name)}</b> <span style="color:var(--dim);font-size:12px">${L(sk.short)} · ${sk.noCd?tr('无冷却','no CD'):'CD'+sk.cd}</span>`;

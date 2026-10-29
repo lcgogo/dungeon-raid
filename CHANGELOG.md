@@ -1,4 +1,9 @@
 
+## [v1.94.1] - 2026-10-29
+
+- 修复 350 回合跨界技能列表把被动技能「重生」列为可选主动的问题；现在只显示可发动的主动技能。
+- Fixed the turn-350 crossover list offering the passive Rebirth as an active skill; it now shows only activatable skills.
+
 ## [v1.94.0] - 2026-10-28
 > Version-Impact: verify
 
