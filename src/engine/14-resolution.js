@@ -175,6 +175,35 @@ function dealDamage(pool, targets, allFoes){
   const multiGold=multiKillGold(normalKills);
   return {dmg,kills,bonusGold,multiGold,xp,spongeAbsorbed};
 }
+// Shared all-foe damage resolution. Callbacks preserve each effect's per-target behavior.
+function damageAllFoes(amount, {snapshot=false, onHit=null, afterDamage=null, rotflesh=false, reflect=true}={}){
+  let dmg=0, kills=0, normalKills=0, bossKills=0, xp=0, hits=0;
+  const apply=(r,c,t)=>{
+    if(!t || (t.type!=='enemy' && t.type!=='boss') || t.finale || grid[r][c]!==t) return;
+    if(onHit) onHit(t,r,c);
+    const hit=Math.min(amount,t.hp); t.hp-=amount;
+    if(afterDamage) afterDamage(t,r,c);
+    hits++; dmg+=hit;
+    if(reflect) statueReflect(t,hit);
+    if(t.hp>0) return;
+    if(t.type==='boss'){
+      if(defeatBoss(t,r,c)==='split') return;
+      bossKills++;
+    } else {
+      grid[r][c]=null; normalKills++; xp+=addXp(player,3+(player.killXp||0)); gainGold(1);
+      if(rotflesh && player.rotflesh) player.maxHp++;
+    }
+    kills++;
+  };
+  if(snapshot){
+    const actors=[];
+    for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const t=grid[r][c]; if(t&&(t.type==='enemy'||t.type==='boss')&&!t.finale) actors.push({r,c,t}); }
+    for(const {r,c,t} of actors) apply(r,c,t);
+  } else {
+    for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++) apply(r,c,grid[r][c]);
+  }
+  return {dmg,kills,normalKills,bossKills,xp,hits};
+}
 // 溅射落点：随机选一个剩余敌人/Boss（含剑免疫，排除终焉之主），造成 over 伤害
 function splashHit(over){
   const foes=[]; for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const t=grid[r][c]; if(t&&(t.type==='enemy'||(t.type==='boss'&&!t.finale))) foes.push([r,c]); }
@@ -272,7 +301,7 @@ function hurtPlayer(atk, sourceKey, ignoreArmor, attacker){
   addDmg(sourceKey, dmg);
   if(dmg>0 && player.tauntWindow){ const grow=Math.max(1, Math.floor(dmg*0.1)); player.maxHp+=grow; log(tr(`🪓 嘲讽吸收：永久最大生命 +${grow}`,`🪓 Taunt converts into +${grow} max HP`), 'buff'); }
   if(dmg>0 && player.unbroken){ player.maxHp+=1; log(tr('🪓 越挫越勇：永久最大生命 +1','🪓 Unbroken: +1 permanent max HP'), 'buff'); }
-  if(dmg>0 && player.iceArmor && attacker){ const ice=Math.max(1, Math.floor(frostOrbDamage()*0.5)); reflectIceArmor(ice, attacker); }
+  if(dmg>0 && player.iceArmor && attacker){ const ice=Math.max(1, Math.floor(currentFlatDamage()*0.5)); reflectIceArmor(ice, attacker); }
   if(player.thorns && dmg>0 && attacker){ const refl=Math.round(player.armor*(player.armorMult||1)+(player.toughness||0)); if(refl>0) reflectThorns(refl, attacker); }   // 荆棘：受到「真·攻击」时把当前护甲减伤量反弹给攻击者（非攻击不传 attacker→不反弹）
   return dmg;
 }

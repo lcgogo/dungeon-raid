@@ -1,4 +1,9 @@
 
+## [v1.94.3] - 2026-10-29
+
+- 重构炸弹与霜冻新星的全场伤害结算，共用击杀奖励处理，同时保留各自的目标遍历、石像反伤、减速和特效规则；对照 `v1.94.2` 快照验证结局一致。
+- Refactored Bomb and Frost Nova to share all-foe damage and kill-reward handling while preserving their traversal, Statue reflection, slow, and visual-effect rules; verified parity against the `v1.94.2` snapshot.
+
 ## [v1.94.2] - 2026-10-29
 
 - 巫妖技能名称与《魔兽争霸》统一为「霜冻新星 / Frost Nova」；技能效果不变。

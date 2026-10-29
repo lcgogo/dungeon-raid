@@ -5,7 +5,7 @@ const path = require('path');
 const file = fs.existsSync('dungeon-raid-dev.html') ? 'dungeon-raid-dev.html' : path.join('..', 'dungeon-raid-dev.html');
 let s = fs.readFileSync(file, 'utf8').match(/<script>([\s\S]*?)<\/script>/)[1];
 const EXPORT = `globalThis.__G={startGame,raceById,onBossKilled,dispatchReplayAct,buyItem,shopCost,resolve,dealDamage,previewKills,applyUpgrade,applyGravity,advanceEnemies,activateSkill,activateDebugSkill,autoReleaseItems,makeTile,isSwordTarget,normalEnemyAttack,bombDamage,gunpowderLevels,bossTier,
-  TIER1,TIER2,RACE_PATHS, CLASS_T2, UPGRADES, WEAPON, gainGold, gainHeal, addXp, currentSwordFlat, witherAuraTick, hurtPlayer, frostOrbDamage,
+  TIER1,TIER2,RACE_PATHS, CLASS_T2, UPGRADES, WEAPON, gainGold, gainHeal, addXp, currentSwordFlat, witherAuraTick, hurtPlayer, currentFlatDamage,
   get player(){return player}, get grid(){return grid}, get logHistory(){return logHistory}, get rec(){return rec}, set rec(v){rec=v}, get ended(){return ended}, set ended(v){ended=v}, recAct,
   set selection(v){selection=v}, set dragging(v){dragging=v},
   set busy(v){busy=v}, set pendingLevels(v){pendingLevels=v}, set replaying(v){replaying=v}, set replayRec(v){replayRec=v}};`;
@@ -207,7 +207,7 @@ G.replayRec={seed:41,race:'undead',acts:[]}; G.replaying=true; G.startGame(G.rac
 const lf=G.player; lf.hp=lf.maxHp=40; lf.tier1='lich'; lf.swordFlat=4; G.busy=false; G.pendingLevels=0;
 G.grid[0][0]={type:'enemy', hp:5, maxHp:5, atk:4, cd:2, baseCd:2};
 G.grid[0][1]={type:'boss', bossId:'ghost', hp:5, maxHp:5, atk:4, cd:2, baseCd:2, tier:1};
-const frostDmg=G.frostOrbDamage();
+const frostDmg=G.currentFlatDamage();
 const enemyCdBefore=G.grid[0][0].cd, bossCdBefore=G.grid[0][1].cd;
 G.TIER1.lich.skill.f(lf);
 ok(G.grid[0][0] && G.grid[0][0].hp===5-frostDmg && G.grid[0][1] && G.grid[0][1].hp===5-frostDmg,'冰封球能命中普通怪与剑免疫Boss');

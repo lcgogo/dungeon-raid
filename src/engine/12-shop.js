@@ -7,11 +7,9 @@ function normalEnemyAttack(t){
 }
 const SHOP={
   heal: {cost:15, f(){ const base=10+2*(player.healUses||0); const h=gainHeal(base); player.healUses=(player.healUses||0)+1; log(tr(`💊 喝下药水，回复 ${h} 生命`,`💊 Potion: +${h} HP`), 'heal'); }},   // 每使用一次：恢复量 +2、下次多花 1 金（后期不再鸡肋）
-  bomb: {cost:25, f(){ let kills=0, boss=0, xp=0; const extra = bombGoldSacrificeBonus(player); if(extra>0) player.gold=Math.max(0, player.gold-extra); const D = bombDamage(player)+extra;   // 基础5 + 爆破手累计 + 乾坤一掷（先买炸弹，再额外扣当前金币 20% 换伤害）
-    for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const t=grid[r][c];
-      if(t&&(t.type==='enemy'||t.type==='boss')){ if(t.finale) continue; addBombFx(r,c); const dd=Math.min(D,t.hp); t.hp-=D; statueReflect(t, dd);   // 终焉之主打不掉；石像反弹；每个命中格爆一下特效
-        if(t.hp<=0){ const isBoss=t.type==='boss';
-          if(isBoss){ if(defeatBoss(t,r,c)==='killed') boss++; } else { grid[r][c]=null; kills++; xp+=addXp(player,3+(player.killXp||0)); gainGold(1); if(player.rotflesh) player.maxHp++; } } } }   // 屠夫·积累腐肉：炸弹击杀也 +1 上限
+  bomb: {cost:25, f(){ const extra = bombGoldSacrificeBonus(player); if(extra>0) player.gold=Math.max(0, player.gold-extra); const D = bombDamage(player)+extra;   // 基础5 + 爆破手累计 + 乾坤一掷（先买炸弹，再额外扣当前金币 20% 换伤害）
+    const result=damageAllFoes(D,{rotflesh:true,onHit:(t,r,c)=>addBombFx(r,c)});
+    const kills=result.normalKills, boss=result.bossKills, xp=result.xp;
     const multiGold=multiKillGold(kills);
     const lifeHeal=lifestealHeal(kills+boss);   // 汲取生命：炸弹击杀也回血
     log(tr(`💥 投掷炸弹，全场怪血量 −${D}`+(extra?`（乾坤一掷 +${extra}）`:''),`💥 Bomb: all foes lose ${D} HP`+(extra?` (All-In +${extra})`:'')) + (kills?tr(`，击杀 ${kills} 只👹`,`, ${kills} killed`):'') + (multiGold?tr(`，多杀奖励 +${multiGold} 金`,`，multi-kill bonus +${multiGold} gold`):'') + (lifeHeal?tr(`，吸血 +${lifeHeal}`,`, +${lifeHeal} lifesteal`):'') + (boss?tr(`，击败 ${boss} 个 Boss`,`, ${boss} boss(es) down`):''));   // Boss 奖励日志由 onBossKilled 统一报

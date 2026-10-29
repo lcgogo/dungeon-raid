@@ -214,7 +214,7 @@ function currentSwordFlat(){ return player.swordFlat + (player.tigerFury&&player
 function burnTickDamage(t){ return Math.max(1, Math.floor(currentSwordFlat()*0.2)) * Math.max(1, t.burnStacks||0); }
 function firewallTickDamage(){ return Math.max(1, Math.floor(currentSwordFlat()*0.2)); }
 function fireWallRows(){ return { start: Math.max(0, ROWS-3), end: ROWS-1 }; }
-function frostOrbDamage(){ return Math.max(1, currentSwordFlat()); }
+function currentFlatDamage(){ return Math.max(1, currentSwordFlat()); }
 function igniteTarget(t, stacks){
   if(!t || t.finale || !(t.type==='enemy' || t.type==='boss')) return false;
   t.burnStacks=(t.burnStacks||0) + Math.max(1, stacks|0);

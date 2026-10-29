@@ -249,9 +249,9 @@ const CONTENT = {
 if('serviceWorker' in navigator) window.addEventListener('load',()=>navigator.serviceWorker.register('/sw.js').catch(()=>{}));
 //==================== 配置 ====================
 // 版本号 v主.次.修：不影响 verify/replay 兼容边界的小改动改"修"；凡是影响 verify/replay/版本分桶/release 验证语义的改动都改"次"；大版本变更需先确认。页面底部显示。
-const VERSION='v1.94.2';
+const VERSION='v1.94.3';
 // CHANGELOG_LINES below is only a fallback for raw source inspection; build/build.js replaces it from CHANGELOG.md.
-const CHANGELOG_LINES=[{"ver": "v1.94.2", "zh": "巫妖技能名称与《魔兽争霸》统一为「霜冻新星 / Frost Nova」；技能效果不变。", "en": "Renamed the Lich skill to match Warcraft: Frost Nova (霜冻新星). Its effects are unchanged."}, {"ver": "v1.94.1", "zh": "修复 350 回合跨界技能列表把被动技能「重生」列为可选主动的问题；现在只显示可发动的主动技能。", "en": "Fixed the turn-350 crossover list offering the passive Rebirth as an active skill; it now shows only activatable skills."}, {"ver": "v1.94.0", "zh": "修复死局逃生检查把「主动技能已就绪」误当成「当前能改变棋盘」的问题：主动没有有效目标/棋子，或会长金币不足时，不再阻止判负。炸弹用完后若棋盘仍无合法行动且没有有效逃生技能，会正确结束对局。", "en": "Fixed deadlock escape checks treating any ready active as a viable board-changing action. Skills without a valid target or required tile, and Guild Master without enough gold, no longer prevent defeat; a board still blocked after using its Bomb now ends the run when no viable escape remains."}, {"ver": "v1.93.3", "zh": "修复结束后回放上一局时，退出回放误恢复已结束棋盘、没有回到首页的问题；已结束对局的棋盘、商店和技能输入现在会被拦截。", "en": "Fixed replay exit restoring a stale finished board instead of returning home; board, shop, and skill inputs are now blocked after a run ends."}, {"ver": "v1.93.2", "zh": "海绵宝宝吸收剑链伤害时，现在会在本次剑链日志中明确显示吸收的伤害量。", "en": "SpongeBob now reports the absorbed damage amount in the sword-chain combat log."}];   /* auto-injected by dr.sh embed-changelog（勿手改） */
+const CHANGELOG_LINES=[{"ver": "v1.94.3", "zh": "重构炸弹与霜冻新星的全场伤害结算，共用击杀奖励处理，同时保留各自的目标遍历、石像反伤、减速和特效规则；对照 `v1.94.2` 快照验证结局一致。", "en": "Refactored Bomb and Frost Nova to share all-foe damage and kill-reward handling while preserving their traversal, Statue reflection, slow, and visual-effect rules; verified parity against the `v1.94.2` snapshot."}, {"ver": "v1.94.2", "zh": "巫妖技能名称与《魔兽争霸》统一为「霜冻新星 / Frost Nova」；技能效果不变。", "en": "Renamed the Lich skill to match Warcraft: Frost Nova (霜冻新星). Its effects are unchanged."}, {"ver": "v1.94.1", "zh": "修复 350 回合跨界技能列表把被动技能「重生」列为可选主动的问题；现在只显示可发动的主动技能。", "en": "Fixed the turn-350 crossover list offering the passive Rebirth as an active skill; it now shows only activatable skills."}, {"ver": "v1.94.0", "zh": "修复死局逃生检查把「主动技能已就绪」误当成「当前能改变棋盘」的问题：主动没有有效目标/棋子，或会长金币不足时，不再阻止判负。炸弹用完后若棋盘仍无合法行动且没有有效逃生技能，会正确结束对局。", "en": "Fixed deadlock escape checks treating any ready active as a viable board-changing action. Skills without a valid target or required tile, and Guild Master without enough gold, no longer prevent defeat; a board still blocked after using its Bomb now ends the run when no viable escape remains."}, {"ver": "v1.93.3", "zh": "修复结束后回放上一局时，退出回放误恢复已结束棋盘、没有回到首页的问题；已结束对局的棋盘、商店和技能输入现在会被拦截。", "en": "Fixed replay exit restoring a stale finished board instead of returning home; board, shop, and skill inputs are now blocked after a run ends."}];   /* auto-injected by dr.sh embed-changelog（勿手改） */
 const DEV=true;   // release build (DEV=false); dev build is dungeon-raid-dev.html (DEV=true)
 const REC_API='https://api.dungeonraid.win';   // 录像分享 API（Cloudflare Worker + KV）
 // 带种子随机数（mulberry32）：游戏全程用 rnd() 取代原生随机，配合录制种子可确定性重放
@@ -576,7 +576,7 @@ function currentSwordFlat(){ return player.swordFlat + (player.tigerFury&&player
 function burnTickDamage(t){ return Math.max(1, Math.floor(currentSwordFlat()*0.2)) * Math.max(1, t.burnStacks||0); }
 function firewallTickDamage(){ return Math.max(1, Math.floor(currentSwordFlat()*0.2)); }
 function fireWallRows(){ return { start: Math.max(0, ROWS-3), end: ROWS-1 }; }
-function frostOrbDamage(){ return Math.max(1, currentSwordFlat()); }
+function currentFlatDamage(){ return Math.max(1, currentSwordFlat()); }
 function igniteTarget(t, stacks){
   if(!t || t.finale || !(t.type==='enemy' || t.type==='boss')) return false;
   t.burnStacks=(t.burnStacks||0) + Math.max(1, stacks|0);
@@ -863,7 +863,7 @@ const TIER1={
     const multiGold=multiKillGold(normalKills), h=gainHeal(healed); const lh=lifestealHeal(kills); applyGravity(); syncPositions(false);
     log(tr(`🪄 吸魂大法：吸取 ${pick.length} 个目标 ${healed} 生命，回血 ${h}`+(kills?`，击杀 ${kills} 只`:'')+(multiGold?`，多杀奖励 +${multiGold} 金`:'')+(lh?`，吸血 +${lh}`:'')+(splashes.length?`，溅射 ${splashes.length} 次`:''),`🪄 Soul Drain: drained ${healed} from ${pick.length}, +${h} HP`+(kills?`, ${kills} killed`:'')+(multiGold?`, multi-kill +${multiGold} gold`:'')+(lh?`, +${lh} lifesteal`:'')+(splashes.length?`, ${splashes.length} splash`:'')), 'heal'); return true; }}},
   skeletonking:{n:['骷髅王','Skeleton King'], quip:['死过一次，再死一次又何妨。','Died once already — what is one more?'], skill:{name:['重生','Rebirth'], short:['本回合致死则满血复活(此后冷却+2)','Cheat death this turn, full heal'], desc:['发动后本回合若受到致命伤害，会立刻满血复活而非死亡。每触发一次，重生的冷却永久 +2。发动即进入冷却（无论本回合是否真的触发）。','Armed this turn: if a lethal blow lands, you revive at full HP instead of dying. Each trigger permanently raises Rebirth’s cooldown by 2. Goes on cooldown when cast, whether or not it triggers.'], cd:5, f:p=>{ p.rebirthTurn=true; log(tr('💀 重生待命：本回合若被击败，将满血复活！','💀 Rebirth armed: if slain this turn, revive at full HP!'), 'buff'); return true; }}},
-  lich:{n:['巫妖','Lich'], quip:['感受死亡的寒冷吧。','Feel the cold of death.'], skill:{name:['霜冻新星','Frost Nova'], short:['全场固定伤害+全体减速','Flat damage + slow all foes'], desc:['对场上所有怪物/Boss（终焉之主除外）造成一次当前固定伤害，并让它们的当前攻击倒计时 +1。','Deals current flat damage to all foes and delays their next attack.'], cd:5, f:p=>{ addBossFx(Math.floor(ROWS/2), Math.floor(COLS/2), false, '#7fd3ff', true); let hit=0, kills=0, normalKills=0, total=0, lh=0; const dmg=frostOrbDamage(), actors=[]; for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){const t=grid[r][c];if(t&&!t.finale&&(t.type==='enemy'||t.type==='boss'))actors.push({r,c,t});} for(const {r,c,t} of actors){if(grid[r][c]!==t)continue; const before=t.hp; t.hp-=dmg; t.cd+=1; t.frostTurns=3; hit++; total+=Math.min(dmg,before); if(t.hp<=0){if(t.type==='boss'){if(defeatBoss(t,r,c)==='split')continue;}else{grid[r][c]=null;normalKills++;addXp(player,3+(player.killXp||0));gainGold(1);}kills++;}} const multiGold=multiKillGold(normalKills); if(kills)lh=lifestealHeal(kills); applyGravity(); syncPositions(false); log(tr(`🧊 霜冻新星：全场 ${hit} 个目标共掉 ${total}`+(kills?`，击杀 ${kills}`:'')+(multiGold?`，多杀奖励 +${multiGold} 金`:'')+(lh?`，吸血 +${lh}`:''),`🧊 Frost Nova: ${hit} targets lose ${total}`+(kills?`, ${kills} killed`:'')+(multiGold?`, multi-kill +${multiGold} gold`:'')+(lh?`, +${lh} lifesteal`:'')), 'buff'); return hit||kills||lh; }}},
+  lich:{n:['巫妖','Lich'], quip:['感受死亡的寒冷吧。','Feel the cold of death.'], skill:{name:['霜冻新星','Frost Nova'], short:['全场固定伤害+全体减速','Flat damage + slow all foes'], desc:['对场上所有怪物/Boss（终焉之主除外）造成一次当前固定伤害，并让它们的当前攻击倒计时 +1。','Deals current flat damage to all foes and delays their next attack.'], cd:5, f:p=>{ addBossFx(Math.floor(ROWS/2), Math.floor(COLS/2), false, '#7fd3ff', true); const dmg=currentFlatDamage(); const result=damageAllFoes(dmg,{snapshot:true,reflect:false,afterDamage:t=>{t.cd+=1;t.frostTurns=3;}}); const {hits,kills,normalKills,dmg:total}=result; const multiGold=multiKillGold(normalKills), lh=lifestealHeal(kills); applyGravity(); syncPositions(false); log(tr(`🧊 霜冻新星：全场 ${hits} 个目标共掉 ${total}`+(kills?`，击杀 ${kills}`:'')+(multiGold?`，多杀奖励 +${multiGold} 金`:'')+(lh?`，吸血 +${lh}`:''),`🧊 Frost Nova: ${hits} targets lose ${total}`+(kills?`, ${kills} killed`:'')+(multiGold?`, multi-kill +${multiGold} gold`:'')+(lh?`, +${lh} lifesteal`:'')), 'buff'); return hits||kills||lh; }}},
   butcher:{n:['屠夫','Butcher'], quip:['钩子一甩，肉就乖乖到底。','One swing of the hook, and the meat comes to me.'], skill:{name:['钩子','Hook'], short:['拉到底排；离底越远伤害越高','Drag down; farther from bottom = more damage'], desc:['一钩把棋盘上所有的怪和 Boss（含{W}免疫，终焉之主除外）顺着各自所在列拉到尽可能底部，其余棋子上浮；随后按【离底线的距离】造成伤害：最底排吃 1× 固定伤害、倒数第二排吃 2×，依此类推。场上没有可拉的敌人时无效、不进冷却。','Hooks every monster & boss (incl. {W}-immune; not the Overlord) down to the bottom of its column while other tiles float up; then deals damage by【distance from the bottom】— bottom row takes 1× flat damage, second-from-bottom 2×, and so on. No effect — and no cooldown — when there is nothing to pull.'], cd:5, f:p=>{
     let moved=0, any=false, dmg=0, kills=0, normalKills=0; const isMon=t=>t&&(t.type==='enemy'||t.type==='boss')&&!t.finale; const hookBase=Math.max(1, p.swordFlat||0); const lines=[];
     for(let c=0;c<COLS;c++){
@@ -2189,11 +2189,9 @@ function normalEnemyAttack(t){
 }
 const SHOP={
   heal: {cost:15, f(){ const base=10+2*(player.healUses||0); const h=gainHeal(base); player.healUses=(player.healUses||0)+1; log(tr(`💊 喝下药水，回复 ${h} 生命`,`💊 Potion: +${h} HP`), 'heal'); }},   // 每使用一次：恢复量 +2、下次多花 1 金（后期不再鸡肋）
-  bomb: {cost:25, f(){ let kills=0, boss=0, xp=0; const extra = bombGoldSacrificeBonus(player); if(extra>0) player.gold=Math.max(0, player.gold-extra); const D = bombDamage(player)+extra;   // 基础5 + 爆破手累计 + 乾坤一掷（先买炸弹，再额外扣当前金币 20% 换伤害）
-    for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const t=grid[r][c];
-      if(t&&(t.type==='enemy'||t.type==='boss')){ if(t.finale) continue; addBombFx(r,c); const dd=Math.min(D,t.hp); t.hp-=D; statueReflect(t, dd);   // 终焉之主打不掉；石像反弹；每个命中格爆一下特效
-        if(t.hp<=0){ const isBoss=t.type==='boss';
-          if(isBoss){ if(defeatBoss(t,r,c)==='killed') boss++; } else { grid[r][c]=null; kills++; xp+=addXp(player,3+(player.killXp||0)); gainGold(1); if(player.rotflesh) player.maxHp++; } } } }   // 屠夫·积累腐肉：炸弹击杀也 +1 上限
+  bomb: {cost:25, f(){ const extra = bombGoldSacrificeBonus(player); if(extra>0) player.gold=Math.max(0, player.gold-extra); const D = bombDamage(player)+extra;   // 基础5 + 爆破手累计 + 乾坤一掷（先买炸弹，再额外扣当前金币 20% 换伤害）
+    const result=damageAllFoes(D,{rotflesh:true,onHit:(t,r,c)=>addBombFx(r,c)});
+    const kills=result.normalKills, boss=result.bossKills, xp=result.xp;
     const multiGold=multiKillGold(kills);
     const lifeHeal=lifestealHeal(kills+boss);   // 汲取生命：炸弹击杀也回血
     log(tr(`💥 投掷炸弹，全场怪血量 −${D}`+(extra?`（乾坤一掷 +${extra}）`:''),`💥 Bomb: all foes lose ${D} HP`+(extra?` (All-In +${extra})`:'')) + (kills?tr(`，击杀 ${kills} 只👹`,`, ${kills} killed`):'') + (multiGold?tr(`，多杀奖励 +${multiGold} 金`,`，multi-kill bonus +${multiGold} gold`):'') + (lifeHeal?tr(`，吸血 +${lifeHeal}`,`, +${lifeHeal} lifesteal`):'') + (boss?tr(`，击败 ${boss} 个 Boss`,`, ${boss} boss(es) down`):''));   // Boss 奖励日志由 onBossKilled 统一报
@@ -2635,6 +2633,35 @@ function dealDamage(pool, targets, allFoes){
   const multiGold=multiKillGold(normalKills);
   return {dmg,kills,bonusGold,multiGold,xp,spongeAbsorbed};
 }
+// Shared all-foe damage resolution. Callbacks preserve each effect's per-target behavior.
+function damageAllFoes(amount, {snapshot=false, onHit=null, afterDamage=null, rotflesh=false, reflect=true}={}){
+  let dmg=0, kills=0, normalKills=0, bossKills=0, xp=0, hits=0;
+  const apply=(r,c,t)=>{
+    if(!t || (t.type!=='enemy' && t.type!=='boss') || t.finale || grid[r][c]!==t) return;
+    if(onHit) onHit(t,r,c);
+    const hit=Math.min(amount,t.hp); t.hp-=amount;
+    if(afterDamage) afterDamage(t,r,c);
+    hits++; dmg+=hit;
+    if(reflect) statueReflect(t,hit);
+    if(t.hp>0) return;
+    if(t.type==='boss'){
+      if(defeatBoss(t,r,c)==='split') return;
+      bossKills++;
+    } else {
+      grid[r][c]=null; normalKills++; xp+=addXp(player,3+(player.killXp||0)); gainGold(1);
+      if(rotflesh && player.rotflesh) player.maxHp++;
+    }
+    kills++;
+  };
+  if(snapshot){
+    const actors=[];
+    for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const t=grid[r][c]; if(t&&(t.type==='enemy'||t.type==='boss')&&!t.finale) actors.push({r,c,t}); }
+    for(const {r,c,t} of actors) apply(r,c,t);
+  } else {
+    for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++) apply(r,c,grid[r][c]);
+  }
+  return {dmg,kills,normalKills,bossKills,xp,hits};
+}
 // 溅射落点：随机选一个剩余敌人/Boss（含剑免疫，排除终焉之主），造成 over 伤害
 function splashHit(over){
   const foes=[]; for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const t=grid[r][c]; if(t&&(t.type==='enemy'||(t.type==='boss'&&!t.finale))) foes.push([r,c]); }
@@ -2732,7 +2759,7 @@ function hurtPlayer(atk, sourceKey, ignoreArmor, attacker){
   addDmg(sourceKey, dmg);
   if(dmg>0 && player.tauntWindow){ const grow=Math.max(1, Math.floor(dmg*0.1)); player.maxHp+=grow; log(tr(`🪓 嘲讽吸收：永久最大生命 +${grow}`,`🪓 Taunt converts into +${grow} max HP`), 'buff'); }
   if(dmg>0 && player.unbroken){ player.maxHp+=1; log(tr('🪓 越挫越勇：永久最大生命 +1','🪓 Unbroken: +1 permanent max HP'), 'buff'); }
-  if(dmg>0 && player.iceArmor && attacker){ const ice=Math.max(1, Math.floor(frostOrbDamage()*0.5)); reflectIceArmor(ice, attacker); }
+  if(dmg>0 && player.iceArmor && attacker){ const ice=Math.max(1, Math.floor(currentFlatDamage()*0.5)); reflectIceArmor(ice, attacker); }
   if(player.thorns && dmg>0 && attacker){ const refl=Math.round(player.armor*(player.armorMult||1)+(player.toughness||0)); if(refl>0) reflectThorns(refl, attacker); }   // 荆棘：受到「真·攻击」时把当前护甲减伤量反弹给攻击者（非攻击不传 attacker→不反弹）
   return dmg;
 }

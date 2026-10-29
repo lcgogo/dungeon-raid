@@ -23,7 +23,7 @@ Play online: **<https://dungeonraid.win>** (Dev build: <https://dungeonraid.win/
 
 The two builds keep **separate, non-overwriting saves** (Dev uses its own localStorage keys). The start screen and footer both label which build you are in. The home page’s Release / Dev version numbers are **statically injected at deploy time**, so they appear instantly even on weak connections without an extra fetch.
 
-The current Dev build is `v1.94.2`; the Lich skill is now named Frost Nova to match Warcraft. The turn-350 crossover list shows only activatable skills and no longer offers passive Rebirth. Feedback entries can be opened to view their thread and post replies. The README tracks the current code, including the Dev-only Human hidden Programmer class, Refined Powder, stable replay boundaries, and the iOS Cyclops board-icon fix. Release builds keep Programmer hidden. Source lives under `src/` and the self-contained HTML is regenerated with `node build/build.js`.
+The current Dev build is `v1.94.3`; Bomb and Frost Nova now share all-foe damage resolution, with parity checked against the `v1.94.2` snapshot. The Lich skill is named Frost Nova to match Warcraft. The turn-350 crossover list shows only activatable skills and no longer offers passive Rebirth. Feedback entries can be opened to view their thread and post replies. The README tracks the current code, including the Dev-only Human hidden Programmer class, Refined Powder, stable replay boundaries, and the iOS Cyclops board-icon fix. Release builds keep Programmer hidden. Source lives under `src/` and the self-contained HTML is regenerated with `node build/build.js`.
 
 ## 🧩 Core Gameplay
 
