@@ -23,7 +23,7 @@ Play online: **<https://dungeonraid.win>** (Dev build: <https://dungeonraid.win/
 
 The two builds keep **separate, non-overwriting saves** (Dev uses its own localStorage keys). The start screen and footer both label which build you are in. The home page’s Release / Dev version numbers are **statically injected at deploy time**, so they appear instantly even on weak connections without an extra fetch.
 
-The current Dev build is `v1.94.3`; Bomb and Frost Nova now share all-foe damage resolution, with parity checked against the `v1.94.2` snapshot. The Lich skill is named Frost Nova to match Warcraft. The turn-350 crossover list shows only activatable skills and no longer offers passive Rebirth. Feedback entries can be opened to view their thread and post replies. The README tracks the current code, including the Dev-only Human hidden Programmer class, Refined Powder, stable replay boundaries, and the iOS Cyclops board-icon fix. Release builds keep Programmer hidden. Source lives under `src/` and the self-contained HTML is regenerated with `node build/build.js`.
+The current Dev build is `v1.95.0`; Magmafiend now melts up to its tier in shields each turn. Bomb and Frost Nova share all-foe damage resolution, with parity checked against the `v1.94.2` snapshot. The Lich skill is named Frost Nova to match Warcraft. The turn-350 crossover list shows only activatable skills and no longer offers passive Rebirth. Feedback entries can be opened to view their thread and post replies. The README tracks the current code, including the Dev-only Human hidden Programmer class, Refined Powder, stable replay boundaries, and the iOS Cyclops board-icon fix. Release builds keep Programmer hidden. Source lives under `src/` and the self-contained HTML is regenerated with `node build/build.js`.
 
 ## 🧩 Core Gameplay
 
@@ -156,7 +156,7 @@ Every **10 turns**, one boss is drawn from a **deterministic 32-card deck** cont
 | 👻 Ghost | Bomb only | Immune to weapon chains; **all weapon-immune bosses use same-tier normal-monster HP**; strikes you hard when its timer hits 0 |
 | 🤡 Clown | Bomb only | Re-rolls several non-monster tiles into other resources each turn, disrupting your chains; does NOT spawn monsters (that's the Summoner) |
 | 🪢 Lashmaster | Bomb only | On spawn, all normal enemies get **-1 attack countdown**, and each turn after that they get **-1 attack countdown** again. It may not be the deadliest foe by itself, but it drags the whole board into a frenzy the longer it lives. |
-| ♨️ Magmafiend | Bomb only | **No attack; weapon-immune**. Every turn it melts all shields without healing from them; fire damage heals it. |
+| ♨️ Magmafiend | Bomb only | **No attack; weapon-immune**. Each turn it melts up to its tier in shields (1 at Lv1, 2 at Lv2, and so on) without healing from them; fire damage heals it. |
 | 🧛 Vampire | Bomb only | **No attack; weapon-immune**. Drains up to its tier in hearts each turn to heal; poison hearts damage it instead. |
 | 🥷 Assassin | Sword / Bomb | Stats like a normal enemy, but its hits are **true damage** — ignore armor, straight to HP |
 | 🦖 Devourer | Sword / Bomb | When its countdown hits 0, it first strikes for **50% of its current HP**; only after that hit resolves does it drain half the HP from every regular enemy to grow |

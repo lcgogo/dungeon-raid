@@ -1,4 +1,10 @@
 
+## [v1.95.0] - 2026-10-31
+> Version-Impact: verify
+
+- 岩浆魔每回合最多按自身等级融化对应数量的盾：Lv1 1 面、Lv2 2 面，以此类推；不会因此回血。
+- Magmafiend now melts up to its tier in shields each turn: 1 at Lv1, 2 at Lv2, and so on; shields still do not heal it.
+
 ## [v1.94.3] - 2026-10-29
 
 - 重构炸弹与霜冻新星的全场伤害结算，共用击杀奖励处理，同时保留各自的目标遍历、石像反伤、减速和特效规则；对照 `v1.94.2` 快照验证结局一致。
