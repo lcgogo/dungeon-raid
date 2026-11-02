@@ -10,7 +10,7 @@
 
 ## 🎮 Play Online
 
-**▶ 正式版 / Release: <https://dungeonraid.win>** ｜ 开发版 / Dev: <https://dungeonraid.win/dungeon-raid-dev.html>
+**▶ 正式版 / Release: <https://dungeonraid.win>** ｜ 国内镜像 / Mainland mirror: <https://dungeonraid.cn> ｜ 开发版 / Dev: <https://dungeonraid.win/dungeon-raid-dev.html>
 
 ## 📚 Documentation
 
