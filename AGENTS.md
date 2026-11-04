@@ -74,3 +74,4 @@
 
 - Worker：源码 `worker/src/index.js`；部署配置 `deploy/worker/wrangler.toml`；从仓库根执行 `npx wrangler deploy --config deploy/worker/wrangler.toml`。排行榜只展示 `verified=1`；`agent`(human/ai) 分人类榜/AI 榜。
 - 重放验证器：`verify.js`（核心）/ `verify-server.js`（render 常驻）；GitHub Actions 定时跑 `verify.js` 兜底 + 保活 render。完整架构、免费额度、密钥放哪、运维速查全在 **`ARCHITECTURE.md`**。
+- 查询最近是否有人提交成绩：直接查 Cloudflare D1 的 `scores` 表，不要用公开 `/top` 榜单推断提交时间。`created` 是 Unix 毫秒；最近 48 小时条件为 `created >= (unixepoch('now')-172800)*1000`，同时统计 `verified` 和 `agent` 状态。
