@@ -4,7 +4,7 @@ const BOSSES=[
     special:['剑链划过时替普通怪吸收本次伤害','Soaks sword-chain damage for crossed normal enemies'],
     desc:['可以用{W}攻击它。若同一条{WC}同时划过它和普通怪，普通怪本次不受伤害，原本每只普通怪应承受的整段伤害都会由🧽宝宝吸收；它自己仍会吸收本来属于自己的那一份。','You CAN attack it with a {WC}. If the same chain crosses it and normal enemies, those enemies take no damage and 🧽 Sponge Baby absorbs the full damage each would have taken; it still absorbs its own normal share too.'] },
   { id:'matryoshka', emoji:'🪆', name:['套娃','Matryoshka'], quip:['里面还有一个。','There is another one inside.'], monster:true, swordable:true, noTierScale:true,
-    desc:['属性与同级普通怪一致。被击败后会在可用非怪物格分裂成 2 个低 1 级的套娃；Lv1 才会真正击败并获得 Boss 奖励。','Stats match a normal enemy. When defeated, it splits into two one-tier-lower copies on available non-monster tiles; only Lv1 is truly defeated and grants boss rewards.'] },
+    desc:['属性与同级普通怪一致。被非炸弹攻击击败后会在可用非怪物格分裂成 2 个低 1 级的套娃；炸弹击败时该分支直接消灭、不再分裂。同一只套娃分裂出的所有分支都消灭后，才获得一次 Boss 奖励。','Stats match a same-tier normal enemy. Non-bomb kills split it into two one-tier-lower copies on available non-monster tiles; a bomb kill removes that branch without splitting. One Boss reward is granted after every branch from the same Matryoshka is eliminated.'] },
   { id:'ghost', emoji:'👻', name:['幽灵','Ghost'], quip:['{W}？穿过去了，挠痒痒都算不上。','{W}s? They pass right through me.'], monster:true, noTierScale:true,
     desc:['{WC}对它无效，只能用 💥炸弹 炸。血量与同级普通怪一致；倒计时归零会对你重击！','Immune to {WC} — only the 💥 Bomb hurts it. Its HP matches same-tier normal enemies, and it strikes you hard at 0!'] },
   { id:'clown', emoji:'🤡', name:['小丑','Clown'], quip:['笑一个嘛，反正棋盘已经乱了。','Smile! Your board is a mess anyway.'], perTurn:true,
@@ -163,7 +163,7 @@ function spawnRandomBossTile(tier=1, includeEnemies=false){
   const cdv=Math.max(1,(s.cd!=null?s.cd:s.baseCd)+extraFoeCd());
   const mult=def.noTierScale?1:tier;
   const hp=s.hp*mult*(def.hpMult||1), atk=s.atk*mult;
-  grid[r][c]={type:'boss', bossId:def.id, tier, hp, maxHp:hp, atk, cd:cdv, baseCd:cdv};
+  grid[r][c]={type:'boss', bossId:def.id, matryoshkaId:def.id==='matryoshka'?nextMatryoshkaId():undefined, tier, hp, maxHp:hp, atk, cd:cdv, baseCd:cdv};
   if(def.onSpawn) def.onSpawn(grid[r][c]);
   addBossFx(r,c,false);
   return true;
@@ -181,7 +181,7 @@ function spawnChosenBoss(id, tier=bossTier()){
   const mult=def.noTierScale?1:tier;
   const hpBase=(!def.swordable&&!def.finale&&!def.monster) ? enemyStats().hp : s.hp;
   const hp=hpBase*(def.noTierScale?1:mult)*(def.hpMult||1), atk=s.atk*mult;
-  grid[r][c]={type:'boss', bossId:def.id, tier, hp, maxHp:hp, atk, cd:cdv, baseCd:cdv};
+  grid[r][c]={type:'boss', bossId:def.id, matryoshkaId:def.id==='matryoshka'?nextMatryoshkaId():undefined, tier, hp, maxHp:hp, atk, cd:cdv, baseCd:cdv};
   addBossFx(r,c,false);
   if(def.onSpawn) def.onSpawn(grid[r][c]);
   log(tr(`🪲 捉虫：投放 ${def.emoji} ${L(def.name)} Lv${tier}！`,`🪲 Debug: spawned ${def.emoji} ${L(def.name)} Lv${tier}!`), 'debuff');
@@ -393,7 +393,7 @@ function spawnBoss(force, exclude){
   // Weapon-immune Bosses use same-tier normal-monster HP; keep attack/cooldown formulas unchanged.
   const hpBase=(!def.swordable&&!def.finale&&!def.monster) ? enemyStats().hp : s.hp;
   const hp=hpBase*(def.noTierScale?1:mult)*(def.hpMult||1), atk=s.atk*mult;
-  grid[r][c]={type:'boss', bossId:def.id, tier, hp, maxHp:hp, atk, cd:cdv, baseCd:cdv};
+  grid[r][c]={type:'boss', bossId:def.id, matryoshkaId:def.id==='matryoshka'?nextMatryoshkaId():undefined, tier, hp, maxHp:hp, atk, cd:cdv, baseCd:cdv};
   addBossFx(r,c,false);
   const tlabel = ` Lv${tier}`;   // 始终标注档位（含一阶 Lv1）
   log(tr(`${def.emoji} Boss【${L(def.name)}】${tlabel} 现身！轻点它查看打法。`,`${def.emoji} Boss [${L(def.name)}]${tlabel} appears! Tap it to see how to fight.`), 'bad');
@@ -401,9 +401,16 @@ function spawnBoss(force, exclude){
   return def.id;
 }
 
+function nextMatryoshkaId(){ player.matryoshkaSeq=(player.matryoshkaSeq||0)+1; return player.matryoshkaSeq; }
+function ensureMatryoshkaId(t){ if(t && t.bossId==='matryoshka' && t.matryoshkaId==null) t.matryoshkaId=nextMatryoshkaId(); return t&&t.matryoshkaId; }
+function hasMatryoshkaSibling(id, except){
+  for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const t=grid[r][c]; if(t && t!==except && t.bossId==='matryoshka' && t.matryoshkaId===id) return true; }
+  return false;
+}
 // A Matryoshka's children reuse the cleared cell first, then deterministic row-major non-monster cells.
 function splitMatryoshka(t){
   if(!t || t.bossId!=='matryoshka' || t.tier<=1) return false;
+  const id=ensureMatryoshkaId(t);
   let parent=null;
   for(let r=0;r<ROWS&&!parent;r++)for(let c=0;c<COLS;c++)if(grid[r][c]===t){parent={r,c};break;}
   if(parent) grid[parent.r][parent.c]=null;
@@ -417,15 +424,20 @@ function splitMatryoshka(t){
   for(let i=0;i<2 && cells.length;i++) pos.push(cells.shift());
   for(const [r,c] of pos){
     const tier=t.tier-1, stats=enemyStats(), cd=Math.max(1,stats.baseCd+extraFoeCd());
-    grid[r][c]={type:'boss',bossId:'matryoshka',tier,hp:stats.hp,maxHp:stats.hp,atk:stats.atk,cd,baseCd:cd};
+    grid[r][c]={type:'boss',bossId:'matryoshka',matryoshkaId:id,tier,hp:stats.hp,maxHp:stats.hp,atk:stats.atk,cd,baseCd:cd};
     addBossFx(r,c,false);
   }
   log(tr(`🪆 套娃分裂成 ${pos.length} 个 Lv${t.tier-1} 套娃！`,`🪆 Matryoshka splits into ${pos.length} Lv${t.tier-1} Matryoshka(s)!`), 'bad');
-  return pos.length===2;
+  return pos.length>0;
 }
-function defeatBoss(t,r,c){
-  if(t.bossId==='matryoshka' && splitMatryoshka(t)) return 'split';
-  grid[r][c]=null; thiefRecover(t); addXp(player,15); gainGold(20); onBossKilled();
+function defeatBoss(t,r,c,{bomb=false}={}){
+  if(t.bossId==='matryoshka'){
+    const id=ensureMatryoshkaId(t);
+    if(!bomb && splitMatryoshka(t)) return 'split';
+    grid[r][c]=null;
+    if(hasMatryoshkaSibling(id,t)) return 'pending';
+  } else grid[r][c]=null;
+  thiefRecover(t); addXp(player,15); gainGold(20); onBossKilled();
   return 'killed';
 }
 function bossKillAt(r,c){

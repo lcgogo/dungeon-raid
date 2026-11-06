@@ -46,7 +46,7 @@ const TIER1={
     for(let i=foes.length-1;i>0;i--){ const j=Math.floor(rnd()*(i+1)); [foes[i],foes[j]]=[foes[j],foes[i]]; }
     let healed=0, kills=0, normalKills=0; const pick=foes.slice(0,2); const splashes=[];
     for(const [r,c] of pick){ const t=grid[r][c]; const before=t.hp; const drain=Math.min(p.maxHp, before); t.hp-=drain; healed+=drain; statueReflect(t, drain);   // 石像：吸魂的伤害也会反弹
-      if(t.hp<=0){ const isB=t.type==='boss'; if(isB){if(defeatBoss(t,r,c)==='split')continue;}else{grid[r][c]=null;normalKills++;addXp(p,3+(p.killXp||0));gainGold(1);} kills++;
+      if(t.hp<=0){ const isB=t.type==='boss'; if(isB){if(defeatBoss(t,r,c)!=='killed')continue;}else{grid[r][c]=null;normalKills++;addXp(p,3+(p.killXp||0));gainGold(1);} kills++;
         if(p.splash && p.maxHp>before) splashes.push(p.maxHp-before); } }   // 溅射：吸魂的溢出（吸力上限−目标血量）也砸向剩余敌人
     holdNextGravity(); holdVisibleBoard();
     soulDrainFx(pick);   // 特效：从每个被吸目标的格子画一条红线指向血条（纯视觉，不影响逻辑/重放）
@@ -70,7 +70,7 @@ const TIER1={
     if(!any) return false;
     for(let r=ROWS-1;r>=0;r--)for(let c=0;c<COLS;c++){ const t=grid[r][c]; if(!isMon(t)) continue;
       const hit=Math.min(t.hp, hookBase*(ROWS-r)); t.hp-=hit; dmg+=hit; statueReflect(t, hit);
-      if(t.hp<=0){ const isB=t.type==='boss'; if(isB&&defeatBoss(t,r,c)==='split')continue; if(!isB){grid[r][c]=null;normalKills++;addXp(player,3+(player.killXp||0));gainGold(1);if(player.rotflesh)player.maxHp++;} kills++; } }
+      if(t.hp<=0){ const isB=t.type==='boss'; if(isB&&defeatBoss(t,r,c)!=='killed')continue; if(!isB){grid[r][c]=null;normalKills++;addXp(player,3+(player.killXp||0));gainGold(1);if(player.rotflesh)player.maxHp++;} kills++; } }
     const multiGold=multiKillGold(normalKills), lh=lifestealHeal(kills); applyGravity(); syncPositions(false);   // 满盘时 applyGravity 为空操作、不消耗 RNG；纯重排，重放确定
     log(tr(`🪝 钩子：把全场怪/Boss 拉到底排，造成 ${dmg} 伤害`+(kills?`，击杀 ${kills}`:'')+(multiGold?`，多杀奖励 +${multiGold} 金`:'')+(lh?`，吸血 +${lh}`:''),`🪝 Hook: dragged all foes down for ${dmg} damage`+(kills?`, ${kills} killed`:'')+(multiGold?`, multi-kill +${multiGold} gold`:'')+(lh?`, +${lh} lifesteal`:'')), moved?'buff':''); return true; }}},
   azuredragon:{n:['青龙','Azure Dragon'], quip:['接受来自远古的绝对威压吧！','Accept the absolute pressure of the ancients!'], skill:{name:['龙吟','Dragon Roar'], short:['全场造成等级伤害','Deal level damage to all foes'], desc:['对全场所有怪物（包括普攻免疫 Boss）造成等同当前等级的伤害。','Deal damage equal to your current level to every foe, including normal-attack-immune bosses.'], cd:5, f:p=>{ addBossFx(Math.floor(ROWS/2), Math.floor(COLS/2), false, '#f5b041', true); const r=dealDamage(p.level,null,true); applyGravity(); syncPositions(false); log(tr(`🐉 龙吟：全场 ${r.dmg} 伤害`+ (r.kills?`，击杀 ${r.kills}`:'')+xpLog(r.xp),`🐉 Dragon Roar: ${r.dmg} damage to all foes`+(r.kills?`, ${r.kills} killed`:'')+xpLog(r.xp)), 'buff'); return true; }}},

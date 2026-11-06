@@ -14,7 +14,7 @@ function startReplay(recObj){
   const overlay=document.getElementById('overlay');
   replayResumeState = player&&grid&&!ended&&overlay&&!overlay.classList.contains('show') ? {
     player: JSON.parse(JSON.stringify(player)),
-    grid: grid.map(row=>row.map(t=> t?{type:t.type,hp:t.hp,maxHp:t.maxHp,atk:t.atk,cd:t.cd,baseCd:t.baseCd,bossId:t.bossId,tier:t.tier,stolen:t.stolen,finale:t.finale,incub:t.incub,poison:t.poison,burnTurns:t.burnTurns,burnStacks:t.burnStacks}:null)),
+    grid: grid.map(row=>row.map(t=> t?{type:t.type,hp:t.hp,maxHp:t.maxHp,atk:t.atk,cd:t.cd,baseCd:t.baseCd,bossId:t.bossId,matryoshkaId:t.matryoshkaId,tier:t.tier,stolen:t.stolen,finale:t.finale,incub:t.incub,poison:t.poison,burnTurns:t.burnTurns,burnStacks:t.burnStacks}:null)),
     pendingLevels, busy, dragging:!!dragging, selection:selection?selection.map(s=>({...s})):[], rec:rec?JSON.parse(JSON.stringify(rec)):null, ended
   } : null;
   replaying=true; replayRec=recObj; replayIdx=0; replaySpeed=1; replayPaused=false; replayAutoPaused=false; replayPending=null; rec=null;

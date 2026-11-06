@@ -4,8 +4,8 @@ const fs = require('fs');
 const path = require('path');
 const file = fs.existsSync('dungeon-raid-dev.html') ? 'dungeon-raid-dev.html' : path.join('..', 'dungeon-raid-dev.html');
 let s = fs.readFileSync(file, 'utf8').match(/<script>([\s\S]*?)<\/script>/)[1];
-const EXPORT = `globalThis.__G={startGame,raceById,onBossKilled,dispatchReplayAct,buyItem,shopCost,resolve,dealDamage,previewKills,applyUpgrade,applyGravity,advanceEnemies,activateSkill,activateDebugSkill,autoReleaseItems,makeTile,isSwordTarget,normalEnemyAttack,bombDamage,gunpowderLevels,bossTier,
-  TIER1,TIER2,RACE_PATHS, CLASS_T2, UPGRADES, WEAPON, gainGold, gainHeal, addXp, currentSwordFlat, witherAuraTick, hurtPlayer, currentFlatDamage,
+const EXPORT = `globalThis.__G={startGame,raceById,onBossKilled,dispatchReplayAct,buyItem,shopCost,bombShopSummary,resolve,dealDamage,previewKills,applyUpgrade,applyGravity,advanceEnemies,activateSkill,activateDebugSkill,autoReleaseItems,makeTile,isSwordTarget,normalEnemyAttack,bombDamage,gunpowderLevels,bossTier,
+  TIER1,TIER2,RACES,RACE_PATHS, CLASS_T2, UPGRADES, WEAPON, gainGold, gainHeal, addXp, currentSwordFlat, witherAuraTick, hurtPlayer, currentFlatDamage,
   get player(){return player}, get grid(){return grid}, get logHistory(){return logHistory}, get rec(){return rec}, set rec(v){rec=v}, get ended(){return ended}, set ended(v){ended=v}, recAct,
   set selection(v){selection=v}, set dragging(v){dragging=v},
   set busy(v){busy=v}, set pendingLevels(v){pendingLevels=v}, set replaying(v){replaying=v}, set replayRec(v){replayRec=v}};`;
@@ -23,7 +23,15 @@ function ok(cond,msg){ console.log((cond?'✓':'✗')+' '+msg); if(!cond) fails+
 
 // 用一份录像驱动（确定性）：起手 replaying 播种，再关掉 replaying 手动驱动里程碑
 G.replayRec={seed:7,race:'human',acts:[]}; G.replaying=true; G.startGame(G.raceById('human')); G.replaying=false;
-const p=G.player; p.hp=p.maxHp=999999; G.busy=false; G.pendingLevels=0;
+let p=G.player; p.hp=p.maxHp=999999; G.busy=false; G.pendingLevels=0;
+ok(p.gold===50,'新局初始金币为50');
+for(const rc of G.RACES){ G.startGame(rc); ok(G.player.gold===50,`${rc.id}初始金币为50`); }
+G.startGame(G.raceById('human')); p=G.player; p.hp=p.maxHp=999999; G.busy=false; G.pendingLevels=0;
+G.player.gunpowder=1;
+ok(G.bombShopSummary(G.player).includes('5+1') && G.bombShopSummary(G.player).includes('25+5'),'炸弹按钮显示伤害5+1与花费25+5');
+G.player.cheapskate=true;
+ok(G.bombShopSummary(G.player).includes('25+5') && G.shopCost('bomb')===15,'半价时仍显示基础加成公式且实际价格为15');
+G.player.cheapskate=false;
 
 // 模拟「到达某回合并击败一个 Boss」→ onBossKilled 标记 pending，再用录像动作应用选择
 function killBossAt(turns){ p.turns=turns; G.onBossKilled(); }

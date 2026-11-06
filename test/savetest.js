@@ -6,7 +6,7 @@ const file = fs.existsSync('dungeon-raid-dev.html') ? 'dungeon-raid-dev.html' : 
 const raw = fs.readFileSync(file, 'utf8').match(/<script>([\s\S]*?)<\/script>/)[1];
 
 const EXPORT = `globalThis.__S={startGame,raceById,saveGame,loadGame,hasSave,VERSION,SAVE_KEY,
-  get player(){return player}, set busy(v){busy=v}};`;
+  get player(){return player}, get grid(){return grid}, set busy(v){busy=v}};`;
 const elH = { get(t,p){ if(p==='style')return t._s||(t._s={}); if(p==='dataset')return t._d||(t._d={}); if(p==='classList')return{add(){},remove(){},toggle(){}}; if(p==='getContext')return()=>new Proxy({},{get:()=>()=>{},set:()=>true}); if(['addEventListener','appendChild','setAttribute','focus','click'].includes(p))return()=>{}; if(p==='querySelector')return()=>new Proxy({},elH); if(p==='querySelectorAll')return()=>[]; if(p==='getBoundingClientRect')return()=>({left:0,top:0,width:420,height:420}); if(['width','height','clientWidth','clientHeight'].includes(p))return 420; return t[p]; }, set(t,p,v){t[p]=v;return true;} };
 const mk = () => new Proxy({}, elH);
 
@@ -29,10 +29,12 @@ function run(devFlag,label){
   S.busy=false;
   S.startGame(S.raceById('human'));   // 建立真实 player+grid
   S.player.prophecyPending='coin';
+  S.grid[0][0]={type:'boss',bossId:'matryoshka',matryoshkaId:77,tier:7,hp:12,maxHp:12,atk:4,cd:3,baseCd:3};
   S.saveGame();                       // 写入存档（ver=当前版本）
   ok(S.hasSave(), `${label} 同版本存档有效`);
   ok(S.loadGame()===true, `${label} 同版本可继续`);
   ok(S.player.prophecyPending==='coin', `${label} 神谕待补子状态可恢复`);
+  ok(S.grid[0][0].matryoshkaId===77, `${label} 套娃分裂链 ID 可从存档恢复`);
   // 篡改存档版本号 → 模拟“版本发生变化”
   const d = JSON.parse(store[S.SAVE_KEY]); d.ver='v0.0.0-old'; store[S.SAVE_KEY]=JSON.stringify(d);
   if(devFlag){

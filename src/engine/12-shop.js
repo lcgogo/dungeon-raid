@@ -8,7 +8,7 @@ function normalEnemyAttack(t){
 const SHOP={
   heal: {cost:15, f(){ const base=10+2*(player.healUses||0); const h=gainHeal(base); player.healUses=(player.healUses||0)+1; log(tr(`💊 喝下药水，回复 ${h} 生命`,`💊 Potion: +${h} HP`), 'heal'); }},   // 每使用一次：恢复量 +2、下次多花 1 金（后期不再鸡肋）
   bomb: {cost:25, f(){ const extra = bombGoldSacrificeBonus(player); if(extra>0) player.gold=Math.max(0, player.gold-extra); const D = bombDamage(player)+extra;   // 基础5 + 爆破手累计 + 乾坤一掷（先买炸弹，再额外扣当前金币 20% 换伤害）
-    const result=damageAllFoes(D,{rotflesh:true,onHit:(t,r,c)=>addBombFx(r,c)});
+    const result=damageAllFoes(D,{rotflesh:true,matryoshkaBomb:true,onHit:(t,r,c)=>addBombFx(r,c)});
     const kills=result.normalKills, boss=result.bossKills, xp=result.xp;
     const multiGold=multiKillGold(kills);
     const lifeHeal=lifestealHeal(kills+boss);   // 汲取生命：炸弹击杀也回血
@@ -18,6 +18,13 @@ const SHOP={
     applyGravity(); syncPositions(false); }},
 };
 function shopCost(key){ let c=SHOP[key].cost; if(key==='heal') c+=(player.healUses||0); if(key==='bomb') c+=5*gunpowderLevels(player); if(player.cheapskate) c=Math.ceil(c/2); return c; } // 治疗/精研火药：每次使用后下次分别多花 1/5 金；小气鬼：花费减半
+function bombShopSummary(p){
+  p=p||player;
+  const powder=gunpowderLevels(p), extra=bombGoldSacrificePreviewBonus(p);
+  const damage=`5${powder?`+${powder}`:''}${powder?tr(`（精研火药 +${powder}）`,` (Powder +${powder})`):''}`;
+  const cost=`25${powder?`+${5*powder}`:''}${powder?tr(`（精研火药 +${5*powder}）`,` (Powder +${5*powder})`):''}`;
+  return tr(`伤害 ${damage}｜花费 ${cost}`+(p.cheapskate?'（半价）':'')+(extra?`｜乾坤一掷 +${extra} 伤害`:''),`Damage ${damage} | Cost ${cost}`+(p.cheapskate?' (½ price)':'')+(extra?` | All-In +${extra} dmg`:''));
+}
 function buyItem(key){
   if(ended||busy||pendingLevels) return;
   if(player.frozen && player.frozen[key]>0) return;   // 雪人冰封该槽（治疗/炸弹），数回合内不可用
@@ -143,8 +150,8 @@ function shopInfoData(key){
     return { icon:'💥', title:tr('炸弹','Bomb'),
       desc:L(['投掷炸弹，对全场怪与 Boss 造成固定伤害（无视档位倍率）。能炸{W}免疫的 Boss（幽灵/小丑/污染怪/雪人）；终焉之主无效；石像会把伤害反弹给你。若有「乾坤一掷」，买完炸弹后还会再额外扣当前金币的 20%，并把这笔数额加到这次炸弹伤害上。',
               'Throw a bomb for fixed damage to all monsters & bosses (ignores tier scaling). Hits {W}-immune bosses (Ghost/Clown/Corruptor/Snowman); no effect on the Overlord; the Statue reflects it back. With All-In, buying the bomb also spends 20% of your current gold and adds exactly that amount to this bomb’s damage.']),
-      rows:[ [tr('当前伤害','Damage'), `−${D}`+(gunpowderLevels(p)?tr(`（精研火药 +${gunpowderLevels(p)}）`,`(Powder +${gunpowderLevels(p)})`):'')+(extra?tr(`（乾坤一掷 +${extra}）`,` (All-In +${extra})`):'')],
-             [tr('花费','Cost'), `${shopCost('bomb')} 💰`+(p.cheapskate?tr('（小气鬼半价）',' (½)'):'')+(gunpowderLevels(p)?tr(`（精研火药 +${5*gunpowderLevels(p)}）`,` (Powder +${5*gunpowderLevels(p)})`):'')],
+      rows:[ [tr('当前伤害','Damage'), `5${gunpowderLevels(p)?`+${gunpowderLevels(p)}${tr(`（精研火药 +${gunpowderLevels(p)}）`,` (Powder +${gunpowderLevels(p)})`)}`:''} = ${bombDamage(p)}`+(extra?tr(`（乾坤一掷 +${extra}）`,` (All-In +${extra})`):'')],
+             [tr('花费','Cost'), `25${gunpowderLevels(p)?`+${5*gunpowderLevels(p)}${tr(`（精研火药 +${5*gunpowderLevels(p)}）`,` (Powder +${5*gunpowderLevels(p)})`)}`:''} = ${shopCost('bomb')} 💰`+(p.cheapskate?tr('（小气鬼半价）',' (½)'):'')],
              [tr('额外扣金','Extra gold spent'), extra?`${extra} 💰`:tr('无','None')],
              [tr('冷却','Cooldown'), `${cd} ${tr('回合','t')}`+(p.shadowBombGold?tr('（乾坤一掷）',' (All-In)'):'')] ] };
   }

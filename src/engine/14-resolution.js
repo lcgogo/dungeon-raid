@@ -137,7 +137,7 @@ function holyStrikeDamage(amt){
   const isBoss=t.type==='boss', name=isBoss?L(bossDef(t).name):tr('普通怪','enemy'), before=t.hp, dealt=Math.min(amt,before);
   addBombFx(tr_,tc);
   t.hp-=amt;
-  if(t.hp<=0){ if(isBoss){if(defeatBoss(t,tr_,tc)==='split')return;} else { grid[tr_][tc]=null; addXp(player,3+(player.killXp||0)); gainGold(1); } }
+  if(t.hp<=0){ if(isBoss){if(defeatBoss(t,tr_,tc)!=='killed')return;} else { grid[tr_][tc]=null; addXp(player,3+(player.killXp||0)); gainGold(1); } }
   log(tr(`✨ 神圣打击：优先命中 ${name}，造成 ${dealt} 伤害`+(t.hp<=0?`，击杀！`:''),`✨ Holy Strike: hit ${name} first for ${dealt} dmg`+(t.hp<=0?`, killed!`:'')));
 }
 
@@ -165,7 +165,7 @@ function dealDamage(pool, targets, allFoes){
     if(sponge && e.t===sponge.t) spongeAbsorbed=Math.min(pool*spongeFodder, Math.max(0,before-pool));
     e.t.hp-=hit; dmg+=hit;
     statueReflect(e.t, hit);   // 石像：等量真实伤害反弹给玩家
-    if(e.t.hp<=0){ if(e.t.type==='boss'){ if(defeatBoss(e.t,e.r,e.c)==='split') continue; } else { grid[e.r][e.c]=null; normalKills++; xp+=addXp(player,3+(player.killXp||0)); gainGold(1); if(player.rotflesh) player.maxHp++; } kills++;
+    if(e.t.hp<=0){ if(e.t.type==='boss'){ if(defeatBoss(e.t,e.r,e.c)!=='killed') continue; } else { grid[e.r][e.c]=null; normalKills++; xp+=addXp(player,3+(player.killXp||0)); gainGold(1); if(player.rotflesh) player.maxHp++; } kills++;
       if(player.splash && pool>before) splashes.push(pool-before);   // 溅射：本次击杀的溢出留待砸向其它敌人
     }
   }
@@ -176,7 +176,7 @@ function dealDamage(pool, targets, allFoes){
   return {dmg,kills,bonusGold,multiGold,xp,spongeAbsorbed};
 }
 // Shared all-foe damage resolution. Callbacks preserve each effect's per-target behavior.
-function damageAllFoes(amount, {snapshot=false, onHit=null, afterDamage=null, rotflesh=false, reflect=true}={}){
+function damageAllFoes(amount, {snapshot=false, onHit=null, afterDamage=null, rotflesh=false, reflect=true, matryoshkaBomb=false}={}){
   let dmg=0, kills=0, normalKills=0, bossKills=0, xp=0, hits=0;
   const apply=(r,c,t)=>{
     if(!t || (t.type!=='enemy' && t.type!=='boss') || t.finale || grid[r][c]!==t) return;
@@ -187,7 +187,8 @@ function damageAllFoes(amount, {snapshot=false, onHit=null, afterDamage=null, ro
     if(reflect) statueReflect(t,hit);
     if(t.hp>0) return;
     if(t.type==='boss'){
-      if(defeatBoss(t,r,c)==='split') return;
+      const result=defeatBoss(t,r,c,{bomb:matryoshkaBomb});
+      if(result==='split' || result==='pending') return;
       bossKills++;
     } else {
       grid[r][c]=null; normalKills++; xp+=addXp(player,3+(player.killXp||0)); gainGold(1);
@@ -210,7 +211,7 @@ function splashHit(over){
   if(!foes.length) return {dmg:0,kills:0,normalKills:0,xp:0};
   const [r,c]=foes[Math.floor(rnd()*foes.length)]; const t=grid[r][c];
   const hit=Math.min(over,t.hp); t.hp-=hit; statueReflect(t, hit); let kills=0, normalKills=0, xp=0;
-  if(t.hp<=0){ const isB=t.type==='boss'; if(isB){ if(defeatBoss(t,r,c)==='split') return {dmg:hit,kills:0,normalKills:0,xp:0}; } else {grid[r][c]=null;normalKills=1;xp+=addXp(player,3+(player.killXp||0));gainGold(1);if(player.rotflesh)player.maxHp++;} kills=1; }
+  if(t.hp<=0){ const isB=t.type==='boss'; if(isB){ if(defeatBoss(t,r,c)!=='killed') return {dmg:hit,kills:0,normalKills:0,xp:0}; } else {grid[r][c]=null;normalKills=1;xp+=addXp(player,3+(player.killXp||0));gainGold(1);if(player.rotflesh)player.maxHp++;} kills=1; }
   return {dmg:hit, kills, normalKills, xp};
 }
 
@@ -271,7 +272,7 @@ function reflectIceArmor(amt, atkr){
   }
   if(!t) return;
   const hit=Math.min(amt,t.hp); t.hp-=hit; t.cd+=1; t.frostTurns=2; t.flashWhite=2; let lh=0;
-  if(t.hp<=0){ const isB=t.type==='boss'; if(isB){ if(defeatBoss(t,r,c)==='split') return; } else {grid[r][c]=null;addXp(player,3+(player.killXp||0));gainGold(1);} lh=lifestealHeal(1); }
+  if(t.hp<=0){ const isB=t.type==='boss'; if(isB){ if(defeatBoss(t,r,c)!=='killed') return; } else {grid[r][c]=null;addXp(player,3+(player.killXp||0));gainGold(1);} lh=lifestealHeal(1); }
   log(tr(`🧊 冰甲反弹 ${hit} 伤害，并让攻击者更慢出手`+(lh?`，吸血 +${lh}`:''),`🧊 Ice Armor reflects ${hit} damage and slows the attacker`+(lh?`, +${lh} lifesteal`:'')), 'buff');
 }
 // 玩家受伤的统一入口：圣盾免伤 / 狂怒不屈保命 / 矮人护甲翻倍 / 荆棘反弹 / 伤害统计
@@ -322,7 +323,7 @@ function deathCoilTick(){
   const dmg=Math.max(1, Math.floor(player.maxHp*0.3)); let kills=0, normalKills=0, hit=0;
   for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const t=grid[r][c];
     if(t&&(t.type==='enemy'||(t.type==='boss'&&!t.finale))){ t.hp-=dmg; hit++;
-      if(t.hp<=0){ const isB=t.type==='boss'; if(isB&&defeatBoss(t,r,c)==='split')continue; if(!isB){grid[r][c]=null;normalKills++;addXp(player,3+(player.killXp||0));gainGold(1);} kills++; } }
+      if(t.hp<=0){ const isB=t.type==='boss'; if(isB&&defeatBoss(t,r,c)!=='killed')continue; if(!isB){grid[r][c]=null;normalKills++;addXp(player,3+(player.killXp||0));gainGold(1);} kills++; } }
   }
   if(!hit) return;
   const multiGold=multiKillGold(normalKills), lh=lifestealHeal(kills);
@@ -336,7 +337,7 @@ function witherAuraTick(healed){
   for(const {r,c,t} of actors){ if(grid[r][c]!==t) continue;
     if(t&&(t.type==='enemy'||(t.type==='boss'&&!t.finale))){
       t.hp-=healed; hit++;
-      if(t.hp<=0){ const isB=t.type==='boss'; if(isB&&defeatBoss(t,r,c)==='split')continue; if(!isB){grid[r][c]=null;normalKills++;addXp(player,3+(player.killXp||0));gainGold(1);} kills++; }
+      if(t.hp<=0){ const isB=t.type==='boss'; if(isB&&defeatBoss(t,r,c)!=='killed')continue; if(!isB){grid[r][c]=null;normalKills++;addXp(player,3+(player.killXp||0));gainGold(1);} kills++; }
     }
   }
   if(!hit) return;
@@ -351,7 +352,7 @@ function reflectThorns(amt, atkr){
   if(!t){ const es=[]; for(let rr=0;rr<ROWS;rr++)for(let cc=0;cc<COLS;cc++){ const x=grid[rr][cc]; if(x&&(x.type==='enemy'||x.type==='boss')&&!x.finale) es.push([rr,cc,x]); }
     if(!es.length) return; [r,c,t]=es[Math.floor(rnd()*es.length)]; }   // 攻击者已不在场（如自身已死）→ 退回随机一个敌人
   t.hp-=amt; let lh=0;
-  if(t.hp<=0){ const isB=t.type==='boss'; if(isB){ if(defeatBoss(t,r,c)==='split') return; } else {grid[r][c]=null;addXp(player,3+(player.killXp||0));gainGold(1);} lh=lifestealHeal(1); }   // 荆棘反杀也吸血
+  if(t.hp<=0){ const isB=t.type==='boss'; if(isB){ if(defeatBoss(t,r,c)!=='killed') return; } else {grid[r][c]=null;addXp(player,3+(player.killXp||0));gainGold(1);} lh=lifestealHeal(1); }   // 荆棘反杀也吸血
   log(tr(`🌵 荆棘反弹 ${amt} 伤害`+(lh?`，吸血 +${lh}`:''),`🌵 Thorns reflect ${amt}`+(lh?`, +${lh} lifesteal`:'')));
 }
 

@@ -1,4 +1,16 @@
 
+## [v1.97.0] - 2026-11-06
+> Version-Impact: verify
+
+- 所有角色新局初始金币调整为 50；炸弹商店显示基础值与精研火药加成公式（伤害 `5+1`、花费 `25+5`），并保留半价后的实际价格提示。
+- All races now start with 50 gold. The Bomb shop shows base values plus Refined Powder (damage `5+1`, cost `25+5`) and indicates when Cheapskate halves the actual price.
+
+## [v1.96.0] - 2026-11-06
+> Version-Impact: verify
+
+- 套娃被炸弹击杀时，该分支直接消灭、不再分裂；普通攻击击杀仍会分裂。同一只套娃分裂出的全部分支消灭后，才计为一次 Boss 击杀并获得奖励。
+- Bomb kills now remove a Matryoshka branch without splitting it; non-bomb kills still split. The Boss kill and reward count once all branches from that Matryoshka are eliminated.
+
 ## [v1.95.0] - 2026-10-31
 > Version-Impact: verify
 

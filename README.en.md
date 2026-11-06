@@ -23,7 +23,7 @@ Play online: **<https://dungeonraid.win>** (Mainland mirror: <https://dungeonrai
 
 The two builds keep **separate, non-overwriting saves** (Dev uses its own localStorage keys). The start screen and footer both label which build you are in. The home page’s Release / Dev version numbers are **statically injected at deploy time**, so they appear instantly even on weak connections without an extra fetch.
 
-The current Dev build is `v1.95.0`; Magmafiend now melts up to its tier in shields each turn. Bomb and Frost Nova share all-foe damage resolution, with parity checked against the `v1.94.2` snapshot. The Lich skill is named Frost Nova to match Warcraft. The turn-350 crossover list shows only activatable skills and no longer offers passive Rebirth. Feedback entries can be opened to view their thread and post replies. The README tracks the current code, including the Dev-only Human hidden Programmer class, Refined Powder, stable replay boundaries, and the iOS Cyclops board-icon fix. Release builds keep Programmer hidden. Source lives under `src/` and the self-contained HTML is regenerated with `node build/build.js`.
+The current Dev build is `v1.97.0`; all races start with 50 gold, and the Bomb shop shows base values plus Refined Powder (damage `5+1`, cost `25+5`). Bomb kills remove a Matryoshka branch without splitting it, while all remaining branches from that Matryoshka must still be eliminated for one Boss kill reward. Magmafiend melts up to its tier in shields each turn. Bomb and Frost Nova share all-foe damage resolution, with parity checked against the `v1.94.2` snapshot. The Lich skill is named Frost Nova to match Warcraft. The turn-350 crossover list shows only activatable skills and no longer offers passive Rebirth. Feedback entries can be opened to view their thread and post replies. The README tracks the current code, including the Dev-only Human hidden Programmer class, Refined Powder, stable replay boundaries, and the iOS Cyclops board-icon fix. Release builds keep Programmer hidden. Source lives under `src/` and the self-contained HTML is regenerated with `node build/build.js`.
 
 ## 🧩 Core Gameplay
 
@@ -54,7 +54,8 @@ Each enemy tile shows three numbers:
 - **XP comes only from kills** (+3 per enemy). On level-up, **pick 1 of 3** upgrades. The regen upgrade **Channel Vitality** now scales by repeated picks: the 1st pick gives +1 per turn, the 2nd adds +2 more (total 3), the 3rd adds +3 more (total 6), and so on.
 - **Combo bonus**: longer chains pay more — total reward `× (1 + (N − 2) × 15%)` (5-chain ≈ ×1.45, 7-chain ≈ ×1.75).
 - **Armor accumulates**: shields do not grant damage reduction directly; they fill the HUD "Armor" bar, and filling it gives +1 damage reduction (costs more each time). Damage reduction soaks each hit, then the rest comes off your HP.
-- **Gold shop**: 💊 Heal (restore 10 HP, **+2 healing and +1 gold cost per use**; **unavailable at full HP**) / 💥 Bomb (base −5 HP to all foes; Refined Powder adds +1 damage and +5 cost per level). **All-In** spends 20% of current gold after buying the bomb and adds that amount to its damage. Each item has its own cooldown.
+- **Starting gold**: all races begin a new run with **50 gold**.
+- **Gold shop**: 💊 Heal (restore 10 HP, **+2 healing and +1 gold cost per use**; **unavailable at full HP**) / 💥 Bomb (base damage 5, cost 25; the shop shows Refined Powder formulas such as damage `5+1` and cost `25+5`). **All-In** spends 20% of current gold after buying the bomb and adds that amount to its damage. Each item has its own cooldown.
 
 ## 🧬 Races (chosen at start)
 
@@ -152,7 +153,7 @@ Every **10 turns**, one boss is drawn from a **deterministic 32-card deck** cont
 | Boss | How to hit | Gimmick |
 |---|---|---|
 | 🧽 SpongeBob | Sword / Bomb | When the same sword chain crosses it and normal enemies, those enemies take no damage and SpongeBob absorbs the full chain damage each would have taken; Bombs, Arrow Rain, and poison hearts do not trigger it |
-| 🪆 Matryoshka | Sword / Bomb | Stats match a same-tier normal enemy; splits into two one-tier-lower copies on available non-monster tiles, until Lv1 is finally defeated |
+| 🪆 Matryoshka | Sword / Bomb | Non-bomb kills split into two one-tier-lower copies; a bomb kill removes that branch without splitting. One Boss kill reward is granted after all branches from the same Matryoshka are eliminated |
 | 👻 Ghost | Bomb only | Immune to weapon chains; **all weapon-immune bosses use same-tier normal-monster HP**; strikes you hard when its timer hits 0 |
 | 🤡 Clown | Bomb only | Re-rolls several non-monster tiles into other resources each turn, disrupting your chains; does NOT spawn monsters (that's the Summoner) |
 | 🪢 Lashmaster | Bomb only | On spawn, all normal enemies get **-1 attack countdown**, and each turn after that they get **-1 attack countdown** again. It may not be the deadliest foe by itself, but it drags the whole board into a frenzy the longer it lives. |

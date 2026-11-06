@@ -249,9 +249,9 @@ const CONTENT = {
 if('serviceWorker' in navigator) window.addEventListener('load',()=>navigator.serviceWorker.register('/sw.js').catch(()=>{}));
 //==================== 配置 ====================
 // 版本号 v主.次.修：不影响 verify/replay 兼容边界的小改动改"修"；凡是影响 verify/replay/版本分桶/release 验证语义的改动都改"次"；大版本变更需先确认。页面底部显示。
-const VERSION='v1.95.0';
+const VERSION='v1.97.0';
 // CHANGELOG_LINES below is only a fallback for raw source inspection; build/build.js replaces it from CHANGELOG.md.
-const CHANGELOG_LINES=[{"ver": "v1.95.0", "zh": "岩浆魔每回合最多按自身等级融化对应数量的盾：Lv1 1 面、Lv2 2 面，以此类推；不会因此回血。", "en": "Magmafiend now melts up to its tier in shields each turn: 1 at Lv1, 2 at Lv2, and so on; shields still do not heal it."}, {"ver": "v1.94.3", "zh": "重构炸弹与霜冻新星的全场伤害结算，共用击杀奖励处理，同时保留各自的目标遍历、石像反伤、减速和特效规则；对照 `v1.94.2` 快照验证结局一致。", "en": "Refactored Bomb and Frost Nova to share all-foe damage and kill-reward handling while preserving their traversal, Statue reflection, slow, and visual-effect rules; verified parity against the `v1.94.2` snapshot."}, {"ver": "v1.94.2", "zh": "巫妖技能名称与《魔兽争霸》统一为「霜冻新星 / Frost Nova」；技能效果不变。", "en": "Renamed the Lich skill to match Warcraft: Frost Nova (霜冻新星). Its effects are unchanged."}, {"ver": "v1.94.1", "zh": "修复 350 回合跨界技能列表把被动技能「重生」列为可选主动的问题；现在只显示可发动的主动技能。", "en": "Fixed the turn-350 crossover list offering the passive Rebirth as an active skill; it now shows only activatable skills."}, {"ver": "v1.94.0", "zh": "修复死局逃生检查把「主动技能已就绪」误当成「当前能改变棋盘」的问题：主动没有有效目标/棋子，或会长金币不足时，不再阻止判负。炸弹用完后若棋盘仍无合法行动且没有有效逃生技能，会正确结束对局。", "en": "Fixed deadlock escape checks treating any ready active as a viable board-changing action. Skills without a valid target or required tile, and Guild Master without enough gold, no longer prevent defeat; a board still blocked after using its Bomb now ends the run when no viable escape remains."}];   /* auto-injected by dr.sh embed-changelog（勿手改） */
+const CHANGELOG_LINES=[{"ver": "v1.97.0", "zh": "所有角色新局初始金币调整为 50；炸弹商店显示基础值与精研火药加成公式（伤害 `5+1`、花费 `25+5`），并保留半价后的实际价格提示。", "en": "All races now start with 50 gold. The Bomb shop shows base values plus Refined Powder (damage `5+1`, cost `25+5`) and indicates when Cheapskate halves the actual price."}, {"ver": "v1.96.0", "zh": "套娃被炸弹击杀时，该分支直接消灭、不再分裂；普通攻击击杀仍会分裂。同一只套娃分裂出的全部分支消灭后，才计为一次 Boss 击杀并获得奖励。", "en": "Bomb kills now remove a Matryoshka branch without splitting it; non-bomb kills still split. The Boss kill and reward count once all branches from that Matryoshka are eliminated."}, {"ver": "v1.95.0", "zh": "岩浆魔每回合最多按自身等级融化对应数量的盾：Lv1 1 面、Lv2 2 面，以此类推；不会因此回血。", "en": "Magmafiend now melts up to its tier in shields each turn: 1 at Lv1, 2 at Lv2, and so on; shields still do not heal it."}, {"ver": "v1.94.3", "zh": "重构炸弹与霜冻新星的全场伤害结算，共用击杀奖励处理，同时保留各自的目标遍历、石像反伤、减速和特效规则；对照 `v1.94.2` 快照验证结局一致。", "en": "Refactored Bomb and Frost Nova to share all-foe damage and kill-reward handling while preserving their traversal, Statue reflection, slow, and visual-effect rules; verified parity against the `v1.94.2` snapshot."}, {"ver": "v1.94.2", "zh": "巫妖技能名称与《魔兽争霸》统一为「霜冻新星 / Frost Nova」；技能效果不变。", "en": "Renamed the Lich skill to match Warcraft: Frost Nova (霜冻新星). Its effects are unchanged."}];   /* auto-injected by dr.sh embed-changelog（勿手改） */
 const DEV=true;   // release build (DEV=false); dev build is dungeon-raid-dev.html (DEV=true)
 const REC_API='https://api.dungeonraid.win';   // 录像分享 API（Cloudflare Worker + KV）
 // 带种子随机数（mulberry32）：游戏全程用 rnd() 取代原生随机，配合录制种子可确定性重放
@@ -330,7 +330,7 @@ let gravityFxHold=0;     // 下一次 applyGravity 要给下落棋子的起落�
 function holdNextGravity(frames=FX_FALL_HOLD){ if(headless||jumping) return; gravityFxHold=Math.max(gravityFxHold, frames|0); }
 
 function newPlayer(){
-  return {hp:20,maxHp:20, armor:0, shieldXp:0, toughness:0, shopCd:{}, skillCd:0, dmgBy:{}, deathMode:'damage', bossDue:false, bossDeck:null, gold:0, xp:0, level:1,
+  return {hp:20,maxHp:20, armor:0, shieldXp:0, toughness:0, shopCd:{}, skillCd:0, dmgBy:{}, deathMode:'damage', bossDue:false, bossDeck:null, gold:50, xp:0, level:1,
     weaponPower:1, swordFlat:0, armorPerShield:1, healPerHeart:1, goldPerCoin:1,
     lifesteal:0, regen:0, coinXp:0, turns:0,
     race:null, tier1:null, tier2:null, t1Pending:false, t2Pending:false,   // 种族/转职
@@ -366,7 +366,7 @@ const BOSSES=[
     special:['剑链划过时替普通怪吸收本次伤害','Soaks sword-chain damage for crossed normal enemies'],
     desc:['可以用{W}攻击它。若同一条{WC}同时划过它和普通怪，普通怪本次不受伤害，原本每只普通怪应承受的整段伤害都会由🧽宝宝吸收；它自己仍会吸收本来属于自己的那一份。','You CAN attack it with a {WC}. If the same chain crosses it and normal enemies, those enemies take no damage and 🧽 Sponge Baby absorbs the full damage each would have taken; it still absorbs its own normal share too.'] },
   { id:'matryoshka', emoji:'🪆', name:['套娃','Matryoshka'], quip:['里面还有一个。','There is another one inside.'], monster:true, swordable:true, noTierScale:true,
-    desc:['属性与同级普通怪一致。被击败后会在可用非怪物格分裂成 2 个低 1 级的套娃；Lv1 才会真正击败并获得 Boss 奖励。','Stats match a normal enemy. When defeated, it splits into two one-tier-lower copies on available non-monster tiles; only Lv1 is truly defeated and grants boss rewards.'] },
+    desc:['属性与同级普通怪一致。被非炸弹攻击击败后会在可用非怪物格分裂成 2 个低 1 级的套娃；炸弹击败时该分支直接消灭、不再分裂。同一只套娃分裂出的所有分支都消灭后，才获得一次 Boss 奖励。','Stats match a same-tier normal enemy. Non-bomb kills split it into two one-tier-lower copies on available non-monster tiles; a bomb kill removes that branch without splitting. One Boss reward is granted after every branch from the same Matryoshka is eliminated.'] },
   { id:'ghost', emoji:'👻', name:['幽灵','Ghost'], quip:['{W}？穿过去了，挠痒痒都算不上。','{W}s? They pass right through me.'], monster:true, noTierScale:true,
     desc:['{WC}对它无效，只能用 💥炸弹 炸。血量与同级普通怪一致；倒计时归零会对你重击！','Immune to {WC} — only the 💥 Bomb hurts it. Its HP matches same-tier normal enemies, and it strikes you hard at 0!'] },
   { id:'clown', emoji:'🤡', name:['小丑','Clown'], quip:['笑一个嘛，反正棋盘已经乱了。','Smile! Your board is a mess anyway.'], perTurn:true,
@@ -525,7 +525,7 @@ function spawnRandomBossTile(tier=1, includeEnemies=false){
   const cdv=Math.max(1,(s.cd!=null?s.cd:s.baseCd)+extraFoeCd());
   const mult=def.noTierScale?1:tier;
   const hp=s.hp*mult*(def.hpMult||1), atk=s.atk*mult;
-  grid[r][c]={type:'boss', bossId:def.id, tier, hp, maxHp:hp, atk, cd:cdv, baseCd:cdv};
+  grid[r][c]={type:'boss', bossId:def.id, matryoshkaId:def.id==='matryoshka'?nextMatryoshkaId():undefined, tier, hp, maxHp:hp, atk, cd:cdv, baseCd:cdv};
   if(def.onSpawn) def.onSpawn(grid[r][c]);
   addBossFx(r,c,false);
   return true;
@@ -543,7 +543,7 @@ function spawnChosenBoss(id, tier=bossTier()){
   const mult=def.noTierScale?1:tier;
   const hpBase=(!def.swordable&&!def.finale&&!def.monster) ? enemyStats().hp : s.hp;
   const hp=hpBase*(def.noTierScale?1:mult)*(def.hpMult||1), atk=s.atk*mult;
-  grid[r][c]={type:'boss', bossId:def.id, tier, hp, maxHp:hp, atk, cd:cdv, baseCd:cdv};
+  grid[r][c]={type:'boss', bossId:def.id, matryoshkaId:def.id==='matryoshka'?nextMatryoshkaId():undefined, tier, hp, maxHp:hp, atk, cd:cdv, baseCd:cdv};
   addBossFx(r,c,false);
   if(def.onSpawn) def.onSpawn(grid[r][c]);
   log(tr(`🪲 捉虫：投放 ${def.emoji} ${L(def.name)} Lv${tier}！`,`🪲 Debug: spawned ${def.emoji} ${L(def.name)} Lv${tier}!`), 'debuff');
@@ -755,7 +755,7 @@ function spawnBoss(force, exclude){
   // Weapon-immune Bosses use same-tier normal-monster HP; keep attack/cooldown formulas unchanged.
   const hpBase=(!def.swordable&&!def.finale&&!def.monster) ? enemyStats().hp : s.hp;
   const hp=hpBase*(def.noTierScale?1:mult)*(def.hpMult||1), atk=s.atk*mult;
-  grid[r][c]={type:'boss', bossId:def.id, tier, hp, maxHp:hp, atk, cd:cdv, baseCd:cdv};
+  grid[r][c]={type:'boss', bossId:def.id, matryoshkaId:def.id==='matryoshka'?nextMatryoshkaId():undefined, tier, hp, maxHp:hp, atk, cd:cdv, baseCd:cdv};
   addBossFx(r,c,false);
   const tlabel = ` Lv${tier}`;   // 始终标注档位（含一阶 Lv1）
   log(tr(`${def.emoji} Boss【${L(def.name)}】${tlabel} 现身！轻点它查看打法。`,`${def.emoji} Boss [${L(def.name)}]${tlabel} appears! Tap it to see how to fight.`), 'bad');
@@ -763,9 +763,16 @@ function spawnBoss(force, exclude){
   return def.id;
 }
 
+function nextMatryoshkaId(){ player.matryoshkaSeq=(player.matryoshkaSeq||0)+1; return player.matryoshkaSeq; }
+function ensureMatryoshkaId(t){ if(t && t.bossId==='matryoshka' && t.matryoshkaId==null) t.matryoshkaId=nextMatryoshkaId(); return t&&t.matryoshkaId; }
+function hasMatryoshkaSibling(id, except){
+  for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const t=grid[r][c]; if(t && t!==except && t.bossId==='matryoshka' && t.matryoshkaId===id) return true; }
+  return false;
+}
 // A Matryoshka's children reuse the cleared cell first, then deterministic row-major non-monster cells.
 function splitMatryoshka(t){
   if(!t || t.bossId!=='matryoshka' || t.tier<=1) return false;
+  const id=ensureMatryoshkaId(t);
   let parent=null;
   for(let r=0;r<ROWS&&!parent;r++)for(let c=0;c<COLS;c++)if(grid[r][c]===t){parent={r,c};break;}
   if(parent) grid[parent.r][parent.c]=null;
@@ -779,15 +786,20 @@ function splitMatryoshka(t){
   for(let i=0;i<2 && cells.length;i++) pos.push(cells.shift());
   for(const [r,c] of pos){
     const tier=t.tier-1, stats=enemyStats(), cd=Math.max(1,stats.baseCd+extraFoeCd());
-    grid[r][c]={type:'boss',bossId:'matryoshka',tier,hp:stats.hp,maxHp:stats.hp,atk:stats.atk,cd,baseCd:cd};
+    grid[r][c]={type:'boss',bossId:'matryoshka',matryoshkaId:id,tier,hp:stats.hp,maxHp:stats.hp,atk:stats.atk,cd,baseCd:cd};
     addBossFx(r,c,false);
   }
   log(tr(`🪆 套娃分裂成 ${pos.length} 个 Lv${t.tier-1} 套娃！`,`🪆 Matryoshka splits into ${pos.length} Lv${t.tier-1} Matryoshka(s)!`), 'bad');
-  return pos.length===2;
+  return pos.length>0;
 }
-function defeatBoss(t,r,c){
-  if(t.bossId==='matryoshka' && splitMatryoshka(t)) return 'split';
-  grid[r][c]=null; thiefRecover(t); addXp(player,15); gainGold(20); onBossKilled();
+function defeatBoss(t,r,c,{bomb=false}={}){
+  if(t.bossId==='matryoshka'){
+    const id=ensureMatryoshkaId(t);
+    if(!bomb && splitMatryoshka(t)) return 'split';
+    grid[r][c]=null;
+    if(hasMatryoshkaSibling(id,t)) return 'pending';
+  } else grid[r][c]=null;
+  thiefRecover(t); addXp(player,15); gainGold(20); onBossKilled();
   return 'killed';
 }
 function bossKillAt(r,c){
@@ -854,7 +866,7 @@ const TIER1={
     for(let i=foes.length-1;i>0;i--){ const j=Math.floor(rnd()*(i+1)); [foes[i],foes[j]]=[foes[j],foes[i]]; }
     let healed=0, kills=0, normalKills=0; const pick=foes.slice(0,2); const splashes=[];
     for(const [r,c] of pick){ const t=grid[r][c]; const before=t.hp; const drain=Math.min(p.maxHp, before); t.hp-=drain; healed+=drain; statueReflect(t, drain);   // 石像：吸魂的伤害也会反弹
-      if(t.hp<=0){ const isB=t.type==='boss'; if(isB){if(defeatBoss(t,r,c)==='split')continue;}else{grid[r][c]=null;normalKills++;addXp(p,3+(p.killXp||0));gainGold(1);} kills++;
+      if(t.hp<=0){ const isB=t.type==='boss'; if(isB){if(defeatBoss(t,r,c)!=='killed')continue;}else{grid[r][c]=null;normalKills++;addXp(p,3+(p.killXp||0));gainGold(1);} kills++;
         if(p.splash && p.maxHp>before) splashes.push(p.maxHp-before); } }   // 溅射：吸魂的溢出（吸力上限−目标血量）也砸向剩余敌人
     holdNextGravity(); holdVisibleBoard();
     soulDrainFx(pick);   // 特效：从每个被吸目标的格子画一条红线指向血条（纯视觉，不影响逻辑/重放）
@@ -878,7 +890,7 @@ const TIER1={
     if(!any) return false;
     for(let r=ROWS-1;r>=0;r--)for(let c=0;c<COLS;c++){ const t=grid[r][c]; if(!isMon(t)) continue;
       const hit=Math.min(t.hp, hookBase*(ROWS-r)); t.hp-=hit; dmg+=hit; statueReflect(t, hit);
-      if(t.hp<=0){ const isB=t.type==='boss'; if(isB&&defeatBoss(t,r,c)==='split')continue; if(!isB){grid[r][c]=null;normalKills++;addXp(player,3+(player.killXp||0));gainGold(1);if(player.rotflesh)player.maxHp++;} kills++; } }
+      if(t.hp<=0){ const isB=t.type==='boss'; if(isB&&defeatBoss(t,r,c)!=='killed')continue; if(!isB){grid[r][c]=null;normalKills++;addXp(player,3+(player.killXp||0));gainGold(1);if(player.rotflesh)player.maxHp++;} kills++; } }
     const multiGold=multiKillGold(normalKills), lh=lifestealHeal(kills); applyGravity(); syncPositions(false);   // 满盘时 applyGravity 为空操作、不消耗 RNG；纯重排，重放确定
     log(tr(`🪝 钩子：把全场怪/Boss 拉到底排，造成 ${dmg} 伤害`+(kills?`，击杀 ${kills}`:'')+(multiGold?`，多杀奖励 +${multiGold} 金`:'')+(lh?`，吸血 +${lh}`:''),`🪝 Hook: dragged all foes down for ${dmg} damage`+(kills?`, ${kills} killed`:'')+(multiGold?`, multi-kill +${multiGold} gold`:'')+(lh?`, +${lh} lifesteal`:'')), moved?'buff':''); return true; }}},
   azuredragon:{n:['青龙','Azure Dragon'], quip:['接受来自远古的绝对威压吧！','Accept the absolute pressure of the ancients!'], skill:{name:['龙吟','Dragon Roar'], short:['全场造成等级伤害','Deal level damage to all foes'], desc:['对全场所有怪物（包括普攻免疫 Boss）造成等同当前等级的伤害。','Deal damage equal to your current level to every foe, including normal-attack-immune bosses.'], cd:5, f:p=>{ addBossFx(Math.floor(ROWS/2), Math.floor(COLS/2), false, '#f5b041', true); const r=dealDamage(p.level,null,true); applyGravity(); syncPositions(false); log(tr(`🐉 龙吟：全场 ${r.dmg} 伤害`+ (r.kills?`，击杀 ${r.kills}`:'')+xpLog(r.xp),`🐉 Dragon Roar: ${r.dmg} damage to all foes`+(r.kills?`, ${r.kills} killed`:'')+xpLog(r.xp)), 'buff'); return true; }}},
@@ -1499,7 +1511,7 @@ function saveGame(){
       pendingLevels,
       rngState: __rngState>>>0,   // 恢复续局时也要续上同一条 RNG 轨迹，否则后续补格/刷怪会让 replay 漂移
       player:{...player},
-      grid: grid.map(row=>row.map(t=> t?{type:t.type,hp:t.hp,maxHp:t.maxHp,atk:t.atk,cd:t.cd,baseCd:t.baseCd,bossId:t.bossId,tier:t.tier,stolen:t.stolen,finale:t.finale,incub:t.incub,poison:t.poison,burnTurns:t.burnTurns,burnStacks:t.burnStacks}:null)),
+      grid: grid.map(row=>row.map(t=> t?{type:t.type,hp:t.hp,maxHp:t.maxHp,atk:t.atk,cd:t.cd,baseCd:t.baseCd,bossId:t.bossId,matryoshkaId:t.matryoshkaId,tier:t.tier,stolen:t.stolen,finale:t.finale,incub:t.incub,poison:t.poison,burnTurns:t.burnTurns,burnStacks:t.burnStacks}:null)),
     }));
   }catch(e){}
 }
@@ -2190,7 +2202,7 @@ function normalEnemyAttack(t){
 const SHOP={
   heal: {cost:15, f(){ const base=10+2*(player.healUses||0); const h=gainHeal(base); player.healUses=(player.healUses||0)+1; log(tr(`💊 喝下药水，回复 ${h} 生命`,`💊 Potion: +${h} HP`), 'heal'); }},   // 每使用一次：恢复量 +2、下次多花 1 金（后期不再鸡肋）
   bomb: {cost:25, f(){ const extra = bombGoldSacrificeBonus(player); if(extra>0) player.gold=Math.max(0, player.gold-extra); const D = bombDamage(player)+extra;   // 基础5 + 爆破手累计 + 乾坤一掷（先买炸弹，再额外扣当前金币 20% 换伤害）
-    const result=damageAllFoes(D,{rotflesh:true,onHit:(t,r,c)=>addBombFx(r,c)});
+    const result=damageAllFoes(D,{rotflesh:true,matryoshkaBomb:true,onHit:(t,r,c)=>addBombFx(r,c)});
     const kills=result.normalKills, boss=result.bossKills, xp=result.xp;
     const multiGold=multiKillGold(kills);
     const lifeHeal=lifestealHeal(kills+boss);   // 汲取生命：炸弹击杀也回血
@@ -2200,6 +2212,13 @@ const SHOP={
     applyGravity(); syncPositions(false); }},
 };
 function shopCost(key){ let c=SHOP[key].cost; if(key==='heal') c+=(player.healUses||0); if(key==='bomb') c+=5*gunpowderLevels(player); if(player.cheapskate) c=Math.ceil(c/2); return c; } // 治疗/精研火药：每次使用后下次分别多花 1/5 金；小气鬼：花费减半
+function bombShopSummary(p){
+  p=p||player;
+  const powder=gunpowderLevels(p), extra=bombGoldSacrificePreviewBonus(p);
+  const damage=`5${powder?`+${powder}`:''}${powder?tr(`（精研火药 +${powder}）`,` (Powder +${powder})`):''}`;
+  const cost=`25${powder?`+${5*powder}`:''}${powder?tr(`（精研火药 +${5*powder}）`,` (Powder +${5*powder})`):''}`;
+  return tr(`伤害 ${damage}｜花费 ${cost}`+(p.cheapskate?'（半价）':'')+(extra?`｜乾坤一掷 +${extra} 伤害`:''),`Damage ${damage} | Cost ${cost}`+(p.cheapskate?' (½ price)':'')+(extra?` | All-In +${extra} dmg`:''));
+}
 function buyItem(key){
   if(ended||busy||pendingLevels) return;
   if(player.frozen && player.frozen[key]>0) return;   // 雪人冰封该槽（治疗/炸弹），数回合内不可用
@@ -2325,8 +2344,8 @@ function shopInfoData(key){
     return { icon:'💥', title:tr('炸弹','Bomb'),
       desc:L(['投掷炸弹，对全场怪与 Boss 造成固定伤害（无视档位倍率）。能炸{W}免疫的 Boss（幽灵/小丑/污染怪/雪人）；终焉之主无效；石像会把伤害反弹给你。若有「乾坤一掷」，买完炸弹后还会再额外扣当前金币的 20%，并把这笔数额加到这次炸弹伤害上。',
               'Throw a bomb for fixed damage to all monsters & bosses (ignores tier scaling). Hits {W}-immune bosses (Ghost/Clown/Corruptor/Snowman); no effect on the Overlord; the Statue reflects it back. With All-In, buying the bomb also spends 20% of your current gold and adds exactly that amount to this bomb’s damage.']),
-      rows:[ [tr('当前伤害','Damage'), `−${D}`+(gunpowderLevels(p)?tr(`（精研火药 +${gunpowderLevels(p)}）`,`(Powder +${gunpowderLevels(p)})`):'')+(extra?tr(`（乾坤一掷 +${extra}）`,` (All-In +${extra})`):'')],
-             [tr('花费','Cost'), `${shopCost('bomb')} 💰`+(p.cheapskate?tr('（小气鬼半价）',' (½)'):'')+(gunpowderLevels(p)?tr(`（精研火药 +${5*gunpowderLevels(p)}）`,` (Powder +${5*gunpowderLevels(p)})`):'')],
+      rows:[ [tr('当前伤害','Damage'), `5${gunpowderLevels(p)?`+${gunpowderLevels(p)}${tr(`（精研火药 +${gunpowderLevels(p)}）`,` (Powder +${gunpowderLevels(p)})`)}`:''} = ${bombDamage(p)}`+(extra?tr(`（乾坤一掷 +${extra}）`,` (All-In +${extra})`):'')],
+             [tr('花费','Cost'), `25${gunpowderLevels(p)?`+${5*gunpowderLevels(p)}${tr(`（精研火药 +${5*gunpowderLevels(p)}）`,` (Powder +${5*gunpowderLevels(p)})`)}`:''} = ${shopCost('bomb')} 💰`+(p.cheapskate?tr('（小气鬼半价）',' (½)'):'')],
              [tr('额外扣金','Extra gold spent'), extra?`${extra} 💰`:tr('无','None')],
              [tr('冷却','Cooldown'), `${cd} ${tr('回合','t')}`+(p.shadowBombGold?tr('（乾坤一掷）',' (All-In)'):'')] ] };
   }
@@ -2595,7 +2614,7 @@ function holyStrikeDamage(amt){
   const isBoss=t.type==='boss', name=isBoss?L(bossDef(t).name):tr('普通怪','enemy'), before=t.hp, dealt=Math.min(amt,before);
   addBombFx(tr_,tc);
   t.hp-=amt;
-  if(t.hp<=0){ if(isBoss){if(defeatBoss(t,tr_,tc)==='split')return;} else { grid[tr_][tc]=null; addXp(player,3+(player.killXp||0)); gainGold(1); } }
+  if(t.hp<=0){ if(isBoss){if(defeatBoss(t,tr_,tc)!=='killed')return;} else { grid[tr_][tc]=null; addXp(player,3+(player.killXp||0)); gainGold(1); } }
   log(tr(`✨ 神圣打击：优先命中 ${name}，造成 ${dealt} 伤害`+(t.hp<=0?`，击杀！`:''),`✨ Holy Strike: hit ${name} first for ${dealt} dmg`+(t.hp<=0?`, killed!`:'')));
 }
 
@@ -2623,7 +2642,7 @@ function dealDamage(pool, targets, allFoes){
     if(sponge && e.t===sponge.t) spongeAbsorbed=Math.min(pool*spongeFodder, Math.max(0,before-pool));
     e.t.hp-=hit; dmg+=hit;
     statueReflect(e.t, hit);   // 石像：等量真实伤害反弹给玩家
-    if(e.t.hp<=0){ if(e.t.type==='boss'){ if(defeatBoss(e.t,e.r,e.c)==='split') continue; } else { grid[e.r][e.c]=null; normalKills++; xp+=addXp(player,3+(player.killXp||0)); gainGold(1); if(player.rotflesh) player.maxHp++; } kills++;
+    if(e.t.hp<=0){ if(e.t.type==='boss'){ if(defeatBoss(e.t,e.r,e.c)!=='killed') continue; } else { grid[e.r][e.c]=null; normalKills++; xp+=addXp(player,3+(player.killXp||0)); gainGold(1); if(player.rotflesh) player.maxHp++; } kills++;
       if(player.splash && pool>before) splashes.push(pool-before);   // 溅射：本次击杀的溢出留待砸向其它敌人
     }
   }
@@ -2634,7 +2653,7 @@ function dealDamage(pool, targets, allFoes){
   return {dmg,kills,bonusGold,multiGold,xp,spongeAbsorbed};
 }
 // Shared all-foe damage resolution. Callbacks preserve each effect's per-target behavior.
-function damageAllFoes(amount, {snapshot=false, onHit=null, afterDamage=null, rotflesh=false, reflect=true}={}){
+function damageAllFoes(amount, {snapshot=false, onHit=null, afterDamage=null, rotflesh=false, reflect=true, matryoshkaBomb=false}={}){
   let dmg=0, kills=0, normalKills=0, bossKills=0, xp=0, hits=0;
   const apply=(r,c,t)=>{
     if(!t || (t.type!=='enemy' && t.type!=='boss') || t.finale || grid[r][c]!==t) return;
@@ -2645,7 +2664,8 @@ function damageAllFoes(amount, {snapshot=false, onHit=null, afterDamage=null, ro
     if(reflect) statueReflect(t,hit);
     if(t.hp>0) return;
     if(t.type==='boss'){
-      if(defeatBoss(t,r,c)==='split') return;
+      const result=defeatBoss(t,r,c,{bomb:matryoshkaBomb});
+      if(result==='split' || result==='pending') return;
       bossKills++;
     } else {
       grid[r][c]=null; normalKills++; xp+=addXp(player,3+(player.killXp||0)); gainGold(1);
@@ -2668,7 +2688,7 @@ function splashHit(over){
   if(!foes.length) return {dmg:0,kills:0,normalKills:0,xp:0};
   const [r,c]=foes[Math.floor(rnd()*foes.length)]; const t=grid[r][c];
   const hit=Math.min(over,t.hp); t.hp-=hit; statueReflect(t, hit); let kills=0, normalKills=0, xp=0;
-  if(t.hp<=0){ const isB=t.type==='boss'; if(isB){ if(defeatBoss(t,r,c)==='split') return {dmg:hit,kills:0,normalKills:0,xp:0}; } else {grid[r][c]=null;normalKills=1;xp+=addXp(player,3+(player.killXp||0));gainGold(1);if(player.rotflesh)player.maxHp++;} kills=1; }
+  if(t.hp<=0){ const isB=t.type==='boss'; if(isB){ if(defeatBoss(t,r,c)!=='killed') return {dmg:hit,kills:0,normalKills:0,xp:0}; } else {grid[r][c]=null;normalKills=1;xp+=addXp(player,3+(player.killXp||0));gainGold(1);if(player.rotflesh)player.maxHp++;} kills=1; }
   return {dmg:hit, kills, normalKills, xp};
 }
 
@@ -2729,7 +2749,7 @@ function reflectIceArmor(amt, atkr){
   }
   if(!t) return;
   const hit=Math.min(amt,t.hp); t.hp-=hit; t.cd+=1; t.frostTurns=2; t.flashWhite=2; let lh=0;
-  if(t.hp<=0){ const isB=t.type==='boss'; if(isB){ if(defeatBoss(t,r,c)==='split') return; } else {grid[r][c]=null;addXp(player,3+(player.killXp||0));gainGold(1);} lh=lifestealHeal(1); }
+  if(t.hp<=0){ const isB=t.type==='boss'; if(isB){ if(defeatBoss(t,r,c)!=='killed') return; } else {grid[r][c]=null;addXp(player,3+(player.killXp||0));gainGold(1);} lh=lifestealHeal(1); }
   log(tr(`🧊 冰甲反弹 ${hit} 伤害，并让攻击者更慢出手`+(lh?`，吸血 +${lh}`:''),`🧊 Ice Armor reflects ${hit} damage and slows the attacker`+(lh?`, +${lh} lifesteal`:'')), 'buff');
 }
 // 玩家受伤的统一入口：圣盾免伤 / 狂怒不屈保命 / 矮人护甲翻倍 / 荆棘反弹 / 伤害统计
@@ -2780,7 +2800,7 @@ function deathCoilTick(){
   const dmg=Math.max(1, Math.floor(player.maxHp*0.3)); let kills=0, normalKills=0, hit=0;
   for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const t=grid[r][c];
     if(t&&(t.type==='enemy'||(t.type==='boss'&&!t.finale))){ t.hp-=dmg; hit++;
-      if(t.hp<=0){ const isB=t.type==='boss'; if(isB&&defeatBoss(t,r,c)==='split')continue; if(!isB){grid[r][c]=null;normalKills++;addXp(player,3+(player.killXp||0));gainGold(1);} kills++; } }
+      if(t.hp<=0){ const isB=t.type==='boss'; if(isB&&defeatBoss(t,r,c)!=='killed')continue; if(!isB){grid[r][c]=null;normalKills++;addXp(player,3+(player.killXp||0));gainGold(1);} kills++; } }
   }
   if(!hit) return;
   const multiGold=multiKillGold(normalKills), lh=lifestealHeal(kills);
@@ -2794,7 +2814,7 @@ function witherAuraTick(healed){
   for(const {r,c,t} of actors){ if(grid[r][c]!==t) continue;
     if(t&&(t.type==='enemy'||(t.type==='boss'&&!t.finale))){
       t.hp-=healed; hit++;
-      if(t.hp<=0){ const isB=t.type==='boss'; if(isB&&defeatBoss(t,r,c)==='split')continue; if(!isB){grid[r][c]=null;normalKills++;addXp(player,3+(player.killXp||0));gainGold(1);} kills++; }
+      if(t.hp<=0){ const isB=t.type==='boss'; if(isB&&defeatBoss(t,r,c)!=='killed')continue; if(!isB){grid[r][c]=null;normalKills++;addXp(player,3+(player.killXp||0));gainGold(1);} kills++; }
     }
   }
   if(!hit) return;
@@ -2809,7 +2829,7 @@ function reflectThorns(amt, atkr){
   if(!t){ const es=[]; for(let rr=0;rr<ROWS;rr++)for(let cc=0;cc<COLS;cc++){ const x=grid[rr][cc]; if(x&&(x.type==='enemy'||x.type==='boss')&&!x.finale) es.push([rr,cc,x]); }
     if(!es.length) return; [r,c,t]=es[Math.floor(rnd()*es.length)]; }   // 攻击者已不在场（如自身已死）→ 退回随机一个敌人
   t.hp-=amt; let lh=0;
-  if(t.hp<=0){ const isB=t.type==='boss'; if(isB){ if(defeatBoss(t,r,c)==='split') return; } else {grid[r][c]=null;addXp(player,3+(player.killXp||0));gainGold(1);} lh=lifestealHeal(1); }   // 荆棘反杀也吸血
+  if(t.hp<=0){ const isB=t.type==='boss'; if(isB){ if(defeatBoss(t,r,c)!=='killed') return; } else {grid[r][c]=null;addXp(player,3+(player.killXp||0));gainGold(1);} lh=lifestealHeal(1); }   // 荆棘反杀也吸血
   log(tr(`🌵 荆棘反弹 ${amt} 伤害`+(lh?`，吸血 +${lh}`:''),`🌵 Thorns reflect ${amt}`+(lh?`, +${lh} lifesteal`:'')));
 }
 
@@ -3286,7 +3306,7 @@ function startReplay(recObj){
   const overlay=document.getElementById('overlay');
   replayResumeState = player&&grid&&!ended&&overlay&&!overlay.classList.contains('show') ? {
     player: JSON.parse(JSON.stringify(player)),
-    grid: grid.map(row=>row.map(t=> t?{type:t.type,hp:t.hp,maxHp:t.maxHp,atk:t.atk,cd:t.cd,baseCd:t.baseCd,bossId:t.bossId,tier:t.tier,stolen:t.stolen,finale:t.finale,incub:t.incub,poison:t.poison,burnTurns:t.burnTurns,burnStacks:t.burnStacks}:null)),
+    grid: grid.map(row=>row.map(t=> t?{type:t.type,hp:t.hp,maxHp:t.maxHp,atk:t.atk,cd:t.cd,baseCd:t.baseCd,bossId:t.bossId,matryoshkaId:t.matryoshkaId,tier:t.tier,stolen:t.stolen,finale:t.finale,incub:t.incub,poison:t.poison,burnTurns:t.burnTurns,burnStacks:t.burnStacks}:null)),
     pendingLevels, busy, dragging:!!dragging, selection:selection?selection.map(s=>({...s})):[], rec:rec?JSON.parse(JSON.stringify(rec)):null, ended
   } : null;
   replaying=true; replayRec=recObj; replayIdx=0; replaySpeed=1; replayPaused=false; replayAutoPaused=false; replayPending=null; rec=null;
@@ -3623,7 +3643,9 @@ function updateHUD(){
     }
     const c=shopCost(key), cd=scd[key]||0, fz=player.frozen&&player.frozen[key]>0;   // 雪人冰封该槽
     if(key==='heal'){ const hv=Math.round((10+2*(player.healUses||0))*(player.healMult||1)); btn.querySelector('small').textContent=tr(`回复 ${hv} 生命`,`Restore ${hv} HP`); }   // 治疗恢复量随次数递增（活死人按 healMult 折算）
-    if(key==='bomb'){ const extra=bombGoldSacrificePreviewBonus(player), D=bombDamage(player)+extra; btn.querySelector('small').textContent=tr(`全场怪 -${D} 血`+(extra?`（乾坤一掷：额外 -${extra} 金，伤害 +${extra}）`:''),`All foes -${D} HP`+(extra?` (All-In: -${extra} extra gold, +${extra} damage)`:'')); }   // 炸弹方块同时显示乾坤一掷的额外金币消耗与伤害
+    if(key==='bomb'){
+      btn.querySelector('small').textContent=bombShopSummary(player);
+    }
     const full = key==='heal' && player.hp>=player.maxHp;   // 满血时治疗禁用
     btn.querySelector('em').textContent = fz ? `❄️${player.frozen[key]}${tr('回合','t')}` : cd>0 ? `⏳${cd}${tr('回合','t')}` : full ? tr('已满血','Full HP') : c+'💰';
     btn.classList.toggle('off', busy || pendingLevels || cd>0 || player.gold < c || fz || full); });
