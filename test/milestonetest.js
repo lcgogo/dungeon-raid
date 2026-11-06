@@ -28,9 +28,9 @@ ok(p.gold===50,'新局初始金币为50');
 for(const rc of G.RACES){ G.startGame(rc); ok(G.player.gold===50,`${rc.id}初始金币为50`); }
 G.startGame(G.raceById('human')); p=G.player; p.hp=p.maxHp=999999; G.busy=false; G.pendingLevels=0;
 G.player.gunpowder=1;
-ok(G.bombShopSummary(G.player).includes('5+1') && G.bombShopSummary(G.player).includes('25+5'),'炸弹按钮显示伤害5+1与花费25+5');
+ok(G.bombShopSummary(G.player).includes('伤害 6（火药+1）') && G.bombShopSummary(G.player).includes('花费 30（火药+5）'),'炸弹短介绍显示整数伤害/花费及火药加成');
 G.player.cheapskate=true;
-ok(G.bombShopSummary(G.player).includes('25+5') && G.shopCost('bomb')===15,'半价时仍显示基础加成公式且实际价格为15');
+ok(G.bombShopSummary(G.player).includes('花费 30（火药+5）') && G.shopCost('bomb')===15,'半价时短介绍保留原价整数公式且实际价格为15');
 G.player.cheapskate=false;
 
 // 模拟「到达某回合并击败一个 Boss」→ onBossKilled 标记 pending，再用录像动作应用选择

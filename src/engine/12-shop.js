@@ -21,9 +21,9 @@ function shopCost(key){ let c=SHOP[key].cost; if(key==='heal') c+=(player.healUs
 function bombShopSummary(p){
   p=p||player;
   const powder=gunpowderLevels(p), extra=bombGoldSacrificePreviewBonus(p);
-  const damage=`5${powder?`+${powder}`:''}${powder?tr(`（精研火药 +${powder}）`,` (Powder +${powder})`):''}`;
-  const cost=`25${powder?`+${5*powder}`:''}${powder?tr(`（精研火药 +${5*powder}）`,` (Powder +${5*powder})`):''}`;
-  return tr(`伤害 ${damage}｜花费 ${cost}`+(p.cheapskate?'（半价）':'')+(extra?`｜乾坤一掷 +${extra} 伤害`:''),`Damage ${damage} | Cost ${cost}`+(p.cheapskate?' (½ price)':'')+(extra?` | All-In +${extra} dmg`:''));
+  const damageBonus=powder?tr(`（火药+${powder}）`,` (Powder +${powder})`):'';
+  const costBonus=powder?tr(`（火药+${5*powder}）`,` (Powder +${5*powder})`):'';
+  return tr(`伤害 ${bombDamage(p)}${damageBonus}｜花费 ${25+5*powder}${costBonus}`+(p.cheapskate?'（半价）':'')+(extra?`｜乾坤一掷 +${extra} 伤害`:''),`Damage ${bombDamage(p)}${damageBonus} | Cost ${25+5*powder}${costBonus}`+(p.cheapskate?' (½ price)':'')+(extra?` | All-In +${extra} dmg`:''));
 }
 function buyItem(key){
   if(ended||busy||pendingLevels) return;

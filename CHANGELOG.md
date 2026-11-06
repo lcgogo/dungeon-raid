@@ -1,4 +1,9 @@
 
+## [v1.97.1] - 2026-11-06
+
+- 精简主页炸弹方块短介绍：显示整数伤害/花费，火药加成放在括号中，例如 `伤害 6（火药+1）｜花费 30（火药+5）`。
+- Shortened the Bomb tile summary to integer damage/cost values with Refined Powder bonuses in parentheses, e.g. `Damage 6 (Powder +1) | Cost 30 (Powder +5)`.
+
 ## [v1.97.0] - 2026-11-06
 > Version-Impact: verify
 

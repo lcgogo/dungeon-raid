@@ -249,9 +249,9 @@ const CONTENT = {
 if('serviceWorker' in navigator) window.addEventListener('load',()=>navigator.serviceWorker.register('/sw.js').catch(()=>{}));
 //==================== 配置 ====================
 // 版本号 v主.次.修：不影响 verify/replay 兼容边界的小改动改"修"；凡是影响 verify/replay/版本分桶/release 验证语义的改动都改"次"；大版本变更需先确认。页面底部显示。
-const VERSION='v1.97.0';
+const VERSION='v1.97.1';
 // CHANGELOG_LINES below is only a fallback for raw source inspection; build/build.js replaces it from CHANGELOG.md.
-const CHANGELOG_LINES=[{"ver": "v1.97.0", "zh": "所有角色新局初始金币调整为 50；炸弹商店显示基础值与精研火药加成公式（伤害 `5+1`、花费 `25+5`），并保留半价后的实际价格提示。", "en": "All races now start with 50 gold. The Bomb shop shows base values plus Refined Powder (damage `5+1`, cost `25+5`) and indicates when Cheapskate halves the actual price."}, {"ver": "v1.96.0", "zh": "套娃被炸弹击杀时，该分支直接消灭、不再分裂；普通攻击击杀仍会分裂。同一只套娃分裂出的全部分支消灭后，才计为一次 Boss 击杀并获得奖励。", "en": "Bomb kills now remove a Matryoshka branch without splitting it; non-bomb kills still split. The Boss kill and reward count once all branches from that Matryoshka are eliminated."}, {"ver": "v1.95.0", "zh": "岩浆魔每回合最多按自身等级融化对应数量的盾：Lv1 1 面、Lv2 2 面，以此类推；不会因此回血。", "en": "Magmafiend now melts up to its tier in shields each turn: 1 at Lv1, 2 at Lv2, and so on; shields still do not heal it."}, {"ver": "v1.94.3", "zh": "重构炸弹与霜冻新星的全场伤害结算，共用击杀奖励处理，同时保留各自的目标遍历、石像反伤、减速和特效规则；对照 `v1.94.2` 快照验证结局一致。", "en": "Refactored Bomb and Frost Nova to share all-foe damage and kill-reward handling while preserving their traversal, Statue reflection, slow, and visual-effect rules; verified parity against the `v1.94.2` snapshot."}, {"ver": "v1.94.2", "zh": "巫妖技能名称与《魔兽争霸》统一为「霜冻新星 / Frost Nova」；技能效果不变。", "en": "Renamed the Lich skill to match Warcraft: Frost Nova (霜冻新星). Its effects are unchanged."}];   /* auto-injected by dr.sh embed-changelog（勿手改） */
+const CHANGELOG_LINES=[{"ver": "v1.97.1", "zh": "精简主页炸弹方块短介绍：显示整数伤害/花费，火药加成放在括号中，例如 `伤害 6（火药+1）｜花费 30（火药+5）`。", "en": "Shortened the Bomb tile summary to integer damage/cost values with Refined Powder bonuses in parentheses, e.g. `Damage 6 (Powder +1) | Cost 30 (Powder +5)`."}, {"ver": "v1.97.0", "zh": "所有角色新局初始金币调整为 50；炸弹商店显示基础值与精研火药加成公式（伤害 `5+1`、花费 `25+5`），并保留半价后的实际价格提示。", "en": "All races now start with 50 gold. The Bomb shop shows base values plus Refined Powder (damage `5+1`, cost `25+5`) and indicates when Cheapskate halves the actual price."}, {"ver": "v1.96.0", "zh": "套娃被炸弹击杀时，该分支直接消灭、不再分裂；普通攻击击杀仍会分裂。同一只套娃分裂出的全部分支消灭后，才计为一次 Boss 击杀并获得奖励。", "en": "Bomb kills now remove a Matryoshka branch without splitting it; non-bomb kills still split. The Boss kill and reward count once all branches from that Matryoshka are eliminated."}, {"ver": "v1.95.0", "zh": "岩浆魔每回合最多按自身等级融化对应数量的盾：Lv1 1 面、Lv2 2 面，以此类推；不会因此回血。", "en": "Magmafiend now melts up to its tier in shields each turn: 1 at Lv1, 2 at Lv2, and so on; shields still do not heal it."}, {"ver": "v1.94.3", "zh": "重构炸弹与霜冻新星的全场伤害结算，共用击杀奖励处理，同时保留各自的目标遍历、石像反伤、减速和特效规则；对照 `v1.94.2` 快照验证结局一致。", "en": "Refactored Bomb and Frost Nova to share all-foe damage and kill-reward handling while preserving their traversal, Statue reflection, slow, and visual-effect rules; verified parity against the `v1.94.2` snapshot."}];   /* auto-injected by dr.sh embed-changelog（勿手改） */
 const DEV=false;   // release build (DEV=false); dev build is dungeon-raid-dev.html (DEV=true)
 const REC_API='https://api.dungeonraid.win';   // 录像分享 API（Cloudflare Worker + KV）
 // 带种子随机数（mulberry32）：游戏全程用 rnd() 取代原生随机，配合录制种子可确定性重放
@@ -2215,9 +2215,9 @@ function shopCost(key){ let c=SHOP[key].cost; if(key==='heal') c+=(player.healUs
 function bombShopSummary(p){
   p=p||player;
   const powder=gunpowderLevels(p), extra=bombGoldSacrificePreviewBonus(p);
-  const damage=`5${powder?`+${powder}`:''}${powder?tr(`（精研火药 +${powder}）`,` (Powder +${powder})`):''}`;
-  const cost=`25${powder?`+${5*powder}`:''}${powder?tr(`（精研火药 +${5*powder}）`,` (Powder +${5*powder})`):''}`;
-  return tr(`伤害 ${damage}｜花费 ${cost}`+(p.cheapskate?'（半价）':'')+(extra?`｜乾坤一掷 +${extra} 伤害`:''),`Damage ${damage} | Cost ${cost}`+(p.cheapskate?' (½ price)':'')+(extra?` | All-In +${extra} dmg`:''));
+  const damageBonus=powder?tr(`（火药+${powder}）`,` (Powder +${powder})`):'';
+  const costBonus=powder?tr(`（火药+${5*powder}）`,` (Powder +${5*powder})`):'';
+  return tr(`伤害 ${bombDamage(p)}${damageBonus}｜花费 ${25+5*powder}${costBonus}`+(p.cheapskate?'（半价）':'')+(extra?`｜乾坤一掷 +${extra} 伤害`:''),`Damage ${bombDamage(p)}${damageBonus} | Cost ${25+5*powder}${costBonus}`+(p.cheapskate?' (½ price)':'')+(extra?` | All-In +${extra} dmg`:''));
 }
 function buyItem(key){
   if(ended||busy||pendingLevels) return;
