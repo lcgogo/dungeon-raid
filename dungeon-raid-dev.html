@@ -249,9 +249,9 @@ const CONTENT = {
 if('serviceWorker' in navigator) window.addEventListener('load',()=>navigator.serviceWorker.register('/sw.js').catch(()=>{}));
 //==================== 配置 ====================
 // 版本号 v主.次.修：不影响 verify/replay 兼容边界的小改动改"修"；凡是影响 verify/replay/版本分桶/release 验证语义的改动都改"次"；大版本变更需先确认。页面底部显示。
-const VERSION='v1.97.1';
+const VERSION='v1.98.0';
 // CHANGELOG_LINES below is only a fallback for raw source inspection; build/build.js replaces it from CHANGELOG.md.
-const CHANGELOG_LINES=[{"ver": "v1.97.1", "zh": "精简主页炸弹方块短介绍：显示整数伤害/花费，火药加成放在括号中，例如 `伤害 6（火药+1）｜花费 30（火药+5）`。", "en": "Shortened the Bomb tile summary to integer damage/cost values with Refined Powder bonuses in parentheses, e.g. `Damage 6 (Powder +1) | Cost 30 (Powder +5)`."}, {"ver": "v1.97.0", "zh": "所有角色新局初始金币调整为 50；炸弹商店显示基础值与精研火药加成公式（伤害 `5+1`、花费 `25+5`），并保留半价后的实际价格提示。", "en": "All races now start with 50 gold. The Bomb shop shows base values plus Refined Powder (damage `5+1`, cost `25+5`) and indicates when Cheapskate halves the actual price."}, {"ver": "v1.96.0", "zh": "套娃被炸弹击杀时，该分支直接消灭、不再分裂；普通攻击击杀仍会分裂。同一只套娃分裂出的全部分支消灭后，才计为一次 Boss 击杀并获得奖励。", "en": "Bomb kills now remove a Matryoshka branch without splitting it; non-bomb kills still split. The Boss kill and reward count once all branches from that Matryoshka are eliminated."}, {"ver": "v1.95.0", "zh": "岩浆魔每回合最多按自身等级融化对应数量的盾：Lv1 1 面、Lv2 2 面，以此类推；不会因此回血。", "en": "Magmafiend now melts up to its tier in shields each turn: 1 at Lv1, 2 at Lv2, and so on; shields still do not heal it."}, {"ver": "v1.94.3", "zh": "重构炸弹与霜冻新星的全场伤害结算，共用击杀奖励处理，同时保留各自的目标遍历、石像反伤、减速和特效规则；对照 `v1.94.2` 快照验证结局一致。", "en": "Refactored Bomb and Frost Nova to share all-foe damage and kill-reward handling while preserving their traversal, Statue reflection, slow, and visual-effect rules; verified parity against the `v1.94.2` snapshot."}];   /* auto-injected by dr.sh embed-changelog（勿手改） */
+const CHANGELOG_LINES=[{"ver": "v1.98.0", "zh": "修复亡灵「迷惑」未影响每回合行动型 Boss 的问题：有主动效果的每回合 Boss 现在遵守全局攻击间隔修正；亡灵对局中每两回合发动一次，其他种族仍每回合发动。纯持续光环不变。", "en": "Fixed Undead Confusion not affecting per-turn active Bosses. Their action interval now follows the global attack-countdown modifier: once every two turns for Undead, and every turn for other races. Passive auras are unchanged."}, {"ver": "v1.97.1", "zh": "精简主页炸弹方块短介绍：显示整数伤害/花费，火药加成放在括号中，例如 `伤害 6（火药+1）｜花费 30（火药+5）`。", "en": "Shortened the Bomb tile summary to integer damage/cost values with Refined Powder bonuses in parentheses, e.g. `Damage 6 (Powder +1) | Cost 30 (Powder +5)`."}, {"ver": "v1.97.0", "zh": "所有角色新局初始金币调整为 50；炸弹商店显示基础值与精研火药加成公式（伤害 `5+1`、花费 `25+5`），并保留半价后的实际价格提示。", "en": "All races now start with 50 gold. The Bomb shop shows base values plus Refined Powder (damage `5+1`, cost `25+5`) and indicates when Cheapskate halves the actual price."}, {"ver": "v1.96.0", "zh": "套娃被炸弹击杀时，该分支直接消灭、不再分裂；普通攻击击杀仍会分裂。同一只套娃分裂出的全部分支消灭后，才计为一次 Boss 击杀并获得奖励。", "en": "Bomb kills now remove a Matryoshka branch without splitting it; non-bomb kills still split. The Boss kill and reward count once all branches from that Matryoshka are eliminated."}, {"ver": "v1.95.0", "zh": "岩浆魔每回合最多按自身等级融化对应数量的盾：Lv1 1 面、Lv2 2 面，以此类推；不会因此回血。", "en": "Magmafiend now melts up to its tier in shields each turn: 1 at Lv1, 2 at Lv2, and so on; shields still do not heal it."}];   /* auto-injected by dr.sh embed-changelog（勿手改） */
 const DEV=true;   // release build (DEV=false); dev build is dungeon-raid-dev.html (DEV=true)
 const REC_API='https://api.dungeonraid.win';   // 录像分享 API（Cloudflare Worker + KV）
 // 带种子随机数（mulberry32）：游戏全程用 rnd() 取代原生随机，配合录制种子可确定性重放
@@ -525,7 +525,7 @@ function spawnRandomBossTile(tier=1, includeEnemies=false){
   const cdv=Math.max(1,(s.cd!=null?s.cd:s.baseCd)+extraFoeCd());
   const mult=def.noTierScale?1:tier;
   const hp=s.hp*mult*(def.hpMult||1), atk=s.atk*mult;
-  grid[r][c]={type:'boss', bossId:def.id, matryoshkaId:def.id==='matryoshka'?nextMatryoshkaId():undefined, tier, hp, maxHp:hp, atk, cd:cdv, baseCd:cdv};
+  grid[r][c]={type:'boss', bossId:def.id, matryoshkaId:def.id==='matryoshka'?nextMatryoshkaId():undefined, turnCd:def.perTurn&&def.act?Math.max(1,1+extraFoeCd()):undefined, tier, hp, maxHp:hp, atk, cd:cdv, baseCd:cdv};
   if(def.onSpawn) def.onSpawn(grid[r][c]);
   addBossFx(r,c,false);
   return true;
@@ -543,7 +543,7 @@ function spawnChosenBoss(id, tier=bossTier()){
   const mult=def.noTierScale?1:tier;
   const hpBase=(!def.swordable&&!def.finale&&!def.monster) ? enemyStats().hp : s.hp;
   const hp=hpBase*(def.noTierScale?1:mult)*(def.hpMult||1), atk=s.atk*mult;
-  grid[r][c]={type:'boss', bossId:def.id, matryoshkaId:def.id==='matryoshka'?nextMatryoshkaId():undefined, tier, hp, maxHp:hp, atk, cd:cdv, baseCd:cdv};
+  grid[r][c]={type:'boss', bossId:def.id, matryoshkaId:def.id==='matryoshka'?nextMatryoshkaId():undefined, turnCd:def.perTurn&&def.act?Math.max(1,1+extraFoeCd()):undefined, tier, hp, maxHp:hp, atk, cd:cdv, baseCd:cdv};
   addBossFx(r,c,false);
   if(def.onSpawn) def.onSpawn(grid[r][c]);
   log(tr(`🪲 捉虫：投放 ${def.emoji} ${L(def.name)} Lv${tier}！`,`🪲 Debug: spawned ${def.emoji} ${L(def.name)} Lv${tier}!`), 'debuff');
@@ -555,7 +555,7 @@ function spawnFinale(){
   if(!cells.length){ for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const t=grid[r][c]; if(t && t.type!=='boss') cells.push([r,c]); } }
   if(!cells.length) return;
   const [r,c]=cells[Math.floor(rnd()*cells.length)];
-  grid[r][c]={type:'boss', bossId:'finale', tier:bossTier(), hp:0, maxHp:0, atk:0, cd:0, baseCd:0, finale:true};
+  grid[r][c]={type:'boss', bossId:'finale', tier:bossTier(), hp:0, maxHp:0, atk:0, cd:0, baseCd:0, turnCd:Math.max(1,1+extraFoeCd()), finale:true};
   syncPositions(false);
   addBossFx(r,c,true);   // 金色入场特效
   log(tr('👑 终焉之主降临！撑过 10 波 Boss 浪潮即可破关！','👑 The Overlord descends! Survive 10 waves of bosses to clear the game!'), 'bad');
@@ -755,7 +755,7 @@ function spawnBoss(force, exclude){
   // Weapon-immune Bosses use same-tier normal-monster HP; keep attack/cooldown formulas unchanged.
   const hpBase=(!def.swordable&&!def.finale&&!def.monster) ? enemyStats().hp : s.hp;
   const hp=hpBase*(def.noTierScale?1:mult)*(def.hpMult||1), atk=s.atk*mult;
-  grid[r][c]={type:'boss', bossId:def.id, matryoshkaId:def.id==='matryoshka'?nextMatryoshkaId():undefined, tier, hp, maxHp:hp, atk, cd:cdv, baseCd:cdv};
+  grid[r][c]={type:'boss', bossId:def.id, matryoshkaId:def.id==='matryoshka'?nextMatryoshkaId():undefined, turnCd:def.perTurn&&def.act?Math.max(1,1+extraFoeCd()):undefined, tier, hp, maxHp:hp, atk, cd:cdv, baseCd:cdv};
   addBossFx(r,c,false);
   const tlabel = ` Lv${tier}`;   // 始终标注档位（含一阶 Lv1）
   log(tr(`${def.emoji} Boss【${L(def.name)}】${tlabel} 现身！轻点它查看打法。`,`${def.emoji} Boss [${L(def.name)}]${tlabel} appears! Tap it to see how to fight.`), 'bad');
@@ -1511,7 +1511,7 @@ function saveGame(){
       pendingLevels,
       rngState: __rngState>>>0,   // 恢复续局时也要续上同一条 RNG 轨迹，否则后续补格/刷怪会让 replay 漂移
       player:{...player},
-      grid: grid.map(row=>row.map(t=> t?{type:t.type,hp:t.hp,maxHp:t.maxHp,atk:t.atk,cd:t.cd,baseCd:t.baseCd,bossId:t.bossId,matryoshkaId:t.matryoshkaId,tier:t.tier,stolen:t.stolen,finale:t.finale,incub:t.incub,poison:t.poison,burnTurns:t.burnTurns,burnStacks:t.burnStacks}:null)),
+      grid: grid.map(row=>row.map(t=> t?{type:t.type,hp:t.hp,maxHp:t.maxHp,atk:t.atk,cd:t.cd,baseCd:t.baseCd,bossId:t.bossId,matryoshkaId:t.matryoshkaId,turnCd:t.turnCd,tier:t.tier,stolen:t.stolen,finale:t.finale,incub:t.incub,poison:t.poison,burnTurns:t.burnTurns,burnStacks:t.burnStacks}:null)),
     }));
   }catch(e){}
 }
@@ -1691,13 +1691,13 @@ function draw(){
       }
       // 倒计时角标（右上）：普通 Boss=倒计时；每回合行动型=恒「1」（每回合都出手）；终焉之主不显示
       if(!isBoss || (!bdef.finale && !bdef.noAttack)){
-        const perT = isBoss && bdef.perTurn, cv = perT ? 1 : t.cd;
+        const perT = isBoss && bdef.perTurn, cv = perT ? (t.turnCd==null?Math.max(1,1+extraFoeCd()):t.turnCd) : t.cd;
         const bx=x+g-4, by=y+10, br=TILE*0.16;
         ctx.beginPath(); ctx.arc(bx,by,br,0,7);
         ctx.fillStyle = cv<=1? '#e74c3c' : cv<=2? '#e67e22' : '#2c3e50';
         ctx.fill(); ctx.strokeStyle='#000'; ctx.lineWidth=1; ctx.stroke();
         ctx.fillStyle='#fff'; ctx.font='700 '+Math.floor(TILE*0.20)+'px system-ui';
-        ctx.fillText(perT ? '1' : t.cd, bx, by+1);
+        ctx.fillText(perT ? cv : t.cd, bx, by+1);
       }
       if(isBoss && !bdef.finale){
         const bx=x+g-4, by=y+g-4, br=TILE*0.16;
@@ -2707,7 +2707,13 @@ function advanceEnemies(){
       r=pos.r; c=pos.c;
     }
     const def = t.type==='boss' ? bossDef(t) : null;
-    if(def && def.perTurn){ if(def.act) def.act(t); continue; }    // 纯每回合型（小丑/吸血鬼）：无倒计时；无动作的光环 Boss 也要正常跳过倒计时
+    if(def && def.perTurn){
+      if(def.act){
+        if(t.turnCd==null) t.turnCd=Math.max(1,1+extraFoeCd());
+        if(--t.turnCd<=0){ def.act(t); t.turnCd=Math.max(1,1+extraFoeCd()); }
+      }
+      continue;
+    }    // 每回合主动型 Boss 也受全局攻击倒计时修正；纯光环 Boss 仍持续生效
     let acted=false;
     t.cd--;
     if(t.cd<=0){
@@ -3306,7 +3312,7 @@ function startReplay(recObj){
   const overlay=document.getElementById('overlay');
   replayResumeState = player&&grid&&!ended&&overlay&&!overlay.classList.contains('show') ? {
     player: JSON.parse(JSON.stringify(player)),
-    grid: grid.map(row=>row.map(t=> t?{type:t.type,hp:t.hp,maxHp:t.maxHp,atk:t.atk,cd:t.cd,baseCd:t.baseCd,bossId:t.bossId,matryoshkaId:t.matryoshkaId,tier:t.tier,stolen:t.stolen,finale:t.finale,incub:t.incub,poison:t.poison,burnTurns:t.burnTurns,burnStacks:t.burnStacks}:null)),
+    grid: grid.map(row=>row.map(t=> t?{type:t.type,hp:t.hp,maxHp:t.maxHp,atk:t.atk,cd:t.cd,baseCd:t.baseCd,bossId:t.bossId,matryoshkaId:t.matryoshkaId,turnCd:t.turnCd,tier:t.tier,stolen:t.stolen,finale:t.finale,incub:t.incub,poison:t.poison,burnTurns:t.burnTurns,burnStacks:t.burnStacks}:null)),
     pendingLevels, busy, dragging:!!dragging, selection:selection?selection.map(s=>({...s})):[], rec:rec?JSON.parse(JSON.stringify(rec)):null, ended
   } : null;
   replaying=true; replayRec=recObj; replayIdx=0; replaySpeed=1; replayPaused=false; replayAutoPaused=false; replayPending=null; rec=null;

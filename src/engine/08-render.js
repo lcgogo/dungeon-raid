@@ -122,13 +122,13 @@ function draw(){
       }
       // 倒计时角标（右上）：普通 Boss=倒计时；每回合行动型=恒「1」（每回合都出手）；终焉之主不显示
       if(!isBoss || (!bdef.finale && !bdef.noAttack)){
-        const perT = isBoss && bdef.perTurn, cv = perT ? 1 : t.cd;
+        const perT = isBoss && bdef.perTurn, cv = perT ? (t.turnCd==null?Math.max(1,1+extraFoeCd()):t.turnCd) : t.cd;
         const bx=x+g-4, by=y+10, br=TILE*0.16;
         ctx.beginPath(); ctx.arc(bx,by,br,0,7);
         ctx.fillStyle = cv<=1? '#e74c3c' : cv<=2? '#e67e22' : '#2c3e50';
         ctx.fill(); ctx.strokeStyle='#000'; ctx.lineWidth=1; ctx.stroke();
         ctx.fillStyle='#fff'; ctx.font='700 '+Math.floor(TILE*0.20)+'px system-ui';
-        ctx.fillText(perT ? '1' : t.cd, bx, by+1);
+        ctx.fillText(perT ? cv : t.cd, bx, by+1);
       }
       if(isBoss && !bdef.finale){
         const bx=x+g-4, by=y+g-4, br=TILE*0.16;

@@ -230,7 +230,13 @@ function advanceEnemies(){
       r=pos.r; c=pos.c;
     }
     const def = t.type==='boss' ? bossDef(t) : null;
-    if(def && def.perTurn){ if(def.act) def.act(t); continue; }    // 纯每回合型（小丑/吸血鬼）：无倒计时；无动作的光环 Boss 也要正常跳过倒计时
+    if(def && def.perTurn){
+      if(def.act){
+        if(t.turnCd==null) t.turnCd=Math.max(1,1+extraFoeCd());
+        if(--t.turnCd<=0){ def.act(t); t.turnCd=Math.max(1,1+extraFoeCd()); }
+      }
+      continue;
+    }    // 每回合主动型 Boss 也受全局攻击倒计时修正；纯光环 Boss 仍持续生效
     let acted=false;
     t.cd--;
     if(t.cd<=0){

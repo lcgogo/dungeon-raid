@@ -163,7 +163,7 @@ function spawnRandomBossTile(tier=1, includeEnemies=false){
   const cdv=Math.max(1,(s.cd!=null?s.cd:s.baseCd)+extraFoeCd());
   const mult=def.noTierScale?1:tier;
   const hp=s.hp*mult*(def.hpMult||1), atk=s.atk*mult;
-  grid[r][c]={type:'boss', bossId:def.id, matryoshkaId:def.id==='matryoshka'?nextMatryoshkaId():undefined, tier, hp, maxHp:hp, atk, cd:cdv, baseCd:cdv};
+  grid[r][c]={type:'boss', bossId:def.id, matryoshkaId:def.id==='matryoshka'?nextMatryoshkaId():undefined, turnCd:def.perTurn&&def.act?Math.max(1,1+extraFoeCd()):undefined, tier, hp, maxHp:hp, atk, cd:cdv, baseCd:cdv};
   if(def.onSpawn) def.onSpawn(grid[r][c]);
   addBossFx(r,c,false);
   return true;
@@ -181,7 +181,7 @@ function spawnChosenBoss(id, tier=bossTier()){
   const mult=def.noTierScale?1:tier;
   const hpBase=(!def.swordable&&!def.finale&&!def.monster) ? enemyStats().hp : s.hp;
   const hp=hpBase*(def.noTierScale?1:mult)*(def.hpMult||1), atk=s.atk*mult;
-  grid[r][c]={type:'boss', bossId:def.id, matryoshkaId:def.id==='matryoshka'?nextMatryoshkaId():undefined, tier, hp, maxHp:hp, atk, cd:cdv, baseCd:cdv};
+  grid[r][c]={type:'boss', bossId:def.id, matryoshkaId:def.id==='matryoshka'?nextMatryoshkaId():undefined, turnCd:def.perTurn&&def.act?Math.max(1,1+extraFoeCd()):undefined, tier, hp, maxHp:hp, atk, cd:cdv, baseCd:cdv};
   addBossFx(r,c,false);
   if(def.onSpawn) def.onSpawn(grid[r][c]);
   log(tr(`🪲 捉虫：投放 ${def.emoji} ${L(def.name)} Lv${tier}！`,`🪲 Debug: spawned ${def.emoji} ${L(def.name)} Lv${tier}!`), 'debuff');
@@ -193,7 +193,7 @@ function spawnFinale(){
   if(!cells.length){ for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const t=grid[r][c]; if(t && t.type!=='boss') cells.push([r,c]); } }
   if(!cells.length) return;
   const [r,c]=cells[Math.floor(rnd()*cells.length)];
-  grid[r][c]={type:'boss', bossId:'finale', tier:bossTier(), hp:0, maxHp:0, atk:0, cd:0, baseCd:0, finale:true};
+  grid[r][c]={type:'boss', bossId:'finale', tier:bossTier(), hp:0, maxHp:0, atk:0, cd:0, baseCd:0, turnCd:Math.max(1,1+extraFoeCd()), finale:true};
   syncPositions(false);
   addBossFx(r,c,true);   // 金色入场特效
   log(tr('👑 终焉之主降临！撑过 10 波 Boss 浪潮即可破关！','👑 The Overlord descends! Survive 10 waves of bosses to clear the game!'), 'bad');
@@ -393,7 +393,7 @@ function spawnBoss(force, exclude){
   // Weapon-immune Bosses use same-tier normal-monster HP; keep attack/cooldown formulas unchanged.
   const hpBase=(!def.swordable&&!def.finale&&!def.monster) ? enemyStats().hp : s.hp;
   const hp=hpBase*(def.noTierScale?1:mult)*(def.hpMult||1), atk=s.atk*mult;
-  grid[r][c]={type:'boss', bossId:def.id, matryoshkaId:def.id==='matryoshka'?nextMatryoshkaId():undefined, tier, hp, maxHp:hp, atk, cd:cdv, baseCd:cdv};
+  grid[r][c]={type:'boss', bossId:def.id, matryoshkaId:def.id==='matryoshka'?nextMatryoshkaId():undefined, turnCd:def.perTurn&&def.act?Math.max(1,1+extraFoeCd()):undefined, tier, hp, maxHp:hp, atk, cd:cdv, baseCd:cdv};
   addBossFx(r,c,false);
   const tlabel = ` Lv${tier}`;   // 始终标注档位（含一阶 Lv1）
   log(tr(`${def.emoji} Boss【${L(def.name)}】${tlabel} 现身！轻点它查看打法。`,`${def.emoji} Boss [${L(def.name)}]${tlabel} appears! Tap it to see how to fight.`), 'bad');

@@ -1,4 +1,10 @@
 
+## [v1.98.0] - 2026-11-09
+> Version-Impact: verify
+
+- 修复亡灵「迷惑」未影响每回合行动型 Boss 的问题：有主动效果的每回合 Boss 现在遵守全局攻击间隔修正；亡灵对局中每两回合发动一次，其他种族仍每回合发动。纯持续光环不变。
+- Fixed Undead Confusion not affecting per-turn active Bosses. Their action interval now follows the global attack-countdown modifier: once every two turns for Undead, and every turn for other races. Passive auras are unchanged.
+
 ## [v1.97.1] - 2026-11-06
 
 - 精简主页炸弹方块短介绍：显示整数伤害/花费，火药加成放在括号中，例如 `伤害 6（火药+1）｜花费 30（火药+5）`。

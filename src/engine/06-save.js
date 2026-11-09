@@ -38,7 +38,7 @@ function saveGame(){
       pendingLevels,
       rngState: __rngState>>>0,   // 恢复续局时也要续上同一条 RNG 轨迹，否则后续补格/刷怪会让 replay 漂移
       player:{...player},
-      grid: grid.map(row=>row.map(t=> t?{type:t.type,hp:t.hp,maxHp:t.maxHp,atk:t.atk,cd:t.cd,baseCd:t.baseCd,bossId:t.bossId,matryoshkaId:t.matryoshkaId,tier:t.tier,stolen:t.stolen,finale:t.finale,incub:t.incub,poison:t.poison,burnTurns:t.burnTurns,burnStacks:t.burnStacks}:null)),
+      grid: grid.map(row=>row.map(t=> t?{type:t.type,hp:t.hp,maxHp:t.maxHp,atk:t.atk,cd:t.cd,baseCd:t.baseCd,bossId:t.bossId,matryoshkaId:t.matryoshkaId,turnCd:t.turnCd,tier:t.tier,stolen:t.stolen,finale:t.finale,incub:t.incub,poison:t.poison,burnTurns:t.burnTurns,burnStacks:t.burnStacks}:null)),
     }));
   }catch(e){}
 }
