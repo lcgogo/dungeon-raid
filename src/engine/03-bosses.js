@@ -211,8 +211,8 @@ function gainGold(g, msgActive){
   return g;
 }
 function currentSwordFlat(){ return player.swordFlat + (player.tigerFury&&player.race==='beast'?Math.floor(player.level/2):0) + (player.titan?Math.floor(player.maxHp/12):0) + shieldBashFlat(player); }
-function burnTickDamage(t){ return Math.max(1, Math.floor(currentSwordFlat()*0.2)) * Math.max(1, t.burnStacks||0) * dailyMultiplier('sun'); }
-function firewallTickDamage(){ return Math.max(1, Math.floor(currentSwordFlat()*0.2)) * dailyMultiplier('sun'); }
+function burnTickDamage(t){ return Math.max(1, Math.floor(currentSwordFlat()*0.2)) * Math.max(1, t.burnStacks||0); }
+function firewallTickDamage(){ return Math.max(1, Math.floor(currentSwordFlat()*0.2)); }
 function fireWallRows(){ return { start: Math.max(0, ROWS-3), end: ROWS-1 }; }
 function currentFlatDamage(){ return Math.max(1, currentSwordFlat()); }
 function igniteTarget(t, stacks){

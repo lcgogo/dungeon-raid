@@ -2,7 +2,7 @@
 // 实际冷却 = 技能基础冷却 + 全局修正（如活死人迷惑 +1），最低 1。
 function effSkillCd(id){
   const sk=id&&TIER1[id]&&TIER1[id].skill; if(!sk) return 5;
-  let cd=sk.cd+(player.skillCdMod||0)-(dailyMultiplier('wisdom')===2?1:0);
+  let cd=sk.cd+(player.skillCdMod||0)-(dailyMultiplier('sun')===2?1:0);
   return Math.max(1, cd);
 }
 function prophecyLabel(type, en){

@@ -124,8 +124,8 @@ function offlineSeedNotice(){
 }
 // 开新局入口：正式版优先消费本地 warm seed；若本地没有，再复用选种族页里的同 race+version 预取结果，最后才现拉；dev 或离线失败 → 本地随机（可玩，不计排名）
 async function freshStart(rc){
-  if(DEV){ startGame(rc); return; }
-  if(typeof navigator!=='undefined' && navigator.onLine===false){ startGame(rc); offlineSeedNotice(); return; }   // 明确离线：秒开不等
+  if(DEV){ startGame(rc); showDailyBlessingPopup(player); return; }
+  if(typeof navigator!=='undefined' && navigator.onLine===false){ startGame(rc); showDailyBlessingPopup(player,offlineSeedNotice); return; }   // 明确离线：秒开不等
   let srv=consumePrefetchedServerSeed(rc);
   if(!srv){
     const pending=pendingSeedPromise(rc);
@@ -137,7 +137,7 @@ async function freshStart(rc){
     if(srv && srv.weekday!==beijingWeekday()) srv=null;
   }
   startGame(rc, srv);
-  if(!srv) offlineSeedNotice();
+  showDailyBlessingPopup(player,!srv?offlineSeedNotice:null);
 }
 function startGame(rc, srv){   // srv={seed,token}：服务端发的种子（正式版上榜用）；缺省则本地随机（dev / 离线，不计排名）
   ended=false;   // 新局开始，重新允许存档

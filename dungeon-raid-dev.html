@@ -249,9 +249,9 @@ const CONTENT = {
 if('serviceWorker' in navigator) window.addEventListener('load',()=>navigator.serviceWorker.register('/sw.js').catch(()=>{}));
 //==================== 配置 ====================
 // 版本号 v主.次.修：不影响 verify/replay 兼容边界的小改动改"修"；凡是影响 verify/replay/版本分桶/release 验证语义的改动都改"次"；大版本变更需先确认。页面底部显示。
-const VERSION='v1.99.0';
+const VERSION='v1.100.0';
 // CHANGELOG_LINES below is only a fallback for raw source inspection; build/build.js replaces it from CHANGELOG.md.
-const CHANGELOG_LINES=[{"ver": "v1.99.0", "zh": "新增每周七神祝福：战神日武器伤害×2、黑夜女神日敌人倒计时+1、知识与智慧之神日经验×2、大地母神日治疗×2、永恒烈阳日火焰伤害×2、风暴之主日盾牌收益×2、蒸汽与机械之神日炸弹伤害×2。祝福在 HUD 与死亡结算中显示；正式版日期由服务端种子固定并写入录像。", "en": "Added a seven-day blessing rotation: War God doubles weapon damage; Goddess of Night adds 1 to foe countdowns; Knowledge and Wisdom doubles XP; Earth Mother doubles healing; Eternal Sun doubles fire damage; Lord of Storms doubles shield gains; Steam and Machinery doubles Bomb damage. The HUD and death settlement show the blessing; ranked runs use the server-stamped weekday recorded with the replay."}, {"ver": "v1.98.0", "zh": "修复亡灵「迷惑」未影响每回合行动型 Boss 的问题：有主动效果的每回合 Boss 现在遵守全局攻击间隔修正；亡灵对局中每两回合发动一次，其他种族仍每回合发动。纯持续光环不变。", "en": "Fixed Undead Confusion not affecting per-turn active Bosses. Their action interval now follows the global attack-countdown modifier: once every two turns for Undead, and every turn for other races. Passive auras are unchanged."}, {"ver": "v1.97.1", "zh": "精简主页炸弹方块短介绍：显示整数伤害/花费，火药加成放在括号中，例如 `伤害 6（火药+1）｜花费 30（火药+5）`。", "en": "Shortened the Bomb tile summary to integer damage/cost values with Refined Powder bonuses in parentheses, e.g. `Damage 6 (Powder +1) | Cost 30 (Powder +5)`."}, {"ver": "v1.97.0", "zh": "所有角色新局初始金币调整为 50；炸弹商店显示基础值与精研火药加成公式（伤害 `5+1`、花费 `25+5`），并保留半价后的实际价格提示。", "en": "All races now start with 50 gold. The Bomb shop shows base values plus Refined Powder (damage `5+1`, cost `25+5`) and indicates when Cheapskate halves the actual price."}, {"ver": "v1.96.0", "zh": "套娃被炸弹击杀时，该分支直接消灭、不再分裂；普通攻击击杀仍会分裂。同一只套娃分裂出的全部分支消灭后，才计为一次 Boss 击杀并获得奖励。", "en": "Bomb kills now remove a Matryoshka branch without splitting it; non-bomb kills still split. The Boss kill and reward count once all branches from that Matryoshka are eliminated."}];   /* auto-injected by dr.sh embed-changelog（勿手改） */
+const CHANGELOG_LINES=[{"ver": "v1.100.0", "zh": "每局开始前显示每日祝福弹窗，列出神祇、效果和《诡秘之主》尊名节选；棋盘外框使用对应的暗色祝福色。接受后进入地牢，回放不重复弹出。DEV 可手动选择祝福并写入录像。知识与智慧之神日仅翻倍经验，不再错误缩短主动冷却。", "en": "Added a pre-run Daily Blessing dialog with the deity, effect, and short honorific-name excerpts from Lord of the Mysteries; the board frame uses a matching dark color. Accept it to enter the dungeon. DEV can manually choose a blessing, and the choice is recorded. Knowledge and Wisdom day doubles XP only and does not change active cooldowns."}, {"ver": "v1.99.0", "zh": "新增每周七神祝福：战神日武器伤害×2、黑夜女神日敌人倒计时+1、知识与智慧之神日经验×2、大地母神日治疗×2、永恒烈阳日所有主动技能冷却−1（最低1）、风暴之主日盾牌护甲进度×2、蒸汽与机械之神日炸弹伤害×2。祝福在开局弹窗、HUD 与死亡结算中显示；正式版按服务端记录的北京时间星期固定录像效果。", "en": "Added a seven-day blessing rotation: War God doubles weapon damage; Goddess of Night adds 1 to foe countdowns; Knowledge and Wisdom doubles XP; Earth Mother doubles healing; Eternal Sun reduces all active skill cooldowns by 1 (minimum 1); Lord of Storms doubles shield armor progress; Steam and Machinery doubles Bomb damage. The opening dialog, HUD, and death settlement show the blessing; ranked replays use the server-stamped Beijing weekday."}, {"ver": "v1.98.0", "zh": "修复亡灵「迷惑」未影响每回合行动型 Boss 的问题：有主动效果的每回合 Boss 现在遵守全局攻击间隔修正；亡灵对局中每两回合发动一次，其他种族仍每回合发动。纯持续光环不变。", "en": "Fixed Undead Confusion not affecting per-turn active Bosses. Their action interval now follows the global attack-countdown modifier: once every two turns for Undead, and every turn for other races. Passive auras are unchanged."}, {"ver": "v1.97.1", "zh": "精简主页炸弹方块短介绍：显示整数伤害/花费，火药加成放在括号中，例如 `伤害 6（火药+1）｜花费 30（火药+5）`。", "en": "Shortened the Bomb tile summary to integer damage/cost values with Refined Powder bonuses in parentheses, e.g. `Damage 6 (Powder +1) | Cost 30 (Powder +5)`."}, {"ver": "v1.97.0", "zh": "所有角色新局初始金币调整为 50；炸弹商店显示基础值与精研火药加成公式（伤害 `5+1`、花费 `25+5`），并保留半价后的实际价格提示。", "en": "All races now start with 50 gold. The Bomb shop shows base values plus Refined Powder (damage `5+1`, cost `25+5`) and indicates when Cheapskate halves the actual price."}];   /* auto-injected by dr.sh embed-changelog（勿手改） */
 const DEV=true;   // release build (DEV=false); dev build is dungeon-raid-dev.html (DEV=true)
 const REC_API='https://api.dungeonraid.win';   // 录像分享 API（Cloudflare Worker + KV）
 // 带种子随机数（mulberry32）：游戏全程用 rnd() 取代原生随机，配合录制种子可确定性重放
@@ -325,19 +325,54 @@ let replayResumeState=null;   // 进入回放前的 live 快照：退出回放�
 let headless=false;   // 无头机器人模式：抑制升级弹窗(及其抽池消耗RNG)，由机器人自行抽池+录制，保证录像可确定性重放
 let prophecySlotKey=null;   // 先知：当前弹框是来自一阶主动还是换装槽（heal/bomb），用于录制/进冷却
 const DAILY_BLESSINGS=[
-  {id:'war', name:['战神','War God'], effect:['武器伤害 ×2','Weapon damage ×2']},
-  {id:'night', name:['黑夜女神','Goddess of Night'], effect:['所有怪物攻击倒计时 +1','All foes get +1 attack countdown']},
-  {id:'wisdom', name:['知识与智慧之神','God of Knowledge and Wisdom'], effect:['获得经验 ×2','XP gained ×2']},
-  {id:'earth', name:['大地母神','Earth Mother'], effect:['所有治疗 ×2','All healing ×2']},
-  {id:'sun', name:['永恒烈阳','Eternal Sun'], effect:['火焰伤害 ×2','Fire damage ×2']},
-  {id:'storm', name:['风暴之主','Lord of Storms'], effect:['盾牌收益 ×2','Shield gains ×2']},
-  {id:'steam', name:['蒸汽与机械之神','God of Steam and Machinery'], effect:['炸弹伤害 ×2','Bomb damage ×2']},
+  {id:'war', name:['战神','War God'], effect:['武器伤害 ×2','Weapon damage ×2'], frame:'#704040', prayer:['「力量与荣耀的象征，伟大的骑士之神，战争主宰，万物的黄昏」','“Symbol of strength and glory, great knight god, master of war, twilight of all things”']},
+  {id:'night', name:['黑夜女神','Goddess of Night'], effect:['所有怪物攻击倒计时 +1','All foes get +1 attack countdown'], frame:'#484360', prayer:['「比星空更崇高，比永恒更久远的黑夜女神」','“Goddess of Night, higher than the stars and older than eternity”']},
+  {id:'wisdom', name:['知识与智慧之神','God of Knowledge and Wisdom'], effect:['获得经验 ×2','XP gained ×2'], frame:'#3b625e', prayer:['「知识之塔，理性化身，智慧之神，洞悉万物的学者」','“Tower of Knowledge, embodiment of reason, god of wisdom, scholar who sees all”']},
+  {id:'earth', name:['大地母神','Earth Mother'], effect:['所有治疗 ×2','All healing ×2'], frame:'#586243', prayer:['「感谢你，生命的源泉！赞美你，万物的母亲！」','“Thanks to you, source of life! Praise to you, mother of all things!”']},
+  {id:'sun', name:['永恒烈阳','Eternal Sun'], effect:['所有主动技能冷却 −1（最低 1）','All active skill cooldowns −1 (minimum 1)'], frame:'#75613c', prayer:['「永恒烈阳，不灭之光，秩序化身」','“Eternal Sun, undying light, embodiment of order”']},
+  {id:'storm', name:['风暴之主','Lord of Storms'], effect:['盾牌收益 ×2','Shield gains ×2'], frame:'#3d596c', prayer:['「空之王，海之皇，天灾君主，风暴之神」','“King of the sky, emperor of the sea, lord of calamities, god of storms”']},
+  {id:'steam', name:['蒸汽与机械之神','God of Steam and Machinery'], effect:['炸弹伤害 ×2','Bomb damage ×2'], frame:'#665043', prayer:['「伟大的蒸汽与机械之神，您是本质的化身，工匠的保护者，技术的光辉」','“Great God of Steam and Machinery, embodiment of essence, protector of craftsmen, radiance of technology”']},
 ];
 function dailyBlessing(p){ p=p||player; const d=p&&p.weekday; return DAILY_BLESSINGS[Number.isInteger(d)&&d>=0&&d<7?d:0]; }
 function hasDailyBlessing(id,p){ return dailyBlessing(p).id===id; }
 function dailyMultiplier(id,p){ return hasDailyBlessing(id,p)?2:1; }
+function dailyBlessingFrame(p){ return dailyBlessing(p).frame; }
+function applyDailyBlessingFrame(p){
+  if(typeof cv==='undefined'||!cv) return;
+  cv.style.outline=`2px solid ${dailyBlessingFrame(p)}`;
+  cv.style.outlineOffset='2px';
+}
 function healingMultiplier(p){ p=p||player; return (p&&p.healMult!=null?p.healMult:1)*dailyMultiplier('earth',p); }
 function dailyBlessingSummary(p){ const d=dailyBlessing(p); return tr(`📅 ${L(d.name)}日 · ${d.effect[0]}`,`📅 ${L(d.name)} Day · ${d.effect[1]}`); }
+function showDailyBlessingPopup(p,onClose){
+  const d=dailyBlessing(p);
+  busy=true;
+  updateHUD();
+  document.getElementById('card').innerHTML=`<div style="font-size:11px;color:var(--dim);margin-bottom:8px">${tr('今日祝福','DAILY BLESSING')}</div>
+    ${DEV?`<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px;margin:0 0 10px;text-align:left">${DAILY_BLESSINGS.map((b,i)=>`<button type="button" class="choice dailyBlessingOption" id="blessingDay${i}" aria-pressed="${p.weekday===i}" style="min-width:0;min-height:46px;margin:0;padding:6px 8px;border-color:${p.weekday===i?'var(--gold)':'#4a3a63'};${p.weekday===i?'color:var(--gold)':''}"><b style="font-size:12px;margin:0">${L(b.name)}</b><small>${L(b.effect)}</small></button>`).join('')}</div>`:''}
+    <h2 id="blessingDeity" style="margin-bottom:8px">${L(d.name)}日</h2>
+    <div id="blessingEffect" style="font-size:16px;color:var(--gold);font-weight:700;margin:0 0 14px">${L(d.effect)}</div>
+    <div style="font-size:10px;color:var(--dim);text-align:left;margin-bottom:3px">${tr('尊名祷词','HONORIFIC INVOCATION')}</div>
+    <blockquote id="blessingPrayer" style="margin:0 0 16px;padding:10px 12px;border-left:2px solid var(--gold);text-align:left;color:var(--txt);font-size:14px;line-height:1.6">${L(d.prayer)}</blockquote>
+    <button class="btn" id="blessingContinue" style="width:100%;margin:0">${tr('接受祝福，进入地牢','Accept Blessing & Enter')}</button>`;
+  const chooseBlessing=weekday=>{
+    const next=DAILY_BLESSINGS[weekday];
+    p.weekday=weekday;
+    if(rec){ rec.weekday=weekday; saveRec(); }
+    p.armorPerShield=hasDailyBlessing('storm',p)?2:1;
+    DAILY_BLESSINGS.forEach((_,i)=>{
+      const button=document.getElementById(`blessingDay${i}`);
+      if(button){ button.classList.toggle('selected',i===weekday); button.setAttribute('aria-pressed',String(i===weekday)); button.style.borderColor=i===weekday?'var(--gold)':'#4a3a63'; button.style.color=i===weekday?'var(--gold)':'var(--txt)'; }
+    });
+    document.getElementById('blessingDeity').textContent=`${L(next.name)}日`;
+    document.getElementById('blessingEffect').textContent=L(next.effect);
+    document.getElementById('blessingPrayer').textContent=L(next.prayer);
+    updateHUD();
+  };
+  if(DEV) DAILY_BLESSINGS.forEach((_,i)=>{ document.getElementById(`blessingDay${i}`).onclick=()=>chooseBlessing(i); });
+  document.getElementById('blessingContinue').onclick=()=>{ busy=false; hideOverlay(); updateHUD(); if(onClose) onClose(); };
+  showOverlay();
+}
 const FX_FALL_HOLD=11;   // 特殊吸取/融化类效果：棋子先消失一小拍，再开始下落，避免和特效同时发生显得太突兀
 const ACTIVE_POPUP_WAIT=720;   // 主动技能结算后留出一拍，再显示升级/转职弹框
 let gravityFxHold=0;     // 下一次 applyGravity 要给下落棋子的起落前停顿（按帧计，纯视觉，不进录像）
@@ -587,8 +622,8 @@ function gainGold(g, msgActive){
   return g;
 }
 function currentSwordFlat(){ return player.swordFlat + (player.tigerFury&&player.race==='beast'?Math.floor(player.level/2):0) + (player.titan?Math.floor(player.maxHp/12):0) + shieldBashFlat(player); }
-function burnTickDamage(t){ return Math.max(1, Math.floor(currentSwordFlat()*0.2)) * Math.max(1, t.burnStacks||0) * dailyMultiplier('sun'); }
-function firewallTickDamage(){ return Math.max(1, Math.floor(currentSwordFlat()*0.2)) * dailyMultiplier('sun'); }
+function burnTickDamage(t){ return Math.max(1, Math.floor(currentSwordFlat()*0.2)) * Math.max(1, t.burnStacks||0); }
+function firewallTickDamage(){ return Math.max(1, Math.floor(currentSwordFlat()*0.2)); }
 function fireWallRows(){ return { start: Math.max(0, ROWS-3), end: ROWS-1 }; }
 function currentFlatDamage(){ return Math.max(1, currentSwordFlat()); }
 function igniteTarget(t, stacks){
@@ -1441,8 +1476,8 @@ function offlineSeedNotice(){
 }
 // 开新局入口：正式版优先消费本地 warm seed；若本地没有，再复用选种族页里的同 race+version 预取结果，最后才现拉；dev 或离线失败 → 本地随机（可玩，不计排名）
 async function freshStart(rc){
-  if(DEV){ startGame(rc); return; }
-  if(typeof navigator!=='undefined' && navigator.onLine===false){ startGame(rc); offlineSeedNotice(); return; }   // 明确离线：秒开不等
+  if(DEV){ startGame(rc); showDailyBlessingPopup(player); return; }
+  if(typeof navigator!=='undefined' && navigator.onLine===false){ startGame(rc); showDailyBlessingPopup(player,offlineSeedNotice); return; }   // 明确离线：秒开不等
   let srv=consumePrefetchedServerSeed(rc);
   if(!srv){
     const pending=pendingSeedPromise(rc);
@@ -1454,7 +1489,7 @@ async function freshStart(rc){
     if(srv && srv.weekday!==beijingWeekday()) srv=null;
   }
   startGame(rc, srv);
-  if(!srv) offlineSeedNotice();
+  showDailyBlessingPopup(player,!srv?offlineSeedNotice:null);
 }
 function startGame(rc, srv){   // srv={seed,token}：服务端发的种子（正式版上榜用）；缺省则本地随机（dev / 离线，不计排名）
   ended=false;   // 新局开始，重新允许存档
@@ -2412,7 +2447,7 @@ document.querySelectorAll('.shopBtn[data-buy]').forEach(b=>attachLongPress(b, b.
 // 实际冷却 = 技能基础冷却 + 全局修正（如活死人迷惑 +1），最低 1。
 function effSkillCd(id){
   const sk=id&&TIER1[id]&&TIER1[id].skill; if(!sk) return 5;
-  let cd=sk.cd+(player.skillCdMod||0)-(dailyMultiplier('wisdom')===2?1:0);
+  let cd=sk.cd+(player.skillCdMod||0)-(dailyMultiplier('sun')===2?1:0);
   return Math.max(1, cd);
 }
 function prophecyLabel(type, en){
@@ -3635,6 +3670,7 @@ function bar(idBar,idTxt,cur,max,suffix){
   document.getElementById(idTxt).textContent=`${Math.max(0,Math.round(cur))} / ${max}`+(suffix||'');
 }
 function updateHUD(){
+  applyDailyBlessingFrame(player);
   document.getElementById('hud').classList.toggle('hoarding', !!(player && player.goldLock>0));
   bar('hpBar','hpTxt',player.hp,player.maxHp);
   document.getElementById('hpBar').style.background = isInfected() ? '#27ae60' : 'var(--hp)';  // 僵尸尸毒感染：血条变绿

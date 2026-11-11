@@ -2,13 +2,16 @@ const fs=require('fs');
 const path=require('path');
 const file=fs.existsSync('dungeon-raid-dev.html')?'dungeon-raid-dev.html':path.join('..','dungeon-raid-dev.html');
 let s=fs.readFileSync(file,'utf8').match(/<script>([\s\S]*?)<\/script>/)[1];
-const EXPORT=`globalThis.__G={startGame,raceById,TIER1,dealDamage,dailyBlessing,dailyBlessingSummary,dailyMultiplier,healingMultiplier,extraFoeCd,effSkillCd,addXp,gainHeal,vampGain,burnTickDamage,firewallTickDamage,bombDamage,bombShopSummary,buyItem,resolve,
-  get player(){return player},get grid(){return grid},get replayRec(){return replayRec},set replaying(v){replaying=v},set replayRec(v){replayRec=v},set selection(v){selection=v},set pendingLevels(v){pendingLevels=v},set busy(v){busy=v},set headless(v){headless=v}};`;
+const EXPORT=`globalThis.__G={startGame,raceById,TIER1,dealDamage,dailyBlessing,dailyBlessingFrame,dailyBlessingSummary,showDailyBlessingPopup,dailyMultiplier,healingMultiplier,extraFoeCd,effSkillCd,addXp,gainHeal,vampGain,burnTickDamage,firewallTickDamage,bombDamage,bombShopSummary,buyItem,resolve,
+  get player(){return player},get grid(){return grid},get board(){return cv},get replayRec(){return replayRec},get rec(){return rec},set rec(v){rec=v},get busy(){return busy},set replaying(v){replaying=v},set replayRec(v){replayRec=v},set selection(v){selection=v},set pendingLevels(v){pendingLevels=v},set busy(v){busy=v},set headless(v){headless=v}};`;
 s=s.replace('resize(); showClassSelect(); loop();',EXPORT);
 const h={get(t,p){
   if(p==='style')return t._s||(t._s={});
   if(p==='dataset')return t._d||(t._d={});
-  if(p==='classList')return{add(){},remove(){},toggle(){}};
+  if(p==='classList'){
+    const classes=t._classes||(t._classes=new Set());
+    return{add(...xs){xs.forEach(x=>classes.add(x));},remove(...xs){xs.forEach(x=>classes.delete(x));},toggle(x,force){if(force===undefined)force=!classes.has(x);force?classes.add(x):classes.delete(x);return force;},contains(x){return classes.has(x);}};
+  }
   if(p==='getContext')return()=>new Proxy({},{get:()=>()=>{},set:()=>true});
   if(['addEventListener','appendChild','setAttribute','focus','click'].includes(p))return()=>{};
   if(p==='querySelector')return()=>new Proxy({},h);
@@ -17,9 +20,11 @@ const h={get(t,p){
   if(['width','height','clientWidth','clientHeight'].includes(p))return 420;
   return t[p];
 },set(t,p,v){t[p]=v;return true;}};
+const elements=new Map();
 const mk=()=>new Proxy({},h);
+const getEl=id=>{if(!elements.has(id))elements.set(id,mk());return elements.get(id);};
 new Function('document','window','localStorage','requestAnimationFrame','location','navigator','fetch','URLSearchParams',s)(
-  {getElementById:mk,createElement:mk,querySelector:mk,querySelectorAll:()=>[],addEventListener(){},body:mk()},
+  {getElementById:getEl,createElement:mk,querySelector:mk,querySelectorAll:()=>[],addEventListener(){},body:mk()},
   {addEventListener(){},requestAnimationFrame:()=>0},{getItem(){return null},setItem(){},removeItem(){}},()=>0,
   {search:''},{language:'zh'},()=>{},URLSearchParams);
 const G=globalThis.__G;
@@ -37,6 +42,12 @@ for(let d=0;d<7;d++){
   ok(G.dailyBlessing(p).id===['war','night','wisdom','earth','sun','storm','steam'][d],`weekday ${d} maps to its blessing`);
 }
 {
+  const colors=Array.from({length:7},(_,day)=>G.dailyBlessingFrame({weekday:day}));
+  ok(new Set(colors).size===7&&colors.every(c=>/^#[0-9a-f]{6}$/i.test(c)),'each blessing has a distinct dark frame color');
+  const p=start(0);
+  ok(G.board.style.outline.includes(G.dailyBlessingFrame(p)),'board frame follows the current blessing');
+}
+{
   const p=start(0); clearBoard(); G.grid[0][0]={type:'enemy',hp:100,maxHp:100};
   const r=G.dealDamage(5,[{r:0,c:0,type:'sword'}]);
   ok(r.dmg===10,'War God doubles weapon damage');
@@ -48,7 +59,7 @@ for(let d=0;d<7;d++){
 {
   const p=start(2);
   ok(G.addXp(p,3)===6&&p.xp===6,'Knowledge and Wisdom doubles XP');
-  ok(G.effSkillCd('knight')===4,'Knowledge and Wisdom reduces active cooldown by one');
+  ok(G.effSkillCd('knight')===5,'Knowledge and Wisdom does not alter active cooldown');
 }
 {
   const p=start(3); p.hp=10; p.maxHp=50;
@@ -59,8 +70,10 @@ for(let d=0;d<7;d++){
   ok(G.gainHeal(3)===3&&undead.hp===13,'Earth Mother and Undead healing penalty combine');
 }
 {
-  const p=start(4); p.swordFlat=5;
-  ok(G.burnTickDamage({burnStacks:1})===2&&G.firewallTickDamage()===2,'Eternal Sun doubles burn and Firewall damage');
+  const p=start(4);
+  ok(G.effSkillCd('knight')===4,'Eternal Sun reduces active cooldown by one');
+  p.skillCdMod=-10;
+  ok(G.effSkillCd('knight')===1,'Eternal Sun cooldown reduction respects the one-turn floor');
 }
 {
   const p=start(5); clearBoard();
@@ -85,6 +98,18 @@ for(let d=0;d<7;d++){
 {
   const src=fs.readFileSync(path.join(path.dirname(file),'src/engine/15-upgrades.js'),'utf8');
   ok(src.includes('${dailyReport}'),'death settlement includes the run daily blessing');
+}
+{
+  const p=start(2); G.rec={weekday:2,acts:[]}; G.showDailyBlessingPopup(p);
+  const card=elements.get('card'), overlay=elements.get('overlay');
+  ok(G.busy&&overlay.classList.contains('show'),'blessing popup blocks board input');
+  ok(card.innerHTML.includes('知识与智慧之神')&&card.innerHTML.includes('知识之塔'),'blessing popup shows canonical deity invocation');
+  getEl('blessingDay6').onclick();
+  ok(p.weekday===6&&G.rec.weekday===6&&p.armorPerShield===1,'DEV can choose a blessing and record that choice');
+  ok(G.board.style.outline.includes(G.dailyBlessingFrame(p)),'DEV blessing choice recolors board frame');
+  ok(getEl('blessingDeity').textContent==='蒸汽与机械之神日'&&getEl('blessingPrayer').textContent.includes('本质的化身'),'DEV selection refreshes deity and invocation');
+  getEl('blessingContinue').onclick();
+  ok(!G.busy&&!overlay.classList.contains('show'),'accepting blessing closes popup and unlocks board');
 }
 console.log(fails?`\n${fails} daily blessing checks failed`:'\nAll daily blessing checks passed');
 process.exit(fails?1:0);

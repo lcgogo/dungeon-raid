@@ -11,19 +11,54 @@ let replayResumeState=null;   // 进入回放前的 live 快照：退出回放�
 let headless=false;   // 无头机器人模式：抑制升级弹窗(及其抽池消耗RNG)，由机器人自行抽池+录制，保证录像可确定性重放
 let prophecySlotKey=null;   // 先知：当前弹框是来自一阶主动还是换装槽（heal/bomb），用于录制/进冷却
 const DAILY_BLESSINGS=[
-  {id:'war', name:['战神','War God'], effect:['武器伤害 ×2','Weapon damage ×2']},
-  {id:'night', name:['黑夜女神','Goddess of Night'], effect:['所有怪物攻击倒计时 +1','All foes get +1 attack countdown']},
-  {id:'wisdom', name:['知识与智慧之神','God of Knowledge and Wisdom'], effect:['获得经验 ×2','XP gained ×2']},
-  {id:'earth', name:['大地母神','Earth Mother'], effect:['所有治疗 ×2','All healing ×2']},
-  {id:'sun', name:['永恒烈阳','Eternal Sun'], effect:['火焰伤害 ×2','Fire damage ×2']},
-  {id:'storm', name:['风暴之主','Lord of Storms'], effect:['盾牌收益 ×2','Shield gains ×2']},
-  {id:'steam', name:['蒸汽与机械之神','God of Steam and Machinery'], effect:['炸弹伤害 ×2','Bomb damage ×2']},
+  {id:'war', name:['战神','War God'], effect:['武器伤害 ×2','Weapon damage ×2'], frame:'#704040', prayer:['「力量与荣耀的象征，伟大的骑士之神，战争主宰，万物的黄昏」','“Symbol of strength and glory, great knight god, master of war, twilight of all things”']},
+  {id:'night', name:['黑夜女神','Goddess of Night'], effect:['所有怪物攻击倒计时 +1','All foes get +1 attack countdown'], frame:'#484360', prayer:['「比星空更崇高，比永恒更久远的黑夜女神」','“Goddess of Night, higher than the stars and older than eternity”']},
+  {id:'wisdom', name:['知识与智慧之神','God of Knowledge and Wisdom'], effect:['获得经验 ×2','XP gained ×2'], frame:'#3b625e', prayer:['「知识之塔，理性化身，智慧之神，洞悉万物的学者」','“Tower of Knowledge, embodiment of reason, god of wisdom, scholar who sees all”']},
+  {id:'earth', name:['大地母神','Earth Mother'], effect:['所有治疗 ×2','All healing ×2'], frame:'#586243', prayer:['「感谢你，生命的源泉！赞美你，万物的母亲！」','“Thanks to you, source of life! Praise to you, mother of all things!”']},
+  {id:'sun', name:['永恒烈阳','Eternal Sun'], effect:['所有主动技能冷却 −1（最低 1）','All active skill cooldowns −1 (minimum 1)'], frame:'#75613c', prayer:['「永恒烈阳，不灭之光，秩序化身」','“Eternal Sun, undying light, embodiment of order”']},
+  {id:'storm', name:['风暴之主','Lord of Storms'], effect:['盾牌收益 ×2','Shield gains ×2'], frame:'#3d596c', prayer:['「空之王，海之皇，天灾君主，风暴之神」','“King of the sky, emperor of the sea, lord of calamities, god of storms”']},
+  {id:'steam', name:['蒸汽与机械之神','God of Steam and Machinery'], effect:['炸弹伤害 ×2','Bomb damage ×2'], frame:'#665043', prayer:['「伟大的蒸汽与机械之神，您是本质的化身，工匠的保护者，技术的光辉」','“Great God of Steam and Machinery, embodiment of essence, protector of craftsmen, radiance of technology”']},
 ];
 function dailyBlessing(p){ p=p||player; const d=p&&p.weekday; return DAILY_BLESSINGS[Number.isInteger(d)&&d>=0&&d<7?d:0]; }
 function hasDailyBlessing(id,p){ return dailyBlessing(p).id===id; }
 function dailyMultiplier(id,p){ return hasDailyBlessing(id,p)?2:1; }
+function dailyBlessingFrame(p){ return dailyBlessing(p).frame; }
+function applyDailyBlessingFrame(p){
+  if(typeof cv==='undefined'||!cv) return;
+  cv.style.outline=`2px solid ${dailyBlessingFrame(p)}`;
+  cv.style.outlineOffset='2px';
+}
 function healingMultiplier(p){ p=p||player; return (p&&p.healMult!=null?p.healMult:1)*dailyMultiplier('earth',p); }
 function dailyBlessingSummary(p){ const d=dailyBlessing(p); return tr(`📅 ${L(d.name)}日 · ${d.effect[0]}`,`📅 ${L(d.name)} Day · ${d.effect[1]}`); }
+function showDailyBlessingPopup(p,onClose){
+  const d=dailyBlessing(p);
+  busy=true;
+  updateHUD();
+  document.getElementById('card').innerHTML=`<div style="font-size:11px;color:var(--dim);margin-bottom:8px">${tr('今日祝福','DAILY BLESSING')}</div>
+    ${DEV?`<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px;margin:0 0 10px;text-align:left">${DAILY_BLESSINGS.map((b,i)=>`<button type="button" class="choice dailyBlessingOption" id="blessingDay${i}" aria-pressed="${p.weekday===i}" style="min-width:0;min-height:46px;margin:0;padding:6px 8px;border-color:${p.weekday===i?'var(--gold)':'#4a3a63'};${p.weekday===i?'color:var(--gold)':''}"><b style="font-size:12px;margin:0">${L(b.name)}</b><small>${L(b.effect)}</small></button>`).join('')}</div>`:''}
+    <h2 id="blessingDeity" style="margin-bottom:8px">${L(d.name)}日</h2>
+    <div id="blessingEffect" style="font-size:16px;color:var(--gold);font-weight:700;margin:0 0 14px">${L(d.effect)}</div>
+    <div style="font-size:10px;color:var(--dim);text-align:left;margin-bottom:3px">${tr('尊名祷词','HONORIFIC INVOCATION')}</div>
+    <blockquote id="blessingPrayer" style="margin:0 0 16px;padding:10px 12px;border-left:2px solid var(--gold);text-align:left;color:var(--txt);font-size:14px;line-height:1.6">${L(d.prayer)}</blockquote>
+    <button class="btn" id="blessingContinue" style="width:100%;margin:0">${tr('接受祝福，进入地牢','Accept Blessing & Enter')}</button>`;
+  const chooseBlessing=weekday=>{
+    const next=DAILY_BLESSINGS[weekday];
+    p.weekday=weekday;
+    if(rec){ rec.weekday=weekday; saveRec(); }
+    p.armorPerShield=hasDailyBlessing('storm',p)?2:1;
+    DAILY_BLESSINGS.forEach((_,i)=>{
+      const button=document.getElementById(`blessingDay${i}`);
+      if(button){ button.classList.toggle('selected',i===weekday); button.setAttribute('aria-pressed',String(i===weekday)); button.style.borderColor=i===weekday?'var(--gold)':'#4a3a63'; button.style.color=i===weekday?'var(--gold)':'var(--txt)'; }
+    });
+    document.getElementById('blessingDeity').textContent=`${L(next.name)}日`;
+    document.getElementById('blessingEffect').textContent=L(next.effect);
+    document.getElementById('blessingPrayer').textContent=L(next.prayer);
+    updateHUD();
+  };
+  if(DEV) DAILY_BLESSINGS.forEach((_,i)=>{ document.getElementById(`blessingDay${i}`).onclick=()=>chooseBlessing(i); });
+  document.getElementById('blessingContinue').onclick=()=>{ busy=false; hideOverlay(); updateHUD(); if(onClose) onClose(); };
+  showOverlay();
+}
 const FX_FALL_HOLD=11;   // 特殊吸取/融化类效果：棋子先消失一小拍，再开始下落，避免和特效同时发生显得太突兀
 const ACTIVE_POPUP_WAIT=720;   // 主动技能结算后留出一拍，再显示升级/转职弹框
 let gravityFxHold=0;     // 下一次 applyGravity 要给下落棋子的起落前停顿（按帧计，纯视觉，不进录像）

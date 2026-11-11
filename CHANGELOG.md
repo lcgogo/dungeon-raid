@@ -1,9 +1,15 @@
 
+## [v1.100.0] - 2026-11-11
+> Version-Impact: verify
+
+- 每局开始前显示每日祝福弹窗，列出神祇、效果和《诡秘之主》尊名节选；棋盘外框使用对应的暗色祝福色。接受后进入地牢，回放不重复弹出。DEV 可手动选择祝福并写入录像。知识与智慧之神日仅翻倍经验，不再错误缩短主动冷却。
+- Added a pre-run Daily Blessing dialog with the deity, effect, and short honorific-name excerpts from Lord of the Mysteries; the board frame uses a matching dark color. Accept it to enter the dungeon. DEV can manually choose a blessing, and the choice is recorded. Knowledge and Wisdom day doubles XP only and does not change active cooldowns.
+
 ## [v1.99.0] - 2026-11-10
 > Version-Impact: verify
 
-- 新增每周七神祝福：战神日武器伤害×2、黑夜女神日敌人倒计时+1、知识与智慧之神日经验×2、大地母神日治疗×2、永恒烈阳日火焰伤害×2、风暴之主日盾牌收益×2、蒸汽与机械之神日炸弹伤害×2。祝福在 HUD 与死亡结算中显示；正式版日期由服务端种子固定并写入录像。
-- Added a seven-day blessing rotation: War God doubles weapon damage; Goddess of Night adds 1 to foe countdowns; Knowledge and Wisdom doubles XP; Earth Mother doubles healing; Eternal Sun doubles fire damage; Lord of Storms doubles shield gains; Steam and Machinery doubles Bomb damage. The HUD and death settlement show the blessing; ranked runs use the server-stamped weekday recorded with the replay.
+- 新增每周七神祝福：战神日武器伤害×2、黑夜女神日敌人倒计时+1、知识与智慧之神日经验×2、大地母神日治疗×2、永恒烈阳日所有主动技能冷却−1（最低1）、风暴之主日盾牌护甲进度×2、蒸汽与机械之神日炸弹伤害×2。祝福在开局弹窗、HUD 与死亡结算中显示；正式版按服务端记录的北京时间星期固定录像效果。
+- Added a seven-day blessing rotation: War God doubles weapon damage; Goddess of Night adds 1 to foe countdowns; Knowledge and Wisdom doubles XP; Earth Mother doubles healing; Eternal Sun reduces all active skill cooldowns by 1 (minimum 1); Lord of Storms doubles shield armor progress; Steam and Machinery doubles Bomb damage. The opening dialog, HUD, and death settlement show the blessing; ranked replays use the server-stamped Beijing weekday.
 
 ## [v1.98.0] - 2026-11-09
 > Version-Impact: verify

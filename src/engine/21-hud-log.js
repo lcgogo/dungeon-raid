@@ -4,6 +4,7 @@ function bar(idBar,idTxt,cur,max,suffix){
   document.getElementById(idTxt).textContent=`${Math.max(0,Math.round(cur))} / ${max}`+(suffix||'');
 }
 function updateHUD(){
+  applyDailyBlessingFrame(player);
   document.getElementById('hud').classList.toggle('hoarding', !!(player && player.goldLock>0));
   bar('hpBar','hpTxt',player.hp,player.maxHp);
   document.getElementById('hpBar').style.background = isInfected() ? '#27ae60' : 'var(--hp)';  // 僵尸尸毒感染：血条变绿

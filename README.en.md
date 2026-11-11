@@ -23,7 +23,7 @@ Play online: **<https://dungeonraid.win>** (Mainland mirror: <https://dungeonrai
 
 The two builds keep **separate, non-overwriting saves** (Dev uses its own localStorage keys). The start screen and footer both label which build you are in. The home page’s Release / Dev version numbers are **statically injected at deploy time**, so they appear instantly even on weak connections without an extra fetch.
 
-The current Dev build is `v1.99.0`; a seven-day blessing rotation is shown in the HUD and death settlement, with ranked replays pinned to the server-stamped Beijing weekday. Undead Confusion makes per-turn active Bosses act every two turns, while other races still face them every turn. The Bomb tile summary uses integer damage/cost values with Refined Powder in parentheses. All races start with 50 gold. Bomb kills remove a Matryoshka branch without splitting it, while all remaining branches from that Matryoshka must still be eliminated for one Boss kill reward. Magmafiend melts up to its tier in shields each turn. Bomb and Frost Nova share all-foe damage resolution, with parity checked against the `v1.94.2` snapshot. The Lich skill is named Frost Nova to match Warcraft. The turn-350 crossover list shows only activatable skills and no longer offers passive Rebirth. Feedback entries can be opened to view their thread and post replies. The README tracks the current code, including the Dev-only Human hidden Programmer class, Refined Powder, stable replay boundaries, and the iOS Cyclops board-icon fix. Release builds keep Programmer hidden. Source lives under `src/` and the self-contained HTML is regenerated with `node build/build.js`.
+The current Dev build is `v1.100.0`; the Daily Blessing opens before the board with its deity, effect, and short honorific-name excerpts from Lord of the Mysteries. The board frame uses a matching dark color, and the blessing remains visible in the HUD and death settlement. DEV can manually choose the blessing in the dialog, and the choice is recorded. Knowledge and Wisdom day doubles XP only, without changing skill cooldowns. Ranked replays use the server-stamped Beijing weekday. Undead Confusion makes per-turn active Bosses act every two turns, while other races still face them every turn. The Bomb tile summary uses integer damage/cost values with Refined Powder in parentheses. All races start with 50 gold. Bomb kills remove a Matryoshka branch without splitting it, while all remaining branches from that Matryoshka must still be eliminated for one Boss kill reward. Magmafiend melts up to its tier in shields each turn. Bomb and Frost Nova share all-foe damage resolution, with parity checked against the `v1.94.2` snapshot. The Lich skill is named Frost Nova to match Warcraft. The turn-350 crossover list shows only activatable skills and no longer offers passive Rebirth. Feedback entries can be opened to view their thread and post replies. The README tracks the current code, including the Dev-only Human hidden Programmer class, Refined Powder, stable replay boundaries, and the iOS Cyclops board-icon fix. Release builds keep Programmer hidden. Source lives under `src/` and the self-contained HTML is regenerated with `node build/build.js`.
 
 ## 🧩 Core Gameplay
 
@@ -43,7 +43,7 @@ The current Dev build is `v1.99.0`; a seven-day blessing rotation is shown in th
 
 ## 📅 Daily Blessings
 
-Blessings rotate at midnight Beijing time. The run records its blessing for deterministic replay, and the death settlement shows which one was active.
+Blessings rotate at midnight Beijing time. The opening dialog shows the blessing and short honorific-name excerpts from Lord of the Mysteries. The run records its blessing for deterministic replay, and the death settlement shows which one was active. DEV allows a manual choice in the opening dialog.
 
 | Day | Deity | Effect |
 |---|---|---|
@@ -51,7 +51,7 @@ Blessings rotate at midnight Beijing time. The run records its blessing for dete
 | Monday | Goddess of Night | All foes get +1 attack countdown; per-turn active Bosses act every two turns |
 | Tuesday | God of Knowledge and Wisdom | XP gained ×2 |
 | Wednesday | Earth Mother | All healing ×2 |
-| Thursday | Eternal Sun | Fire damage ×2 |
+| Thursday | Eternal Sun | All active skill cooldowns −1 (minimum 1) |
 | Friday | Lord of Storms | Shield armor progress ×2 |
 | Saturday | God of Steam and Machinery | Bomb damage ×2, including All-In bonus |
 
