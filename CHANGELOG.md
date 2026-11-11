@@ -1,4 +1,9 @@
 
+## [v1.100.2] - 2026-11-11
+
+- 修复自动清理按旧版本和日期删除破关记录的问题；破关榜继续跨版本展示，历史破关成绩不再被自动清理。
+- Fixed pruning that deleted clears from older builds; the clear board remains cross-version and historical clear records are no longer automatically removed.
+
 ## [v1.100.1] - 2026-11-11
 
 - 修复 DEV 手动选择每日祝福后，开局日志仍显示原自动祝福的问题；现在只更新原日志条目。

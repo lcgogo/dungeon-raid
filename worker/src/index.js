@@ -117,15 +117,15 @@ async function recentVersions(env, n) {
   });
   return minors.slice(0, n);   // 返回「大.次」键，如 ["v1.30","v1.29"]
 }
-// 定期清理：删除「不在最近 keepVers 个版本」且「created 早于 days 天」的录像（KV）+ 其 scores 行。
-// 每条 KV 录像都有对应 scores 行（/rec、/score、/clear 都同时写两边），故按 D1 驱动即可删全。
+// 定期清理：删除「不在最近 keepVers 个版本」且「created 早于 days 天」的普通成绩及分享录像。
+// 破关记录是稀有历史榜单数据，不能随版本窗口清理。
 // 每次最多删 max 条（留余量给 KV 免费版每日删除配额），多了下次接着删。
 async function pruneOld(env, { days = 30, keepVers = 5, max = 400 } = {}) {
   const keep = await recentVersions(env, keepVers);   // 最近 keepVers 个「大.次」桶
   const cutoff = Date.now() - days * 86400000;
   const notIn = keep.length ? ` AND ${keep.map(() => 'version NOT LIKE ?').join(' AND ')}` : '';   // 不在保留桶内
   const { results } = await env.DB.prepare(
-    `SELECT id FROM scores WHERE created < ?${notIn} LIMIT ?`
+    `SELECT id FROM scores WHERE cleared=0 AND created < ?${notIn} LIMIT ?`
   ).bind(cutoff, ...keep.map(m => m + '.%'), max).all();
   const ids = (results || []).map(r => r.id);
   let deleted = 0;

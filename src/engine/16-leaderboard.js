@@ -28,7 +28,7 @@ async function renderLeaderboard(){
   try{
     const rq = lbRace ? `&race=${lbRace}` : '';
     const ep = lbBoard==='clear'
-      ? `/clearboard?agent=${lbAgent}${rq}&n=20`        // 破关榜：历代全部（稀有里程碑，不按版本分桶，免得被频繁发版挤出窗口）
+      ? `/clearboard?agent=${lbAgent}${rq}&n=20`        // 破关榜：历代全部；Worker 清理时永久保留破关记录
       : `/top?recent=3&agent=${lbAgent}${rq}&n=10`;
     const res=await fetch(REC_API+ep); const j=await res.json();
     const rows = lbBoard==='clear' ? (j.clears||[]) : (j.top||[]);
