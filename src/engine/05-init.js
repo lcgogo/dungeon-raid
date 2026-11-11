@@ -169,6 +169,7 @@ function startGame(rc, srv){   // srv={seed,token}：服务端发的种子（正
   hideOverlay(); logClear();
   log(tr(`【${rc.e}${L(rc.n)}】踏入地牢… 祝你好运！`, `${rc.e}${L(rc.n)} enters the dungeon… good luck!`));
   log(dailyBlessingSummary(player),'buff');
+  logHistory[logHistory.length-1].dailyBlessing=true;
   updateHUD();
 }
 // 新手第一局教学棋盘：在内部格放一只弱怪，左右各一把剑（剑-怪-剑，可连成穿怪剑链一击带走）。用 rnd() 故确定可重放。

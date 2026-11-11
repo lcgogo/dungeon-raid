@@ -1,4 +1,9 @@
 
+## [v1.100.1] - 2026-11-11
+
+- 修复 DEV 手动选择每日祝福后，开局日志仍显示原自动祝福的问题；现在只更新原日志条目。
+- Fixed the DEV blessing picker leaving the original auto-selected deity in the start log; it now updates that entry in place.
+
 ## [v1.100.0] - 2026-11-11
 > Version-Impact: verify
 

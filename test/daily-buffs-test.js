@@ -3,7 +3,7 @@ const path=require('path');
 const file=fs.existsSync('dungeon-raid-dev.html')?'dungeon-raid-dev.html':path.join('..','dungeon-raid-dev.html');
 let s=fs.readFileSync(file,'utf8').match(/<script>([\s\S]*?)<\/script>/)[1];
 const EXPORT=`globalThis.__G={startGame,raceById,TIER1,dealDamage,dailyBlessing,dailyBlessingFrame,dailyBlessingSummary,showDailyBlessingPopup,dailyMultiplier,healingMultiplier,extraFoeCd,effSkillCd,addXp,gainHeal,vampGain,burnTickDamage,firewallTickDamage,bombDamage,bombShopSummary,buyItem,resolve,
-  get player(){return player},get grid(){return grid},get board(){return cv},get replayRec(){return replayRec},get rec(){return rec},set rec(v){rec=v},get busy(){return busy},set replaying(v){replaying=v},set replayRec(v){replayRec=v},set selection(v){selection=v},set pendingLevels(v){pendingLevels=v},set busy(v){busy=v},set headless(v){headless=v}};`;
+  get player(){return player},get grid(){return grid},get board(){return cv},get replayRec(){return replayRec},get rec(){return rec},get logHistory(){return logHistory},set rec(v){rec=v},get busy(){return busy},set replaying(v){replaying=v},set replayRec(v){replayRec=v},set selection(v){selection=v},set pendingLevels(v){pendingLevels=v},set busy(v){busy=v},set headless(v){headless=v}};`;
 s=s.replace('resize(); showClassSelect(); loop();',EXPORT);
 const h={get(t,p){
   if(p==='style')return t._s||(t._s={});
@@ -106,6 +106,7 @@ for(let d=0;d<7;d++){
   ok(card.innerHTML.includes('知识与智慧之神')&&card.innerHTML.includes('知识之塔'),'blessing popup shows canonical deity invocation');
   getEl('blessingDay6').onclick();
   ok(p.weekday===6&&G.rec.weekday===6&&p.armorPerShield===1,'DEV can choose a blessing and record that choice');
+  ok(G.logHistory.filter(e=>e.dailyBlessing).length===1&&G.logHistory.find(e=>e.dailyBlessing).m.includes('蒸汽与机械之神日'),'DEV blessing choice updates the existing start log');
   ok(G.board.style.outline.includes(G.dailyBlessingFrame(p)),'DEV blessing choice recolors board frame');
   ok(getEl('blessingDeity').textContent==='蒸汽与机械之神日'&&getEl('blessingPrayer').textContent.includes('本质的化身'),'DEV selection refreshes deity and invocation');
   getEl('blessingContinue').onclick();

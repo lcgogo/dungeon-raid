@@ -53,6 +53,7 @@ function showDailyBlessingPopup(p,onClose){
     document.getElementById('blessingDeity').textContent=`${L(next.name)}日`;
     document.getElementById('blessingEffect').textContent=L(next.effect);
     document.getElementById('blessingPrayer').textContent=L(next.prayer);
+    updateDailyBlessingLog();
     updateHUD();
   };
   if(DEV) DAILY_BLESSINGS.forEach((_,i)=>{ document.getElementById(`blessingDay${i}`).onclick=()=>chooseBlessing(i); });

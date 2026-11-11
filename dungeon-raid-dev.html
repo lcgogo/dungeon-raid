@@ -249,9 +249,9 @@ const CONTENT = {
 if('serviceWorker' in navigator) window.addEventListener('load',()=>navigator.serviceWorker.register('/sw.js').catch(()=>{}));
 //==================== 配置 ====================
 // 版本号 v主.次.修：不影响 verify/replay 兼容边界的小改动改"修"；凡是影响 verify/replay/版本分桶/release 验证语义的改动都改"次"；大版本变更需先确认。页面底部显示。
-const VERSION='v1.100.0';
+const VERSION='v1.100.1';
 // CHANGELOG_LINES below is only a fallback for raw source inspection; build/build.js replaces it from CHANGELOG.md.
-const CHANGELOG_LINES=[{"ver": "v1.100.0", "zh": "每局开始前显示每日祝福弹窗，列出神祇、效果和《诡秘之主》尊名节选；棋盘外框使用对应的暗色祝福色。接受后进入地牢，回放不重复弹出。DEV 可手动选择祝福并写入录像。知识与智慧之神日仅翻倍经验，不再错误缩短主动冷却。", "en": "Added a pre-run Daily Blessing dialog with the deity, effect, and short honorific-name excerpts from Lord of the Mysteries; the board frame uses a matching dark color. Accept it to enter the dungeon. DEV can manually choose a blessing, and the choice is recorded. Knowledge and Wisdom day doubles XP only and does not change active cooldowns."}, {"ver": "v1.99.0", "zh": "新增每周七神祝福：战神日武器伤害×2、黑夜女神日敌人倒计时+1、知识与智慧之神日经验×2、大地母神日治疗×2、永恒烈阳日所有主动技能冷却−1（最低1）、风暴之主日盾牌护甲进度×2、蒸汽与机械之神日炸弹伤害×2。祝福在开局弹窗、HUD 与死亡结算中显示；正式版按服务端记录的北京时间星期固定录像效果。", "en": "Added a seven-day blessing rotation: War God doubles weapon damage; Goddess of Night adds 1 to foe countdowns; Knowledge and Wisdom doubles XP; Earth Mother doubles healing; Eternal Sun reduces all active skill cooldowns by 1 (minimum 1); Lord of Storms doubles shield armor progress; Steam and Machinery doubles Bomb damage. The opening dialog, HUD, and death settlement show the blessing; ranked replays use the server-stamped Beijing weekday."}, {"ver": "v1.98.0", "zh": "修复亡灵「迷惑」未影响每回合行动型 Boss 的问题：有主动效果的每回合 Boss 现在遵守全局攻击间隔修正；亡灵对局中每两回合发动一次，其他种族仍每回合发动。纯持续光环不变。", "en": "Fixed Undead Confusion not affecting per-turn active Bosses. Their action interval now follows the global attack-countdown modifier: once every two turns for Undead, and every turn for other races. Passive auras are unchanged."}, {"ver": "v1.97.1", "zh": "精简主页炸弹方块短介绍：显示整数伤害/花费，火药加成放在括号中，例如 `伤害 6（火药+1）｜花费 30（火药+5）`。", "en": "Shortened the Bomb tile summary to integer damage/cost values with Refined Powder bonuses in parentheses, e.g. `Damage 6 (Powder +1) | Cost 30 (Powder +5)`."}, {"ver": "v1.97.0", "zh": "所有角色新局初始金币调整为 50；炸弹商店显示基础值与精研火药加成公式（伤害 `5+1`、花费 `25+5`），并保留半价后的实际价格提示。", "en": "All races now start with 50 gold. The Bomb shop shows base values plus Refined Powder (damage `5+1`, cost `25+5`) and indicates when Cheapskate halves the actual price."}];   /* auto-injected by dr.sh embed-changelog（勿手改） */
+const CHANGELOG_LINES=[{"ver": "v1.100.1", "zh": "修复 DEV 手动选择每日祝福后，开局日志仍显示原自动祝福的问题；现在只更新原日志条目。", "en": "Fixed the DEV blessing picker leaving the original auto-selected deity in the start log; it now updates that entry in place."}, {"ver": "v1.100.0", "zh": "每局开始前显示每日祝福弹窗，列出神祇、效果和《诡秘之主》尊名节选；棋盘外框使用对应的暗色祝福色。接受后进入地牢，回放不重复弹出。DEV 可手动选择祝福并写入录像。知识与智慧之神日仅翻倍经验，不再错误缩短主动冷却。", "en": "Added a pre-run Daily Blessing dialog with the deity, effect, and short honorific-name excerpts from Lord of the Mysteries; the board frame uses a matching dark color. Accept it to enter the dungeon. DEV can manually choose a blessing, and the choice is recorded. Knowledge and Wisdom day doubles XP only and does not change active cooldowns."}, {"ver": "v1.99.0", "zh": "新增每周七神祝福：战神日武器伤害×2、黑夜女神日敌人倒计时+1、知识与智慧之神日经验×2、大地母神日治疗×2、永恒烈阳日所有主动技能冷却−1（最低1）、风暴之主日盾牌护甲进度×2、蒸汽与机械之神日炸弹伤害×2。祝福在开局弹窗、HUD 与死亡结算中显示；正式版按服务端记录的北京时间星期固定录像效果。", "en": "Added a seven-day blessing rotation: War God doubles weapon damage; Goddess of Night adds 1 to foe countdowns; Knowledge and Wisdom doubles XP; Earth Mother doubles healing; Eternal Sun reduces all active skill cooldowns by 1 (minimum 1); Lord of Storms doubles shield armor progress; Steam and Machinery doubles Bomb damage. The opening dialog, HUD, and death settlement show the blessing; ranked replays use the server-stamped Beijing weekday."}, {"ver": "v1.98.0", "zh": "修复亡灵「迷惑」未影响每回合行动型 Boss 的问题：有主动效果的每回合 Boss 现在遵守全局攻击间隔修正；亡灵对局中每两回合发动一次，其他种族仍每回合发动。纯持续光环不变。", "en": "Fixed Undead Confusion not affecting per-turn active Bosses. Their action interval now follows the global attack-countdown modifier: once every two turns for Undead, and every turn for other races. Passive auras are unchanged."}, {"ver": "v1.97.1", "zh": "精简主页炸弹方块短介绍：显示整数伤害/花费，火药加成放在括号中，例如 `伤害 6（火药+1）｜花费 30（火药+5）`。", "en": "Shortened the Bomb tile summary to integer damage/cost values with Refined Powder bonuses in parentheses, e.g. `Damage 6 (Powder +1) | Cost 30 (Powder +5)`."}];   /* auto-injected by dr.sh embed-changelog（勿手改） */
 const DEV=true;   // release build (DEV=false); dev build is dungeon-raid-dev.html (DEV=true)
 const REC_API='https://api.dungeonraid.win';   // 录像分享 API（Cloudflare Worker + KV）
 // 带种子随机数（mulberry32）：游戏全程用 rnd() 取代原生随机，配合录制种子可确定性重放
@@ -367,6 +367,7 @@ function showDailyBlessingPopup(p,onClose){
     document.getElementById('blessingDeity').textContent=`${L(next.name)}日`;
     document.getElementById('blessingEffect').textContent=L(next.effect);
     document.getElementById('blessingPrayer').textContent=L(next.prayer);
+    updateDailyBlessingLog();
     updateHUD();
   };
   if(DEV) DAILY_BLESSINGS.forEach((_,i)=>{ document.getElementById(`blessingDay${i}`).onclick=()=>chooseBlessing(i); });
@@ -1521,6 +1522,7 @@ function startGame(rc, srv){   // srv={seed,token}：服务端发的种子（正
   hideOverlay(); logClear();
   log(tr(`【${rc.e}${L(rc.n)}】踏入地牢… 祝你好运！`, `${rc.e}${L(rc.n)} enters the dungeon… good luck!`));
   log(dailyBlessingSummary(player),'buff');
+  logHistory[logHistory.length-1].dailyBlessing=true;
   updateHUD();
 }
 // 新手第一局教学棋盘：在内部格放一只弱怪，左右各一把剑（剑-怪-剑，可连成穿怪剑链一击带走）。用 rnd() 故确定可重放。
@@ -3759,9 +3761,18 @@ function updateDanger(){
 const logEl=document.getElementById('log'); let logHistory=[];
 // 日志按事件类型上色：回血=绿 / 增益=蓝 / 攻击敌人=白(默认) / 被攻击·Boss出场=红 / 负面效果=黄
 function logColor(e){ const k=e&&e.k; return k==='bad'?'#ff5252':k==='heal'?'#2ecc71':k==='buff'?'#4aa3ff':k==='debuff'?'#f1c40f':'var(--txt)'; }
+function renderRecentLog(){
+  logEl.innerHTML=logHistory.slice(-2).reverse().map(e=>`<span style="color:${logColor(e)}">${e.m}</span>`).join('<br>'); }
 function log(m, k){
   logHistory.push({m, k}); if(logHistory.length>80)logHistory.shift();   // 完整历史含类型标记（点 log 栏查看更多）
-  logEl.innerHTML=logHistory.slice(-2).reverse().map(e=>`<span style="color:${logColor(e)}">${e.m}</span>`).join('<br>'); }
+  renderRecentLog(); }
+function updateDailyBlessingLog(){
+  for(let i=logHistory.length-1;i>=0;i--) if(logHistory[i]&&logHistory[i].dailyBlessing){
+    logHistory[i].m=dailyBlessingSummary(player);
+    renderRecentLog();
+    return;
+  }
+}
 function logClear(){ logHistory=[]; logEl.innerHTML=''; }
 function settlementLogBox(){
   const recent=logHistory.slice(-3).reverse(), full=logHistory.slice().reverse();

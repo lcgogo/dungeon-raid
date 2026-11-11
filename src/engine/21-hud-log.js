@@ -93,9 +93,18 @@ function updateDanger(){
 const logEl=document.getElementById('log'); let logHistory=[];
 // 日志按事件类型上色：回血=绿 / 增益=蓝 / 攻击敌人=白(默认) / 被攻击·Boss出场=红 / 负面效果=黄
 function logColor(e){ const k=e&&e.k; return k==='bad'?'#ff5252':k==='heal'?'#2ecc71':k==='buff'?'#4aa3ff':k==='debuff'?'#f1c40f':'var(--txt)'; }
+function renderRecentLog(){
+  logEl.innerHTML=logHistory.slice(-2).reverse().map(e=>`<span style="color:${logColor(e)}">${e.m}</span>`).join('<br>'); }
 function log(m, k){
   logHistory.push({m, k}); if(logHistory.length>80)logHistory.shift();   // 完整历史含类型标记（点 log 栏查看更多）
-  logEl.innerHTML=logHistory.slice(-2).reverse().map(e=>`<span style="color:${logColor(e)}">${e.m}</span>`).join('<br>'); }
+  renderRecentLog(); }
+function updateDailyBlessingLog(){
+  for(let i=logHistory.length-1;i>=0;i--) if(logHistory[i]&&logHistory[i].dailyBlessing){
+    logHistory[i].m=dailyBlessingSummary(player);
+    renderRecentLog();
+    return;
+  }
+}
 function logClear(){ logHistory=[]; logEl.innerHTML=''; }
 function settlementLogBox(){
   const recent=logHistory.slice(-3).reverse(), full=logHistory.slice().reverse();
