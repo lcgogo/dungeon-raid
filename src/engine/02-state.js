@@ -10,6 +10,20 @@ let rec=null, replaying=false;   // rec=本局录像{v,seed,race,acts}；replayi
 let replayResumeState=null;   // 进入回放前的 live 快照：退出回放时恢复，避免技能槽/职业/棋盘状态泄漏回实玩
 let headless=false;   // 无头机器人模式：抑制升级弹窗(及其抽池消耗RNG)，由机器人自行抽池+录制，保证录像可确定性重放
 let prophecySlotKey=null;   // 先知：当前弹框是来自一阶主动还是换装槽（heal/bomb），用于录制/进冷却
+const DAILY_BLESSINGS=[
+  {id:'war', name:['战神','War God'], effect:['武器伤害 ×2','Weapon damage ×2']},
+  {id:'night', name:['黑夜女神','Goddess of Night'], effect:['所有怪物攻击倒计时 +1','All foes get +1 attack countdown']},
+  {id:'wisdom', name:['知识与智慧之神','God of Knowledge and Wisdom'], effect:['获得经验 ×2','XP gained ×2']},
+  {id:'earth', name:['大地母神','Earth Mother'], effect:['所有治疗 ×2','All healing ×2']},
+  {id:'sun', name:['永恒烈阳','Eternal Sun'], effect:['火焰伤害 ×2','Fire damage ×2']},
+  {id:'storm', name:['风暴之主','Lord of Storms'], effect:['盾牌收益 ×2','Shield gains ×2']},
+  {id:'steam', name:['蒸汽与机械之神','God of Steam and Machinery'], effect:['炸弹伤害 ×2','Bomb damage ×2']},
+];
+function dailyBlessing(p){ p=p||player; const d=p&&p.weekday; return DAILY_BLESSINGS[Number.isInteger(d)&&d>=0&&d<7?d:0]; }
+function hasDailyBlessing(id,p){ return dailyBlessing(p).id===id; }
+function dailyMultiplier(id,p){ return hasDailyBlessing(id,p)?2:1; }
+function healingMultiplier(p){ p=p||player; return (p&&p.healMult!=null?p.healMult:1)*dailyMultiplier('earth',p); }
+function dailyBlessingSummary(p){ const d=dailyBlessing(p); return tr(`📅 ${L(d.name)}日 · ${d.effect[0]}`,`📅 ${L(d.name)} Day · ${d.effect[1]}`); }
 const FX_FALL_HOLD=11;   // 特殊吸取/融化类效果：棋子先消失一小拍，再开始下落，避免和特效同时发生显得太突兀
 const ACTIVE_POPUP_WAIT=720;   // 主动技能结算后留出一拍，再显示升级/转职弹框
 let gravityFxHold=0;     // 下一次 applyGravity 要给下落棋子的起落前停顿（按帧计，纯视觉，不进录像）
@@ -30,7 +44,7 @@ function newPlayer(){
     upgradeChoices:3, bombCd:3, goldLock:0, goldFrozen:0, healUses:0, bombUses:0, gunpowder:0, demolitionist:false, shadowBombGold:false, tycoonGoldShield:false, frozen:{},  // healUses：治疗递增；gunpowder：精研火药等级；bombUses：旧存档兼容计数；demolitionist：爆破手；shadowBombGold：乾坤一掷；tycoonGoldShield：钱能买命；frozen：雪人冰封的主动剩余回合（skill/heal/bomb）
     finaleStarted:false, finaleWave:0, cleared:false};                      // 终局：终焉之主浪潮 / 破关
 }
-function addXp(p,n){ const gained=n * (p.race==='beast' ? 2 : 1); p.xp += gained; return gained; }
+function addXp(p,n){ const gained=n * (p.race==='beast' ? 2 : 1) * dailyMultiplier('wisdom',p); p.xp += gained; return gained; }
 function xpLog(gained){ return gained ? tr(`，经验 +${gained}`,`, +${gained} XP`) : ''; }
 function xpNeeded(lv){ return 10 + lv*6; }
 function armorNeeded(a){ return 3 + a*3; }   // 护甲像经验一样累积：每升 1 点护甲所需的盾进度递增（越往后越贵）
@@ -44,4 +58,4 @@ function enemyStats(){
   };
 }
 function enemyChance(){ return Math.min(0.30, 0.10 + player.level*0.014); }
-function extraFoeCd(){ return (player&&player.foeCdBonus)||0; }   // 亡灵「迷惑」+1；神兽「失衡」-1（生成时统一最低 1）
+function extraFoeCd(){ return ((player&&player.foeCdBonus)||0)+(hasDailyBlessing('night')?1:0); }   // 亡灵「迷惑」与黑夜女神日

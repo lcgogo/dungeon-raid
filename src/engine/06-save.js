@@ -51,11 +51,13 @@ function loadGame(){
     if(typeof data.rngState==='number') srand(data.rngState>>>0);   // 续局必须接回原 RNG 轨迹，否则后续补格/刷怪会让 replay 漂移
     else { __rng=null; __rngState=0; }   // 旧存档缺少 RNG 快照时，至少别误沿用本页残留状态
     player=normalizePlayerClassIds(data.player);
+    if(!Number.isInteger(player.weekday)||player.weekday<0||player.weekday>6) player.weekday=beijingWeekday();
     if(!player.autoUse) player.autoUse={heal:false,bomb:false};
     ended=false;   // 继续上局 = 恢复进行中的对局，重新允许存档
     pendingLevels=data.pendingLevels||0;
     grid=data.grid.map(row=>row.map(t=> t?{...t}:null));
     rec=loadRec();   // 恢复进行中的录像，继续游戏时录制不断
+    if(rec && (!Number.isInteger(rec.weekday)||rec.weekday<0||rec.weekday>6)) rec.weekday=player.weekday;
     if(rec && rec.acts && rec.acts.length){ const la=rec.acts[rec.acts.length-1]; const last=la[la.length-1]; if(typeof last==='number') rec.t0=Date.now()-last; }   // 重设 t0：游玩时长排除「关掉游戏的间隔」（不影响重放，时间戳仅供分析）
     selection=[]; dragging=false; busy=false;
     syncPositions(true); hideOverlay(); logClear();

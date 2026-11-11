@@ -80,7 +80,7 @@ function resolve(){
   if(player.tortoiseRegen && player.hp>0){ const rh=Math.max(1,Math.floor(player.hp*0.1)); const healed=gainHeal(rh); if(healed>0) log(tr(`🐢 恐鳌之心：恢复当前生命的 10%（+${healed}）`,`🐢 Heart of Tarrasque: restored 10% of current HP (+${healed})`), 'heal'); }
   if(player.goldLock>0){ player.goldLock--; if(player.goldLock===0){ const pay=Math.round(player.goldFrozen*1.2); player.gold+=pay; player.goldFrozen=0; log(tr(`🔓 囤金到期：返还 ${pay} 金币`,`🔓 Hoard matured: +${pay} gold`), 'buff'); } } // 守财奴囤金到期（1.2 倍）：放在敌人行动后，让「钱能买命」覆盖最后一回合
   if(player.cleared) return;   // 终焉第10波撑过 → onClear 已结算，停止后续处理
-  if(player.regen){ const aura=Math.max(0, Math.round(player.regen*((player.healMult!=null)?player.healMult:1))); const _h=gainHeal(player.regen); if(_h>0) log(tr(`💗 恢复 +${_h}（每回合）`,`💗 Regen +${_h} HP`), 'heal'); if(player.witherAura && aura>0){ const self= hurtPlayer(aura, 'witheraura', true); if(self>0) log(tr(`🪦 竭心光环：失去 ${self} 生命`,`🪦 Wither Aura: lose ${self} HP`), 'bad'); witherAuraTick(aura); } }
+  if(player.regen){ const aura=Math.max(0, Math.round(player.regen*healingMultiplier())); const _h=gainHeal(player.regen); if(_h>0) log(tr(`💗 恢复 +${_h}（每回合）`,`💗 Regen +${_h} HP`), 'heal'); if(player.witherAura && aura>0){ const self= hurtPlayer(aura, 'witheraura', true); if(self>0) log(tr(`🪦 竭心光环：失去 ${self} 生命`,`🪦 Wither Aura: lose ${self} HP`), 'bad'); witherAuraTick(aura); } }
   if(player.turns===500 && !player.finaleStarted){ player.finaleStarted=true; player.finaleWave=0; spawnFinale(); }  // 第500回合：终局降临
   if(!player.finaleStarted){
     if(player.turns % 10 === 0) player.bossDue=true;          // 每 10 回合：该来 Boss
@@ -117,7 +117,8 @@ function resolve(){
 
 // 治疗：返回实际回复的生命（超出上限的部分丢弃）
 function gainHeal(amount){
-  if(player.healMult!=null && player.healMult!==1) amount=Math.round(amount*player.healMult);   // 活死人：一切治疗减半（重生满血走 hp=maxHp，不经此处）
+  const healMult=healingMultiplier();
+  if(healMult!==1) amount=Math.round(amount*healMult);   // 亡灵削弱与大地母神日相乘；重生满血不经此处
   const space=player.maxHp-player.hp;
   if(amount<=space){ player.hp+=amount; return amount; }
   player.hp+=space; const over=amount-space;
@@ -142,6 +143,7 @@ function holyStrikeDamage(amt){
 }
 
 function dealDamage(pool, targets, allFoes){
+  if(!allFoes) pool*=dailyMultiplier('war');
   let dmg=0, kills=0, normalKills=0, bonusGold=0, xp=0, spongeAbsorbed=0;
   const list=[];
   const seen=new Set();
@@ -318,6 +320,7 @@ function statueReflect(t, hit){ if(t && t.bossId==='statue' && hit>0){ const d=h
 function lifestealHeal(n){ if(!player.lifesteal||n<=0) return 0; return vampGain(n*player.lifesteal); }
 // 吸血类回血（吸血/嗜血）：回到上限封顶；若有「血狂」，溢出全部增为永久生命上限。返回本次实际+的生命。
 function vampGain(amount){
+  amount=Math.round(amount*healingMultiplier());
   if(amount<=0) return 0; const b=player.hp, space=player.maxHp-player.hp;
   if(amount<=space){ player.hp+=amount; return player.hp-b; }
   player.hp=player.maxHp; const over=amount-space;

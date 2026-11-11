@@ -4,6 +4,9 @@ const fs = require('fs');
 const path = require('path');
 const file = fs.existsSync('dungeon-raid-dev.html') ? 'dungeon-raid-dev.html' : path.join('..', 'dungeon-raid-dev.html');
 let s = fs.readFileSync(file, 'utf8').match(/<script>([\s\S]*?)<\/script>/)[1];
+s=s.replace("function dailyMultiplier(id,p){ return hasDailyBlessing(id,p)?2:1; }", "function dailyMultiplier(){ return 1; }");
+s=s.replace("function extraFoeCd(){ return ((player&&player.foeCdBonus)||0)+(hasDailyBlessing('night')?1:0); }", "function extraFoeCd(){ return (player&&player.foeCdBonus)||0; }");
+s=s.replace("if(hasDailyBlessing('storm',player)) player.armorPerShield*=2;", "");
 const EXPORT = `globalThis.__G={startGame,raceById,onBossKilled,dispatchReplayAct,buyItem,shopCost,bombShopSummary,resolve,dealDamage,previewKills,applyUpgrade,applyGravity,advanceEnemies,activateSkill,activateDebugSkill,autoReleaseItems,makeTile,isSwordTarget,normalEnemyAttack,bombDamage,gunpowderLevels,bossTier,
   TIER1,TIER2,RACES,RACE_PATHS, CLASS_T2, UPGRADES, WEAPON, gainGold, gainHeal, addXp, currentSwordFlat, witherAuraTick, hurtPlayer, currentFlatDamage,
   get player(){return player}, get grid(){return grid}, get logHistory(){return logHistory}, get rec(){return rec}, set rec(v){rec=v}, get ended(){return ended}, set ended(v){ended=v}, recAct,
@@ -271,7 +274,7 @@ ok(!recentLogs.some(m=>m.includes('减伤计算')),'普通怪汇总后不再逐�
 ok(G.WEAPON.beast && G.WEAPON.beast.e==='🐾' && G.WEAPON.beast.n[0]==='爪','神兽武器=🐾爪');
 ok(G.RACE_PATHS.beast.t1.length===4 && G.RACE_PATHS.beast.t2.length===4,'神兽拥有四条四象职业线');
 G.replayRec={seed:59,race:'beast',acts:[]}; G.replaying=true; G.startGame(G.raceById('beast')); G.replaying=false;
-const bz=G.player; bz.hp=bz.maxHp=40; bz.level=1; bz.armor=0; bz.toughness=0; bz.skillCd=0; G.busy=false; G.pendingLevels=0;
+const bz=G.player; bz.weekday=0; bz.hp=bz.maxHp=40; bz.level=1; bz.armor=0; bz.toughness=0; bz.skillCd=0; G.busy=false; G.pendingLevels=0;
 const xpBefore=bz.xp; G.addXp(bz,3);
 ok(bz.xp===xpBefore+6,'神兽神识获得经验翻倍');
 bz.tier1='whitetiger'; bz.skillCd=0; G.grid[0][0]={type:'sword'}; G.grid[0][1]={type:'boss',bossId:'ghost',hp:20,maxHp:20,atk:1,cd:9,baseCd:9,tier:1};

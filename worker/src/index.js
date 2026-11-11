@@ -29,6 +29,7 @@ const AUTO_CLASSIFY_BATCH_MAX = 50;
 // 反作弊·服务端发种子：上榜成绩必须用服务端发的种子（防离线刷幸运种子）。
 // true = 强制：无 token 的提交一律拒收（v1.22.0 带 token 的正式版上线后开启）。
 const REQUIRE_TOKEN = true;
+function beijingWeekday(){ return new Date(Date.now()+8*60*60*1000).getUTCDay(); }
 
 // 校验并消费一次性种子 token：present 且有效 → 标记已用、返回 {ok:true,dbg,gate}；否则 {ok:false,reason}
 async function consumeToken(env, token, seed) {
@@ -41,7 +42,7 @@ async function consumeToken(env, token, seed) {
   if (t.u) return { ok: false, reason: 'used' };
   if ((t.s >>> 0) !== (seed >>> 0)) return { ok: false, reason: 'seed-mismatch' };
   await env.REC.put(k, JSON.stringify({ ...t, u: 1 }), { expirationTtl: 600 });  // 标记已用，短 TTL 防复用
-  return { ok: true, dbg: !!t.dbg, gate: t.gate || null };
+  return { ok: true, dbg: !!t.dbg, gate: t.gate || null, weekday: Number.isInteger(t.wd)?t.wd:beijingWeekday() };
 }
 
 const json = (o, s = 200, extraHeaders = null) => new Response(JSON.stringify(o), { status: s, headers: { 'Content-Type': 'application/json', ...CORS, ...(extraHeaders || {}) } });
@@ -490,12 +491,13 @@ export default {
       }
       const seed = crypto.getRandomValues(new Uint32Array(1))[0] >>> 0;
       const token = shortId(16);
+      const weekday=beijingWeekday();
       if (env.REC) {
         const kvStart = Date.now();
-        await env.REC.put('seed:' + token, JSON.stringify({ s: seed, u: 0, dbg: 0, gate: null }), { expirationTtl: SEED_TTL });
+        await env.REC.put('seed:' + token, JSON.stringify({ s: seed, u: 0, dbg: 0, gate: null, wd:weekday }), { expirationTtl: SEED_TTL });
         kvMs = Date.now() - kvStart;
       }
-      return json({ seed, token, debug_bypass: false }, 200, {
+      return json({ seed, token, weekday, debug_bypass: false }, 200, {
         'X-Seed-Limit-Ms': String(limiterMs),
         'X-Seed-Kv-Ms': String(kvMs),
         'X-Seed-Total-Ms': String(Date.now() - seedReqStart),
@@ -516,8 +518,9 @@ export default {
       if (url.searchParams.get('k') !== env.DEBUG_SEED_SECRET) return json({ error: 'forbidden' }, 403);
       const seed = crypto.getRandomValues(new Uint32Array(1))[0] >>> 0;
       const token = shortId(16);
-      if (env.REC) await env.REC.put('seed:' + token, JSON.stringify({ s: seed, u: 0, dbg: 1, gate: null }), { expirationTtl: SEED_TTL });
-      return json({ seed, token, debug_bypass: true });
+      const weekday=beijingWeekday();
+      if (env.REC) await env.REC.put('seed:' + token, JSON.stringify({ s: seed, u: 0, dbg: 1, gate: null, wd:weekday }), { expirationTtl: SEED_TTL });
+      return json({ seed, token, weekday, debug_bypass: true });
     }
 
     // GET /rec/:id
@@ -561,6 +564,7 @@ export default {
       if (tkn && !tok.ok) return json({ error: 'invalid seed token: ' + tok.reason }, 422);
       if (!tkn && REQUIRE_TOKEN) return json({ error: 'ranked play requires a server seed' }, 422);
       const turns = turnCount(d.rec);                 // 回合以录像动作数为准，防止伪报
+      d.rec.weekday=tok.weekday;
       const race = d.rec.race, version = d.rec.ver || '';
       let threshold = tok.gate || null;
       const thresholdBucket = threshold && threshold.requested_version_bucket ? threshold.requested_version_bucket : minorKey(version);
@@ -588,6 +592,7 @@ export default {
       if (tkn && !tok.ok) return json({ error: 'invalid seed token: ' + tok.reason }, 422);
       if (!tkn && REQUIRE_TOKEN) return json({ error: 'ranked play requires a server seed' }, 422);
       const turns = turnCount(d.rec);
+      d.rec.weekday=tok.weekday;
       if (turns < 510) return json({ error: 'not a clear (need >=510 turns)' }, 422);
       const race = d.rec.race, version = d.rec.ver || '';
       let threshold = tok.gate || null;

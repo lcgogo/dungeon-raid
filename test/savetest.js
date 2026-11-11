@@ -29,12 +29,14 @@ function run(devFlag,label){
   S.busy=false;
   S.startGame(S.raceById('human'));   // 建立真实 player+grid
   S.player.prophecyPending='coin';
+  S.player.weekday=6;
   S.grid[0][0]={type:'boss',bossId:'matryoshka',matryoshkaId:77,tier:7,hp:12,maxHp:12,atk:4,cd:3,baseCd:3};
   S.grid[0][1]={type:'boss',bossId:'birdman',turnCd:2,tier:1,hp:12,maxHp:12,atk:4,cd:3,baseCd:3};
   S.saveGame();                       // 写入存档（ver=当前版本）
   ok(S.hasSave(), `${label} 同版本存档有效`);
   ok(S.loadGame()===true, `${label} 同版本可继续`);
   ok(S.player.prophecyPending==='coin', `${label} 神谕待补子状态可恢复`);
+  ok(S.player.weekday===6, `${label} 每日祝福星期可从存档恢复`);
   ok(S.grid[0][0].matryoshkaId===77, `${label} 套娃分裂链 ID 可从存档恢复`);
   ok(S.grid[0][1].turnCd===2, `${label} 每回合 Boss 行动倒计时可从存档恢复`);
   // 篡改存档版本号 → 模拟“版本发生变化”

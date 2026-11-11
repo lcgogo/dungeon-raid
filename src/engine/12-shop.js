@@ -7,7 +7,7 @@ function normalEnemyAttack(t){
 }
 const SHOP={
   heal: {cost:15, f(){ const base=10+2*(player.healUses||0); const h=gainHeal(base); player.healUses=(player.healUses||0)+1; log(tr(`💊 喝下药水，回复 ${h} 生命`,`💊 Potion: +${h} HP`), 'heal'); }},   // 每使用一次：恢复量 +2、下次多花 1 金（后期不再鸡肋）
-  bomb: {cost:25, f(){ const extra = bombGoldSacrificeBonus(player); if(extra>0) player.gold=Math.max(0, player.gold-extra); const D = bombDamage(player)+extra;   // 基础5 + 爆破手累计 + 乾坤一掷（先买炸弹，再额外扣当前金币 20% 换伤害）
+  bomb: {cost:25, f(){ const extra = bombGoldSacrificeBonus(player); if(extra>0) player.gold=Math.max(0, player.gold-extra); const D = bombDamage(player)+extra*dailyMultiplier('steam');   // 机械日翻倍炸弹与乾坤一掷伤害
     const result=damageAllFoes(D,{rotflesh:true,matryoshkaBomb:true,onHit:(t,r,c)=>addBombFx(r,c)});
     const kills=result.normalKills, boss=result.bossKills, xp=result.xp;
     const multiGold=multiKillGold(kills);
@@ -21,9 +21,11 @@ function shopCost(key){ let c=SHOP[key].cost; if(key==='heal') c+=(player.healUs
 function bombShopSummary(p){
   p=p||player;
   const powder=gunpowderLevels(p), extra=bombGoldSacrificePreviewBonus(p);
-  const damageBonus=powder?tr(`（火药+${powder}）`,` (Powder +${powder})`):'';
+  const powderBonus=powder*dailyMultiplier('steam',p);
+  const damageBonus=powder?tr(`（火药+${powderBonus}）`,` (Powder +${powderBonus})`):'';
   const costBonus=powder?tr(`（火药+${5*powder}）`,` (Powder +${5*powder})`):'';
-  return tr(`伤害 ${bombDamage(p)}${damageBonus}｜花费 ${25+5*powder}${costBonus}`+(p.cheapskate?'（半价）':'')+(extra?`｜乾坤一掷 +${extra} 伤害`:''),`Damage ${bombDamage(p)}${damageBonus} | Cost ${25+5*powder}${costBonus}`+(p.cheapskate?' (½ price)':'')+(extra?` | All-In +${extra} dmg`:''));
+  const allIn=extra*dailyMultiplier('steam',p);
+  return tr(`伤害 ${bombDamage(p)}${damageBonus}｜花费 ${25+5*powder}${costBonus}`+(p.cheapskate?'（半价）':'')+(allIn?`｜乾坤一掷 +${allIn} 伤害`:''),`Damage ${bombDamage(p)}${damageBonus} | Cost ${25+5*powder}${costBonus}`+(p.cheapskate?' (½ price)':'')+(allIn?` | All-In +${allIn} dmg`:''));
 }
 function buyItem(key){
   if(ended||busy||pendingLevels) return;
@@ -136,7 +138,7 @@ function shopInfoData(key){
              [tr('状态','Status'), (p.skill2.id==='miser'&&p.goldLock>0)?`🔒${p.goldLock}${tr('回合','t')}`:p.skill2Cd>0?`⏳${p.skill2Cd}${tr('回合','t')}`:tr('可发动','Ready')] ] };
   }
   if(key==='heal'){
-    const hv=Math.round((10+2*(p.healUses||0))*(p.healMult||1)), half=(p.healMult&&p.healMult!==1);
+    const hv=Math.round((10+2*(p.healUses||0))*healingMultiplier(p)), half=(p.healMult&&p.healMult!==1);
     return { icon:'💊', title:tr('治疗','Heal'),
       desc:tr('喝下药水回复生命。每使用一次：恢复量 +2、下次多花 1 金，后期也跟得上。满血时不可用（避免浪费）。'+(half?'（活死人：一切治疗减半）':''),
               'Drink a potion to restore HP. Each use: +2 healing and +1 cost, so it keeps up late-game. Unavailable at full HP (no waste).'+(half?' (Undead: all healing halved.)':'')),
@@ -146,11 +148,11 @@ function shopInfoData(key){
              [tr('已使用','Used'), `${p.healUses||0} ${tr('次','×')}`] ] };
   }
   if(key==='bomb'){
-    const extra=bombGoldSacrificePreviewBonus(p), cd=p.bombCd||3, D=bombDamage(p)+extra;
+    const extra=bombGoldSacrificePreviewBonus(p), cd=p.bombCd||3, D=bombDamage(p)+extra*dailyMultiplier('steam',p);
     return { icon:'💥', title:tr('炸弹','Bomb'),
       desc:L(['投掷炸弹，对全场怪与 Boss 造成固定伤害（无视档位倍率）。能炸{W}免疫的 Boss（幽灵/小丑/污染怪/雪人）；终焉之主无效；石像会把伤害反弹给你。若有「乾坤一掷」，买完炸弹后还会再额外扣当前金币的 20%，并把这笔数额加到这次炸弹伤害上。',
               'Throw a bomb for fixed damage to all monsters & bosses (ignores tier scaling). Hits {W}-immune bosses (Ghost/Clown/Corruptor/Snowman); no effect on the Overlord; the Statue reflects it back. With All-In, buying the bomb also spends 20% of your current gold and adds exactly that amount to this bomb’s damage.']),
-      rows:[ [tr('当前伤害','Damage'), `5${gunpowderLevels(p)?`+${gunpowderLevels(p)}${tr(`（精研火药 +${gunpowderLevels(p)}）`,` (Powder +${gunpowderLevels(p)})`)}`:''} = ${bombDamage(p)}`+(extra?tr(`（乾坤一掷 +${extra}）`,` (All-In +${extra})`):'')],
+      rows:[ [tr('当前伤害','Damage'), `${bombDamage(p)}`+(extra?tr(`（乾坤一掷 +${extra*dailyMultiplier('steam',p)}）`,` (All-In +${extra*dailyMultiplier('steam',p)})`):'')],
              [tr('花费','Cost'), `25${gunpowderLevels(p)?`+${5*gunpowderLevels(p)}${tr(`（精研火药 +${5*gunpowderLevels(p)}）`,` (Powder +${5*gunpowderLevels(p)})`)}`:''} = ${shopCost('bomb')} 💰`+(p.cheapskate?tr('（小气鬼半价）',' (½)'):'')],
              [tr('额外扣金','Extra gold spent'), extra?`${extra} 💰`:tr('无','None')],
              [tr('冷却','Cooldown'), `${cd} ${tr('回合','t')}`+(p.shadowBombGold?tr('（乾坤一掷）',' (All-In)'):'')] ] };

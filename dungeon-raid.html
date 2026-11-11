@@ -249,9 +249,9 @@ const CONTENT = {
 if('serviceWorker' in navigator) window.addEventListener('load',()=>navigator.serviceWorker.register('/sw.js').catch(()=>{}));
 //==================== 配置 ====================
 // 版本号 v主.次.修：不影响 verify/replay 兼容边界的小改动改"修"；凡是影响 verify/replay/版本分桶/release 验证语义的改动都改"次"；大版本变更需先确认。页面底部显示。
-const VERSION='v1.98.0';
+const VERSION='v1.99.0';
 // CHANGELOG_LINES below is only a fallback for raw source inspection; build/build.js replaces it from CHANGELOG.md.
-const CHANGELOG_LINES=[{"ver": "v1.98.0", "zh": "修复亡灵「迷惑」未影响每回合行动型 Boss 的问题：有主动效果的每回合 Boss 现在遵守全局攻击间隔修正；亡灵对局中每两回合发动一次，其他种族仍每回合发动。纯持续光环不变。", "en": "Fixed Undead Confusion not affecting per-turn active Bosses. Their action interval now follows the global attack-countdown modifier: once every two turns for Undead, and every turn for other races. Passive auras are unchanged."}, {"ver": "v1.97.1", "zh": "精简主页炸弹方块短介绍：显示整数伤害/花费，火药加成放在括号中，例如 `伤害 6（火药+1）｜花费 30（火药+5）`。", "en": "Shortened the Bomb tile summary to integer damage/cost values with Refined Powder bonuses in parentheses, e.g. `Damage 6 (Powder +1) | Cost 30 (Powder +5)`."}, {"ver": "v1.97.0", "zh": "所有角色新局初始金币调整为 50；炸弹商店显示基础值与精研火药加成公式（伤害 `5+1`、花费 `25+5`），并保留半价后的实际价格提示。", "en": "All races now start with 50 gold. The Bomb shop shows base values plus Refined Powder (damage `5+1`, cost `25+5`) and indicates when Cheapskate halves the actual price."}, {"ver": "v1.96.0", "zh": "套娃被炸弹击杀时，该分支直接消灭、不再分裂；普通攻击击杀仍会分裂。同一只套娃分裂出的全部分支消灭后，才计为一次 Boss 击杀并获得奖励。", "en": "Bomb kills now remove a Matryoshka branch without splitting it; non-bomb kills still split. The Boss kill and reward count once all branches from that Matryoshka are eliminated."}, {"ver": "v1.95.0", "zh": "岩浆魔每回合最多按自身等级融化对应数量的盾：Lv1 1 面、Lv2 2 面，以此类推；不会因此回血。", "en": "Magmafiend now melts up to its tier in shields each turn: 1 at Lv1, 2 at Lv2, and so on; shields still do not heal it."}];   /* auto-injected by dr.sh embed-changelog（勿手改） */
+const CHANGELOG_LINES=[{"ver": "v1.99.0", "zh": "新增每周七神祝福：战神日武器伤害×2、黑夜女神日敌人倒计时+1、知识与智慧之神日经验×2、大地母神日治疗×2、永恒烈阳日火焰伤害×2、风暴之主日盾牌收益×2、蒸汽与机械之神日炸弹伤害×2。祝福在 HUD 与死亡结算中显示；正式版日期由服务端种子固定并写入录像。", "en": "Added a seven-day blessing rotation: War God doubles weapon damage; Goddess of Night adds 1 to foe countdowns; Knowledge and Wisdom doubles XP; Earth Mother doubles healing; Eternal Sun doubles fire damage; Lord of Storms doubles shield gains; Steam and Machinery doubles Bomb damage. The HUD and death settlement show the blessing; ranked runs use the server-stamped weekday recorded with the replay."}, {"ver": "v1.98.0", "zh": "修复亡灵「迷惑」未影响每回合行动型 Boss 的问题：有主动效果的每回合 Boss 现在遵守全局攻击间隔修正；亡灵对局中每两回合发动一次，其他种族仍每回合发动。纯持续光环不变。", "en": "Fixed Undead Confusion not affecting per-turn active Bosses. Their action interval now follows the global attack-countdown modifier: once every two turns for Undead, and every turn for other races. Passive auras are unchanged."}, {"ver": "v1.97.1", "zh": "精简主页炸弹方块短介绍：显示整数伤害/花费，火药加成放在括号中，例如 `伤害 6（火药+1）｜花费 30（火药+5）`。", "en": "Shortened the Bomb tile summary to integer damage/cost values with Refined Powder bonuses in parentheses, e.g. `Damage 6 (Powder +1) | Cost 30 (Powder +5)`."}, {"ver": "v1.97.0", "zh": "所有角色新局初始金币调整为 50；炸弹商店显示基础值与精研火药加成公式（伤害 `5+1`、花费 `25+5`），并保留半价后的实际价格提示。", "en": "All races now start with 50 gold. The Bomb shop shows base values plus Refined Powder (damage `5+1`, cost `25+5`) and indicates when Cheapskate halves the actual price."}, {"ver": "v1.96.0", "zh": "套娃被炸弹击杀时，该分支直接消灭、不再分裂；普通攻击击杀仍会分裂。同一只套娃分裂出的全部分支消灭后，才计为一次 Boss 击杀并获得奖励。", "en": "Bomb kills now remove a Matryoshka branch without splitting it; non-bomb kills still split. The Boss kill and reward count once all branches from that Matryoshka are eliminated."}];   /* auto-injected by dr.sh embed-changelog（勿手改） */
 const DEV=false;   // release build (DEV=false); dev build is dungeon-raid-dev.html (DEV=true)
 const REC_API='https://api.dungeonraid.win';   // 录像分享 API（Cloudflare Worker + KV）
 // 带种子随机数（mulberry32）：游戏全程用 rnd() 取代原生随机，配合录制种子可确定性重放
@@ -324,6 +324,20 @@ let rec=null, replaying=false;   // rec=本局录像{v,seed,race,acts}；replayi
 let replayResumeState=null;   // 进入回放前的 live 快照：退出回放时恢复，避免技能槽/职业/棋盘状态泄漏回实玩
 let headless=false;   // 无头机器人模式：抑制升级弹窗(及其抽池消耗RNG)，由机器人自行抽池+录制，保证录像可确定性重放
 let prophecySlotKey=null;   // 先知：当前弹框是来自一阶主动还是换装槽（heal/bomb），用于录制/进冷却
+const DAILY_BLESSINGS=[
+  {id:'war', name:['战神','War God'], effect:['武器伤害 ×2','Weapon damage ×2']},
+  {id:'night', name:['黑夜女神','Goddess of Night'], effect:['所有怪物攻击倒计时 +1','All foes get +1 attack countdown']},
+  {id:'wisdom', name:['知识与智慧之神','God of Knowledge and Wisdom'], effect:['获得经验 ×2','XP gained ×2']},
+  {id:'earth', name:['大地母神','Earth Mother'], effect:['所有治疗 ×2','All healing ×2']},
+  {id:'sun', name:['永恒烈阳','Eternal Sun'], effect:['火焰伤害 ×2','Fire damage ×2']},
+  {id:'storm', name:['风暴之主','Lord of Storms'], effect:['盾牌收益 ×2','Shield gains ×2']},
+  {id:'steam', name:['蒸汽与机械之神','God of Steam and Machinery'], effect:['炸弹伤害 ×2','Bomb damage ×2']},
+];
+function dailyBlessing(p){ p=p||player; const d=p&&p.weekday; return DAILY_BLESSINGS[Number.isInteger(d)&&d>=0&&d<7?d:0]; }
+function hasDailyBlessing(id,p){ return dailyBlessing(p).id===id; }
+function dailyMultiplier(id,p){ return hasDailyBlessing(id,p)?2:1; }
+function healingMultiplier(p){ p=p||player; return (p&&p.healMult!=null?p.healMult:1)*dailyMultiplier('earth',p); }
+function dailyBlessingSummary(p){ const d=dailyBlessing(p); return tr(`📅 ${L(d.name)}日 · ${d.effect[0]}`,`📅 ${L(d.name)} Day · ${d.effect[1]}`); }
 const FX_FALL_HOLD=11;   // 特殊吸取/融化类效果：棋子先消失一小拍，再开始下落，避免和特效同时发生显得太突兀
 const ACTIVE_POPUP_WAIT=720;   // 主动技能结算后留出一拍，再显示升级/转职弹框
 let gravityFxHold=0;     // 下一次 applyGravity 要给下落棋子的起落前停顿（按帧计，纯视觉，不进录像）
@@ -344,7 +358,7 @@ function newPlayer(){
     upgradeChoices:3, bombCd:3, goldLock:0, goldFrozen:0, healUses:0, bombUses:0, gunpowder:0, demolitionist:false, shadowBombGold:false, tycoonGoldShield:false, frozen:{},  // healUses：治疗递增；gunpowder：精研火药等级；bombUses：旧存档兼容计数；demolitionist：爆破手；shadowBombGold：乾坤一掷；tycoonGoldShield：钱能买命；frozen：雪人冰封的主动剩余回合（skill/heal/bomb）
     finaleStarted:false, finaleWave:0, cleared:false};                      // 终局：终焉之主浪潮 / 破关
 }
-function addXp(p,n){ const gained=n * (p.race==='beast' ? 2 : 1); p.xp += gained; return gained; }
+function addXp(p,n){ const gained=n * (p.race==='beast' ? 2 : 1) * dailyMultiplier('wisdom',p); p.xp += gained; return gained; }
 function xpLog(gained){ return gained ? tr(`，经验 +${gained}`,`, +${gained} XP`) : ''; }
 function xpNeeded(lv){ return 10 + lv*6; }
 function armorNeeded(a){ return 3 + a*3; }   // 护甲像经验一样累积：每升 1 点护甲所需的盾进度递增（越往后越贵）
@@ -358,7 +372,7 @@ function enemyStats(){
   };
 }
 function enemyChance(){ return Math.min(0.30, 0.10 + player.level*0.014); }
-function extraFoeCd(){ return (player&&player.foeCdBonus)||0; }   // 亡灵「迷惑」+1；神兽「失衡」-1（生成时统一最低 1）
+function extraFoeCd(){ return ((player&&player.foeCdBonus)||0)+(hasDailyBlessing('night')?1:0); }   // 亡灵「迷惑」与黑夜女神日
 
 // ===== Boss 池：每 10 回合从中随机挑一个现身。多数 Boss 可被武器攻击，奖励丰厚 =====
 const BOSSES=[
@@ -573,8 +587,8 @@ function gainGold(g, msgActive){
   return g;
 }
 function currentSwordFlat(){ return player.swordFlat + (player.tigerFury&&player.race==='beast'?Math.floor(player.level/2):0) + (player.titan?Math.floor(player.maxHp/12):0) + shieldBashFlat(player); }
-function burnTickDamage(t){ return Math.max(1, Math.floor(currentSwordFlat()*0.2)) * Math.max(1, t.burnStacks||0); }
-function firewallTickDamage(){ return Math.max(1, Math.floor(currentSwordFlat()*0.2)); }
+function burnTickDamage(t){ return Math.max(1, Math.floor(currentSwordFlat()*0.2)) * Math.max(1, t.burnStacks||0) * dailyMultiplier('sun'); }
+function firewallTickDamage(){ return Math.max(1, Math.floor(currentSwordFlat()*0.2)) * dailyMultiplier('sun'); }
 function fireWallRows(){ return { start: Math.max(0, ROWS-3), end: ROWS-1 }; }
 function currentFlatDamage(){ return Math.max(1, currentSwordFlat()); }
 function igniteTarget(t, stacks){
@@ -655,7 +669,7 @@ function bossTier(){ return 1 + Math.floor(player.turns/50); }  // 每 50 回合
 function hasBoss(){ for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++) if(grid[r][c]&&grid[r][c].type==='boss') return true; return false; }
 function enemyHpSum(){ let h=0; for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const t=grid[r][c]; if(t&&t.type==='enemy') h+=t.hp; } return h; }   // 会长「收买」花费 = 全场普通怪当前血量之和
 function gunpowderLevels(p){ p=p||player; return p.gunpowder!=null ? p.gunpowder : (p.bombBoost ? (p.bombUses||0) : 0); }
-function bombDamage(p){ return 5 + gunpowderLevels(p); }   // 炸弹伤害=基础5+精研火药等级；火枪手「狙击」=本值×2
+function bombDamage(p){ return (5 + gunpowderLevels(p))*dailyMultiplier('steam',p); }   // 炸弹伤害=基础5+精研火药；机械之神日翻倍
 function bombGoldSacrificeBonus(p){ p=p||player; return p.shadowBombGold ? Math.floor((p.gold||0)*0.2) : 0; }   // 乾坤一掷：买完炸弹后，再额外扣当前金币的 20% 并把同值加到这次炸弹伤害
 function bombGoldSacrificePreviewBonus(p){ p=p||player; return p.shadowBombGold ? Math.floor(Math.max(0,(p.gold||0)-shopCost('bomb'))*0.2) : 0; }   // 面板预览：先扣正常炸弹价，再估算乾坤一掷会额外扣多少金币
 function shieldBashFlat(p){ p=p||player; return p.shieldBash ? (p.armor*(p.armorMult||1)+(p.toughness||0)) : 0; }   // 盾击：把护甲减伤量加到固定剑伤上
@@ -1316,14 +1330,15 @@ function preferredSeedRace(){
   return RACES[0];
 }
 function warmSeedExpiry(){ return Date.now()+SEED_WARM_MS; }
+function beijingWeekday(){ return new Date(Date.now()+8*60*60*1000).getUTCDay(); }
 function readWarmSeed(rc){
   if(DEV||!rc) return null;
   try{
     const raw=localStorage.getItem(SEED_POOL_KEY); if(!raw) return null;
     const x=JSON.parse(raw);
     const key=serverSeedKey(rc);
-    if(!x || x.used || !x.token || typeof x.seed!=='number' || x.key!==key || x.ver!==VERSION || !x.expiresAt || x.expiresAt<=Date.now()){ localStorage.removeItem(SEED_POOL_KEY); return null; }
-    return {seed:x.seed>>>0, token:x.token};
+    if(!x || x.used || !x.token || typeof x.seed!=='number' || x.key!==key || x.ver!==VERSION || !x.expiresAt || x.expiresAt<=Date.now() || x.weekday!==beijingWeekday()){ localStorage.removeItem(SEED_POOL_KEY); return null; }
+    return {seed:x.seed>>>0, token:x.token, weekday:x.weekday};
   }catch(e){ try{ localStorage.removeItem(SEED_POOL_KEY); }catch(_e){} return null; }
 }
 function storeWarmSeed(rc, srv){
@@ -1334,6 +1349,7 @@ function storeWarmSeed(rc, srv){
       ver: VERSION,
       seed: srv.seed>>>0,
       token: srv.token,
+      weekday: srv.weekday,
       issuedAt: Date.now(),
       expiresAt: warmSeedExpiry(),
     }));
@@ -1348,7 +1364,7 @@ function purgeWarmSeed(){
   try{
     const raw=localStorage.getItem(SEED_POOL_KEY); if(!raw) return;
     const x=JSON.parse(raw);
-    if(!x || x.used || !x.token || typeof x.seed!=='number' || x.ver!==VERSION || !x.expiresAt || x.expiresAt<=Date.now()) localStorage.removeItem(SEED_POOL_KEY);
+    if(!x || x.used || !x.token || typeof x.seed!=='number' || x.ver!==VERSION || !x.expiresAt || x.expiresAt<=Date.now() || x.weekday!==beijingWeekday()) localStorage.removeItem(SEED_POOL_KEY);
   }catch(e){ try{ localStorage.removeItem(SEED_POOL_KEY); }catch(_e){} }
 }
 function prefetchServerSeed(rc){
@@ -1395,7 +1411,7 @@ async function fetchServerSeed(rc){
   try{
     const qs = new URLSearchParams({ race: rc.id, version: VERSION });
     const r=await fetch(REC_API+'/seed?'+qs.toString(),{method:'POST',signal:ctrl&&ctrl.signal});
-    if(r&&r.ok){ const x=await r.json(); if(typeof x.seed==='number'&&x.token) return {seed:x.seed>>>0, token:x.token}; }
+    if(r&&r.ok){ const x=await r.json(); if(typeof x.seed==='number'&&x.token) return {seed:x.seed>>>0, token:x.token, weekday:x.weekday}; }
   }catch(e){}
   finally{ if(timer) clearTimeout(timer); }
   return null;
@@ -1432,22 +1448,29 @@ async function freshStart(rc){
     const pending=pendingSeedPromise(rc);
     try{ srv=await Promise.race([ pending || fetchServerSeed(rc), new Promise(res=>setTimeout(()=>res(null), 900)) ]); }catch(e){}
   }
+  if(srv && srv.weekday!==beijingWeekday()){
+    srv=null;
+    try{ srv=await fetchServerSeed(rc); }catch(e){}
+    if(srv && srv.weekday!==beijingWeekday()) srv=null;
+  }
   startGame(rc, srv);
   if(!srv) offlineSeedNotice();
 }
 function startGame(rc, srv){   // srv={seed,token}：服务端发的种子（正式版上榜用）；缺省则本地随机（dev / 离线，不计排名）
   ended=false;   // 新局开始，重新允许存档
+  const recordedWeekday=replaying?replayRec.weekday:srv&&srv.weekday;
+  const weekday=Number.isInteger(recordedWeekday)&&recordedWeekday>=0&&recordedWeekday<7?recordedWeekday:beijingWeekday();
   let firstGame=false;
   if(replaying){ srand(replayRec.seed); firstGame=!!replayRec.tut; }   // 回放：是否新手局以录像里的 tut 标志为准（保持棋盘可复现）
   else {
     try{ firstGame = !localStorage.getItem(TUT_KEY); }catch(e){}        // 本机第一次游玩
     const seed = (srv && typeof srv.seed==='number') ? (srv.seed>>>0) : (((Date.now()>>>0)^(__seedCtr++*0x9E3779B9))>>>0); srand(seed);
-    rec={v:1,seed,ver:VERSION,race:rc.id,t0:Date.now(),acts:[]};        // ver：版本分桶；t0：开局时刻
+    rec={v:1,seed,ver:VERSION,race:rc.id,weekday,t0:Date.now(),acts:[]}; // weekday 固定每日祝福，避免跨日回放漂移
     if(srv && srv.token) rec.token=srv.token;                          // 服务端种子 token：提交时随录像带上、供 worker 校验
     if(firstGame){ rec.tut=1; try{ localStorage.setItem(TUT_KEY,'1'); }catch(e){} }
     saveRec();
   }
-  player=newPlayer(); player.race=rc.id; rc.f(player); player.hp=player.maxHp;
+  player=newPlayer(); player.race=rc.id; player.weekday=weekday; if(hasDailyBlessing('storm',player)) player.armorPerShield*=2; rc.f(player); player.hp=player.maxHp;
   player.autoUse={heal:false,bomb:false};   // 新局不继承上一局的自动释放状态；只有“继续上局”才恢复存档状态
   selection=[]; dragging=false; busy=false; pendingLevels=0;
   grid=[];
@@ -1462,6 +1485,7 @@ function startGame(rc, srv){   // srv={seed,token}：服务端发的种子（正
   syncPositions(true);
   hideOverlay(); logClear();
   log(tr(`【${rc.e}${L(rc.n)}】踏入地牢… 祝你好运！`, `${rc.e}${L(rc.n)} enters the dungeon… good luck!`));
+  log(dailyBlessingSummary(player),'buff');
   updateHUD();
 }
 // 新手第一局教学棋盘：在内部格放一只弱怪，左右各一把剑（剑-怪-剑，可连成穿怪剑链一击带走）。用 rnd() 故确定可重放。
@@ -1524,11 +1548,13 @@ function loadGame(){
     if(typeof data.rngState==='number') srand(data.rngState>>>0);   // 续局必须接回原 RNG 轨迹，否则后续补格/刷怪会让 replay 漂移
     else { __rng=null; __rngState=0; }   // 旧存档缺少 RNG 快照时，至少别误沿用本页残留状态
     player=normalizePlayerClassIds(data.player);
+    if(!Number.isInteger(player.weekday)||player.weekday<0||player.weekday>6) player.weekday=beijingWeekday();
     if(!player.autoUse) player.autoUse={heal:false,bomb:false};
     ended=false;   // 继续上局 = 恢复进行中的对局，重新允许存档
     pendingLevels=data.pendingLevels||0;
     grid=data.grid.map(row=>row.map(t=> t?{...t}:null));
     rec=loadRec();   // 恢复进行中的录像，继续游戏时录制不断
+    if(rec && (!Number.isInteger(rec.weekday)||rec.weekday<0||rec.weekday>6)) rec.weekday=player.weekday;
     if(rec && rec.acts && rec.acts.length){ const la=rec.acts[rec.acts.length-1]; const last=la[la.length-1]; if(typeof last==='number') rec.t0=Date.now()-last; }   // 重设 t0：游玩时长排除「关掉游戏的间隔」（不影响重放，时间戳仅供分析）
     selection=[]; dragging=false; busy=false;
     syncPositions(true); hideOverlay(); logClear();
@@ -2201,7 +2227,7 @@ function normalEnemyAttack(t){
 }
 const SHOP={
   heal: {cost:15, f(){ const base=10+2*(player.healUses||0); const h=gainHeal(base); player.healUses=(player.healUses||0)+1; log(tr(`💊 喝下药水，回复 ${h} 生命`,`💊 Potion: +${h} HP`), 'heal'); }},   // 每使用一次：恢复量 +2、下次多花 1 金（后期不再鸡肋）
-  bomb: {cost:25, f(){ const extra = bombGoldSacrificeBonus(player); if(extra>0) player.gold=Math.max(0, player.gold-extra); const D = bombDamage(player)+extra;   // 基础5 + 爆破手累计 + 乾坤一掷（先买炸弹，再额外扣当前金币 20% 换伤害）
+  bomb: {cost:25, f(){ const extra = bombGoldSacrificeBonus(player); if(extra>0) player.gold=Math.max(0, player.gold-extra); const D = bombDamage(player)+extra*dailyMultiplier('steam');   // 机械日翻倍炸弹与乾坤一掷伤害
     const result=damageAllFoes(D,{rotflesh:true,matryoshkaBomb:true,onHit:(t,r,c)=>addBombFx(r,c)});
     const kills=result.normalKills, boss=result.bossKills, xp=result.xp;
     const multiGold=multiKillGold(kills);
@@ -2215,9 +2241,11 @@ function shopCost(key){ let c=SHOP[key].cost; if(key==='heal') c+=(player.healUs
 function bombShopSummary(p){
   p=p||player;
   const powder=gunpowderLevels(p), extra=bombGoldSacrificePreviewBonus(p);
-  const damageBonus=powder?tr(`（火药+${powder}）`,` (Powder +${powder})`):'';
+  const powderBonus=powder*dailyMultiplier('steam',p);
+  const damageBonus=powder?tr(`（火药+${powderBonus}）`,` (Powder +${powderBonus})`):'';
   const costBonus=powder?tr(`（火药+${5*powder}）`,` (Powder +${5*powder})`):'';
-  return tr(`伤害 ${bombDamage(p)}${damageBonus}｜花费 ${25+5*powder}${costBonus}`+(p.cheapskate?'（半价）':'')+(extra?`｜乾坤一掷 +${extra} 伤害`:''),`Damage ${bombDamage(p)}${damageBonus} | Cost ${25+5*powder}${costBonus}`+(p.cheapskate?' (½ price)':'')+(extra?` | All-In +${extra} dmg`:''));
+  const allIn=extra*dailyMultiplier('steam',p);
+  return tr(`伤害 ${bombDamage(p)}${damageBonus}｜花费 ${25+5*powder}${costBonus}`+(p.cheapskate?'（半价）':'')+(allIn?`｜乾坤一掷 +${allIn} 伤害`:''),`Damage ${bombDamage(p)}${damageBonus} | Cost ${25+5*powder}${costBonus}`+(p.cheapskate?' (½ price)':'')+(allIn?` | All-In +${allIn} dmg`:''));
 }
 function buyItem(key){
   if(ended||busy||pendingLevels) return;
@@ -2330,7 +2358,7 @@ function shopInfoData(key){
              [tr('状态','Status'), (p.skill2.id==='miser'&&p.goldLock>0)?`🔒${p.goldLock}${tr('回合','t')}`:p.skill2Cd>0?`⏳${p.skill2Cd}${tr('回合','t')}`:tr('可发动','Ready')] ] };
   }
   if(key==='heal'){
-    const hv=Math.round((10+2*(p.healUses||0))*(p.healMult||1)), half=(p.healMult&&p.healMult!==1);
+    const hv=Math.round((10+2*(p.healUses||0))*healingMultiplier(p)), half=(p.healMult&&p.healMult!==1);
     return { icon:'💊', title:tr('治疗','Heal'),
       desc:tr('喝下药水回复生命。每使用一次：恢复量 +2、下次多花 1 金，后期也跟得上。满血时不可用（避免浪费）。'+(half?'（活死人：一切治疗减半）':''),
               'Drink a potion to restore HP. Each use: +2 healing and +1 cost, so it keeps up late-game. Unavailable at full HP (no waste).'+(half?' (Undead: all healing halved.)':'')),
@@ -2340,11 +2368,11 @@ function shopInfoData(key){
              [tr('已使用','Used'), `${p.healUses||0} ${tr('次','×')}`] ] };
   }
   if(key==='bomb'){
-    const extra=bombGoldSacrificePreviewBonus(p), cd=p.bombCd||3, D=bombDamage(p)+extra;
+    const extra=bombGoldSacrificePreviewBonus(p), cd=p.bombCd||3, D=bombDamage(p)+extra*dailyMultiplier('steam',p);
     return { icon:'💥', title:tr('炸弹','Bomb'),
       desc:L(['投掷炸弹，对全场怪与 Boss 造成固定伤害（无视档位倍率）。能炸{W}免疫的 Boss（幽灵/小丑/污染怪/雪人）；终焉之主无效；石像会把伤害反弹给你。若有「乾坤一掷」，买完炸弹后还会再额外扣当前金币的 20%，并把这笔数额加到这次炸弹伤害上。',
               'Throw a bomb for fixed damage to all monsters & bosses (ignores tier scaling). Hits {W}-immune bosses (Ghost/Clown/Corruptor/Snowman); no effect on the Overlord; the Statue reflects it back. With All-In, buying the bomb also spends 20% of your current gold and adds exactly that amount to this bomb’s damage.']),
-      rows:[ [tr('当前伤害','Damage'), `5${gunpowderLevels(p)?`+${gunpowderLevels(p)}${tr(`（精研火药 +${gunpowderLevels(p)}）`,` (Powder +${gunpowderLevels(p)})`)}`:''} = ${bombDamage(p)}`+(extra?tr(`（乾坤一掷 +${extra}）`,` (All-In +${extra})`):'')],
+      rows:[ [tr('当前伤害','Damage'), `${bombDamage(p)}`+(extra?tr(`（乾坤一掷 +${extra*dailyMultiplier('steam',p)}）`,` (All-In +${extra*dailyMultiplier('steam',p)})`):'')],
              [tr('花费','Cost'), `25${gunpowderLevels(p)?`+${5*gunpowderLevels(p)}${tr(`（精研火药 +${5*gunpowderLevels(p)}）`,` (Powder +${5*gunpowderLevels(p)})`)}`:''} = ${shopCost('bomb')} 💰`+(p.cheapskate?tr('（小气鬼半价）',' (½)'):'')],
              [tr('额外扣金','Extra gold spent'), extra?`${extra} 💰`:tr('无','None')],
              [tr('冷却','Cooldown'), `${cd} ${tr('回合','t')}`+(p.shadowBombGold?tr('（乾坤一掷）',' (All-In)'):'')] ] };
@@ -2384,7 +2412,7 @@ document.querySelectorAll('.shopBtn[data-buy]').forEach(b=>attachLongPress(b, b.
 // 实际冷却 = 技能基础冷却 + 全局修正（如活死人迷惑 +1），最低 1。
 function effSkillCd(id){
   const sk=id&&TIER1[id]&&TIER1[id].skill; if(!sk) return 5;
-  let cd=sk.cd+(player.skillCdMod||0);
+  let cd=sk.cd+(player.skillCdMod||0)-(dailyMultiplier('wisdom')===2?1:0);
   return Math.max(1, cd);
 }
 function prophecyLabel(type, en){
@@ -2557,7 +2585,7 @@ function resolve(){
   if(player.tortoiseRegen && player.hp>0){ const rh=Math.max(1,Math.floor(player.hp*0.1)); const healed=gainHeal(rh); if(healed>0) log(tr(`🐢 恐鳌之心：恢复当前生命的 10%（+${healed}）`,`🐢 Heart of Tarrasque: restored 10% of current HP (+${healed})`), 'heal'); }
   if(player.goldLock>0){ player.goldLock--; if(player.goldLock===0){ const pay=Math.round(player.goldFrozen*1.2); player.gold+=pay; player.goldFrozen=0; log(tr(`🔓 囤金到期：返还 ${pay} 金币`,`🔓 Hoard matured: +${pay} gold`), 'buff'); } } // 守财奴囤金到期（1.2 倍）：放在敌人行动后，让「钱能买命」覆盖最后一回合
   if(player.cleared) return;   // 终焉第10波撑过 → onClear 已结算，停止后续处理
-  if(player.regen){ const aura=Math.max(0, Math.round(player.regen*((player.healMult!=null)?player.healMult:1))); const _h=gainHeal(player.regen); if(_h>0) log(tr(`💗 恢复 +${_h}（每回合）`,`💗 Regen +${_h} HP`), 'heal'); if(player.witherAura && aura>0){ const self= hurtPlayer(aura, 'witheraura', true); if(self>0) log(tr(`🪦 竭心光环：失去 ${self} 生命`,`🪦 Wither Aura: lose ${self} HP`), 'bad'); witherAuraTick(aura); } }
+  if(player.regen){ const aura=Math.max(0, Math.round(player.regen*healingMultiplier())); const _h=gainHeal(player.regen); if(_h>0) log(tr(`💗 恢复 +${_h}（每回合）`,`💗 Regen +${_h} HP`), 'heal'); if(player.witherAura && aura>0){ const self= hurtPlayer(aura, 'witheraura', true); if(self>0) log(tr(`🪦 竭心光环：失去 ${self} 生命`,`🪦 Wither Aura: lose ${self} HP`), 'bad'); witherAuraTick(aura); } }
   if(player.turns===500 && !player.finaleStarted){ player.finaleStarted=true; player.finaleWave=0; spawnFinale(); }  // 第500回合：终局降临
   if(!player.finaleStarted){
     if(player.turns % 10 === 0) player.bossDue=true;          // 每 10 回合：该来 Boss
@@ -2594,7 +2622,8 @@ function resolve(){
 
 // 治疗：返回实际回复的生命（超出上限的部分丢弃）
 function gainHeal(amount){
-  if(player.healMult!=null && player.healMult!==1) amount=Math.round(amount*player.healMult);   // 活死人：一切治疗减半（重生满血走 hp=maxHp，不经此处）
+  const healMult=healingMultiplier();
+  if(healMult!==1) amount=Math.round(amount*healMult);   // 亡灵削弱与大地母神日相乘；重生满血不经此处
   const space=player.maxHp-player.hp;
   if(amount<=space){ player.hp+=amount; return amount; }
   player.hp+=space; const over=amount-space;
@@ -2619,6 +2648,7 @@ function holyStrikeDamage(amt){
 }
 
 function dealDamage(pool, targets, allFoes){
+  if(!allFoes) pool*=dailyMultiplier('war');
   let dmg=0, kills=0, normalKills=0, bonusGold=0, xp=0, spongeAbsorbed=0;
   const list=[];
   const seen=new Set();
@@ -2795,6 +2825,7 @@ function statueReflect(t, hit){ if(t && t.bossId==='statue' && hit>0){ const d=h
 function lifestealHeal(n){ if(!player.lifesteal||n<=0) return 0; return vampGain(n*player.lifesteal); }
 // 吸血类回血（吸血/嗜血）：回到上限封顶；若有「血狂」，溢出全部增为永久生命上限。返回本次实际+的生命。
 function vampGain(amount){
+  amount=Math.round(amount*healingMultiplier());
   if(amount<=0) return 0; const b=player.hp, space=player.maxHp-player.hp;
   if(amount<=space){ player.hp+=amount; return player.hp-b; }
   player.hp=player.maxHp; const over=amount-space;
@@ -2870,11 +2901,11 @@ function checkLevel(){
 
 //==================== 升级（技能三选一）====================
 const UPGRADES=[
-  {n:['强化体魄','Fortify Body'],  d:p=>{const v=Math.round(6*(p.maxHpUpMult||1)), h=Math.round(v*(p.healMult||1)); return [`最大生命 +${v}，回血 ${h}`,`+${v} max HP, heal ${h}`];}, f:p=>{const v=Math.round(6*(p.maxHpUpMult||1)); p.maxHp+=v; p.hp=Math.min(p.maxHp, p.hp+Math.round(v*(p.healMult||1)));}}, // 兽人×2上限/回12，精灵×0.5上限/回3，活死人治疗减半→回3；不再回满
+  {n:['强化体魄','Fortify Body'],  d:p=>{const v=Math.round(6*(p.maxHpUpMult||1)), h=Math.round(v*healingMultiplier(p)); return [`最大生命 +${v}，回血 ${h}`,`+${v} max HP, heal ${h}`];}, f:p=>{const v=Math.round(6*(p.maxHpUpMult||1)); p.maxHp+=v; p.hp=Math.min(p.maxHp, p.hp+Math.round(v*healingMultiplier(p)));}}, // 生命升级恢复受职业与每日祝福影响
   {n:['磨利刀刃','Sharpen Blade'], d:['{W}伤 +50%（连越长收益越大）','+50% {W} power (longer chains gain more)'], f:p=>{p.weaponPower+=0.5;}},
   {n:['淬炼锋芒','Temper Edge'],   d:['每次{WC}额外 +3 固定伤害','+3 flat damage per {WC}'], f:p=>{p.swordFlat+=3;}},
   {n:['加固护甲','Reinforce Armor'], d:['立即 +1 减伤','+1 damage reduction now'], f:p=>{ if(!p.noArmor) p.armor+=1; }}, // 兽人无甲：无效
-  {n:['强化盾术','Hone Shielding'], d:['每个盾提供的护甲 +1','+1 Armor progress per shield'], f:p=>{p.armorPerShield+=1;}},
+  {n:['强化盾术','Hone Shielding'], d:['每个盾提供的护甲 +1','+1 Armor progress per shield'], f:p=>{p.armorPerShield+=dailyMultiplier('storm',p);}},
   {n:['精研医术','Refine Healing'], d:['每颗心回复生命 +1','+1 HP healed per heart'], f:p=>{p.healPerHeart+=1;}},
   {n:['搜刮财富','Gather Gold'],   d:['每枚金币收益 +1','+1 gold per coin'], f:p=>{p.goldPerCoin+=1;}},
   {n:['汲取生命','Drain Life'],    d:['每击杀一只怪物回复 1 生命','Heal 1 HP per enemy killed'], f:p=>{p.lifesteal+=1;}},
@@ -2925,6 +2956,7 @@ function gameOver(){
   const wasReplay=replaying;
   const endRec=wasReplay ? replayRec : null;
   const endPlayer=wasReplay ? JSON.parse(JSON.stringify(player)) : player;   // stopReplay 会恢复回放前状态，结算页必须使用回放终点快照
+  const dailyReport=`<div style="font-size:12px;color:var(--dim);margin:-3px 0 8px">${dailyBlessingSummary(endPlayer)}</div>`;
   if(rec){ rec.maxHp=player.maxHp; rec.level=player.level; rec.gold=player.gold; rec.turns=player.turns; rec.cleared=!!player.cleared; rec.token=rec.token||(player.token||''); rec.perks=player.chosenPerks.slice(); }
   if(wasReplay){ stopReplay(); }                 // 回放播到死亡：停止回放，照常显示死亡报告
   else { saveBest(); clearSave();
@@ -2952,6 +2984,7 @@ function gameOver(){
     <p style="margin-bottom:8px">${tr('地牢吞噬了又一位冒险者…','The dungeon claims another adventurer…')}</p>
     <div style="font-size:14px;margin-bottom:8px">${tr('等级','Lv')} <b style="color:var(--gold)">${endPlayer.level}</b> · 💰<b style="color:var(--gold)">${endPlayer.gold}</b> · <b style="color:var(--gold)">${endPlayer.turns}</b> ${tr('回合','turns')}</div>
     <div style="font-size:12px;color:var(--dim);margin:-4px 0 8px">⏱ ${tr('用时','Played')} ${fmtDur(durMs)}</div>
+    ${dailyReport}
     ${report}
     ${settlementLogBox()}
     ${DEV?'':`<div id="rankBox" style="text-align:left;margin:4px 0 12px;background:var(--panel2);border-radius:10px;padding:6px 4px;min-height:20px"></div>`}
@@ -3630,6 +3663,7 @@ function updateHUD(){
   if(player.deathCoil>0) b.push(tr(`🟢缠绕${player.deathCoil}`,`🟢Coil ${player.deathCoil}`));
   if(player.lifesteal)b.push(tr(`吸血 ${player.lifesteal}`,`Lifesteal ${player.lifesteal}`));
   if(player.regen)b.push(tr(`恢复 ${player.regen}`,`Regen ${player.regen}`));
+  b.push(dailyBlessingSummary(player));
   document.getElementById('bonusTxt').textContent=b.join('　');
   const scd=(player.shopCd&&typeof player.shopCd==='object')?player.shopCd:{};
   document.querySelectorAll('.shopBtn[data-buy]').forEach(btn=>{
@@ -3648,7 +3682,7 @@ function updateHUD(){
       return;
     }
     const c=shopCost(key), cd=scd[key]||0, fz=player.frozen&&player.frozen[key]>0;   // 雪人冰封该槽
-    if(key==='heal'){ const hv=Math.round((10+2*(player.healUses||0))*(player.healMult||1)); btn.querySelector('small').textContent=tr(`回复 ${hv} 生命`,`Restore ${hv} HP`); }   // 治疗恢复量随次数递增（活死人按 healMult 折算）
+    if(key==='heal'){ const hv=Math.round((10+2*(player.healUses||0))*healingMultiplier(player)); btn.querySelector('small').textContent=tr(`回复 ${hv} 生命`,`Restore ${hv} HP`); }   // 随职业治疗修正与每日祝福变化
     if(key==='bomb'){
       btn.querySelector('small').textContent=bombShopSummary(player);
     }

@@ -1,10 +1,10 @@
 //==================== 升级（技能三选一）====================
 const UPGRADES=[
-  {n:['强化体魄','Fortify Body'],  d:p=>{const v=Math.round(6*(p.maxHpUpMult||1)), h=Math.round(v*(p.healMult||1)); return [`最大生命 +${v}，回血 ${h}`,`+${v} max HP, heal ${h}`];}, f:p=>{const v=Math.round(6*(p.maxHpUpMult||1)); p.maxHp+=v; p.hp=Math.min(p.maxHp, p.hp+Math.round(v*(p.healMult||1)));}}, // 兽人×2上限/回12，精灵×0.5上限/回3，活死人治疗减半→回3；不再回满
+  {n:['强化体魄','Fortify Body'],  d:p=>{const v=Math.round(6*(p.maxHpUpMult||1)), h=Math.round(v*healingMultiplier(p)); return [`最大生命 +${v}，回血 ${h}`,`+${v} max HP, heal ${h}`];}, f:p=>{const v=Math.round(6*(p.maxHpUpMult||1)); p.maxHp+=v; p.hp=Math.min(p.maxHp, p.hp+Math.round(v*healingMultiplier(p)));}}, // 生命升级恢复受职业与每日祝福影响
   {n:['磨利刀刃','Sharpen Blade'], d:['{W}伤 +50%（连越长收益越大）','+50% {W} power (longer chains gain more)'], f:p=>{p.weaponPower+=0.5;}},
   {n:['淬炼锋芒','Temper Edge'],   d:['每次{WC}额外 +3 固定伤害','+3 flat damage per {WC}'], f:p=>{p.swordFlat+=3;}},
   {n:['加固护甲','Reinforce Armor'], d:['立即 +1 减伤','+1 damage reduction now'], f:p=>{ if(!p.noArmor) p.armor+=1; }}, // 兽人无甲：无效
-  {n:['强化盾术','Hone Shielding'], d:['每个盾提供的护甲 +1','+1 Armor progress per shield'], f:p=>{p.armorPerShield+=1;}},
+  {n:['强化盾术','Hone Shielding'], d:['每个盾提供的护甲 +1','+1 Armor progress per shield'], f:p=>{p.armorPerShield+=dailyMultiplier('storm',p);}},
   {n:['精研医术','Refine Healing'], d:['每颗心回复生命 +1','+1 HP healed per heart'], f:p=>{p.healPerHeart+=1;}},
   {n:['搜刮财富','Gather Gold'],   d:['每枚金币收益 +1','+1 gold per coin'], f:p=>{p.goldPerCoin+=1;}},
   {n:['汲取生命','Drain Life'],    d:['每击杀一只怪物回复 1 生命','Heal 1 HP per enemy killed'], f:p=>{p.lifesteal+=1;}},
@@ -55,6 +55,7 @@ function gameOver(){
   const wasReplay=replaying;
   const endRec=wasReplay ? replayRec : null;
   const endPlayer=wasReplay ? JSON.parse(JSON.stringify(player)) : player;   // stopReplay 会恢复回放前状态，结算页必须使用回放终点快照
+  const dailyReport=`<div style="font-size:12px;color:var(--dim);margin:-3px 0 8px">${dailyBlessingSummary(endPlayer)}</div>`;
   if(rec){ rec.maxHp=player.maxHp; rec.level=player.level; rec.gold=player.gold; rec.turns=player.turns; rec.cleared=!!player.cleared; rec.token=rec.token||(player.token||''); rec.perks=player.chosenPerks.slice(); }
   if(wasReplay){ stopReplay(); }                 // 回放播到死亡：停止回放，照常显示死亡报告
   else { saveBest(); clearSave();
@@ -82,6 +83,7 @@ function gameOver(){
     <p style="margin-bottom:8px">${tr('地牢吞噬了又一位冒险者…','The dungeon claims another adventurer…')}</p>
     <div style="font-size:14px;margin-bottom:8px">${tr('等级','Lv')} <b style="color:var(--gold)">${endPlayer.level}</b> · 💰<b style="color:var(--gold)">${endPlayer.gold}</b> · <b style="color:var(--gold)">${endPlayer.turns}</b> ${tr('回合','turns')}</div>
     <div style="font-size:12px;color:var(--dim);margin:-4px 0 8px">⏱ ${tr('用时','Played')} ${fmtDur(durMs)}</div>
+    ${dailyReport}
     ${report}
     ${settlementLogBox()}
     ${DEV?'':`<div id="rankBox" style="text-align:left;margin:4px 0 12px;background:var(--panel2);border-radius:10px;padding:6px 4px;min-height:20px"></div>`}

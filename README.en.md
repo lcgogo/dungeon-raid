@@ -23,7 +23,7 @@ Play online: **<https://dungeonraid.win>** (Mainland mirror: <https://dungeonrai
 
 The two builds keep **separate, non-overwriting saves** (Dev uses its own localStorage keys). The start screen and footer both label which build you are in. The home page’s Release / Dev version numbers are **statically injected at deploy time**, so they appear instantly even on weak connections without an extra fetch.
 
-The current Dev build is `v1.98.0`; Undead Confusion now makes per-turn active Bosses act every two turns, while other races still face them every turn. The Bomb tile summary uses integer damage/cost values with Refined Powder in parentheses. All races start with 50 gold. Bomb kills remove a Matryoshka branch without splitting it, while all remaining branches from that Matryoshka must still be eliminated for one Boss kill reward. Magmafiend melts up to its tier in shields each turn. Bomb and Frost Nova share all-foe damage resolution, with parity checked against the `v1.94.2` snapshot. The Lich skill is named Frost Nova to match Warcraft. The turn-350 crossover list shows only activatable skills and no longer offers passive Rebirth. Feedback entries can be opened to view their thread and post replies. The README tracks the current code, including the Dev-only Human hidden Programmer class, Refined Powder, stable replay boundaries, and the iOS Cyclops board-icon fix. Release builds keep Programmer hidden. Source lives under `src/` and the self-contained HTML is regenerated with `node build/build.js`.
+The current Dev build is `v1.99.0`; a seven-day blessing rotation is shown in the HUD and death settlement, with ranked replays pinned to the server-stamped Beijing weekday. Undead Confusion makes per-turn active Bosses act every two turns, while other races still face them every turn. The Bomb tile summary uses integer damage/cost values with Refined Powder in parentheses. All races start with 50 gold. Bomb kills remove a Matryoshka branch without splitting it, while all remaining branches from that Matryoshka must still be eliminated for one Boss kill reward. Magmafiend melts up to its tier in shields each turn. Bomb and Frost Nova share all-foe damage resolution, with parity checked against the `v1.94.2` snapshot. The Lich skill is named Frost Nova to match Warcraft. The turn-350 crossover list shows only activatable skills and no longer offers passive Rebirth. Feedback entries can be opened to view their thread and post replies. The README tracks the current code, including the Dev-only Human hidden Programmer class, Refined Powder, stable replay boundaries, and the iOS Cyclops board-icon fix. Release builds keep Programmer hidden. Source lives under `src/` and the self-contained HTML is regenerated with `node build/build.js`.
 
 ## 🧩 Core Gameplay
 
@@ -40,6 +40,20 @@ The current Dev build is `v1.98.0`; Undead Confusion now makes per-turn active B
 
 - A **weapon chain can be dragged straight through 👹**. Every enemy on the chain takes the **full** chain damage **independently** — enough damage means an instant kill. Human/Elf/Dwarf/Orc/Undead/Mythic Beasts use Sword/Arrow/Hammer/Axe/Bone/Claw icons respectively. A chain must include **at least one weapon tile** to deal damage (chaining only monsters with no weapon isn't an attack and costs no turn).
 - While dragging, any enemy that **would die** turns into 💀 as a live preview.
+
+## 📅 Daily Blessings
+
+Blessings rotate at midnight Beijing time. The run records its blessing for deterministic replay, and the death settlement shows which one was active.
+
+| Day | Deity | Effect |
+|---|---|---|
+| Sunday | War God | Weapon damage ×2 |
+| Monday | Goddess of Night | All foes get +1 attack countdown; per-turn active Bosses act every two turns |
+| Tuesday | God of Knowledge and Wisdom | XP gained ×2 |
+| Wednesday | Earth Mother | All healing ×2 |
+| Thursday | Eternal Sun | Fire damage ×2 |
+| Friday | Lord of Storms | Shield armor progress ×2 |
+| Saturday | God of Steam and Machinery | Bomb damage ×2, including All-In bonus |
 
 ## 👹 Enemy Info
 

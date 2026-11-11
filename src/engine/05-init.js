@@ -13,14 +13,15 @@ function preferredSeedRace(){
   return RACES[0];
 }
 function warmSeedExpiry(){ return Date.now()+SEED_WARM_MS; }
+function beijingWeekday(){ return new Date(Date.now()+8*60*60*1000).getUTCDay(); }
 function readWarmSeed(rc){
   if(DEV||!rc) return null;
   try{
     const raw=localStorage.getItem(SEED_POOL_KEY); if(!raw) return null;
     const x=JSON.parse(raw);
     const key=serverSeedKey(rc);
-    if(!x || x.used || !x.token || typeof x.seed!=='number' || x.key!==key || x.ver!==VERSION || !x.expiresAt || x.expiresAt<=Date.now()){ localStorage.removeItem(SEED_POOL_KEY); return null; }
-    return {seed:x.seed>>>0, token:x.token};
+    if(!x || x.used || !x.token || typeof x.seed!=='number' || x.key!==key || x.ver!==VERSION || !x.expiresAt || x.expiresAt<=Date.now() || x.weekday!==beijingWeekday()){ localStorage.removeItem(SEED_POOL_KEY); return null; }
+    return {seed:x.seed>>>0, token:x.token, weekday:x.weekday};
   }catch(e){ try{ localStorage.removeItem(SEED_POOL_KEY); }catch(_e){} return null; }
 }
 function storeWarmSeed(rc, srv){
@@ -31,6 +32,7 @@ function storeWarmSeed(rc, srv){
       ver: VERSION,
       seed: srv.seed>>>0,
       token: srv.token,
+      weekday: srv.weekday,
       issuedAt: Date.now(),
       expiresAt: warmSeedExpiry(),
     }));
@@ -45,7 +47,7 @@ function purgeWarmSeed(){
   try{
     const raw=localStorage.getItem(SEED_POOL_KEY); if(!raw) return;
     const x=JSON.parse(raw);
-    if(!x || x.used || !x.token || typeof x.seed!=='number' || x.ver!==VERSION || !x.expiresAt || x.expiresAt<=Date.now()) localStorage.removeItem(SEED_POOL_KEY);
+    if(!x || x.used || !x.token || typeof x.seed!=='number' || x.ver!==VERSION || !x.expiresAt || x.expiresAt<=Date.now() || x.weekday!==beijingWeekday()) localStorage.removeItem(SEED_POOL_KEY);
   }catch(e){ try{ localStorage.removeItem(SEED_POOL_KEY); }catch(_e){} }
 }
 function prefetchServerSeed(rc){
@@ -92,7 +94,7 @@ async function fetchServerSeed(rc){
   try{
     const qs = new URLSearchParams({ race: rc.id, version: VERSION });
     const r=await fetch(REC_API+'/seed?'+qs.toString(),{method:'POST',signal:ctrl&&ctrl.signal});
-    if(r&&r.ok){ const x=await r.json(); if(typeof x.seed==='number'&&x.token) return {seed:x.seed>>>0, token:x.token}; }
+    if(r&&r.ok){ const x=await r.json(); if(typeof x.seed==='number'&&x.token) return {seed:x.seed>>>0, token:x.token, weekday:x.weekday}; }
   }catch(e){}
   finally{ if(timer) clearTimeout(timer); }
   return null;
@@ -129,22 +131,29 @@ async function freshStart(rc){
     const pending=pendingSeedPromise(rc);
     try{ srv=await Promise.race([ pending || fetchServerSeed(rc), new Promise(res=>setTimeout(()=>res(null), 900)) ]); }catch(e){}
   }
+  if(srv && srv.weekday!==beijingWeekday()){
+    srv=null;
+    try{ srv=await fetchServerSeed(rc); }catch(e){}
+    if(srv && srv.weekday!==beijingWeekday()) srv=null;
+  }
   startGame(rc, srv);
   if(!srv) offlineSeedNotice();
 }
 function startGame(rc, srv){   // srv={seed,token}：服务端发的种子（正式版上榜用）；缺省则本地随机（dev / 离线，不计排名）
   ended=false;   // 新局开始，重新允许存档
+  const recordedWeekday=replaying?replayRec.weekday:srv&&srv.weekday;
+  const weekday=Number.isInteger(recordedWeekday)&&recordedWeekday>=0&&recordedWeekday<7?recordedWeekday:beijingWeekday();
   let firstGame=false;
   if(replaying){ srand(replayRec.seed); firstGame=!!replayRec.tut; }   // 回放：是否新手局以录像里的 tut 标志为准（保持棋盘可复现）
   else {
     try{ firstGame = !localStorage.getItem(TUT_KEY); }catch(e){}        // 本机第一次游玩
     const seed = (srv && typeof srv.seed==='number') ? (srv.seed>>>0) : (((Date.now()>>>0)^(__seedCtr++*0x9E3779B9))>>>0); srand(seed);
-    rec={v:1,seed,ver:VERSION,race:rc.id,t0:Date.now(),acts:[]};        // ver：版本分桶；t0：开局时刻
+    rec={v:1,seed,ver:VERSION,race:rc.id,weekday,t0:Date.now(),acts:[]}; // weekday 固定每日祝福，避免跨日回放漂移
     if(srv && srv.token) rec.token=srv.token;                          // 服务端种子 token：提交时随录像带上、供 worker 校验
     if(firstGame){ rec.tut=1; try{ localStorage.setItem(TUT_KEY,'1'); }catch(e){} }
     saveRec();
   }
-  player=newPlayer(); player.race=rc.id; rc.f(player); player.hp=player.maxHp;
+  player=newPlayer(); player.race=rc.id; player.weekday=weekday; if(hasDailyBlessing('storm',player)) player.armorPerShield*=2; rc.f(player); player.hp=player.maxHp;
   player.autoUse={heal:false,bomb:false};   // 新局不继承上一局的自动释放状态；只有“继续上局”才恢复存档状态
   selection=[]; dragging=false; busy=false; pendingLevels=0;
   grid=[];
@@ -159,6 +168,7 @@ function startGame(rc, srv){   // srv={seed,token}：服务端发的种子（正
   syncPositions(true);
   hideOverlay(); logClear();
   log(tr(`【${rc.e}${L(rc.n)}】踏入地牢… 祝你好运！`, `${rc.e}${L(rc.n)} enters the dungeon… good luck!`));
+  log(dailyBlessingSummary(player),'buff');
   updateHUD();
 }
 // 新手第一局教学棋盘：在内部格放一只弱怪，左右各一把剑（剑-怪-剑，可连成穿怪剑链一击带走）。用 rnd() 故确定可重放。

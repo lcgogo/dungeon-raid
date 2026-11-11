@@ -33,8 +33,12 @@ function loadEngine(file){
 
 function run(file,effect){
   const G=loadEngine(file);
-  G.replayRec={seed:92741,race:'human',acts:[]}; G.replaying=true; G.startGame(G.raceById('human')); G.replaying=false; G.headless=true;
+  G.replayRec={seed:92741,race:'human',weekday:5,acts:[]}; G.replaying=true; G.startGame(G.raceById('human')); G.replaying=false; G.headless=true;
   const p=G.player;
+  if(file==='dungeon-raid-dev.html'){
+    delete p.weekday; p.armorPerShield=1;
+    G.logHistory.splice(1,1);  // 忽略新增的开局每日祝福提示，专测原有伤害结算兼容性
+  }
   Object.assign(p,{turns:20,level:20,xp:0,gold:210,hp:700,maxHp:1000,swordFlat:7,gunpowder:2,
     shadowBombGold:true,demolitionist:true,rotflesh:true,lifesteal:1,killXp:0});
   const cells=[[0,0,3,'enemy'],[1,2,7,'enemy'],[2,3,8,'enemy'],[4,1,26,'enemy'],[5,5,50,'enemy'],[0,5,6,'boss','statue'],[5,0,2,'boss','overlord',true]];
@@ -54,7 +58,7 @@ for(const effect of ['bomb','frostNova']){
 
 function matryoshkaEngine(){
   const G=loadEngine('dungeon-raid-dev.html');
-  G.replayRec={seed:227,race:'human',acts:[]}; G.replaying=true; G.startGame(G.raceById('human')); G.replaying=false; G.headless=true;
+  G.replayRec={seed:227,race:'human',weekday:5,acts:[]}; G.replaying=true; G.startGame(G.raceById('human')); G.replaying=false; G.headless=true;
   for(let r=0;r<6;r++)for(let c=0;c<6;c++) G.grid[r][c]=null;
   G.player.gold=0; G.player.xp=0;
   return G;

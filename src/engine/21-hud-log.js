@@ -32,6 +32,7 @@ function updateHUD(){
   if(player.deathCoil>0) b.push(tr(`🟢缠绕${player.deathCoil}`,`🟢Coil ${player.deathCoil}`));
   if(player.lifesteal)b.push(tr(`吸血 ${player.lifesteal}`,`Lifesteal ${player.lifesteal}`));
   if(player.regen)b.push(tr(`恢复 ${player.regen}`,`Regen ${player.regen}`));
+  b.push(dailyBlessingSummary(player));
   document.getElementById('bonusTxt').textContent=b.join('　');
   const scd=(player.shopCd&&typeof player.shopCd==='object')?player.shopCd:{};
   document.querySelectorAll('.shopBtn[data-buy]').forEach(btn=>{
@@ -50,7 +51,7 @@ function updateHUD(){
       return;
     }
     const c=shopCost(key), cd=scd[key]||0, fz=player.frozen&&player.frozen[key]>0;   // 雪人冰封该槽
-    if(key==='heal'){ const hv=Math.round((10+2*(player.healUses||0))*(player.healMult||1)); btn.querySelector('small').textContent=tr(`回复 ${hv} 生命`,`Restore ${hv} HP`); }   // 治疗恢复量随次数递增（活死人按 healMult 折算）
+    if(key==='heal'){ const hv=Math.round((10+2*(player.healUses||0))*healingMultiplier(player)); btn.querySelector('small').textContent=tr(`回复 ${hv} 生命`,`Restore ${hv} HP`); }   // 随职业治疗修正与每日祝福变化
     if(key==='bomb'){
       btn.querySelector('small').textContent=bombShopSummary(player);
     }

@@ -1,4 +1,10 @@
 
+## [v1.99.0] - 2026-11-10
+> Version-Impact: verify
+
+- 新增每周七神祝福：战神日武器伤害×2、黑夜女神日敌人倒计时+1、知识与智慧之神日经验×2、大地母神日治疗×2、永恒烈阳日火焰伤害×2、风暴之主日盾牌收益×2、蒸汽与机械之神日炸弹伤害×2。祝福在 HUD 与死亡结算中显示；正式版日期由服务端种子固定并写入录像。
+- Added a seven-day blessing rotation: War God doubles weapon damage; Goddess of Night adds 1 to foe countdowns; Knowledge and Wisdom doubles XP; Earth Mother doubles healing; Eternal Sun doubles fire damage; Lord of Storms doubles shield gains; Steam and Machinery doubles Bomb damage. The HUD and death settlement show the blessing; ranked runs use the server-stamped weekday recorded with the replay.
+
 ## [v1.98.0] - 2026-11-09
 > Version-Impact: verify
 
