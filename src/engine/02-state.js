@@ -15,9 +15,9 @@ const DAILY_BLESSINGS=[
   {id:'night', name:['黑夜女神','Goddess of Night'], effect:['所有怪物攻击倒计时 +1','All foes get +1 attack countdown'], frame:'#484360', prayer:['「比星空更崇高，比永恒更久远的黑夜女神」','“Goddess of Night, higher than the stars and older than eternity”']},
   {id:'wisdom', name:['知识与智慧之神','God of Knowledge and Wisdom'], effect:['获得经验 ×2','XP gained ×2'], frame:'#3b625e', prayer:['「知识之塔，理性化身，智慧之神，洞悉万物的学者」','“Tower of Knowledge, embodiment of reason, god of wisdom, scholar who sees all”']},
   {id:'earth', name:['大地母神','Earth Mother'], effect:['所有治疗 ×2','All healing ×2'], frame:'#586243', prayer:['「感谢你，生命的源泉！赞美你，万物的母亲！」','“Thanks to you, source of life! Praise to you, mother of all things!”']},
-  {id:'sun', name:['永恒烈阳','Eternal Sun'], effect:['所有主动技能冷却 −1（最低 1）','All active skill cooldowns −1 (minimum 1)'], frame:'#75613c', prayer:['「永恒烈阳，不灭之光，秩序化身」','“Eternal Sun, undying light, embodiment of order”']},
-  {id:'storm', name:['风暴之主','Lord of Storms'], effect:['盾牌收益 ×2','Shield gains ×2'], frame:'#3d596c', prayer:['「空之王，海之皇，天灾君主，风暴之神」','“King of the sky, emperor of the sea, lord of calamities, god of storms”']},
-  {id:'steam', name:['蒸汽与机械之神','God of Steam and Machinery'], effect:['炸弹伤害 ×2','Bomb damage ×2'], frame:'#665043', prayer:['「伟大的蒸汽与机械之神，您是本质的化身，工匠的保护者，技术的光辉」','“Great God of Steam and Machinery, embodiment of essence, protector of craftsmen, radiance of technology”']},
+  {id:'sun', name:['永恒烈阳','Eternal Sun'], effect:['炸弹伤害 ×2','Bomb damage ×2'], frame:'#75613c', prayer:['「永恒烈阳，不灭之光，秩序化身」','“Eternal Sun, undying light, embodiment of order”']},
+  {id:'storm', name:['风暴之主','Lord of Storms'], effect:['所有主动技能冷却 −1（最低 1）','All active skill cooldowns −1 (minimum 1)'], frame:'#3d596c', prayer:['「空之王，海之皇，天灾君主，风暴之神」','“King of the sky, emperor of the sea, lord of calamities, god of storms”']},
+  {id:'steam', name:['蒸汽与机械之神','God of Steam and Machinery'], effect:['盾牌收益 ×2','Shield gains ×2'], frame:'#665043', prayer:['「伟大的蒸汽与机械之神，您是本质的化身，工匠的保护者，技术的光辉」','“Great God of Steam and Machinery, embodiment of essence, protector of craftsmen, radiance of technology”']},
 ];
 function dailyBlessing(p){ p=p||player; const d=p&&p.weekday; return DAILY_BLESSINGS[Number.isInteger(d)&&d>=0&&d<7?d:0]; }
 function hasDailyBlessing(id,p){ return dailyBlessing(p).id===id; }
@@ -45,7 +45,7 @@ function showDailyBlessingPopup(p,onClose){
     const next=DAILY_BLESSINGS[weekday];
     p.weekday=weekday;
     if(rec){ rec.weekday=weekday; saveRec(); }
-    p.armorPerShield=hasDailyBlessing('storm',p)?2:1;
+    p.armorPerShield=hasDailyBlessing('steam',p)?2:1;
     DAILY_BLESSINGS.forEach((_,i)=>{
       const button=document.getElementById(`blessingDay${i}`);
       if(button){ button.classList.toggle('selected',i===weekday); button.setAttribute('aria-pressed',String(i===weekday)); button.style.borderColor=i===weekday?'var(--gold)':'#4a3a63'; button.style.color=i===weekday?'var(--gold)':'var(--txt)'; }

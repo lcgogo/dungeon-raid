@@ -70,30 +70,34 @@ for(let d=0;d<7;d++){
   ok(G.gainHeal(3)===3&&undead.hp===13,'Earth Mother and Undead healing penalty combine');
 }
 {
-  const p=start(4);
-  ok(G.effSkillCd('knight')===4,'Eternal Sun reduces active cooldown by one');
-  p.skillCdMod=-10;
-  ok(G.effSkillCd('knight')===1,'Eternal Sun cooldown reduction respects the one-turn floor');
-}
-{
-  const p=start(5); clearBoard();
-  G.grid[0][0]={type:'shield'}; G.grid[0][1]={type:'shield'};
-  G.selection=[{r:0,c:0,type:'shield'},{r:0,c:1,type:'shield'}];
-  G.resolve();
-  ok(p.armor===1&&p.shieldXp===1,'Lord of Storms doubles linked shield progress');
-  ok(p.armorPerShield===2,'Lord of Storms doubles Forge shield value');
-  p.armor=0; p.shieldXp=0; clearBoard(); G.grid[0][0]={type:'shield'}; G.grid[0][1]={type:'shield'};
-  G.TIER1.blacksmith.skill.f(p);
-  ok(p.armor===1&&p.shieldXp===1,'Lord of Storms doubles shields consumed by Forge');
-}
-{
-  const p=start(6); p.gunpowder=1;
-  ok(G.bombDamage(p)===12,'Steam and Machinery doubles bomb damage including powder');
-  ok(G.bombShopSummary(p).includes('伤害 12（火药+2）'),'bomb tile shows doubled powder contribution');
+  const p=start(4); p.gunpowder=1;
+  ok(G.bombDamage(p)===12,'Eternal Sun doubles bomb damage including powder');
+  ok(G.bombShopSummary(p).includes('伤害 12（火药+2）'),'Eternal Sun doubles displayed powder contribution');
   p.gold=125; p.shadowBombGold=true; p.shopCd={bomb:0}; clearBoard();
   const target=G.grid[0][0]={type:'enemy',hp:80,maxHp:80};
   G.buyItem('bomb');
-  ok(target.hp===30,'Steam and Machinery doubles the bomb total including All-In');
+  ok(target.hp===30,'Eternal Sun doubles the bomb total including All-In');
+}
+{
+  const p=start(5);
+  ok(G.effSkillCd('knight')===4,'Lord of Storms reduces active cooldown by one');
+  p.skillCdMod=-10;
+  ok(G.effSkillCd('knight')===1,'Lord of Storms cooldown reduction respects the one-turn floor');
+}
+{
+  const p=start(6); clearBoard();
+  G.grid[0][0]={type:'shield'}; G.grid[0][1]={type:'shield'};
+  G.selection=[{r:0,c:0,type:'shield'},{r:0,c:1,type:'shield'}];
+  G.resolve();
+  ok(p.armor===1&&p.shieldXp===1,'Steam and Machinery doubles linked shield progress');
+  ok(p.armorPerShield===2,'Steam and Machinery doubles Forge shield value');
+  p.armor=0; p.shieldXp=0; clearBoard(); G.grid[0][0]={type:'shield'}; G.grid[0][1]={type:'shield'};
+  G.TIER1.blacksmith.skill.f(p);
+  ok(p.armor===1&&p.shieldXp===1,'Steam and Machinery doubles shields consumed by Forge');
+}
+{
+  const p=start(6);
+  ok(p.armorPerShield===2,'Steam and Machinery doubles starting shield value');
 }
 {
   const src=fs.readFileSync(path.join(path.dirname(file),'src/engine/15-upgrades.js'),'utf8');
@@ -105,7 +109,7 @@ for(let d=0;d<7;d++){
   ok(G.busy&&overlay.classList.contains('show'),'blessing popup blocks board input');
   ok(card.innerHTML.includes('知识与智慧之神')&&card.innerHTML.includes('知识之塔'),'blessing popup shows canonical deity invocation');
   getEl('blessingDay6').onclick();
-  ok(p.weekday===6&&G.rec.weekday===6&&p.armorPerShield===1,'DEV can choose a blessing and record that choice');
+  ok(p.weekday===6&&G.rec.weekday===6&&p.armorPerShield===2,'DEV can choose a blessing and record that choice');
   ok(G.logHistory.filter(e=>e.dailyBlessing).length===1&&G.logHistory.find(e=>e.dailyBlessing).m.includes('蒸汽与机械之神日'),'DEV blessing choice updates the existing start log');
   ok(G.board.style.outline.includes(G.dailyBlessingFrame(p)),'DEV blessing choice recolors board frame');
   ok(getEl('blessingDeity').textContent==='蒸汽与机械之神日'&&getEl('blessingPrayer').textContent.includes('本质的化身'),'DEV selection refreshes deity and invocation');

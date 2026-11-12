@@ -4,7 +4,7 @@ const UPGRADES=[
   {n:['磨利刀刃','Sharpen Blade'], d:['{W}伤 +50%（连越长收益越大）','+50% {W} power (longer chains gain more)'], f:p=>{p.weaponPower+=0.5;}},
   {n:['淬炼锋芒','Temper Edge'],   d:['每次{WC}额外 +3 固定伤害','+3 flat damage per {WC}'], f:p=>{p.swordFlat+=3;}},
   {n:['加固护甲','Reinforce Armor'], d:['立即 +1 减伤','+1 damage reduction now'], f:p=>{ if(!p.noArmor) p.armor+=1; }}, // 兽人无甲：无效
-  {n:['强化盾术','Hone Shielding'], d:['每个盾提供的护甲 +1','+1 Armor progress per shield'], f:p=>{p.armorPerShield+=dailyMultiplier('storm',p);}},
+  {n:['强化盾术','Hone Shielding'], d:['每个盾提供的护甲 +1','+1 Armor progress per shield'], f:p=>{p.armorPerShield+=dailyMultiplier('steam',p);}},
   {n:['精研医术','Refine Healing'], d:['每颗心回复生命 +1','+1 HP healed per heart'], f:p=>{p.healPerHeart+=1;}},
   {n:['搜刮财富','Gather Gold'],   d:['每枚金币收益 +1','+1 gold per coin'], f:p=>{p.goldPerCoin+=1;}},
   {n:['汲取生命','Drain Life'],    d:['每击杀一只怪物回复 1 生命','Heal 1 HP per enemy killed'], f:p=>{p.lifesteal+=1;}},

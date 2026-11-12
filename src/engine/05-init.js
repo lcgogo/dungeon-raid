@@ -153,7 +153,7 @@ function startGame(rc, srv){   // srv={seed,token}：服务端发的种子（正
     if(firstGame){ rec.tut=1; try{ localStorage.setItem(TUT_KEY,'1'); }catch(e){} }
     saveRec();
   }
-  player=newPlayer(); player.race=rc.id; player.weekday=weekday; if(hasDailyBlessing('storm',player)) player.armorPerShield*=2; rc.f(player); player.hp=player.maxHp;
+  player=newPlayer(); player.race=rc.id; player.weekday=weekday; if(hasDailyBlessing('steam',player)) player.armorPerShield*=2; rc.f(player); player.hp=player.maxHp;
   player.autoUse={heal:false,bomb:false};   // 新局不继承上一局的自动释放状态；只有“继续上局”才恢复存档状态
   selection=[]; dragging=false; busy=false; pendingLevels=0;
   grid=[];

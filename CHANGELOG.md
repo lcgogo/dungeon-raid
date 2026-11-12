@@ -1,4 +1,22 @@
 
+## [v1.103.0] - 2026-11-12
+> Version-Impact: verify
+
+- 调整每日祝福：永恒烈阳日炸弹伤害×2，风暴之主日主动技能冷却−1（最低1），蒸汽与机械之神日盾牌收益×2。
+- Reassigned daily blessings: Eternal Sun doubles Bomb damage, Lord of Storms reduces active cooldowns by 1 (minimum 1), and Steam and Machinery doubles shield gains.
+
+## [v1.102.0] - 2026-11-12
+> Version-Impact: verify
+
+- 调整每日祝福：永恒烈阳日炸弹伤害×2，风暴之主日主动技能冷却−1（最低1），蒸汽与机械之神日盾牌护甲进度×2。
+- Reassigned daily blessings: Eternal Sun doubles Bomb damage, Lord of Storms reduces active cooldowns by 1 (minimum 1), and Steam and Machinery doubles shield armor progress.
+
+## [v1.101.0] - 2026-11-12
+> Version-Impact: verify
+
+- 调整三日祝福归属：永恒烈阳日改为炸弹伤害×2，风暴之主日改为主动技能冷却−1（最低1），蒸汽与机械之神日改为盾牌护甲进度×2。
+- Reassigned three daily blessings: Eternal Sun now doubles Bomb damage, Lord of Storms reduces active cooldowns by 1 (minimum 1), and Steam and Machinery doubles shield armor progress.
+
 ## [v1.100.2] - 2026-11-11
 
 - 修复自动清理按旧版本和日期删除破关记录的问题；破关榜继续跨版本展示，历史破关成绩不再被自动清理。
