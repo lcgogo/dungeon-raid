@@ -126,10 +126,10 @@ const BOSSES=[
       const [nr,nc]=cells[Math.floor(rnd()*cells.length)]; const {r,c}=pos; const tmp=grid[nr][nc];
       grid[nr][nc]=t; grid[r][c]=tmp; t.curY=cellY(nr); if(tmp) tmp.curY=cellY(r); syncPositions(false);
       log(tr('🦅 鸟人振翅，和一个棋子换了位置！','🦅 The Birdman flaps to a new spot!'), 'debuff'); } },
-  // 终焉之主：第 500 回合出现。无血量、无攻击、不可被打。每回合把若干非怪/非Boss棋子变成对应波次等级的随机Boss（第1波1个Lv1…第10波10个Lv10），撑满10波不死即破关。不进随机池。
+  // 终焉之主：第 500 回合出现。无血量、无攻击、不可被打。倒计时归零时召唤当前波次数量的随机Boss（第1波1个Lv1…第10波10个Lv10）；撑过第10波并活到下一次行动时破关。不进随机池。
   { id:'finale', emoji:'👑', name:['终焉之主','Overlord'], quip:['走到这一步？那就别想走了。','Made it this far? You leave no more.'], noRandom:true, perTurn:true, finale:true,
-    special:['每回合召唤渐增的Boss浪潮，撑过10波即破关','Summons growing boss waves; survive 10 to clear'],
-    desc:['终局考验：它本身无血、无攻击、打不掉。但【每回合】把若干非怪/非Boss棋子变成随机 Boss——第 1 波 1 个、第 2 波 2 个…第 10 波 10 个。撑满 10 波还活着即【破关】！','The final trial: it has no HP, no attack, and cannot be killed. Each turn it turns several non-enemy tiles into random bosses — 1 on wave 1, 2 on wave 2… 10 on wave 10. Survive all 10 waves to CLEAR the game!'],
+    special:['倒计时归零时召唤渐增的Boss浪潮；撑过第10波并活到下次行动即破关','Summons a growing Boss wave when its countdown expires; survive wave 10 until its next action to clear'],
+    desc:['终局考验：它本身无血、无攻击、打不掉。**倒计时归零时**，它会把若干非怪/非Boss棋子变成随机 Boss——第 1 波 1 个、第 2 波 2 个…第 10 波 10 个。撑过第 10 波后，还要活到终焉之主下次行动，才会【破关】。','The final trial: it has no HP, no attack, and cannot be killed. **When its countdown reaches zero**, it turns several non-enemy tiles into random Bosses — 1 on wave 1, 2 on wave 2… 10 on wave 10. After surviving wave 10, stay alive until the Overlord acts again to CLEAR the game.'],
     act(t){
       if(player.finaleWave>=10){ onClear(); return; }   // 已撑满10波且仍存活 → 破关
       player.finaleWave++;
@@ -196,7 +196,7 @@ function spawnFinale(){
   grid[r][c]={type:'boss', bossId:'finale', tier:bossTier(), hp:0, maxHp:0, atk:0, cd:0, baseCd:0, turnCd:Math.max(1,1+extraFoeCd()), finale:true};
   syncPositions(false);
   addBossFx(r,c,true);   // 金色入场特效
-  log(tr('👑 终焉之主降临！撑过 10 波 Boss 浪潮即可破关！','👑 The Overlord descends! Survive 10 waves of bosses to clear the game!'), 'bad');
+  log(tr('👑 终焉之主降临！倒计时归零时召唤下一波；撑过第10波并活到下次行动即可破关！','👑 The Overlord descends! A new wave arrives when its countdown expires. Survive wave 10 until its next action to clear!'), 'bad');
 }
 function bossDef(t){ return BOSSES.find(b=>b.id===(t&&t.bossId)) || BOSSES[0]; }
 function findTilePos(tile){

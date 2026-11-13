@@ -1,4 +1,9 @@
 
+## [v1.103.1] - 2026-11-13
+
+- 修正终焉之主图鉴和降临日志：Boss 浪潮在倒计时归零时召唤；撑过第 10 波后，还需存活到它下次行动才破关。
+- Clarified the Overlord entry and arrival log: waves spawn when its countdown expires, and clearing requires surviving wave 10 until its next action.
+
 ## [v1.103.0] - 2026-11-12
 > Version-Impact: verify
 
