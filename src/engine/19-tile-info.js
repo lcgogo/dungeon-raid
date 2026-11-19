@@ -12,7 +12,7 @@ function tileInfo(t){
     desc:L(CONTENT.tile.shield),
     rows:[ [tr('当前减伤','Damage reduction'), p.noArmor?tr('无甲（兽人）','none (Orc)'):`${p.armor}`],
       [tr('护甲','Armor'), p.noArmor?'—':`${p.shieldXp} / ${armorNeeded(p.armor)}`],
-      [tr('每个盾 +进度','Progress per shield'), `+${p.armorPerShield}`],
+      [tr('每个盾 +进度','Progress per shield'), `+${shieldProgressPerTile(p)}`],
       [tr('减伤倍率(矮人)','Armor mult (Dwarf)'), p.armorMult>1?`×${p.armorMult}`:'—'] ]};
   if(t.type==='heart'&&pollutionActive()) return {icon:'💚', title:tr('毒心 · 危险','Poison Heart · Danger'),
     desc:L(CONTENT.tile.poisonHeart),

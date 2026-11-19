@@ -39,7 +39,7 @@ function resolve(){
     const d=DEF[type];
     if(type==='shield'){ mk='buff';
       if(player.noArmor){ msg=`${d.emoji}×${count}${comboTxt} → `+tr('无甲：护甲无效','No Armor: shields do nothing'); }
-      else { player.shieldXp += Math.round(count*player.armorPerShield*(player.armorPerShieldMult||1)*combo);
+      else { player.shieldXp += Math.round(count*shieldProgressPerTile(player)*combo);
         let gained=0; while(player.shieldXp>=armorNeeded(player.armor)){ player.shieldXp-=armorNeeded(player.armor); player.armor++; gained++; }
         msg=`${d.emoji}×${count}${comboTxt} → `+tr(`护甲 ${player.shieldXp}/${armorNeeded(player.armor)}`,`Armor ${player.shieldXp}/${armorNeeded(player.armor)}`)+(gained?tr(`，减伤 +${gained}！（当前 ${player.armor}）`,`, DR +${gained}! (now ${player.armor})`):''); } }
     else if(type==='heart'){

@@ -65,6 +65,7 @@ function dispatchReplayAct(a){
   else if(k==='k'){
     if(a[1]==='seer') activateSeerSkill(a[2], true);
     else if(a[1]==='debug') activateDebugSkill(a[2], true);
+    else if(a[1]==='astrologer') selectAstrologerBlessing(a[2], true);
     else activateSkill();
   }
   else if(k==='a') setAutoUse(a[1],!!a[2],true);

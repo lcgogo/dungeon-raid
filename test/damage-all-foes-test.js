@@ -36,7 +36,7 @@ function run(file,effect){
   G.replayRec={seed:92741,race:'human',weekday:5,acts:[]}; G.replaying=true; G.startGame(G.raceById('human')); G.replaying=false; G.headless=true;
   const p=G.player;
   if(file==='dungeon-raid-dev.html'){
-    delete p.weekday; p.armorPerShield=1;
+    delete p.weekday; delete p.startWeekday; delete p.extraBlessing; p.armorPerShield=1;
     G.logHistory.splice(1,1);  // 忽略新增的开局每日祝福提示，专测原有伤害结算兼容性
   }
   Object.assign(p,{turns:20,level:20,xp:0,gold:210,hp:700,maxHp:1000,swordFlat:7,gunpowder:2,

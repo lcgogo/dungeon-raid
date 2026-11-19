@@ -26,7 +26,7 @@ function updateHUD(){
     if(player.tier2) id+=` · ${L(TIER2[player.tier2].n)}`;
     b.push(id); }
   b.push(`${wE()}×${player.weaponPower}${player.swordFlat?`+${player.swordFlat}`:''}`);
-  b.push(player.noArmor?tr('无甲','No armor'):`🔰${player.armorPerShield}`);
+  b.push(player.noArmor?tr('无甲','No armor'):`🔰${shieldProgressPerTile(player)}`);
   b.push(`💗${player.healPerHeart}`);
   b.push(`💰${player.goldPerCoin}`);
   if(player.goldLock>0) b.push(tr(`🔒囤金${player.goldLock}`,`🔒${player.goldLock}`));

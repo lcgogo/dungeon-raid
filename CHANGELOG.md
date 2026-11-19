@@ -1,4 +1,10 @@
 
+## [v1.104.0] - 2026-11-18
+> Version-Impact: verify
+
+- 新增精灵职业「占星家」：主动可切换本局主祝福，100 级被动额外获得按开局星期推算的下一位神祇祝福；两种祝福可同时生效，主动选择写入录像。
+- Added the Elf Astrologer: its active skill changes the run's primary blessing, and its level-100 passive grants the next deity's blessing based on the starting weekday; both blessings stack, and active choices are recorded for replay.
+
 ## [v1.103.1] - 2026-11-13
 
 - 修正终焉之主图鉴和降临日志：Boss 浪潮在倒计时归零时召唤；撑过第 10 波后，还需存活到它下次行动才破关。

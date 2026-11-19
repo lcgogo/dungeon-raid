@@ -249,9 +249,9 @@ const CONTENT = {
 if('serviceWorker' in navigator) window.addEventListener('load',()=>navigator.serviceWorker.register('/sw.js').catch(()=>{}));
 //==================== 配置 ====================
 // 版本号 v主.次.修：不影响 verify/replay 兼容边界的小改动改"修"；凡是影响 verify/replay/版本分桶/release 验证语义的改动都改"次"；大版本变更需先确认。页面底部显示。
-const VERSION='v1.103.1';
+const VERSION='v1.104.0';
 // CHANGELOG_LINES below is only a fallback for raw source inspection; build/build.js replaces it from CHANGELOG.md.
-const CHANGELOG_LINES=[{"ver": "v1.103.1", "zh": "修正终焉之主图鉴和降临日志：Boss 浪潮在倒计时归零时召唤；撑过第 10 波后，还需存活到它下次行动才破关。", "en": "Clarified the Overlord entry and arrival log: waves spawn when its countdown expires, and clearing requires surviving wave 10 until its next action."}, {"ver": "v1.103.0", "zh": "调整每日祝福：永恒烈阳日炸弹伤害×2，风暴之主日主动技能冷却−1（最低1），蒸汽与机械之神日盾牌收益×2。", "en": "Reassigned daily blessings: Eternal Sun doubles Bomb damage, Lord of Storms reduces active cooldowns by 1 (minimum 1), and Steam and Machinery doubles shield gains."}, {"ver": "v1.102.0", "zh": "调整每日祝福：永恒烈阳日炸弹伤害×2，风暴之主日主动技能冷却−1（最低1），蒸汽与机械之神日盾牌护甲进度×2。", "en": "Reassigned daily blessings: Eternal Sun doubles Bomb damage, Lord of Storms reduces active cooldowns by 1 (minimum 1), and Steam and Machinery doubles shield armor progress."}, {"ver": "v1.101.0", "zh": "调整三日祝福归属：永恒烈阳日改为炸弹伤害×2，风暴之主日改为主动技能冷却−1（最低1），蒸汽与机械之神日改为盾牌护甲进度×2。", "en": "Reassigned three daily blessings: Eternal Sun now doubles Bomb damage, Lord of Storms reduces active cooldowns by 1 (minimum 1), and Steam and Machinery doubles shield armor progress."}, {"ver": "v1.100.2", "zh": "修复自动清理按旧版本和日期删除破关记录的问题；破关榜继续跨版本展示，历史破关成绩不再被自动清理。", "en": "Fixed pruning that deleted clears from older builds; the clear board remains cross-version and historical clear records are no longer automatically removed."}];   /* auto-injected by dr.sh embed-changelog（勿手改） */
+const CHANGELOG_LINES=[{"ver": "v1.104.0", "zh": "新增精灵职业「占星家」：主动可切换本局主祝福，100 级被动额外获得按开局星期推算的下一位神祇祝福；两种祝福可同时生效，主动选择写入录像。", "en": "Added the Elf Astrologer: its active skill changes the run's primary blessing, and its level-100 passive grants the next deity's blessing based on the starting weekday; both blessings stack, and active choices are recorded for replay."}, {"ver": "v1.103.1", "zh": "修正终焉之主图鉴和降临日志：Boss 浪潮在倒计时归零时召唤；撑过第 10 波后，还需存活到它下次行动才破关。", "en": "Clarified the Overlord entry and arrival log: waves spawn when its countdown expires, and clearing requires surviving wave 10 until its next action."}, {"ver": "v1.103.0", "zh": "调整每日祝福：永恒烈阳日炸弹伤害×2，风暴之主日主动技能冷却−1（最低1），蒸汽与机械之神日盾牌收益×2。", "en": "Reassigned daily blessings: Eternal Sun doubles Bomb damage, Lord of Storms reduces active cooldowns by 1 (minimum 1), and Steam and Machinery doubles shield gains."}, {"ver": "v1.102.0", "zh": "调整每日祝福：永恒烈阳日炸弹伤害×2，风暴之主日主动技能冷却−1（最低1），蒸汽与机械之神日盾牌护甲进度×2。", "en": "Reassigned daily blessings: Eternal Sun doubles Bomb damage, Lord of Storms reduces active cooldowns by 1 (minimum 1), and Steam and Machinery doubles shield armor progress."}, {"ver": "v1.101.0", "zh": "调整三日祝福归属：永恒烈阳日改为炸弹伤害×2，风暴之主日改为主动技能冷却−1（最低1），蒸汽与机械之神日改为盾牌护甲进度×2。", "en": "Reassigned three daily blessings: Eternal Sun now doubles Bomb damage, Lord of Storms reduces active cooldowns by 1 (minimum 1), and Steam and Machinery doubles shield armor progress."}];   /* auto-injected by dr.sh embed-changelog（勿手改） */
 const DEV=false;   // release build (DEV=false); dev build is dungeon-raid-dev.html (DEV=true)
 const REC_API='https://api.dungeonraid.win';   // 录像分享 API（Cloudflare Worker + KV）
 // 带种子随机数（mulberry32）：游戏全程用 rnd() 取代原生随机，配合录制种子可确定性重放
@@ -334,8 +334,15 @@ const DAILY_BLESSINGS=[
   {id:'steam', name:['蒸汽与机械之神','God of Steam and Machinery'], effect:['盾牌收益 ×2','Shield gains ×2'], frame:'#665043', prayer:['「伟大的蒸汽与机械之神，您是本质的化身，工匠的保护者，技术的光辉」','“Great God of Steam and Machinery, embodiment of essence, protector of craftsmen, radiance of technology”']},
 ];
 function dailyBlessing(p){ p=p||player; const d=p&&p.weekday; return DAILY_BLESSINGS[Number.isInteger(d)&&d>=0&&d<7?d:0]; }
-function hasDailyBlessing(id,p){ return dailyBlessing(p).id===id; }
+function dailyBlessingIds(p){
+  p=p||player;
+  const ids=[dailyBlessing(p).id], extra=p&&p.extraBlessing;
+  if(extra&&DAILY_BLESSINGS.some(d=>d.id===extra)&&!ids.includes(extra)) ids.push(extra);
+  return ids;
+}
+function hasDailyBlessing(id,p){ return dailyBlessingIds(p).includes(id); }
 function dailyMultiplier(id,p){ return hasDailyBlessing(id,p)?2:1; }
+function shieldProgressPerTile(p){ p=p||player; return (p.armorPerShield||1)*(p.armorPerShieldMult||1)*dailyMultiplier('steam',p); }
 function dailyBlessingFrame(p){ return dailyBlessing(p).frame; }
 function applyDailyBlessingFrame(p){
   if(typeof cv==='undefined'||!cv) return;
@@ -343,7 +350,10 @@ function applyDailyBlessingFrame(p){
   cv.style.outlineOffset='2px';
 }
 function healingMultiplier(p){ p=p||player; return (p&&p.healMult!=null?p.healMult:1)*dailyMultiplier('earth',p); }
-function dailyBlessingSummary(p){ const d=dailyBlessing(p); return tr(`📅 ${L(d.name)}日 · ${d.effect[0]}`,`📅 ${L(d.name)} Day · ${d.effect[1]}`); }
+function dailyBlessingSummary(p){
+  const ids=dailyBlessingIds(p), labels=ids.map(id=>{const d=DAILY_BLESSINGS.find(x=>x.id===id);return `${L(d.name)}${tr('日',' Day')} · ${L(d.effect)}`;});
+  return `📅 ${labels.join(tr(' ＋ 额外祝福：',' + Bonus blessing: '))}`;
+}
 function showDailyBlessingPopup(p,onClose){
   const d=dailyBlessing(p);
   busy=true;
@@ -358,8 +368,8 @@ function showDailyBlessingPopup(p,onClose){
   const chooseBlessing=weekday=>{
     const next=DAILY_BLESSINGS[weekday];
     p.weekday=weekday;
+    p.startWeekday=weekday;
     if(rec){ rec.weekday=weekday; saveRec(); }
-    p.armorPerShield=hasDailyBlessing('steam',p)?2:1;
     DAILY_BLESSINGS.forEach((_,i)=>{
       const button=document.getElementById(`blessingDay${i}`);
       if(button){ button.classList.toggle('selected',i===weekday); button.setAttribute('aria-pressed',String(i===weekday)); button.style.borderColor=i===weekday?'var(--gold)':'#4a3a63'; button.style.color=i===weekday?'var(--gold)':'var(--txt)'; }
@@ -374,6 +384,39 @@ function showDailyBlessingPopup(p,onClose){
   document.getElementById('blessingContinue').onclick=()=>{ busy=false; hideOverlay(); updateHUD(); if(onClose) onClose(); };
   showOverlay();
 }
+function showAstrologerBlessingSelect(){
+  const p=player, card=document.getElementById('card');
+  busy=true;
+  card.innerHTML=`<h2>🔭 ${L(TIER1.astrologer.skill.name)}</h2><p>${tr('选择一位不同的神祇，切换本局祝福。额外祝福会保留。','Choose another deity to change this run’s blessing. Your bonus blessing stays.')}</p>`;
+  DAILY_BLESSINGS.forEach((blessing,weekday)=>{
+    if(weekday===p.weekday||blessing.id===p.extraBlessing) return;
+    const b=document.createElement('button'); b.className='choice';
+    b.innerHTML=`<b>${L(blessing.name)}</b><small>${L(blessing.effect)}</small>`;
+    b.onclick=()=>selectAstrologerBlessing(weekday,false);
+    card.appendChild(b);
+  });
+  showOverlay();
+}
+function selectAstrologerBlessing(weekday,fromReplay=false){
+  if(!player||!Number.isInteger(weekday)||weekday<0||weekday>=DAILY_BLESSINGS.length||weekday===player.weekday||DAILY_BLESSINGS[weekday].id===player.extraBlessing) return false;
+  const p=player, blessing=DAILY_BLESSINGS[weekday];
+  p.weekday=weekday;
+  p.skillCd=effSkillCd('astrologer');
+  if(!fromReplay) recAct(['k','astrologer',weekday]);
+  triggerDragonMight();
+  applyDailyBlessingFrame(p);
+  log(tr(`🔭 占星家将祝福切换为${L(blessing.name)}日`,`🔭 Astrologer changes the blessing to ${L(blessing.name)} Day`),'buff');
+  updateDailyBlessingLog(); updateHUD();
+  if(fromReplay) return true;
+  busy=false; hideOverlay();
+  if(player.t1Pending){player.t1Pending=false;showTierSelect(1);return true;}
+  if(player.t2Pending){player.t2Pending=false;showTierSelect(2);return true;}
+  if(player.t3Pending){player.t3Pending=false;showTierSelect(3);return true;}
+  if(player.t4Pending){player.t4Pending=false;showSkillSwap();return true;}
+  if(pendingLevels){showLevelUp();return true;}
+  checkDeadlock();
+  return true;
+}
 const FX_FALL_HOLD=11;   // 特殊吸取/融化类效果：棋子先消失一小拍，再开始下落，避免和特效同时发生显得太突兀
 const ACTIVE_POPUP_WAIT=720;   // 主动技能结算后留出一拍，再显示升级/转职弹框
 let gravityFxHold=0;     // 下一次 applyGravity 要给下落棋子的起落前停顿（按帧计，纯视觉，不进录像）
@@ -383,9 +426,9 @@ function newPlayer(){
   return {hp:20,maxHp:20, armor:0, shieldXp:0, toughness:0, shopCd:{}, skillCd:0, dmgBy:{}, deathMode:'damage', bossDue:false, bossDeck:null, gold:50, xp:0, level:1,
     weaponPower:1, swordFlat:0, armorPerShield:1, healPerHeart:1, goldPerCoin:1,
     lifesteal:0, regen:0, coinXp:0, turns:0,
-    race:null, tier1:null, tier2:null, t1Pending:false, t2Pending:false,   // 种族/转职
+    race:null, tier1:null, tier2:null, t1Pending:false, t2Pending:false, weekday:0, startWeekday:0,   // 种族/转职与本局祝福
     tier2b:null, t3Pending:false,                                          // 200回合：本种族第二个被动
-    skill2:null, skill2Cd:0, t4Pending:false, autoUse:{heal:false,bomb:false}, // 350回合：任选主动替换治疗/炸弹槽；商店主动自动释放
+    skill2:null, skill2Cd:0, t4Pending:false, autoUse:{heal:false,bomb:false}, extraBlessing:null, // 350回合跨界；占星家被动额外祝福
     comboMult:1, swordMult:1, armorMult:1, maxHpUpMult:1, noArmor:false,
     chosenPerks:[],                                                      // 本局已选技能名（按选择顺序，供录像/展示用）
     prophecyPending:null, echoPendingType:null,                           // 先知 / 命运回响：下一次补子强制落下的类型
@@ -884,7 +927,7 @@ const TIER1={
   rogue:{n:['盗贼','Rogue'], quip:['剑能砍人，钱要从刀口里拿。','If the blade lands, the purse opens.'], skill:{name:['妙手空空','Empty Pockets'], short:['本回合命中偷金','Hits steal bonus gold'], desc:['本回合你用{WC}攻击到的每个敌人，都会额外掉落它当前血量 20% 的金币（向下取整，至少 1 金）。连线会变成金色；若这回合没用{W}打到敌人，就等于白开。','For this turn, every enemy your {WC} hits drops extra gold equal to 20% of its current HP (rounded down, minimum 1). The chain turns gold; if your {W} fails to hit anything this turn, the buff is wasted.'], cd:5, f:p=>{ p.rogueStealTurn=true; log(tr(`📲 妙手空空：本回合用${wChain()}命中的敌人，会按命中前血量额外掉金币`,`💰 Empty Pockets: enemies hit by your ${wChain()} this turn drop bonus gold from their pre-hit HP`), 'buff'); return true; }}},
   treant:{n:['树人','Treant'], quip:['生命有借有还——敌人先还。','Life is a loan; your enemies pay first.'], skill:{name:['蔓藤缠绕','Vine Coil'], short:['3回合内每回合全场怪 −30%你最大生命','3 turns: all foes −30% your max HP/turn'], desc:['发动后接下来 3 个回合，每回合让场上所有怪/Boss（含剑免疫，终焉之主除外）损失「你最大生命的 30%」。被缠绕期间敌人格变绿。','For the next 3 turns, every turn all enemies/bosses (incl. sword-immune; Overlord excluded) lose 30% of your max HP. Cursed foes glow green.'], cd:5, f:p=>{ p.deathCoil=3; log(tr('🟢 蔓藤缠绕：未来 3 回合，全场怪每回合流失你 30% 最大生命！','🟢 Vine Coil: for 3 turns, all foes lose 30% of your max HP each turn!'), 'buff'); return true; }}},
   seer:{n:['先知','Seer'], quip:['我命由我不由天','My fate is mine, not heaven\'s.'], skill:{name:['神谕','Prophecy'], short:['指定下次落下的棋子','Choose the next falling tiles'], desc:['发动后选择一种棋子：金币、盾、心、剑或怪物。下一次补子时，新落下的所有棋子都会变成该类型。若选择怪物，则只会生成普通怪物，不会生成 Boss。若本回合没有触发补子，则效果会保留到下一次补子发生。','Choose one tile type: coin, shield, heart, sword, or enemy. During the next refill, all newly falling tiles become that type. If enemy is chosen, only normal enemies are created, never bosses. If no refill happens this turn, the effect is kept until the next refill occurs.'], cd:5, f:p=>{ showProphecySelect(prophecySlotKey); return '__defer__'; }}},
-  blacksmith:{n:['锻造师','Blacksmith'], quip:['盾别拿手里，焊身上才香。','Do not hold shields — wear them.'], skill:{name:['锻甲','Forge Armor'], short:['收全场盾→护甲','Absorb all shields'], desc:['吞下棋盘上所有的盾，按「每盾护甲进度」一次性转成护甲进度并立刻结算升甲。兽人无甲→无效；场上没盾→无效、不进冷却。','Devours every shield on the board, converting each into Armor XP at your per-shield rate and leveling armor at once. No effect for the armor-less Orc, or when there are no shields (no cooldown then).'], cd:5, f:p=>{ if(p.noArmor) return false; const cells=[]; let n=0; for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){const t=grid[r][c]; if(t&&t.type==='shield'){cells.push({r,c,type:'shield'}); grid[r][c]=null;n++;}} if(!n)return false; absorbLinesFx(cells,{targetId:'skillBtn'}); p.shieldXp+=n*p.armorPerShield; while(p.shieldXp>=armorNeeded(p.armor)){p.shieldXp-=armorNeeded(p.armor);p.armor++;} applyGravity(); syncPositions(false); log(tr(`🔰 锻甲：吞下 ${n} 盾（减伤 ${p.armor}）`,`🔰 Forge: ${n} shields (armor ${p.armor})`), 'buff'); return n; }}},
+  blacksmith:{n:['锻造师','Blacksmith'], quip:['盾别拿手里，焊身上才香。','Do not hold shields — wear them.'], skill:{name:['锻甲','Forge Armor'], short:['收全场盾→护甲','Absorb all shields'], desc:['吞下棋盘上所有的盾，按「每盾护甲进度」一次性转成护甲进度并立刻结算升甲。兽人无甲→无效；场上没盾→无效、不进冷却。','Devours every shield on the board, converting each into Armor XP at your per-shield rate and leveling armor at once. No effect for the armor-less Orc, or when there are no shields (no cooldown then).'], cd:5, f:p=>{ if(p.noArmor) return false; const cells=[]; let n=0; for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){const t=grid[r][c]; if(t&&t.type==='shield'){cells.push({r,c,type:'shield'}); grid[r][c]=null;n++;}} if(!n)return false; absorbLinesFx(cells,{targetId:'skillBtn'}); p.shieldXp+=n*shieldProgressPerTile(p); while(p.shieldXp>=armorNeeded(p.armor)){p.shieldXp-=armorNeeded(p.armor);p.armor++;} applyGravity(); syncPositions(false); log(tr(`🔰 锻甲：吞下 ${n} 盾（减伤 ${p.armor}）`,`🔰 Forge: ${n} shields (armor ${p.armor})`), 'buff'); return n; }}},
   miser:{n:['守财奴','Miser'], quip:['钱躺一会儿，利滚利。','Let the gold nap — it wakes up bigger.'], skill:{name:['囤金','Hoard'], short:['投入手头金币，4回合后1.2倍返还','Invest current gold; 1.2× in 4 turns'], desc:['把当前手头金币全部投入囤金，4 回合后按剩余投入金币的 1.2 倍返还。期间新获得的金币照常进账，也可以继续使用商店和其它技能；若已有「钱能买命」，受伤时只消耗手头金币，不会动囤金本金。没有金币或正在囤金时无效、不进冷却。','Invest all current gold into Hoard; after 4 turns, the remaining invested gold is paid back at 1.2×. New gold earned during Hoard is banked normally, and shops / other skills remain usable. With Money Buys Life, damage always spends current wallet gold first and never touches invested Hoard gold. No effect — and no cooldown — with no gold or while already hoarding.'], cd:5, f:p=>{ if(p.goldLock>0) return false; const stake=p.gold|0; if(stake<=0) return false; p.gold=0; p.goldFrozen=stake; const n=4; p.goldLock=n; log(tr(`🔒 囤金：投入 ${stake} 金币，${n} 回合后按 1.2 倍返还`,`🔒 Hoard: invested ${stake} gold; 1.2× payout in ${n} turns`), 'buff'); return true; }}},
   guildmaster:{n:['会长','Guild Master'], quip:['有钱能使鬼推磨。','Money makes the world go round.'], skill:{name:['收买','Buyout'], short:['花「全怪血量」的金币把全场怪买通成金币','Pay gold = total enemy HP to bribe all enemies into coins'], desc:['花费「场上所有普通怪当前血量之和」那么多金币，把它们全部买通、原地变成金币（不影响 Boss）。金币不够则发动不了。无冷却，钱够就能反复用。学了「小气鬼」后花费减半。发动成功时，还会从金币数位置向被买通的怪拉出金色连线，更直观地看到这笔钱花去了哪里。','Spend gold equal to the total current HP of all regular monsters to bribe them all into coins on the spot (bosses unaffected). Fails if you cannot afford it. No cooldown — reusable while you have the gold. Costs half once you have Cheapskate. On success, golden tethers now also stretch from the gold counter to the bribed enemies so you can immediately see where the money went.'], cd:5, noCd:true, f:p=>{ let hp=0; const cells=[]; for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ const t=grid[r][c]; if(t&&t.type==='enemy'){ hp+=t.hp; cells.push([r,c]); } } const cost=p.cheapskate?Math.ceil(hp/2):hp;   // 小气鬼：买通花费也减半（会长100回合必得小气鬼）
     if(!cells.length || p.gold<cost) return false; p.gold-=cost; buyoutFx(cells.map(([r,c])=>({r,c})));   // 真正花钱：付「全怪血量」金币买通
@@ -955,6 +998,7 @@ Object.assign(TIER1.skeletonking.skill, {
   passive:true,
 });
 TIER1.skeletonking.skill.f=p=>true;
+TIER1.astrologer={n:['占星家','Astrologer'], quip:['星辰给出征兆，抉择仍在你手中。','The stars reveal signs; the choice is yours.'], skill:{name:['星象改易','Celestial Recasting'], short:['选择另一位神祇，切换本局祝福','Choose another deity to change this run’s blessing'], desc:['选择一位不同的神祇，将本局主祝福切换为其祝福；已有的额外神恩会保留。','Choose another deity to replace this run’s primary blessing; any bonus divine blessing remains.'], cd:5, f:p=>{showAstrologerBlessingSelect();return '__defer__';}}};
 // 二阶职业：被动
 const TIER2={
   stresstest:{n:['压力测试','Stress Test'], d:['每回合把一个非 Boss 棋子变成当前档位的随机 Boss','Each turn, turn one non-Boss tile into a random Boss at the current tier'], devOnly:true, f:p=>{ p.stressTest=true; }},
@@ -978,6 +1022,7 @@ const TIER2={
   bladeall:{n:['皆可为剑','Anything a Blade'], d:['每回合棋盘摆完后，把 3 个非敌/非剑棋子变成剑','Each turn after the board settles, turns 3 non-enemy non-sword tiles into swords'], f:p=>{ p.swordConvert=true; }},
   allpoison:{n:['万物皆毒','All is Poison'], d:['每回合把 3 个非敌/非心棋子燃成黑毒心；连黑毒心只放毒灌全场怪、不回血','Each turn burns 3 non-enemy non-heart tiles into BLACK poison hearts; linking them poisons all foes (no heal)'], f:p=>{ p.poisonConvert=true; }},
   echooffate:{n:['命运回响','Echo of Fate'], d:['每 5 个有效回合自动触发：下一回合补子必定变成触发回合消除的非怪物棋子','Every 5 valid turns: the next refill is guaranteed to match the non-enemy tile cleared on the trigger turn'], f:p=>{ p.echoOfFate=true; }},
+  celestialfavor:{n:['额外神恩','Celestial Favor'], d:['额外获得开局星期下一位神祇的祝福；与主祝福同时生效','Gain the next deity’s blessing in the weekly cycle; it stacks with your primary blessing'], f:p=>{const day=Number.isInteger(p.startWeekday)?p.startWeekday:(p.weekday||0);p.extraBlessing=DAILY_BLESSINGS[(day+1)%DAILY_BLESSINGS.length].id;}},
   dragonmight:{n:['龙威','Dragon Might'], d:['使用任意主动技能后，普通怪物的攻击减半','After using any active skill, normal monsters deal half attack damage'], f:p=>{ p.dragonMight=true; }},
   tigerfury:{n:['杀伐之心','Tiger Fury'], d:['固定爪伤 +⌊等级/2⌋','+⌊level/2⌋ flat Claw damage'], f:p=>{ p.tigerFury=true; }},
   tortoiseheart:{n:['恐鳌之心','Heart of Tarrasque'], d:['每回合恢复当前生命的 10%','Restore 10% of current HP each turn'], f:p=>{ p.tortoiseRegen=true; }},
@@ -986,7 +1031,7 @@ const TIER2={
 // 二阶被动锁定到一阶职业（100 回合按此直接授予；200 回合再从同族其余被动里选另一个）
 const CLASS_T2={
   knight:'general', priest:'holystrike', firemage:'firewall', swordsaint:'bladeall',
-  ranger:'sharpshooter', rogue:'shadow', treant:'thorns', seer:'echooffate',
+  ranger:'sharpshooter', rogue:'shadow', treant:'thorns', seer:'echooffate', astrologer:'celestialfavor',
   blacksmith:'shieldbash', miser:'tycoon', guildmaster:'cheapskate', musketeer:'demolitionist',
   necromancer:'witheraura', skeletonking:'splash', butcher:'rotflesh', lich:'icearmor', programmer:'stresstest',
   berserker:'warlord', fighter:'bloodfrenzy', witchdoctor:'allpoison', axelord:'unbroken',
@@ -994,7 +1039,7 @@ const CLASS_T2={
 };
 const RACE_PATHS={
   human:{t1:['knight','priest','firemage','swordsaint',...(DEV?['programmer']:[])], t2:['general','holystrike','firewall','bladeall',...(DEV?['stresstest']:[])]},
-  elf:  {t1:['ranger','rogue','treant','seer'], t2:['sharpshooter','shadow','thorns','echooffate']},
+  elf:  {t1:['ranger','rogue','treant','seer','astrologer'], t2:['sharpshooter','shadow','thorns','echooffate','celestialfavor']},
   dwarf:{t1:['blacksmith','miser','guildmaster','musketeer'], t2:['shieldbash','tycoon','cheapskate','demolitionist']},
   undead:{t1:['necromancer','skeletonking','butcher','lich'], t2:['witheraura','splash','rotflesh','icearmor']},
   orc:  {t1:['berserker','fighter','witchdoctor','axelord'], t2:['warlord','bloodfrenzy','allpoison','unbroken']},
@@ -1506,7 +1551,7 @@ function startGame(rc, srv){   // srv={seed,token}：服务端发的种子（正
     if(firstGame){ rec.tut=1; try{ localStorage.setItem(TUT_KEY,'1'); }catch(e){} }
     saveRec();
   }
-  player=newPlayer(); player.race=rc.id; player.weekday=weekday; if(hasDailyBlessing('steam',player)) player.armorPerShield*=2; rc.f(player); player.hp=player.maxHp;
+  player=newPlayer(); player.race=rc.id; player.weekday=weekday; player.startWeekday=weekday; rc.f(player); player.hp=player.maxHp;
   player.autoUse={heal:false,bomb:false};   // 新局不继承上一局的自动释放状态；只有“继续上局”才恢复存档状态
   selection=[]; dragging=false; busy=false; pendingLevels=0;
   grid=[];
@@ -2581,7 +2626,7 @@ function resolve(){
     const d=DEF[type];
     if(type==='shield'){ mk='buff';
       if(player.noArmor){ msg=`${d.emoji}×${count}${comboTxt} → `+tr('无甲：护甲无效','No Armor: shields do nothing'); }
-      else { player.shieldXp += Math.round(count*player.armorPerShield*(player.armorPerShieldMult||1)*combo);
+      else { player.shieldXp += Math.round(count*shieldProgressPerTile(player)*combo);
         let gained=0; while(player.shieldXp>=armorNeeded(player.armor)){ player.shieldXp-=armorNeeded(player.armor); player.armor++; gained++; }
         msg=`${d.emoji}×${count}${comboTxt} → `+tr(`护甲 ${player.shieldXp}/${armorNeeded(player.armor)}`,`Armor ${player.shieldXp}/${armorNeeded(player.armor)}`)+(gained?tr(`，减伤 +${gained}！（当前 ${player.armor}）`,`, DR +${gained}! (now ${player.armor})`):''); } }
     else if(type==='heart'){
@@ -2942,7 +2987,7 @@ const UPGRADES=[
   {n:['磨利刀刃','Sharpen Blade'], d:['{W}伤 +50%（连越长收益越大）','+50% {W} power (longer chains gain more)'], f:p=>{p.weaponPower+=0.5;}},
   {n:['淬炼锋芒','Temper Edge'],   d:['每次{WC}额外 +3 固定伤害','+3 flat damage per {WC}'], f:p=>{p.swordFlat+=3;}},
   {n:['加固护甲','Reinforce Armor'], d:['立即 +1 减伤','+1 damage reduction now'], f:p=>{ if(!p.noArmor) p.armor+=1; }}, // 兽人无甲：无效
-  {n:['强化盾术','Hone Shielding'], d:['每个盾提供的护甲 +1','+1 Armor progress per shield'], f:p=>{p.armorPerShield+=dailyMultiplier('steam',p);}},
+  {n:['强化盾术','Hone Shielding'], d:['每个盾提供的护甲 +1','+1 Armor progress per shield'], f:p=>{p.armorPerShield+=1;}},
   {n:['精研医术','Refine Healing'], d:['每颗心回复生命 +1','+1 HP healed per heart'], f:p=>{p.healPerHeart+=1;}},
   {n:['搜刮财富','Gather Gold'],   d:['每枚金币收益 +1','+1 gold per coin'], f:p=>{p.goldPerCoin+=1;}},
   {n:['汲取生命','Drain Life'],    d:['每击杀一只怪物回复 1 生命','Heal 1 HP per enemy killed'], f:p=>{p.lifesteal+=1;}},
@@ -3434,6 +3479,7 @@ function dispatchReplayAct(a){
   else if(k==='k'){
     if(a[1]==='seer') activateSeerSkill(a[2], true);
     else if(a[1]==='debug') activateDebugSkill(a[2], true);
+    else if(a[1]==='astrologer') selectAstrologerBlessing(a[2], true);
     else activateSkill();
   }
   else if(k==='a') setAutoUse(a[1],!!a[2],true);
@@ -3542,7 +3588,7 @@ function tileInfo(t){
     desc:L(CONTENT.tile.shield),
     rows:[ [tr('当前减伤','Damage reduction'), p.noArmor?tr('无甲（兽人）','none (Orc)'):`${p.armor}`],
       [tr('护甲','Armor'), p.noArmor?'—':`${p.shieldXp} / ${armorNeeded(p.armor)}`],
-      [tr('每个盾 +进度','Progress per shield'), `+${p.armorPerShield}`],
+      [tr('每个盾 +进度','Progress per shield'), `+${shieldProgressPerTile(p)}`],
       [tr('减伤倍率(矮人)','Armor mult (Dwarf)'), p.armorMult>1?`×${p.armorMult}`:'—'] ]};
   if(t.type==='heart'&&pollutionActive()) return {icon:'💚', title:tr('毒心 · 危险','Poison Heart · Danger'),
     desc:L(CONTENT.tile.poisonHeart),
@@ -3695,7 +3741,7 @@ function updateHUD(){
     if(player.tier2) id+=` · ${L(TIER2[player.tier2].n)}`;
     b.push(id); }
   b.push(`${wE()}×${player.weaponPower}${player.swordFlat?`+${player.swordFlat}`:''}`);
-  b.push(player.noArmor?tr('无甲','No armor'):`🔰${player.armorPerShield}`);
+  b.push(player.noArmor?tr('无甲','No armor'):`🔰${shieldProgressPerTile(player)}`);
   b.push(`💗${player.healPerHeart}`);
   b.push(`💰${player.goldPerCoin}`);
   if(player.goldLock>0) b.push(tr(`🔒囤金${player.goldLock}`,`🔒${player.goldLock}`));

@@ -20,8 +20,15 @@ const DAILY_BLESSINGS=[
   {id:'steam', name:['蒸汽与机械之神','God of Steam and Machinery'], effect:['盾牌收益 ×2','Shield gains ×2'], frame:'#665043', prayer:['「伟大的蒸汽与机械之神，您是本质的化身，工匠的保护者，技术的光辉」','“Great God of Steam and Machinery, embodiment of essence, protector of craftsmen, radiance of technology”']},
 ];
 function dailyBlessing(p){ p=p||player; const d=p&&p.weekday; return DAILY_BLESSINGS[Number.isInteger(d)&&d>=0&&d<7?d:0]; }
-function hasDailyBlessing(id,p){ return dailyBlessing(p).id===id; }
+function dailyBlessingIds(p){
+  p=p||player;
+  const ids=[dailyBlessing(p).id], extra=p&&p.extraBlessing;
+  if(extra&&DAILY_BLESSINGS.some(d=>d.id===extra)&&!ids.includes(extra)) ids.push(extra);
+  return ids;
+}
+function hasDailyBlessing(id,p){ return dailyBlessingIds(p).includes(id); }
 function dailyMultiplier(id,p){ return hasDailyBlessing(id,p)?2:1; }
+function shieldProgressPerTile(p){ p=p||player; return (p.armorPerShield||1)*(p.armorPerShieldMult||1)*dailyMultiplier('steam',p); }
 function dailyBlessingFrame(p){ return dailyBlessing(p).frame; }
 function applyDailyBlessingFrame(p){
   if(typeof cv==='undefined'||!cv) return;
@@ -29,7 +36,10 @@ function applyDailyBlessingFrame(p){
   cv.style.outlineOffset='2px';
 }
 function healingMultiplier(p){ p=p||player; return (p&&p.healMult!=null?p.healMult:1)*dailyMultiplier('earth',p); }
-function dailyBlessingSummary(p){ const d=dailyBlessing(p); return tr(`📅 ${L(d.name)}日 · ${d.effect[0]}`,`📅 ${L(d.name)} Day · ${d.effect[1]}`); }
+function dailyBlessingSummary(p){
+  const ids=dailyBlessingIds(p), labels=ids.map(id=>{const d=DAILY_BLESSINGS.find(x=>x.id===id);return `${L(d.name)}${tr('日',' Day')} · ${L(d.effect)}`;});
+  return `📅 ${labels.join(tr(' ＋ 额外祝福：',' + Bonus blessing: '))}`;
+}
 function showDailyBlessingPopup(p,onClose){
   const d=dailyBlessing(p);
   busy=true;
@@ -44,8 +54,8 @@ function showDailyBlessingPopup(p,onClose){
   const chooseBlessing=weekday=>{
     const next=DAILY_BLESSINGS[weekday];
     p.weekday=weekday;
+    p.startWeekday=weekday;
     if(rec){ rec.weekday=weekday; saveRec(); }
-    p.armorPerShield=hasDailyBlessing('steam',p)?2:1;
     DAILY_BLESSINGS.forEach((_,i)=>{
       const button=document.getElementById(`blessingDay${i}`);
       if(button){ button.classList.toggle('selected',i===weekday); button.setAttribute('aria-pressed',String(i===weekday)); button.style.borderColor=i===weekday?'var(--gold)':'#4a3a63'; button.style.color=i===weekday?'var(--gold)':'var(--txt)'; }
@@ -60,6 +70,39 @@ function showDailyBlessingPopup(p,onClose){
   document.getElementById('blessingContinue').onclick=()=>{ busy=false; hideOverlay(); updateHUD(); if(onClose) onClose(); };
   showOverlay();
 }
+function showAstrologerBlessingSelect(){
+  const p=player, card=document.getElementById('card');
+  busy=true;
+  card.innerHTML=`<h2>🔭 ${L(TIER1.astrologer.skill.name)}</h2><p>${tr('选择一位不同的神祇，切换本局祝福。额外祝福会保留。','Choose another deity to change this run’s blessing. Your bonus blessing stays.')}</p>`;
+  DAILY_BLESSINGS.forEach((blessing,weekday)=>{
+    if(weekday===p.weekday||blessing.id===p.extraBlessing) return;
+    const b=document.createElement('button'); b.className='choice';
+    b.innerHTML=`<b>${L(blessing.name)}</b><small>${L(blessing.effect)}</small>`;
+    b.onclick=()=>selectAstrologerBlessing(weekday,false);
+    card.appendChild(b);
+  });
+  showOverlay();
+}
+function selectAstrologerBlessing(weekday,fromReplay=false){
+  if(!player||!Number.isInteger(weekday)||weekday<0||weekday>=DAILY_BLESSINGS.length||weekday===player.weekday||DAILY_BLESSINGS[weekday].id===player.extraBlessing) return false;
+  const p=player, blessing=DAILY_BLESSINGS[weekday];
+  p.weekday=weekday;
+  p.skillCd=effSkillCd('astrologer');
+  if(!fromReplay) recAct(['k','astrologer',weekday]);
+  triggerDragonMight();
+  applyDailyBlessingFrame(p);
+  log(tr(`🔭 占星家将祝福切换为${L(blessing.name)}日`,`🔭 Astrologer changes the blessing to ${L(blessing.name)} Day`),'buff');
+  updateDailyBlessingLog(); updateHUD();
+  if(fromReplay) return true;
+  busy=false; hideOverlay();
+  if(player.t1Pending){player.t1Pending=false;showTierSelect(1);return true;}
+  if(player.t2Pending){player.t2Pending=false;showTierSelect(2);return true;}
+  if(player.t3Pending){player.t3Pending=false;showTierSelect(3);return true;}
+  if(player.t4Pending){player.t4Pending=false;showSkillSwap();return true;}
+  if(pendingLevels){showLevelUp();return true;}
+  checkDeadlock();
+  return true;
+}
 const FX_FALL_HOLD=11;   // 特殊吸取/融化类效果：棋子先消失一小拍，再开始下落，避免和特效同时发生显得太突兀
 const ACTIVE_POPUP_WAIT=720;   // 主动技能结算后留出一拍，再显示升级/转职弹框
 let gravityFxHold=0;     // 下一次 applyGravity 要给下落棋子的起落前停顿（按帧计，纯视觉，不进录像）
@@ -69,9 +112,9 @@ function newPlayer(){
   return {hp:20,maxHp:20, armor:0, shieldXp:0, toughness:0, shopCd:{}, skillCd:0, dmgBy:{}, deathMode:'damage', bossDue:false, bossDeck:null, gold:50, xp:0, level:1,
     weaponPower:1, swordFlat:0, armorPerShield:1, healPerHeart:1, goldPerCoin:1,
     lifesteal:0, regen:0, coinXp:0, turns:0,
-    race:null, tier1:null, tier2:null, t1Pending:false, t2Pending:false,   // 种族/转职
+    race:null, tier1:null, tier2:null, t1Pending:false, t2Pending:false, weekday:0, startWeekday:0,   // 种族/转职与本局祝福
     tier2b:null, t3Pending:false,                                          // 200回合：本种族第二个被动
-    skill2:null, skill2Cd:0, t4Pending:false, autoUse:{heal:false,bomb:false}, // 350回合：任选主动替换治疗/炸弹槽；商店主动自动释放
+    skill2:null, skill2Cd:0, t4Pending:false, autoUse:{heal:false,bomb:false}, extraBlessing:null, // 350回合跨界；占星家被动额外祝福
     comboMult:1, swordMult:1, armorMult:1, maxHpUpMult:1, noArmor:false,
     chosenPerks:[],                                                      // 本局已选技能名（按选择顺序，供录像/展示用）
     prophecyPending:null, echoPendingType:null,                           // 先知 / 命运回响：下一次补子强制落下的类型
