@@ -1,4 +1,9 @@
 
+## [v1.104.1] - 2026-11-19
+
+- 将占星家主动技能更名为「偷天换日」，并修正描述，明确它只切换主祝福。
+- Renamed the Astrologer's active skill to “Steal the Heavens” and clarified that it changes only the primary blessing.
+
 ## [v1.104.0] - 2026-11-18
 > Version-Impact: verify
 

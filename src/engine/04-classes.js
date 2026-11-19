@@ -85,7 +85,7 @@ Object.assign(TIER1.skeletonking.skill, {
   passive:true,
 });
 TIER1.skeletonking.skill.f=p=>true;
-TIER1.astrologer={n:['占星家','Astrologer'], quip:['星辰给出征兆，抉择仍在你手中。','The stars reveal signs; the choice is yours.'], skill:{name:['星象改易','Celestial Recasting'], short:['选择另一位神祇，切换本局祝福','Choose another deity to change this run’s blessing'], desc:['选择一位不同的神祇，将本局主祝福切换为其祝福；已有的额外神恩会保留。','Choose another deity to replace this run’s primary blessing; any bonus divine blessing remains.'], cd:5, f:p=>{showAstrologerBlessingSelect();return '__defer__';}}};
+TIER1.astrologer={n:['占星家','Astrologer'], quip:['星辰给出征兆，抉择仍在你手中。','The stars reveal signs; the choice is yours.'], skill:{name:['偷天换日','Steal the Heavens'], short:['选择另一位神祇，切换本局主祝福','Choose another deity to change this run’s primary blessing'], desc:['选择一位不同的神祇，将本局主祝福切换为其祝福。','Choose another deity to change your primary blessing for this run.'], cd:5, f:p=>{showAstrologerBlessingSelect();return '__defer__';}}};
 // 二阶职业：被动
 const TIER2={
   stresstest:{n:['压力测试','Stress Test'], d:['每回合把一个非 Boss 棋子变成当前档位的随机 Boss','Each turn, turn one non-Boss tile into a random Boss at the current tier'], devOnly:true, f:p=>{ p.stressTest=true; }},
